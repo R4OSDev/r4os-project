@@ -1,2 +1,15 @@
 # GitHub
-- Zum Pushen eines Repos nutzt du bitte Private/GitHub/Push.bat
+- Das private GitHub-Projektverzeichnis `D:\R4OS\` wird als
+  `R4OSDev/r4os-project` auf dem Branch `main` gesichert.
+- Fuer Push und Pull ausschliesslich `D:\R4OS\Tools\Github.bat` verwenden.
+  Ohne Argumente fragt es interaktiv erst nach `Push` oder `Pull` und danach
+  nach dem Projekt. Weitere Ziele werden spaeter ergaenzt.
+- Direkte Aufrufe:
+  - `Github.bat -push -project ["Commit-Beschreibung"]`
+  - `Github.bat -pull -project`
+- Ein Push staged nach `D:\R4OS\.gitignore`, erstellt bei Aenderungen einen
+  Commit und pusht `main`. Ein Pull verwendet ausschliesslich
+  `git pull --ff-only`.
+- Zugangsdaten liegen nur lokal unter
+  `D:\R4OS\Tools\Credentials\Github.bat` und duerfen nie gelesen,
+  angezeigt oder gepusht werden.
