@@ -1,8 +1,8 @@
 @echo off
 setlocal EnableExtensions DisableDelayedExpansion
 
-if /I "%~1"=="--askpass" goto askpass
 if /I "%~1"=="-push" if /I "%~2"=="-project" goto push_project
+if not "%~1"=="" goto askpass
 goto usage
 
 :push_project
@@ -28,7 +28,7 @@ if /I not "%R4OS_PROJECT_BRANCH%"=="main" (
 call :ensure_project_remote
 if errorlevel 1 goto failure
 
-set "GIT_ASKPASS=%~f0 --askpass"
+set "GIT_ASKPASS=%~f0"
 set "GIT_TERMINAL_PROMPT=0"
 
 git -C "%R4OS_PROJECT_ROOT%" add -A
@@ -124,7 +124,7 @@ exit /b 0
 call :load_credentials
 if errorlevel 1 exit /b 1
 
-echo %~2 | findstr /I /C:"Username" >nul
+echo %~1 | findstr /I /C:"Username" >nul
 if not errorlevel 1 (
     echo %R4OS_GITHUB_USER%
     endlocal & exit /b 0
