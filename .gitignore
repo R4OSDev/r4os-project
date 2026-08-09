@@ -1,0 +1,26 @@
+# Ausgeschlossene Dateien
+Test.txt
+
+# Ausschlossene Verzeichnisse
+/Artifacts/
+/Artifacts/*
+/DevKit/
+/DevKit/*
+/Repositories/
+/Repositories/*
+/Tools/Credentials/
+/Tools/Credentials/*
+
+# Ausgeschlossene Artefakte
+**/.zig-cache/
+**/zig-out/
+
+# OS- und Editor-Muell
+Thumbs.db
+.DS_Store
+desktop.ini
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
