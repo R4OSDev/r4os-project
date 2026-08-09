@@ -27,7 +27,7 @@ endlocal & exit /b %errorlevel%
 
 :pull
 if /I "%R4OS_ACTION%"=="PUSH" goto upload
-call :loadcredentials
+call :load_credentials
 if errorlevel 1 goto failure
 
 set "R4OS_PROJECT_ROOT=D:\R4OS"
@@ -44,7 +44,7 @@ if /I not "%R4OS_PROJECT_BRANCH%"=="main" (
     goto failure
 )
 
-call :verifyremote
+call :verify_project_remote
 if errorlevel 1 goto failure
 
 set "GIT_ASKPASS=%~f0"
@@ -61,7 +61,7 @@ echo ERFOLG: D:\R4OS wurde von R4OSDev/r4os-project aktualisiert.
 endlocal & exit /b 0
 
 :upload
-call :loadcredentials
+call :load_credentials
 if errorlevel 1 goto failure
 
 set "R4OS_PROJECT_ROOT=D:\R4OS"
@@ -80,7 +80,7 @@ if /I not "%R4OS_PROJECT_BRANCH%"=="main" (
     goto failure
 )
 
-call :ensureremote
+call :ensure_project_remote
 if errorlevel 1 goto failure
 
 set "GIT_ASKPASS=%~f0"
@@ -99,7 +99,7 @@ echo Keine neuen Projektdateien zum Committen.
 goto pushbranch
 
 :commit
-call :ensureidentity
+call :ensure_identity
 if errorlevel 1 goto failure
 
 git -C "%R4OS_PROJECT_ROOT%" commit -m "%R4OS_COMMIT_MESSAGE%"
@@ -118,14 +118,14 @@ if errorlevel 1 (
 echo ERFOLG: D:\R4OS wurde nach R4OSDev/r4os-project gepusht.
 endlocal & exit /b 0
 
-:ensureremote
+:ensure_project_remote
 git -C "%R4OS_PROJECT_ROOT%" remote get-url origin >nul 2>&1
-if errorlevel 1 goto createremote
+if errorlevel 1 goto create_project_remote
 
-call :verifyremote
+call :verify_project_remote
 exit /b %errorlevel%
 
-:verifyremote
+:verify_project_remote
 git -C "%R4OS_PROJECT_ROOT%" remote get-url origin >nul 2>&1
 if errorlevel 1 (
     echo FEHLER: Das Projekt-Repository besitzt kein Remote namens origin.
@@ -138,8 +138,8 @@ if /I "%R4OS_CURRENT_REMOTE%"=="%R4OS_PROJECT_REMOTE%" exit /b 0
 echo FEHLER: origin zeigt auf %R4OS_CURRENT_REMOTE% statt auf %R4OS_PROJECT_REMOTE%.
 exit /b 1
 
-:createremote
-call :ensuregithub
+:create_project_remote
+call :ensure_github_project
 if errorlevel 1 exit /b 1
 
 git -C "%R4OS_PROJECT_ROOT%" remote add origin "%R4OS_PROJECT_REMOTE%"
@@ -149,7 +149,7 @@ if errorlevel 1 (
 )
 exit /b 0
 
-:ensuregithub
+:ensure_github_project
 curl.exe --silent --show-error --fail --request GET --header "Accept: application/vnd.github+json" --header "Authorization: Bearer %R4OS_GITHUB_TOKEN%" "https://api.github.com/repos/R4OSDev/r4os-project" >nul 2>&1
 if not errorlevel 1 exit /b 0
 
@@ -161,7 +161,7 @@ if errorlevel 1 (
 )
 exit /b 0
 
-:ensureidentity
+:ensure_identity
 git -C "%R4OS_PROJECT_ROOT%" config --get user.name >nul 2>&1
 if errorlevel 1 git -C "%R4OS_PROJECT_ROOT%" config user.name "%R4OS_GITHUB_USER%"
 
@@ -169,7 +169,7 @@ git -C "%R4OS_PROJECT_ROOT%" config --get user.email >nul 2>&1
 if errorlevel 1 git -C "%R4OS_PROJECT_ROOT%" config user.email "%R4OS_GITHUB_USER%@users.noreply.github.com"
 exit /b 0
 
-:loadcredentials
+:load_credentials
 call "%~dp0Credentials\Github.bat"
 if errorlevel 1 (
     echo FEHLER: Die GitHub-Zugangsdaten konnten nicht geladen werden.
@@ -187,7 +187,7 @@ if not defined R4OS_GITHUB_TOKEN (
 exit /b 0
 
 :askpass
-call :loadcredentials
+call :load_credentials
 if errorlevel 1 exit /b 1
 
 echo %~1 | findstr /I /C:"Username" >nul
