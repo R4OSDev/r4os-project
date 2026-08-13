@@ -1,6 +1,8 @@
 @echo off
 setlocal EnableExtensions DisableDelayedExpansion
 
+for %%I in ("%~dp0..") do set "R4OS_PROJECT_ROOT=%%~fI"
+
 if defined R4OS_GITHUB_ASKPASS goto askpass
 if /I "%~1"=="-push" if /I "%~2"=="-project" set "R4OS_ACTION=PUSH"
 if /I "%~1"=="-pull" if /I "%~2"=="-project" set "R4OS_ACTION=PULL"
@@ -30,7 +32,6 @@ if /I "%R4OS_ACTION%"=="PUSH" goto upload
 call :load_credentials
 if errorlevel 1 goto failure
 
-set "R4OS_PROJECT_ROOT=D:\R4OS"
 set "R4OS_PROJECT_REMOTE=https://github.com/R4OSDev/r4os-project.git"
 
 if not exist "%R4OS_PROJECT_ROOT%\.git" (
@@ -57,14 +58,13 @@ if errorlevel 1 (
     goto failure
 )
 
-echo ERFOLG: D:\R4OS wurde von R4OSDev/r4os-project aktualisiert.
+echo ERFOLG: %R4OS_PROJECT_ROOT% wurde von R4OSDev/r4os-project aktualisiert.
 endlocal & exit /b 0
 
 :upload
 call :load_credentials
 if errorlevel 1 goto failure
 
-set "R4OS_PROJECT_ROOT=D:\R4OS"
 set "R4OS_PROJECT_REMOTE=https://github.com/R4OSDev/r4os-project.git"
 set "R4OS_COMMIT_MESSAGE=%~3"
 if "%R4OS_COMMIT_MESSAGE%"=="" set "R4OS_COMMIT_MESSAGE=Projektstand sichern"
@@ -115,7 +115,7 @@ if errorlevel 1 (
     goto failure
 )
 
-echo ERFOLG: D:\R4OS wurde nach R4OSDev/r4os-project gepusht.
+echo ERFOLG: %R4OS_PROJECT_ROOT% wurde nach R4OSDev/r4os-project gepusht.
 endlocal & exit /b 0
 
 :ensure_project_remote
