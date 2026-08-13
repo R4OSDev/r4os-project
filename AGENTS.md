@@ -1,7 +1,11 @@
 # Einleitung
-R4OS ist ein 64-Bit Betriebssystem dass sich an alten Windows-Versionen orientiert, allerdings technisch modern.
 
-
+R4OS ist ein in Zig entwickeltes Betriebssystem fuer x86_64. Es startet ueber
+Limine im Long Mode und verbindet eine an DOS und Windows 98 angelehnte
+Systemstruktur mit eigenstaendigen Anwendungen, Diensten, Libraries, Treibern
+und Protokollen. R4OS ist ein Single-User-System, gilt vollstaendig als
+vertrauenswuerdig und besitzt bewusst kein Benutzer-, Rechte- oder
+Sandboxmodell.
 
 # GitHub
 - Das private GitHub-Projektverzeichnis `D:\R4OS\` wird als
