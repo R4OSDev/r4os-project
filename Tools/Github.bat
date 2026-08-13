@@ -2,6 +2,8 @@
 setlocal EnableExtensions DisableDelayedExpansion
 
 if defined R4OS_GITHUB_ASKPASS goto askpass
+call :ensure_credentials
+if errorlevel 1 goto failure
 if /I "%~1"=="-push" if /I "%~2"=="-project" set "R4OS_ACTION=PUSH"
 if /I "%~1"=="-pull" if /I "%~2"=="-project" set "R4OS_ACTION=PULL"
 if defined R4OS_ACTION goto pull
@@ -169,6 +171,39 @@ git -C "%R4OS_PROJECT_ROOT%" config --get user.email >nul 2>&1
 if errorlevel 1 git -C "%R4OS_PROJECT_ROOT%" config user.email "%R4OS_GITHUB_USER%@users.noreply.github.com"
 exit /b 0
 
+:ensure_credentials
+set "R4OS_CREDENTIAL_DIR=%~dp0Credentials"
+set "R4OS_CREDENTIAL_FILE=%~dp0Credentials\Github.bat"
+
+if not exist "%R4OS_CREDENTIAL_DIR%\" (
+    mkdir "%R4OS_CREDENTIAL_DIR%"
+    if errorlevel 1 (
+        echo FEHLER: Der Ordner Tools\Credentials konnte nicht erstellt werden.
+        exit /b 1
+    )
+)
+
+if exist "%R4OS_CREDENTIAL_FILE%" exit /b 0
+
+>"%R4OS_CREDENTIAL_FILE%" (
+    echo @echo off
+    echo rem Lokale GitHub-Zugangsdaten fuer die R4OS-Werkzeuge.
+    echo rem Diese Datei darf niemals in Git eingecheckt werden.
+    echo.
+    echo set "R4OS_GITHUB_USER=DEIN_GITHUB_BENUTZERNAME"
+    echo set "R4OS_GITHUB_TOKEN=github_pat_DEIN_TOKEN"
+    echo.
+    echo exit /b 0
+)
+if errorlevel 1 (
+    echo FEHLER: Tools\Credentials\Github.bat konnte nicht erstellt werden.
+    exit /b 1
+)
+
+echo Tools\Credentials\Github.bat wurde mit Platzhaltern angelegt.
+echo Bitte Benutzername und Token eintragen und Github.bat erneut starten.
+exit /b 0
+
 :load_credentials
 call "%~dp0Credentials\Github.bat"
 if errorlevel 1 (
@@ -182,6 +217,14 @@ if not defined R4OS_GITHUB_USER (
 )
 if not defined R4OS_GITHUB_TOKEN (
     echo FEHLER: R4OS_GITHUB_TOKEN fehlt in Tools\Credentials\Github.bat.
+    exit /b 1
+)
+if /I "%R4OS_GITHUB_USER%"=="DEIN_GITHUB_BENUTZERNAME" (
+    echo FEHLER: Bitte R4OS_GITHUB_USER in Tools\Credentials\Github.bat eintragen.
+    exit /b 1
+)
+if /I "%R4OS_GITHUB_TOKEN%"=="github_pat_DEIN_TOKEN" (
+    echo FEHLER: Bitte R4OS_GITHUB_TOKEN in Tools\Credentials\Github.bat eintragen.
     exit /b 1
 )
 exit /b 0
