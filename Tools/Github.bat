@@ -2,8 +2,6 @@
 setlocal EnableExtensions DisableDelayedExpansion
 
 if defined R4OS_GITHUB_ASKPASS goto askpass
-call :ensure_credentials
-if errorlevel 1 goto failure
 if /I "%~1"=="-push" if /I "%~2"=="-project" set "R4OS_ACTION=PUSH"
 if /I "%~1"=="-pull" if /I "%~2"=="-project" set "R4OS_ACTION=PULL"
 if defined R4OS_ACTION goto pull
@@ -171,40 +169,13 @@ git -C "%R4OS_PROJECT_ROOT%" config --get user.email >nul 2>&1
 if errorlevel 1 git -C "%R4OS_PROJECT_ROOT%" config user.email "%R4OS_GITHUB_USER%@users.noreply.github.com"
 exit /b 0
 
-:ensure_credentials
-set "R4OS_CREDENTIAL_DIR=%~dp0Credentials"
-set "R4OS_CREDENTIAL_FILE=%~dp0Credentials\Github.bat"
-
-if not exist "%R4OS_CREDENTIAL_DIR%\" (
-    mkdir "%R4OS_CREDENTIAL_DIR%"
-    if errorlevel 1 (
-        echo FEHLER: Der Ordner Tools\Credentials konnte nicht erstellt werden.
-        exit /b 1
-    )
-)
-
-if exist "%R4OS_CREDENTIAL_FILE%" exit /b 0
-
->"%R4OS_CREDENTIAL_FILE%" (
-    echo @echo off
-    echo rem Lokale GitHub-Zugangsdaten fuer die R4OS-Werkzeuge.
-    echo rem Diese Datei darf niemals in Git eingecheckt werden.
-    echo.
-    echo set "R4OS_GITHUB_USER=DEIN_GITHUB_BENUTZERNAME"
-    echo set "R4OS_GITHUB_TOKEN=github_pat_DEIN_TOKEN"
-    echo.
-    echo exit /b 0
-)
-if errorlevel 1 (
-    echo FEHLER: Tools\Credentials\Github.bat konnte nicht erstellt werden.
+:load_credentials
+if not exist "%~dp0Credentials\Github.bat" (
+    echo FEHLER: Tools\Credentials\Github.bat fehlt.
+    echo Bitte zuerst Tools\Setup.bat ausfuehren.
     exit /b 1
 )
 
-echo Tools\Credentials\Github.bat wurde mit Platzhaltern angelegt.
-echo Bitte Benutzername und Token eintragen und Github.bat erneut starten.
-exit /b 0
-
-:load_credentials
 call "%~dp0Credentials\Github.bat"
 if errorlevel 1 (
     echo FEHLER: Die GitHub-Zugangsdaten konnten nicht geladen werden.

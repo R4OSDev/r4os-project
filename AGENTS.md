@@ -4,6 +4,9 @@
 - Fuer Push und Pull ausschliesslich `D:\R4OS\Tools\Github.bat` verwenden.
   Ohne Argumente fragt es interaktiv erst nach `Push` oder `Pull` und danach
   nach dem Projekt. Weitere Ziele werden spaeter ergaenzt.
+- Nach einem frischen Clone zuerst `D:\R4OS\Tools\Setup.bat` ausfuehren.
+  Es erzeugt die ignorierten Workspace-Ordner `Artifacts`, `DevKit` und
+  `Repositories` sowie bei Bedarf die lokale GitHub-Credentials-Vorlage.
 - Direkte Aufrufe:
   - `Github.bat -push -project ["Commit-Beschreibung"]`
   - `Github.bat -pull -project`
