@@ -1,3 +1,8 @@
+# Einleitung
+R4OS ist ein 64-Bit Betriebssystem dass sich an alten Windows-Versionen orientiert, allerdings technisch modern.
+
+
+
 # GitHub
 - Das private GitHub-Projektverzeichnis `D:\R4OS\` wird als
   `R4OSDev/r4os-project` auf dem Branch `main` gesichert.
