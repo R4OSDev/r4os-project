@@ -1,959 +1,356 @@
-﻿R4OS 0.63.X - Update-Server-Infrastruktur
-===========================================
+﻿R4OS 0.64.X - Multi-Repository-Plattform und DevKit
+====================================================
 
 Leitbild
 --------
 
-R4OS kann veroeffentlichte R4U-Systemupdates sicher anfragen und beziehen.
-SYSUPD bleibt ausschliesslich fuer VERIFY, APPLY, Recovery und Rollback
-zustaendig; der Server verteilt nie Dateien direkt in ein R4OS-Systemziel.
+R4OS wird von einem gemeinsamen Quellbaum zu einer klar getrennten,
+mehrrepositoryfaehigen Plattform weiterentwickelt. Kernel, Contract, SDK,
+Libraries, auslieferbare Module und Systemdistribution besitzen eindeutige
+Verantwortungen, eigene Quell-Repositories und eigenstaendige Buildgrenzen.
 
-0.63.0
+Das SDK bleibt die einzige Entwickleroberflaeche. Die API-/ABI-Wahrheit liegt
+allein im Contract; Kernel und Libraries implementieren sie, Anwendungen,
+Dienste, Treiber und Protokolle konsumieren sie. Ein lokales DevKit stellt die
+passenden Hostwerkzeuge bereit, ohne Quell-Repositories oder Buildartefakte zu
+vermischen.
+
+Zielstruktur
+------------
+
+Lokaler Entwicklungsworkspace:
+
+    D:\R4OS\
+      DevKit\          installierbare Hostwerkzeuge; nur Setup ist versioniert
+      Repositories\    aktive Git-Quellbloecke; jedes Unterverzeichnis ein Repo
+      Artifacts\       lokale und CI-Buildausgaben; nie versioniert
+      Tools\           lokale Workspace-Werkzeuge, einschliesslich Github.bat
+
+`D:\R4OS\` wird privat als `R4OSDev/r4os-project` gesichert. Es ist der
+schlanke Windows-Workspace, aber weder eine Quelle fuer R4OS-Komponenten noch
+eine Distributionswahrheit.
+
+Die oeffentlichen R4OS-Repositories unter der GitHub-Organisation `R4OSDev`:
+
+- `r4os-devkit`
+  - Versionierter Bootstrap unter `Setup\` fuer das hostspezifische DevKit.
+  - Installiert Zig, Limine, QEMU, R4OS-SDK und gebaute Hostwerkzeuge nur
+    innerhalb von `DevKit\`.
+  - Die installierten Ordner selbst sind ignoriert; keine Tool-Binaries werden
+    in die Git-Historie aufgenommen.
+
+- `r4os-contract`
+  - Einzige Quelle fuer R4M0, R4LQuery, R4XStart, API-IDs, Typen, Layouts,
+    Fehlercodes und Versionsvertraege.
+  - Enthält `ApiContract.json`, den Contract-Generator, erzeugte Zig-/C-
+    Bindings, API-Dokumentation und Conformance-Fixtures.
+  - Enthält weder Kernelimplementierung, Libraryimplementierung noch
+    handgeschriebene SDK-Fassaden.
+
+- `r4os-sdk`
+  - Konsumiert eine feste Contract-Version und stellt die handgeschriebenen
+    R4OS-Fassaden, Buildprofile, Templates, C-Integration und SDK-Werkzeuge
+    bereit.
+  - Definiert keine eigene ABI- oder API-Wahrheit.
+  - Bleibt hostneutral; hostabhaengige Binaries werden durch das DevKit
+    bereitgestellt.
+
+- `r4os-kernel`
+  - Enthält Kernel, Bootintegration, zwingend built-in Bestandteile und deren
+    kernelnahe Tests.
+  - Konsumiert Contract-Artefakte und stellt die kernelimplementierten
+    API-Provider bereit.
+  - Enthält keinen SDK-, Library- oder normalen Modulquellbaum.
+
+- `r4os-libraries`
+  - Enthält die eigenstaendigen R4L-Provider und deren Tests.
+  - Jede R4L implementiert ausschliesslich ihre im Contract beschriebene
+    Tabelle; sie kopiert oder definiert keinen Contract selbst.
+  - Eine API-Gruppe, die technisch im Kernel implementiert bleibt, wird nicht
+    kuenstlich als zweiter Provider dupliziert.
+
+- `r4os-distribution`
+  - Baut keine fachliche Komponente neu, sondern integriert gepruefte
+    Kernel-, Library- und Modulstaende zu Slim-, Full- und Test-Images.
+  - Enthält Imagekonfiguration, Injection, Releasezusammenstellung,
+    Integrationsabnahmen und den spaeteren reproduzierbaren
+    Komponentenstand.
+
+- `r4os-module-*`
+  - Jedes auslieferbare R4X-, R4D- oder R4P-Projekt wird langfristig ein
+    eigenes Repository, zum Beispiel `r4os-module-terminal`,
+    `r4os-driver-rtl8168` oder `r4os-service-sshd`.
+  - Jedes Modul baut eigenstaendig gegen SDK und Contract und bringt seine
+    modulnahen Tests mit.
+  - Externe Entwickler benoetigen nur DevKit, SDK und ihr Modulrepository.
+
+Gemeinsame Regeln:
+
+- Kein Repo referenziert ein anderes ueber feste relative Quellpfade.
+- Git-Submodule sind kein Auslieferungs- oder Integrationsmechanismus.
+- Ein Contract- oder SDK-Upgrade darf betroffene Repositories ueber den
+  Workspace gezielt vorbereiten, aber nie ungeprueft in geschuetzte
+  `main`-Branches schreiben.
+- Die Reihenfolge einer API-Aenderung ist immer Contract, Provider, SDK,
+  nutzende Komponenten, Distribution und Gesamtintegration.
+- Der Aufbau beginnt ohne Lockdatei. Reproduzierbare Versionslocks und
+  veroeffentlichte Paketfeeds folgen erst, wenn die erste echte
+  Mehrrepo-Integration steht.
+
+0.64.0
 ------
 
-Titel: Update-Server Grundstruktur
-Status: Erledigt
+Titel: Zielarchitektur und Workspace-Vertrag
+Status: In Arbeit
 
-Offene Punkte: -
+Offene Punkte:
+- Die oben beschriebene Repo- und Verantwortungsgrenze als verbindlichen
+  Entwicklungsvertrag dokumentieren.
+- Den lokalen `D:\R4OS\`-Workspace als schlanken privaten Projektbestand
+  vervollstaendigen und seine ignorierten Grenzen pruefen.
+- Einheitliche Repositorynamen, Standardbranch `main`, Tagkonventionen und
+  die künftige Organisation `R4OSDev` festlegen.
+- Das bestehende R4OS-Repository vollstaendig inventarisieren: jede Datei und
+  jeder Buildschritt bekommt einen kuenftigen Besitzer oder bleibt bewusst im
+  bisherigen Bestand, bis seine Zielgrenze bereitsteht.
 
 Erledigt:
-- Repository `R4OS_UpdateServer` angelegt.
-- Lokale Serverstruktur sowie Push- und Bootstrap-Deployment-Skripte angelegt.
-- Initialen Commit nach Gitea gepusht und den Bootstrap auf dem echten Server
-  ausgefuehrt.
-- Ports, externe Runtime-Verzeichnisse und die initiale IP-Policy als
-  versionsfreie Beispielkonfiguration festgelegt.
+- Lokalen Workspace `D:\R4OS\` mit `DevKit\`, `Repositories\`,
+  `Artifacts\` und `Tools\` angelegt.
+- Privates GitHub-Repository `R4OSDev/r4os-project` angelegt und den
+  abgespeckten Workspace erfolgreich gesichert.
+- Zentrales `Tools\Github.bat` fuer interaktives sowie direktes Push/Pull
+  des Workspace eingerichtet; Credentials bleiben ausserhalb von Git unter
+  `Tools\Credentials\`.
 
 Abnahme:
-- Push-Skript erstellt einen Commit und pusht nach Gitea.
-- Bootstrap klont oder aktualisiert den Server-Checkout und legt nur die
-  vorgesehenen Runtime-Verzeichnisse an.
-- Es werden keine Listener gestartet und keine Firewall-Regeln veraendert.
+- Die Zielstruktur ist fuer jede bestehende Komponente eindeutig genug, dass
+  die folgenden Auslagerungen ohne neue Grundsatzentscheidung beginnen
+  koennen.
+- `r4os-project` enthaelt keine Credentials, Repositories, installierten
+  DevKit-Dateien oder Buildartefakte.
 
 Notizen:
-- Der echte Dienst folgt erst in den nachstehenden Unterversionen.
-- Blocklist und Allowlist sind Serverzustand ausserhalb von Git; Fail2Ban ist
-  hoechstens ein spaeterer Firewall-Zusatz, nicht die Datenwahrheit.
+- Dieser Schritt verschiebt noch keinen produktiven R4OS-Quellcode.
+- Das abgeschlossene 0.63.X-Updateprojekt bleibt unangetastet.
 
-0.63.1
+0.64.1
 ------
 
-Titel: Internes Update ControlCenter
-Status: Erledigt
+Titel: DevKit-Bootstrap und Hostwerkzeuggrenze
+Status: Geplant
 
-Offene Punkte: -
+Offene Punkte:
+- Repository `r4os-devkit` mit dem ausschliesslich versionierten Ordner
+  `Setup\` anlegen.
+- Windows-Bootstrap als ersten vollstaendig unterstuetzten Host umsetzen.
+- Zig, Limine und QEMU innerhalb von `DevKit\` beschaffen und die erzeugten
+  Ordner strikt ignorieren.
+- Die Setupgrenze technisch pruefen: kein Setup-Schritt darf ausserhalb von
+  `DevKit\` schreiben, loeschen oder Quell-Repositories veraendern.
+- Die kuenftigen R4OS-Hostwerkzeuge als installierbare DevKit-Bestandteile
+  vorsehen, ihre Quellen aber nicht ins DevKit verschieben.
 
-Erledigt:
-- Web-ControlCenter auf `10.0.0.5:1337` implementiert.
-- Eingehende und veroeffentlichte R4U-Pakete mit Version, Groesse, SHA-256
-  und Validierungszustand sichtbar gemacht.
-- Persistente SQLite-Sicht auf Allowlist, Blocklist und Audit umgesetzt.
-- Gezieltes Entsperren mit Auditnotiz sowie atomare Paketveroeffentlichung
-  aus dem ControlCenter implementiert.
+Erledigt: -
 
 Abnahme:
-- Port 1337 ist von ausserhalb des internen Netzes nicht erreichbar.
-- Das ControlCenter liest ausschliesslich den gemeinsamen Serverzustand und
-  entsperrt eine IP ohne den Releasebestand zu veraendern.
-- Lokale und serverseitige Handler-Abnahme gruen; Live-API liefert HTTP 200.
+- Ein leerer Windows-Workspace kann das DevKit aus `Setup\` einrichten.
+- Wiederholtes Setup bleibt innerhalb des DevKit idempotent und veraendert
+  weder `Repositories\` noch `Artifacts\` oder `Tools\`.
 
 Notizen:
-- Dienstbindung ist exakt `10.0.0.5:1337`; die zusaetzliche Firewall-Policy
-  bleibt Serverbetrieb.
+- Linux wird erst als zweiter, tatsaechlich getesteter Host aufgenommen.
+- Eine Versions- oder Hash-Lockdatei ist bewusst nicht Teil des ersten
+  Bootstrap-Schritts.
 
-0.63.2
+0.64.2
 ------
 
-Titel: IP-Registrierung auf Port 1338
-Status: Erledigt
+Titel: Contract als eigenstaendige ABI-Wahrheit
+Status: Geplant
 
-Offene Punkte: -
-
-Erledigt:
-- TCP-Dienst auf `0.0.0.0:1338` mit konstantem Magic-Number-Vergleich gebaut.
-- Richtige Magic Number registriert die normalisierte TCP-Quell-IP und
-  antwortet mit `R4OS-AUTH OK`.
-- Falsche oder unvollstaendige Eingaben bleiben ohne Antwort, entfernen eine
-  vorhandene Freigabe und blockieren die IP fuer 24 Stunden.
-
-Abnahme:
-- Richtige Magic Number registriert genau die TCP-Quell-IP.
-- Eine falsche Eingabe liefert keine Antwort und erzeugt einen sichtbaren
-  Blocklist-Eintrag.
-- Unit-, Socket- und Live-Abnahme gruen.
-
-Notizen:
-- Fail2Ban ist nicht die fachliche Datenwahrheit; alle Sperren bleiben im
-  gemeinsamen SQLite-Zustand und sind im ControlCenter aufhebbar.
-
-0.63.3
-------
-
-Titel: Update-Gateway auf Port 1339
-Status: Erledigt
-
-Offene Punkte: -
-
-Erledigt:
-- Nginx-TLS auf Port 1339 vor dem lokalen Python-Upstream auf 8139 aktiviert.
-- JSON-Katalog sowie GET-/HEAD-/Range-Download fuer veroeffentlichte R4U-
-  Pakete implementiert.
-- Erste unbekannte Anfrage liefert HTTP 401 `Authenticate!`; die zweite im
-  15-Minuten-Fenster erzeugt Blocklist und HTTP 403.
-- R4U-Header, Manifest, ABI, Zielklassen, Payloadlayout, FNV-Pruefsummen und
-  SHA-256 werden vor atomarer Veroeffentlichung geprueft.
-
-Abnahme:
-- Eine Allowlist-IP kann nur vollstaendig veroeffentlichte Pakete sehen und
-  beziehen.
-- Eine nicht registrierte IP kann keine Paketbytes lesen.
-- Die zweite nicht registrierte Anfrage erzeugt einen nachvollziehbaren
-  Blocklist-Eintrag.
-- Acht Tests lokal und unter Python 3.13 auf dem Server gruen; echter
-  R4UPack-Vertrag, TLS-Livepfad, 401 -> 403, Entsperren und Freigabe abgenommen.
-
-Notizen:
-- Der R4OS-Client und sein Streaming-Download werden bewusst erst danach
-  eingeplant.
-- `r4os-update-server.service` ist aktiv und beim Boot aktiviert; Nginx- und
-  Dienstkonfiguration liegen als Quellen im UpdateServer-Checkout.
-
-0.63.4
-------
-
-Titel: Dreistufige Update-Server-Zugriffspolicy
-Status: Erledigt
-
-Offene Punkte: -
-
-Erledigt:
-- Port 1338 antwortet auf den gueltigen Magic Key exakt mit `OK`, traegt die
-  Quell-IP bei Bedarf in die Allowlist ein und setzt ihre 1339-Retries zurueck.
-- Jede andere Eingabe auf Port 1338 blockiert die Quell-IP fuer 24 Stunden und
-  bleibt ohne Antwort.
-- Port 1339 liefert fuer unbekannte IPs zuerst `STOP NOW!`, danach
-  `LAST CHANCE!` und blockiert beim dritten Versuch fuer 24 Stunden.
-- Der 1339-Retryzaehler bleibt bis zur erfolgreichen Authentifizierung, zum
-  Ban oder zum manuellen Entsperren erhalten.
-
-Abnahme:
-- Unit- und Socket-Tests pruefen beide Warnstufen, den dritten Ban, die
-  24-Stunden-Sperre und das Zuruecksetzen durch den gueltigen Magic Key.
-- Serverseitige Socket-Abnahme bestaetigt `OK`, Retry-Reset und
-  Allowlist-Zugriff; die laufende 1339-Instanz liefert beide Warnungen und den
-  dritten Ban exakt wie festgelegt.
-
-Notizen:
-- Port 1337 bleibt unveraendert und ist nur ueber den internen Tunnel
-  erreichbar.
-
-0.63.5
-------
-
-Titel: Antwortloser Ban auf den oeffentlichen Ports
-Status: Erledigt
-
-Offene Punkte: -
-
-Erledigt:
-- Port 1338 bleibt bei falschen Eingaben und fuer bereits gebannte IPs
-  vollstaendig antwortlos.
-- Nginx verwirft auf Port 1339 den internen Blockstatus und schliesst die
-  Clientverbindung beim dritten sowie bei jedem weiteren Versuch ohne
-  HTTP-Antwort.
-- `STOP NOW!` und `LAST CHANCE!` bleiben ausschliesslich dem ersten und zweiten
-  Versuch vorbehalten.
-
-Abnahme:
-- Serverseitige Tests pruefen den dauerhaften Nginx-Drop-Vertrag.
-- Die Live-Abnahme bestaetigt zwei HTTP-401-Warnungen und danach eine leere
-  Verbindung ohne HTTP-Status oder Antworttext.
-
-Notizen:
-- Der Block bleibt weiterhin 24 Stunden in SQLite bestehen; die
-  Firewall-Spiegelung durch Fail2Ban ist davon getrennt.
-
-0.63.6
-------
-
-Titel: Dynamischer Flooding-Schutz fuer Port 1339
-Status: Erledigt
-
-Offene Punkte: -
-
-Erledigt:
-- Ein threadsicheres rollendes Ein-Sekunden-Limit begrenzt Port 1339 pro
-  Quell-IP standardmaessig auf 60 Anfragen/s, auch fuer Allowlist-IP-Adressen.
-- Ueberzaehlige Anfragen werden vor Allowlist-, SQLite- und Paketarbeit
-  abgewiesen und von Nginx ohne oeffentliche Antwort verworfen.
-- Der Initialwert liegt zentral in `config/r4os-update-server.toml` und wird
-  beim ersten Start in die persistente SQLite-Settings-Tabelle uebernommen.
-- Das ControlCenter zeigt und aendert das Limit zwischen 1 und 10000
-  Anfragen/s ohne Dienstneustart; Aenderungen erscheinen im Audit.
-
-Abnahme:
-- Unit-Tests pruefen Pro-IP-Trennung, rollendes Zeitfenster, dynamische
-  Aenderung, Wertebereich und Persistenz ueber einen Neustart.
-- Handler- und Live-Abnahme pruefen das neue ControlCenter-Setting, exakt 60
-  erfolgreiche Anfragen und den antwortlosen Drop weiterer Anfragen.
-
-Notizen:
-- Das ist ein einfacher Anwendungsschutz vor Allowlist-Missbrauch. Ein
-  volumetrischer DDoS muss weiterhin vor der Serverleitung abgefangen werden.
-
-0.63.7
-------
-
-Titel: Tab-basiertes Neon-Blue ControlCenter
-Status: Erledigt
-
-Offene Punkte: -
-
-Erledigt:
-- Das ControlCenter in die Tabs Overview, Updatepacks, Access, Settings und
-  Audit Log aufgeteilt.
-- Overview mit kompakten Paket-, Allowlist-, Blocklist- und Gateway-Metriken
-  sowie sichtbarer Portpolicy umgesetzt.
-- Modernes responsives Hacker-Design mit dunklem Raster, Neon Blue,
-  Statusfarben, Scanlines und monospaced Typografie erstellt.
-- Publish, Unblock und Settings leiten nach der Aktion in den jeweils
-  passenden Tab zurueck; unbekannte Tabs fallen auf Overview zurueck.
-- Die bestehende JSON-API und alle Serverfunktionen bleiben unveraendert.
-
-Abnahme:
-- Handler-Tests pruefen alle Tabs, genau einen aktiven Navigationspunkt,
-  Inhaltsaufteilung, Fallback und Settings-Redirect.
-- Desktop- und schmale Browseransicht werden auf Lesbarkeit, Tabellenzugriff,
-  aktive Tabs und sichtbare Settings-Steuerung geprueft.
-
-Notizen:
-- Das Dashboard verwendet keine externen Assets oder Webfonts und bleibt im
-  internen Tunnel vollstaendig eigenstaendig.
-
-0.63.8
-------
-
-Titel: Betriebs- und Entwickleranleitung fuer den R4OS Server
-Status: Erledigt
-
-Offene Punkte: -
-
-Erledigt:
-- `Docs/Agents/Server.txt` als zentrale Referenz fuer lokale Repositories,
-  Serverbaum, Update-Dienst, Ports und Laufzeitdaten angelegt.
-- Den sicheren Weg vom R4U-Upload ueber die Validierung bis zur atomaren
-  Veroeffentlichung und den spaeteren Download dokumentiert.
-- Push-, Deployment-, Betriebs-, Diagnose- und Sicherheitsregeln erfasst.
-- Die Anleitung in AGENTS.md und im Dokumentationsinventar verlinkt.
-
-Abnahme:
-- Dokumentation gegen Konfiguration, Deployment-Skripte, Implementierung und
-  laufenden Serverzustand auf der internen IP abgeglichen.
-- JSON-Inventar, BOM-Konvention und Versionsstand geprueft.
-
-Notizen:
-- Geheimnisse und konkrete Magic Keys bleiben bewusst ausserhalb der
-  versionierten Dokumentation.
-
-0.63.9
-------
-
-Titel: Slim-, Full- und Test-Imagevertrag im R4MF
-Status: Erledigt
-
-Offene Punkte: -
-
-Erledigt:
-- `IMAGE_SCOPE=slim|full|test|none` ist die einzige Imagezuordnung; alte
-  Werte werden current-only abgewiesen.
-- ModuleCatalog, gemeinsamer Parser, SDK-Build, Imageplan, Generatoren und
-  Vorlagen verwenden denselben fail-closed Profilvertrag samt
-  Abhaengigkeitsabschluss.
-- Alle 151 In-Tree-Manifeste sind bewusst klassifiziert und ihre geaenderten
-  Modulversionen wurden erhoeht.
-- Der normale Build erzeugt Full, `-slim` erzeugt Slim und Testimage-Modi
-  erzeugen `slim + test`.
-- `Inventory/Modules.json` bleibt der vollstaendige Quellkatalog;
-  `MODULES.JSON` ist Schema 2, traegt das konkrete Profil und enthaelt exakt
-  die Module des jeweiligen Imageplans.
-- R4X-, R4L-, R4D- und R4P-Testfixtures werden ausschliesslich als zusaetzliche
-  Manifeste in denselben Plan eingespeist; feste Modullisten wurden entfernt.
-- New-R4XProject erzeugt Full standardmaessig, akzeptiert alle vier Scopes und
-  liefert eigenstaendig baubare Zig-/C-Projekte, deren lokale Builddateien nur
-  an Manifest und SDK delegieren.
-- R4MF-, R4M0-, SDK-, Build-, Anwendungs- und Inventardokumentation wurde an
-  Auswahlmatrix, Profilinventar und Standalone-Projektvertrag angepasst.
-
-Abnahme:
-- Katalog- und Imageplantests weisen bytegenau nach: Slim enthaelt nur
-  `slim`, Full genau `slim + full`, Test genau `slim + test` und `none`
-  erscheint in keiner Variante.
-- Slim-, Full- und Testimage bauen erfolgreich; fehlende Abhaengigkeiten,
-  unbekannte Werte und die alten Werte `normal` und `both` werden sichtbar
-  abgewiesen.
-- Jedes In-Tree-Manifest besitzt genau einen gueltigen neuen Scope, und kein
-  Modulziel erscheint doppelt in einem erzeugten Image.
-- Fuer jede Variante stimmen Profil sowie Identitaeten und Ziele aller
-  R4X-/R4L-/R4D-/R4P-Eintraege in der abgeleiteten `MODULES.JSON` exakt mit
-  dem erzeugten Imageplan ueberein; kein nicht installiertes Modul erscheint
-  im lokalen Anfangsinventar.
-- Inventartests weisen die neue Schemakennung nach und lehnen ein fehlendes,
-  unbekanntes oder nicht zum erzeugten Image passendes Profil ab.
-- `Docs/Agents/R4M0-Container.txt` erklaert den neuen Vertrag und alle
-  Auswahlmengen korrekt; `Inventory/Docs.json` ist aktualisiert.
-
-Notizen:
-- Optionale Full-Module werden nicht automatisch in Testimages aufgenommen.
-  Ein spaeterer ausdruecklicher Zusatzmechanismus ist nicht Bestandteil
-  dieser Unterversion und erzeugt keinen fuenften Scope-Wert.
-- `IMAGE_SCOPE` beschreibt Imagezugehoerigkeit, nicht Laufzeitabhaengigkeiten
-  oder die spaetere Installierbarkeit eines Moduls.
-- Abnahme 2026-08-09: Full 99, Slim 45 und Test 96 Module; Plan,
-  `MODULES.JSON` und Image-Zugaben waren je Profil identisch. Der Acceptance-
-  Gate bestaetigte Wegwerf-Zig/C-Projekte sowie die Pre-Write-Ablehnung von
-  ungueltigen, fehlenden und manipulierten Artefakten ohne Aenderung des
-  bestehenden `disk.img`.
-
-0.63.10
--------
-
-Titel: Getrennte Release-, Kernel- und Komponenten-Versionierung
-Status: Erledigt
-
-Offene Punkte: -
-
-Erledigt:
-- Die zentrale fortlaufende R4OS-Releaseversion beibehalten. Sie folgt wie
-  bisher der abgeschlossenen Roadmap-Unterversion und identifiziert den
-  gemeinsam abgenommenen Release-Stand.
-- `VERSION.R4S` als einzige maschinenlesbare Wahrheit dieser Releaseversion
-  behalten, das bisher irrefuehrende Feld `KERNEL_VERSION` jedoch eindeutig
-  in `RELEASE_VERSION` umbenennen.
-- Im Kernelprojekt genau eine eigene maschinenlesbare semantische
-  Versionsquelle festlegen; sie wird nur geaendert, wenn sich das
-  Kernelartefakt aendert.
-- Die Kernelversion beim Build validieren und als selbstbeschreibenden
-  Metadatensatz in `r4os.elf` einbetten, damit Quellstand, Datei und laufender
-  Kernel nicht auseinanderlaufen koennen.
-- Die Version des LAUFENDEN Kernels ueber eine append-only R4DEV-Funktion und
-  die gemeinsame SDK-Fassade bereitstellen.
-- Den Kernel als eigene Inventarkomponente `KERNEL` mit Ziel
-  `/boot/r4os.elf` und derselben eingebetteten Version in `MODULES.JSON`
-  aufnehmen, ohne ihn faelschlich als R4M0-Modul auszugeben.
-- Die bestehenden eigenen R4M0-Modulversionen unveraendert als jeweilige
-  Komponentenwahrheit behandeln.
-- Desktop, Terminal und SYSINFO so umstellen, dass R4OS-Releaseversion und
-  laufende Kernelversion getrennt und eindeutig bezeichnet werden.
-- AGENTS-, Build- und Roadmapregeln festhalten: Jede abgeschlossene
-  Unterversion erhoeht die Releaseversion; Kernel- und Modulversionen steigen
-  nur, wenn sich das jeweilige Artefakt geaendert hat.
-
-Abnahme:
-- Ein Release mit Aenderungen an mehreren Modulen erhoeht die zentrale
-  Releaseversion, waehrend die unveraenderte Kernelversion gleich bleibt.
-- Build-, Runtime- und Inventartests weisen fuer denselben Kernel exakt
-  dieselbe Kernelversion in Versionsquelle, ELF-Metadaten, R4DEV und
-  `MODULES.JSON` nach.
-- Ein reiner R4X-, R4D-, R4P-, R4L-, Server- oder Dokumentationsschritt
-  erhoeht die Releaseversion, aber veraendert die Kernelversion nicht.
-- Ein auf Platte aktualisierter, aber noch nicht gebooteter Kernel ist als
-  `Restart required` vom weiterhin laufenden Kernelstand unterscheidbar.
-- Keine Anzeige oder API bezeichnet die Releaseversion als Kernelversion oder
-  umgekehrt.
-
-Notizen:
-- Die zentrale Releaseversion bezeichnet den gemeinsam freigegebenen
-  R4OS-Stand. Sie ist keine Artefaktversion und darf von jeder
-  Komponentenversion abweichen.
-- Der Kernel ist kein R4M0-Modul; nur Versions- und Inventarverhalten sind den
-  Modulen gleichgestellt.
-- Abnahme 2026-08-09: Full-Image mit 100 Komponenten erzeugt. Quelle,
-  ELF-Metadaten, R4DEV und MODULES.JSON melden den Kernel exakt als 0.1.0;
-  der fokussierte QEMU-Boot meldet Release 0.63.10, aktiven und installierten
-  Kernel 0.1.0 und schaltet kontrolliert ab.
-
-0.63.11
--------
-
-Titel: Releasemanifest und komponentenbasierter R4U-Vertrag
-Status: Erledigt
-
-Offene Punkte: -
-
-Erledigt:
-- Ein Releasemanifest festlegen, das eine zentrale R4OS-Releaseversion und den
-  dazu freigegebenen Sollstand der Profile `slim`, `full` und `test`
-  verbindet.
-- Je Profil genau die Komponenten als erforderlich ausweisen, die dessen
-  Imagevertrag umfasst. Der lokale Profilwert aus `MODULES.JSON` entscheidet,
-  welcher Sollstand fuer das jeweilige Geraet einen Release abschliesst.
-- Unveraenderte Komponenten, insbesondere der Kernel, mit ihrer bisherigen
-  Version in den neuen Release-Stand uebernehmen.
-- Die bisherigen R4U-Felder `MIN_VERSION` und `TARGET_VERSION` durch eine
-  eindeutige Releasezuordnung sowie explizite Komponentenangebote und
-  Komponentenanforderungen ersetzen.
-- Die Releasezuordnung eines R4U dient der Gruppierung und Nachverfolgung,
-  niemals als Ersatz fuer technische Komponentenabhaengigkeiten.
-- Eine Paketversion nur als Version des R4U-Pakets fuehren und klar von
-  Release- und Komponentenversionen trennen.
-- `TITLE` und `DESCRIPTION` als verbindliche Paketmetadaten direkt in das
-  UTF-8-R4U-Manifest aufnehmen. Beide sind reiner Anzeigetext und Bestandteil
-  der Manifest- und Paketpruefsummen.
-- Fuer Titel und Beschreibung eindeutige Bytegrenzen sowie Plain-Text-Regeln
-  ohne NUL, Steuerzeichen oder Markup festlegen; R4UPack nimmt laengere
-  Beschreibungen sicher aus einer UTF-8-Datei entgegen.
-- Fuer jedes versionierte Payload `kind`, `name`, kanonisches Inventarziel,
-  angebotene Version und erlaubte Installationsart im Manifest binden.
-- Abhaengigkeiten ausschliesslich gegen konkrete Komponenten formulieren,
-  beispielsweise Kernel oder R4SYS mit einer Mindestversion.
-- Aus den enthaltenen Komponenten eine verbindliche Aktivierungs- und
-  Prioritaetsklasse ableiten. Kernel- und R4L-Pakete sind `foundation`,
-  verlangen einen Neustartabschluss und haben vor normalen Paketen Vorrang.
-- Bei Mehrkomponentenpaketen gilt immer die strengste enthaltene Klasse;
-  R4UPack, Server und SYSUPD leiten sie unabhaengig her und weisen eine
-  widerspruechliche Manifestangabe ab.
-- Komponentenanforderungen bei Bedarf zwischen `installed` und `active`
-  unterscheiden, insbesondere fuer einen bereits abgelegten, aber noch nicht
-  laufenden neuen Kernel.
-- SYSUPD gegen lokale R4M0-Metadaten, Kernel-ELF-Metadaten und das reparierbare
-  Inventar pruefen lassen, statt Releaseversionen als Kompatibilitaetsbeweis
-  zu verwenden.
-- Den lokalen Release-Stand erst auf die Zielreleaseversion setzen, wenn alle
-  erforderlichen Komponenten des Releasemanifests erfolgreich installiert
-  und verifiziert sind; einen Teilstand sichtbar als unvollstaendig fuehren.
-- Journal, VERIFY, APPLY und RESUME an Release-, Paket-, Komponentenbindung
-  und die bestehenden Payloadfingerabdruecke binden.
-- Konfigurations- und Datenpayloads ohne erfundene Modulversion erlauben, aber
-  ueber konkrete Komponentenabhaengigkeiten und Paketbindung absichern.
-- Technisch gueltige Downgrades in R4UPack und SYSUPD ausdruecklich erlauben.
-  Ob ein solches Paket verteilt wird, ist Release- beziehungsweise
-  Serverpolicy und keine Sperre des lokalen Installationsvertrags.
-
-Abnahme:
-- R4UPack- und SYSUPD-Tests pruefen Modul-, Kernel-, Konfigurations- und
-  Mehrkomponentenpakete mit eindeutiger Releasezuordnung und konkreten
-  Komponentenanforderungen.
-- Fehlende, zu lange, ungueltige oder manipulierte Titel und Beschreibungen
-  werden abgewiesen; gueltiges UTF-8 bleibt bytegenau erhalten.
-- Ein Release ohne Kernelaenderung erhaelt eine neue Releaseversion und
-  verweist weiterhin auf exakt dieselbe Kernelversion.
-- Ein nur teilweise installiertes Release darf sich lokal nicht als
-  vollstaendig erreichter Zielrelease-Stand ausgeben.
-- Fehlende oder zu alte konkrete Abhaengigkeiten, falsche Artefaktversionen
-  und manipulierte Komponentenmetadaten werden abgewiesen; ein bewusst
-  gebautes gueltiges Downgrade kann lokal VERIFY und APPLY durchlaufen.
-- Tests pruefen abgeleitete Foundation-Prioritaet, erzwungenen
-  Neustartabschluss, gemischte Pakete sowie installierte gegen aktive
-  Kernelanforderungen.
-- Alle bisherigen Journal-, Stromverlust-, Rollback- und Resume-Garantien
-  bleiben mit getrennten Release-, Paket- und Komponentenversionen erhalten.
-
-Notizen:
-- Eine Kernelanforderung ist nur erlaubt, wenn ein Paket technisch genau diese
-  Kernelversion braucht. Sie darf niemals nur aus der zentralen
-  Releaseversion abgeleitet werden.
-- Beispiel: Release `0.63.11` kann Kernel `0.4.2`, R4SYS `0.8.1` und R4NET
-  `0.6.0` enthalten. Der naechste Release darf Kernel `0.4.2` unveraendert
-  weiterverwenden.
-- Abnahme 2026-08-09: Vollbuild und fokussierter QEMU-Lauf gruen. Das
-  Releasemanifest bindet 0.63.11 an 46 Slim-, 100 Full- und 97
-  Testkomponenten; der unveraenderte Kernel bleibt 0.1.0. R4U2 prueft
-  Paketmetadaten, Komponenten, Anforderungen, abgeleitete Klassen,
-  Downgrades, geschuetzte Zustandsdateien und Journal-v3-Bindung.
-
-0.63.12
--------
-
-Titel: Gemeinsame SYSUPD-Engine und Inventarpflege
-Status: Erledigt
-
-Offene Punkte: -
-
-Erledigt:
-- VERIFY/APPLY/RESUME/STATUS aus dem monolithischen SYSUPD-Frontend in eine
-  typisierte, gemeinsam verwendete Update-Engine ohne zweite Vertragswahrheit
+Offene Punkte:
+- Repository `r4os-contract` anlegen und die bestehende Contract-Quelle samt
+  Generator, erzeugten Artefakten, Dokumentation und Conformance-Fixtures
   ueberfuehren.
-- Eine typisierte Engine-Schnittstelle fuer spaetere Dienstaufrufer
-  bereitstellen und `SYSUPD.R4X` als Terminal-Frontend darauf erhalten; kein
-  Aufrufer muss Consoletexte auswerten.
-- Installation weiterhin paketweit, seriell und unter dem bestehenden
-  SYSLOCK-/Journal-/Recoveryvertrag ausfuehren.
-- VERIFY als seiteneffektfreie Engine-Operation im laufenden Betrieb
-  bereitstellen und nur vollstaendig veroeffentlichte Inbox-Pakete annehmen.
-- Die gemeinsame Update-Engine als einzigen Update-Schreiber fuer das lokale
-  `MODULES.JSON` festlegen. Desktop-App, UPDSVC und SYSUPD-Frontend duerfen
-  die Datei nicht jeweils selbst veraendern.
-- Das beim Voll-Build eingetragene Imageprofil bei Inventarupdates erhalten;
-  eine Modulinstallation oder Versionsaenderung darf es nicht still aus den
-  gerade vorhandenen Eintraegen neu ableiten.
-- Nach erfolgreichem Ersetzen eines Moduls Identitaet, Art, Ziel und Version
-  aus den tatsaechlich installierten R4M0-Metadaten lesen und den lokalen
-  Eintrag exakt anlegen beziehungsweise aktualisieren. Katalogangaben werden
-  niemals ungeprueft als installierter Stand uebernommen.
-- Die Inventaraktualisierung als durable, wiederaufnehmbare Abschlussphase
-  derselben Transaktion behandeln. `Installed` darf erst gemeldet werden,
-  wenn Artefakte und `MODULES.JSON` konsistent sind.
-- Kernelstaende entsprechend gegen die Kernel-ELF-Metadaten nachziehen; das
-  lokale `MODULES.JSON` niemals als R4U-Payload ausliefern.
-- Einen unterbrochenen Inventarnachlauf beim naechsten Start gegen die
-  installierten R4M0-Container und Kernel-ELF-Metadaten reparieren koennen.
-- Technisch gueltige Downgrades durch denselben VERIFY-/APPLY-Pfad fuehren;
-  der Inventareintrag uebernimmt auch dabei exakt die Artefaktversion.
-
-Abnahme:
-- Alle bestehenden SYSUPD-Vertrags-, Journal-, Resume- und Recoverytests
-  bleiben ohne Verhaltensregression gruen und laufen gegen die gemeinsame
-  Engine.
-- Terminal- und direkte Engine-Aufrufe koennen keine parallelen Transaktionen
-  starten; ein erfolgreicher Installationslauf aktualisiert Paket und
-  Inventar sichtbar.
-- Einzel-, Mehrkomponenten- und Downgradepakete weisen danach exakt die
-  eingebetteten Artefaktversionen in `MODULES.JSON` aus; nicht betroffene
-  Eintraege bleiben inhaltlich unveraendert.
-- Abbrueche vor, waehrend und nach der Inventarphase werden per RESUME oder
-  Recovery ohne falschen Erfolgsstatus zu einem konsistenten Stand gebracht.
-- Jede Inventaraktualisierung erhaelt das vom Voll-Build eingetragene
-  Imageprofil unveraendert.
-
-Notizen:
-- Versionen werden nicht rechnerisch erhoeht. Das Inventar uebernimmt immer
-  die verifizierte Version des wirklich installierten Artefakts.
-- Abnahme 2026-08-09: Hostvertraege und fokussierter QEMU-Lauf gruen. Der
-  Gast prueft Terminal-Downgrade und -Wiederaufstieg, ein Foundation-
-  Mehrkomponentenpaket, Abbrueche vor und nach dem Inventarcommit sowie das
-  unveraenderte `test`-Profil. Journal v4 bindet den internen Inventarschritt;
-  die bestehende Recoveryabnahme bleibt regressionsfrei.
-
-0.63.13
--------
-
-Titel: Live-Aktivierung und journalisierter Neustart-Batch
-Status: Geplant
-
-Offene Punkte:
-- Die Paketaktivierung anhand des R4U-Vertrags in einen Live- und einen
-  Neustartpfad trennen; Download und VERIFY bleiben vorbereitend im laufenden
-  Betrieb moeglich.
-- Nur ein reines Anwendungsupdate live anwenden, wenn keine betroffene
-  Programminstanz laeuft und keine Abhaengigkeit auf einen ausstehenden
-  Neustart wartet. Andernfalls das Paket fuer den Neustartpfad stagen.
-- Kernel-, R4L-, Treiber-, Protokoll- und laufende Serviceupdates sowie alle
-  davon abhaengigen Pakete nie waehrend des normalen Betriebs aktivieren.
-- Fuer den Neustartpfad einen durablen Batch mit fest gebundenen Paketpfaden,
-  Hashes und Reihenfolge journalisieren. Vor dem Commit alle Pakete erneut
-  verifizieren und erst danach den exklusiven Update-Lock beziehen.
-- Den Batch zuerst topologisch nach konkreten Abhaengigkeiten und nur zwischen
-  gleichzeitig installierbaren Paketen nach Prioritaet ordnen. Kernel und R4L
-  bilden dabei die hoechste Klasse; Prioritaet darf nie eine Abhaengigkeit
-  verletzen.
-- Nach einem expliziten Commitauftrag den vorbereiteten Batch unter dem
-  Update-Lock vollstaendig anwenden und unmittelbar neu starten. Bei einem
-  Fehler nicht rebooten, sondern den Batch sichtbar resumierbar oder
-  recoverbar lassen.
-- Alte Artefakte und den vorherigen Inventarstand fuer den gesamten Batch bis
-  zur erfolgreichen Post-Boot-Pruefung gebunden behalten. Scheitert der
-  Commit vor dem Reboot, alle bereits angewendeten Pakete des Batches in
-  umgekehrter Reihenfolge zurueckrollen.
-- Nach Stromverlust zuerst ausschliesslich den journalgebundenen Batch
-  vorwaerts fortsetzen. Ist dessen vollstaendiger Commit nicht mehr beweisbar
-  oder moeglich, den gesamten Batch statt nur des letzten Pakets zurueckrollen.
-- Die Zustaende `Verifying`, `Installing`, `Installed`, `Failed`, `Staged`,
-  `Pending restart` und `Restart required` samt Fehlergrund und Fortschritt
-  ausgeben.
-- Nach einer Live-Installation den Sollstand des Zielrelease erneut pruefen.
-  Bei einem Neustart-Batch den Zielrelease zunaechst nur als ausstehend
-  journalisieren und erst nach dem naechsten Boot laufenden Kernel,
-  Artefaktinventar und Batchabschluss verifizieren.
-- `VERSION.R4S` und den Foundation-Status erst nach dieser Post-Boot-Pruefung
-  atomar auf Zielrelease beziehungsweise `Installed` setzen.
+- Erzeugte Zig-/C-Bindings als konsumierbares Contract-Paket bereitstellen.
+- Sicherstellen, dass Generator und Check ausserhalb des bisherigen
+  Monorepos gegen eine feste Contract-Quelle laufen.
+- Alle verbliebenen zweiten ABI-Definitionen identifizieren und durch die
+  erzeugte Contract-Sicht ersetzen.
 
 Erledigt: -
 
 Abnahme:
-- Laufende Anwendungen verhindern ihren Live-Replace; nicht laufende reine
-  R4X-Pakete koennen ohne Neustart vollstaendig installiert werden.
-- Abhaengigkeiten schlagen jede Prioritaet; zwischen gleichzeitig
-  installierbaren Paketen werden Kernel und R4L zuerst committed.
-- Stromverlust- und Fehlerproben an jeder Batchgrenze enden nach Recovery in
-  einem konsistenten, eindeutig fortsetzbaren Stand und loesen niemals einen
-  automatischen Neustart nach einem fehlgeschlagenen Commit aus.
-- Ein Fehler nach dem ersten von mehreren Paketen stellt Artefakte,
-  `MODULES.JSON` und Releasezustand des vollstaendigen Ausgangsbatches wieder
-  her; kein erfolgreiches Teilpaket bleibt ungebunden zurueck.
-- Vor erfolgreicher Post-Boot-Pruefung meldet das System weder den neuen
-  Zielrelease noch Foundation-Pakete als vollstaendig installiert.
+- Der Contract-Generator erzeugt und prueft alle bisherigen Bindings,
+  Dokumente, Inventare und Fixtures bytegenau aus `r4os-contract`.
+- Ein minimaler externer Verbraucher kann die Zig- und C-Contract-Sicht ohne
+  Kernel- oder SDK-Quellpfad einbinden.
 
 Notizen:
-- Der spaetere UPDSVC und das Terminal verwenden ausschliesslich die
-  typisierten Stage-, Commit-, Resume- und Statusoperationen dieser Engine.
+- Dieser Schritt veraendert noch keine API-Semantik und keine bestehenden
+  Slot-, Layout- oder Versionsvertraege.
 
-0.63.14
--------
+0.64.3
+------
 
-Titel: Komponentenfaehiger Updatekatalog und Installationsvertrag
+Titel: SDK auf versioniertem Contract-Fundament
 Status: Geplant
 
 Offene Punkte:
-- Katalogschema v2 fuer R4OS-Releases mit zentraler Releaseversion,
-  Releasemanifest und atomaren Installationspaketen mit Paket-ID, Titel,
-  Dateiname, Groesse, SHA-256 und Rebootbedarf festlegen.
-- Je Installationspaket alle versionierten Komponenten mit `kind`, `name`,
-  `target`, angebotener Version und Installationsart ausweisen.
-- Den Katalog ausschliesslich aus freigegebenen Releasemanifesten und
-  validierten R4U-Manifesten erzeugen; keine zweite manuell gepflegte
-  Vertragswahrheit einfuehren.
-- `TITLE` und `DESCRIPTION` beim Einlesen eines R4U validieren, im
-  ControlCenter fuer eingehende und veroeffentlichte Pakete anzeigen und als
-  Paketmetadaten in den Katalog uebernehmen.
-- Abgeleitete Aktivierungs- und Prioritaetsklasse im ControlCenter anzeigen
-  und unveraendert als Katalogmetadaten an den Client uebertragen.
-- R4M0-Metadaten von Modulen und ELF-Metadaten des Kernels beim
-  Veroeffentlichen gegen die angebotenen Komponentenversionen pruefen.
-- Den Kernel als Komponente `KERNEL` abbilden; Konfigurations- und
-  Datenpayloads paketgebunden ohne erfundene Modulidentitaet ausweisen.
-- Abhaengigkeiten, Installationsreihenfolge, Rebootgrenzen und unveraenderliche
-  Release-Dateinamen verbindlich definieren.
-- ControlCenter und `/catalog` auf den neuen Vertrag erweitern und unbekannte
-  Schemas fail-closed behandeln.
+- Repository `r4os-sdk` anlegen und die handgeschriebenen SDK-Fassaden,
+  Buildprofile, Templates und SDK-Werkzeuge aus dem bisherigen Baum
+  ueberfuehren.
+- Jede SDK-ABI-Referenz ausschliesslich aus dem Contract-Paket beziehen.
+- Die bestehende SDK-Selbstgenuegsamkeit auf den neuen externen Contract-
+  Bezug ausrichten.
+- Den SDK-Quellbaum hostneutral machen; Windows-spezifische Start- oder
+  Tooldateien gehoeren in das DevKit, nicht in die SDK-API.
 
 Erledigt: -
 
 Abnahme:
-- Serverseitige Tests pruefen Einzelmodul-, Kernel-, Mehrkomponenten- und
-  Konfigurationspakete, falsche Artefaktversionen, doppelte Komponenten und
-  unaufloesbare konkrete Abhaengigkeiten.
-- Ein Roundtrip weist Titel und Beschreibung bytegenau vom R4U-Manifest ueber
-  Servercache, ControlCenter und Katalog-JSON nach; Oberflaechen behandeln
-  beide Felder ausschliesslich als escapten Plain Text.
-- Derselbe Roundtrip weist die serverseitig neu abgeleitete Aktivierungs- und
-  Prioritaetsklasse nach; manipulierte oder widerspruechliche Angaben werden
-  nicht veroeffentlicht.
-- Ein neuer Release mit unveraendertem Kernel weist im Katalog die neue
-  Releaseversion und weiterhin dieselbe Kernelversion aus.
-- Ein publiziertes Paket ist genau eine atomar installierbare Einheit; einzelne
-  Payloads eines Pakets sind nie separat als Update auswaehlbar.
+- Das SDK baut aus `r4os-sdk` gegen `r4os-contract`, ohne den alten
+  Monorepo-Pfad zu lesen.
+- Bestehende Zig- und C-SDK-Smokes bauen gegen die neue SDK-Ausgabe.
 
 Notizen:
-- Ein Ein-Modul-R4U erscheint als einzelne Komponente. Ein technisch
-  untrennbares Mehrkomponenten-R4U erscheint als Gruppe mit gemeinsamer Aktion
-  und gemeinsamem Status.
-- Ein Release kann aus mehreren atomaren R4U-Paketen bestehen; erst der
-  vollstaendige erforderliche Sollstand erreicht die Zielreleaseversion.
+- Bequeme Fassaden bleiben SDK-Code; nur ABI-Daten kommen aus dem Contract.
 
-0.63.15
--------
+0.64.4
+------
 
-Titel: Streaming-HTTPS-Downloadpfad im SDK
+Titel: Externer Modul-Smokepfad
 Status: Geplant
 
 Offene Punkte:
-- Die gemeinsame `App.web()`-Fassade um einen begrenzten Streaming-Download
-  mit caller-owned Puffern beziehungsweise durablem Dateisink erweitern.
-- TLS-Zertifikatspruefung, GET/HEAD, Content-Length, 206 Content-Range, 416,
-  Abbruch, Timeout, Fortschritt und einen einzelnen Range-Resume abbilden.
-- Grosse Antworten direkt schreiben, statt ein vollstaendiges R4U im Speicher
-  oder im bisherigen begrenzten Fetch-Body zu sammeln.
-- Redirects und Zielwechsel nur nach dem bestehenden Autorisierungsvertrag
-  zulassen; keine private TCP-, HTTP- oder TLS-Implementierung im Updater.
+- Ein kleines, risikofreies R4X-Smoke-Modul ausserhalb des bisherigen
+  R4OS-Quellbaums anlegen.
+- Den vollstaendigen Weg DevKit, Contract, SDK, eigenstaendiger Modulbuild
+  und R4M0-Artefakt pruefen.
+- Modulmanifest, Builddatei und Testablage als verbindliche Vorlage fuer
+  spaetere `r4os-module-*`-Repositories festlegen.
 
 Erledigt: -
 
 Abnahme:
-- SDK- und R4HTTP/R4TLS-Tests pruefen grosse Bodies, kurze Reads, Disconnect,
-  Resume, falsche Content-Range, falsches Zertifikat und expliziten Abbruch.
-- Ein mehrstelliges Megabyte-R4U wird mit konstant begrenztem Arbeitsspeicher
-  bytegenau in einen Dateisink geschrieben.
+- Ein frischer Workspace baut das Smoke-Modul mit DevKit und SDK, ohne einen
+  Kernel-, Library- oder Distributionscheckout zu benoetigen.
+- Das erzeugte R4M0 entspricht dem bisherigen Standalone-Modulvertrag.
 
 Notizen:
-- Der vorhandene synchrone Komplettabruf bleibt fuer kleine Antworten wie den
-  JSON-Katalog bestehen; Paketdownloads verwenden ausschliesslich Streaming.
+- Dieses erste externe Modul ist nur ein Grenzbeweis und noch kein
+  produktiver Systembestand.
 
-0.63.16
--------
+0.64.5
+------
 
-Titel: UPDSVC-Grunddienst und Clientvertrag
+Titel: Distribution als Integrationsgrenze
 Status: Geplant
 
 Offene Punkte:
-- `UPDSVC.R4X` als R4X-Service unter `Code/System/Software/UpdateService/`
-  mit eigenstaendigem `module.R4MF` und `IMAGE_SCOPE=slim` anlegen.
-- Serveradresse, Ports, Magic Key, Updatekanal und Betriebsoptionen in einer
-  nicht einkompilierten `C:\R4OS\CONFIG\UPDATE.R4S` ablegen.
-- Einen versionierten Service-Endpunkt fuer Status, Suchen, Download,
-  Installation, Update All und Abbruch festlegen.
-- Genau einen Worker und eine autoritative Zustandsmaschine fuer alle
-  1338-/1339-Zugriffe, Downloads und Installationen schaffen.
-- Alle Installations-, Batch-, Resume- und Statusoperationen direkt an die
-  gemeinsame Update-Engine anbinden; UPDSVC wertet niemals SYSUPD-Ausgaben
-  oder eine zweite Manifestdarstellung aus.
-- Zustand ueber Dienstneustart sowie trennende und erneut verbindende Clients
-  hinweg rekonstruierbar halten.
+- Repository `r4os-distribution` anlegen und seinen Auftrag auf Imageplan,
+  Injection, Releasezusammenstellung und Integrationsabnahme begrenzen.
+- Einen lokalen Mehrrepo-Workspace-Aufruf definieren, der die benoetigten
+  Checkouts findet, die Artefakte nach `Artifacts\` schreibt und ein Image
+  erzeugt.
+- Die bisherigen Slim-, Full- und Test-Profile als Distributionsvertrag
+  uebernehmen.
+- Integration so vorbereiten, dass spaeter konkrete Komponentenstaende
+  reproduzierbar gebunden werden koennen, ohne jetzt bereits eine Lockdatei
+  einzufuehren.
 
 Erledigt: -
 
 Abnahme:
-- Servicevertragstests pruefen Register/Open/Call/Close, parallele Aufrufer,
-  Busy-, Cancel- und Neustartverhalten sowie unbekannte Operationen.
-- Mehrere geoeffnete Clients koennen keine parallelen Updateablaeufe oder
-  mehrfachen 1339-Fehlversuche erzeugen.
-- Gleichzeitige Terminal- und Dienstaufrufe werden durch denselben Engine-Lock
-  serialisiert und koennen keinen zweiten Commit oder Neustart-Batch anlegen.
+- Distribution kann das externe Smoke-Modul als zusaetzliche Komponente in
+  ein Testimage integrieren und dessen Ziel, Metadaten und Image-Scope
+  pruefen.
+- Alle Buildartefakte bleiben ausserhalb der Komponenten-Repositories.
 
 Notizen:
-- Die Trennung zwischen Dienst und Desktop-App ist eine Lebenszyklus-, keine
-  Sicherheitsgrenze; R4OS bleibt single-user und fully trusted.
-- Enthaelt ein Paket UPDSVC selbst, muss es einen Neustart verlangen. Der
-  Dienst versucht niemals, sich selbst zu stoppen oder neu zu starten.
+- Die Distribution konsumiert Komponentenartefakte; sie dupliziert weder
+  deren Quellcode noch deren unabhängigen Tests.
 
-0.63.17
--------
+0.64.6
+------
 
-Titel: Updatesuche und lokaler Inventarabgleich
+Titel: Erste produktive Modulauslagerung
 Status: Geplant
 
 Offene Punkte:
-- Eine Suche immer mit dem Magic Key auf Port 1338 beginnen und Port 1339 erst
-  nach der Antwort `OK` ansprechen.
-- Katalog v2 ueber HTTPS laden und mit R4P JSON strikt und begrenzt lesen.
-- `VERSION.R4S` als erreichten R4OS-Release-Stand und
-  `C:\R4OS\CONFIG\MODULES.JSON` als installierten Komponentenstand lesen; die
-  Version des laufenden Kernels ueber R4DEV beziehen.
-- Das lokale Profil `slim|full|test` aus `MODULES.JSON` validieren und beim
-  Releasemanifest ausschliesslich dessen erforderlichen Sollstand verwenden.
-- Den installierten `KERNEL`-Eintrag bei Bedarf gegen die Metadaten von
-  `r4os.elf` pruefen und vom weiterhin laufenden Kernelstand unterscheiden.
-- Komponenten eindeutig ueber `kind + name + target` zuordnen und ihre
-  semantischen Versionen vergleichen; gleiche Namen verschiedener Arten nicht
-  vermischen.
-- Das Releasemanifest des angebotenen Zielrelease gegen den lokalen Stand
-  abgleichen und daraus eine deterministische Liste aktualisierbarer
-  Installationspakete und ihrer Komponenten erzeugen.
-- Im normalen Serverabgleich nur neuere Versionen bereits installierter
-  Komponenten sowie fehlende, fuer das lokale Profil erforderliche
-  Komponenten anbieten. Nicht installierte optionale Komponenten und
-  Downgrades erscheinen nicht als Updateangebot.
-- Kein blindes Wiederholen bei `STOP NOW!` oder `LAST CHANCE!`; nach einem
-  Authentifizierungsfehler sichtbar abbrechen.
+- Ein kleines Diagnose-R4X als ersten produktiven Kandidaten in ein eigenes
+  `r4os-module-*`-Repository ueberfuehren.
+- Modulbuild, modulnahe Tests, Artefaktveroeffentlichung und
+  Distributionsintegration vollstaendig gegen Contract und SDK pruefen.
+- Den alten Quellpfad nach erfolgreicher Integration entfernen, damit keine
+  zweite Produktivquelle bestehen bleibt.
 
 Erledigt: -
 
 Abnahme:
-- Tests pruefen kein Update, ein Update, mehrere Versionen, fehlende lokale
-  Komponenten, gleichnamige Modularten, unerfuellte konkrete Anforderungen,
-  Abhaengigkeiten und unbekannte Katalogfelder.
-- Profiltests pruefen Slim-, Full- und Test-Sollstaende, die Reparatur eines
-  fehlenden Pflichtmoduls und das Ausblenden nicht installierter optionaler
-  Komponenten sowie niedrigerer angebotener Versionen.
-- Ein neuer R4OS-Release mit unveraendertem Kernel wird korrekt anhand seiner
-  geaenderten Module erkannt.
-- Ein installierter neuer Kernel wird vor dem Neustart als `Restart required`
-  erkannt, ohne ihn bereits als laufenden Kernel auszugeben.
-- Eine erfolgreiche erneute Authentifizierung setzt den serverseitigen
-  1339-Versuchszaehler zurueck, ohne dass der Client die Warnkette ausreizt.
+- Das ausgegliederte Modul baut und testet eigenstaendig und erscheint nur
+  aus seinem neuen Repository im R4OS-Testimage.
+- Ein Vollbuild der Distribution erreicht den bisherigen Funktionsstand ohne
+  versteckten Rueckgriff auf den alten Monorepo-Pfad.
 
 Notizen:
-- `MODULES.JSON` ist der schnelle veraenderliche Installationsstand. Weicht es
-  vom Artefakt ab, bleiben R4M0- beziehungsweise Kernel-ELF-Metadaten die
-  jeweilige Komponentenwahrheit.
-- `VERSION.R4S` bezeichnet nur einen vollstaendig erreichten Release-Sollstand
-  und ersetzt niemals den Einzelvergleich der Komponenten.
+- TERMINAL, Netzwerkstack und bootkritische Treiber sind bewusst keine ersten
+  Migrationskandidaten.
 
-0.63.18
--------
+0.64.7
+------
 
-Titel: Paketdownload, Resume und Integritaet
+Titel: Kernel- und Library-Repositorygrenzen
 Status: Geplant
 
 Offene Punkte:
-- Die Downloadoperation des UPDSVC fuer ein ausgewaehltes, an den aktuellen
-  Suchsnapshot gebundenes Paket implementieren und ueber den Service-Endpunkt
-  steuerbar machen.
-- R4U zunaechst unter einem `.PART`-Namen in
-  `C:\R4OS\UPDATE\INBOX` schreiben und erst nach erfolgreicher Pruefung als
-  `.R4U` sichtbar machen.
-- Unterbrochene Downloads anhand der vorhandenen Laenge mit einer einzelnen
-  HTTP-Range fortsetzen und unpassende Teilstaende sicher verwerfen.
-- Endgroesse und SHA-256 gegen den Katalog pruefen; erst danach durable und
-  atomar in der Inbox veroeffentlichen.
-- Fortschritt und die Zustaende `Available`, `Downloading`, `Downloaded` und
-  `Failed` persistent und ueber den Service-Endpunkt sichtbar machen.
+- `r4os-kernel` und `r4os-libraries` anlegen und ihre Quellen mit Contract-
+  Verbrauch sowie eigenstaendigen Build- und Testeinstiegen vorbereiten.
+- Je API-Gruppe eindeutig festlegen, ob ihr Provider technisch im Kernel oder
+  in einer R4L liegt.
+- Kernel- und Library-Artefakte durch die Distribution integrieren, ohne
+  Contract- oder SDK-Quellen zu kopieren.
+- Den verbleibenden Monorepo-Bestand auf nur noch temporäre
+  Migrationsverantwortung reduzieren.
 
 Erledigt: -
 
 Abnahme:
-- QEMU-/Fixture-Tests unterbrechen den Download an mehreren Bytegrenzen,
-  starten den Dienst neu, verbinden den Testaufrufer erneut und verlangen am
-  Ende ein bytegleiches R4U.
-- Beschaedigte, zu kurze, zu lange oder serverseitig gewechselte Pakete werden
-  nie unter einem finalen `.R4U`-Namen veroeffentlicht.
+- Kernel und Libraries bauen aus getrennten Repositories gegen dieselbe
+  Contract-Version.
+- Ein Distributionsvollbuild prueft API-Provider, R4L-Identitaeten,
+  Artefaktabschluss und alle Profile ohne den alten gemeinsamen Quellbaum.
 
 Notizen:
-- Veroeffentlichte Serverpakete bleiben unveraenderlich. SHA-256 ist die
-  abschliessende Bindung eines fortgesetzten Downloads.
+- Bootkritische Kernelgrenzen und alle bestehenden ABI-Invarianten bleiben
+  unveraendert; die Repo-Trennung ist kein Anlass fuer fachliche Umbauten.
 
-0.63.19
--------
+0.64.8
+------
 
-Titel: R4OS Update Desktop-Anwendung
+Titel: Migrationsabschluss und Folgeplan
 Status: Geplant
 
 Offene Punkte:
-- `UPDATE.R4X` als eigenstaendige Desktop-Anwendung unter
-  `Code/System/Software/UpdateCenter/` anlegen.
-- Einen sichtbaren `Search for Updates`-Button und einen Verbindungs-, Such-
-  und Fehlerstatus umsetzen.
-- Die vom Dienst gelieferte Liste mit Name, Art, installierter und angebotener
-  Version, Paketgruppe, Fortschritt und Status darstellen.
-- Zu jedem angebotenen Paket den Titel und die aus dem R4U-Manifest
-  uebertragene Beschreibung anzeigen.
-- Aktuelle und angebotene R4OS-Releaseversion getrennt von den
-  Komponentenversionen anzeigen.
-- Aktivierungsart und Foundation-Prioritaet sichtbar machen; bei einem
-  Neustartpaket fuehrt `Update` bis `Staged` beziehungsweise
-  `Pending restart`, aber noch nicht irrefuehrend bis `Installed`.
-- Bei einem Kernelupdate installierte und laufende Version getrennt anzeigen,
-  solange ein Neustart fuer die Aktivierung aussteht.
-- Fuer jeden installierbaren Eintrag einen `Update`-Button anbieten und ihn
-  waehrend Download, Verify oder Installation passend deaktivieren.
-- Den `Update`-Button ausschliesslich an die fertigen Such-, Download- und
-  Installationsoperationen des UPDSVC binden; keine Updateentscheidung oder
-  Dateioperation in der Desktop-App duplizieren.
-- Sitzungsresultate nach einer Installation als `Installed` sichtbar lassen;
-  erst eine neue Suche baut die Ergebnisliste neu auf.
-- Schliessen und erneutes Oeffnen der App darf einen laufenden Dienstauftrag
-  weder abbrechen noch duplizieren.
+- Den verbliebenen Bestand in weitere `r4os-module-*`-Repositories nach
+  Risikoreihenfolge ausplanen.
+- Dokumentation, Projektvorlagen, DevKit-Setup und Workspace-Hilfen auf die
+  tatsaechlich erreichte Mehrrepo-Struktur aktualisieren.
+- Die erste geeignete Form eines reproduzierbaren Komponentenstands und
+  eines koordinierten Contract-/SDK-Upgrades fuer 0.65.X festlegen.
+- Alte Buildpfade nur entfernen, wenn ein vollstaendiger Ersatz einschliesslich
+  Clean-Build und QEMU-Abnahme nachgewiesen ist.
 
 Erledigt: -
 
 Abnahme:
-- GUI-Tests pruefen leere, kurze und lange Listen, Paketgruppen, alle Status,
-  Fortschrittswechsel, Fehlertexte, Buttonzustand und erneutes Oeffnen.
-- Ein einzelner Update-Button fuehrt genau die zugehoerige atomare R4U-Einheit
-  je nach Aktivierungsart bis `Installed`, `Pending restart` oder zu einem
-  sichtbaren Fehler.
+- Fuer jeden produktiven Quellbestand existiert ein eindeutiger Repository-
+  Besitzer oder ein dokumentierter, zeitlich begrenzter Migrationsschritt.
+- Die Mehrrepo-Integration baut aus einem frischen Workspace und besteht die
+  fuer den erreichten Bestand einschlaegigen Host- und Runtime-Abnahmen.
 
 Notizen:
-- Einzelne Payloads eines Mehrkomponentenpakets erhalten keinen irrefuehrenden
-  eigenen Installationsbutton.
-
-0.63.20
--------
-
-Titel: Update All, Neustartabschluss und Startmenue
-Status: Geplant
-
-Offene Punkte:
-- Einen `Update All`-Button umsetzen, der aus dem aktuellen Suchsnapshot eine
-  feste, abhaengigkeitsgerechte, priorisierte und serielle Warteschlange
-  erstellt.
-- Zuerst alle benoetigten Pakete herunterladen und verifizieren. Live-faehige
-  Pakete koennen danach angewendet werden; Foundation- und abhaengige Pakete
-  werden als gemeinsamer Neustart-Batch vorbereitet.
-- Nie parallel installieren; bei einem Fehler anhalten, den Fehler markieren
-  und noch offene Eintraege unveraendert fuer einen spaeteren Versuch lassen.
-- Rebootanforderungen aller erfolgreich installierten Pakete sammeln.
-- Nach der Warteschlange pruefen, ob alle erforderlichen Komponenten des
-  Zielrelease erreicht wurden. Einen reinen Live-Release dann bestaetigen,
-  einen Neustart-Release erst nach erfolgreicher Post-Boot-Pruefung.
-- Nach vollstaendig vorbereitetem Neustart-Batch den optionalen
-  `Restart R4OS`-Button zeigen. Erst sein Klick startet den kontrollierten
-  Batch-Commit und bei dessen Erfolg unmittelbar den Neustart.
-- `R4OS Update` in `MENU.R4S` und im Desktop-Fallback als ersten obersten
-  Startmenueeintrag vor `Programs` eintragen.
-- UPDSVC in `SERVICES.R4S` produktiv aktivieren und den Update-Center-Pfad,
-  Icon- und Hilfebestand vervollstaendigen.
-
-Erledigt: -
-
-Abnahme:
-- Tests pruefen Reihenfolge, Teilerfolg, Fehlerstopp, erneuten Versuch,
-  Rebootaggregation, optionalen Neustart und eine unveraenderte Liste waehrend
-  eines laufenden Update-All-Auftrags.
-- Abhaengigkeiten schlagen jede Prioritaet; unter gleich installierbaren
-  Paketen werden Kernel und R4L vor normalen Komponenten committed.
-- Ohne Klick auf `Restart R4OS` bleiben Foundation-Pakete nur vorbereitet.
-  Ein fehlgeschlagener Batch-Commit rebootet nicht und meldet keinen
-  installierten Zielrelease.
-- Desktop-Abnahme bestaetigt `R4OS Update` als ersten sichtbaren Eintrag ganz
-  oben im Startmenue und den erfolgreichen GUI-Start.
-
-Notizen:
-- Ein Reboot wird nur angeboten, wenn mindestens ein erfolgreich installiertes
-  oder vollstaendig vorbereitetes Paket ihn verlangt und der aktuelle Auftrag
-  nicht mehr arbeitet.
-
-0.63.21
--------
-
-Titel: Isolierte Update-End-to-End-Abnahme
-Status: Geplant
-
-Offene Punkte:
-- Einen isolierten Fixture-Updateserver mit eigener IP-/Blocklist und
-  reproduzierbaren Katalogen fuer Host- und QEMU-Tests bereitstellen.
-- Die gesamte Kette Magic Key, Katalog, Inventarvergleich, Einzelupdate,
-  Download, Resume, SHA-256, SYSUPD VERIFY/APPLY und Statuswechsel pruefen.
-- Titel und Beschreibung auf dem Weg vom gepackten R4U bis zur sichtbaren
-  Paketliste des Clients bytegenau und sicher escaped pruefen.
-- Update All mit Einzelmodulen, Paketgruppe und Systempaket pruefen.
-- Ein nicht laufendes reines R4X live aktualisieren sowie einen getrennten
-  Foundation-Batch aus Kernel, R4L und abhaengiger Anwendung bis zum
-  bestaetigten Neustart pruefen.
-- Negative Faelle fuer falschen Key, 401-Warnung, Katalogfehler, TLS-Fehler,
-  Downloadabbruch, falschen Hash, inkompatibles Paket und APPLY-Abbruch testen.
-- Fehler und Stromverlust vor dem Batch, zwischen Foundation-Paketen und vor
-  dem Reboot pruefen; kein Fall darf mit unvollstaendigem Commit automatisch
-  neu starten.
-- Reboot und anschliessenden Kernel-, Inventar-, Service- und GUI-Stand im
-  gestarteten Zielsystem kontrollieren.
-
-Erledigt: -
-
-Abnahme:
-- Ein automatisierter QEMU-Lauf aktualisiert ein altes Testimage vollstaendig,
-  rebootet und weist Zielreleaseversion sowie die erwarteten Kernel- und
-  Modulversionen nach.
-- Das Protokoll weist Abhaengigkeitsreihenfolge und anschliessend
-  Foundation-Prioritaet nach; vor der Benutzerbestaetigung ist kein
-  Foundation-Paket als `Installed` gemeldet.
-- Ein absichtlich abgebrochenes Teilupdate weist neue Komponentenversionen,
-  aber noch nicht die Zielreleaseversion aus.
-- Kein Negativtest kann die echte Server-IP blockieren oder produktive
-  Runtime-Daten veraendern.
-
-Notizen:
-- Die bestehenden tiefen SYSUPD-Stromverlustmodelle bleiben eigene Gates; der
-  neue Lauf schliesst erstmals den echten Client-/Server-Transport ein.
-
-0.63.22
--------
-
-Titel: Reales Update ueber den produktiven Server
-Status: Geplant
-
-Offene Punkte:
-- Den abschliessend geprueften Canary-Release `0.63.22` mit mindestens einem
-  Modulupdate und bei Bedarf einem Kernelupdate fuer den bekannten
-  Hardwarestand bauen und im ControlCenter veroeffentlichen.
-- Vorher ein bekannt-gutes Rueckroll-R4U, Hashes, Groessen und den erwarteten
-  Komponentenstand festhalten.
-- Auf echter Hardware ueber UPDSVC authentifizieren, suchen, herunterladen,
-  installieren und den optionalen Neustart ausloesen.
-- Nach dem Boot R4OS-Releaseversion, laufende Kernelversion, lokale
-  Komponentenversionen, SYSUPD-Status, UPDSVC, Startmenue und
-  Update-Center-Ergebnis pruefen.
-- Dokumentation und Diagnosepfade mit den realen Erkenntnissen abschliessen.
-
-Erledigt: -
-
-Abnahme:
-- Die reale Hardware bezieht das Paket ausschliesslich ueber 1338/1339 und
-  erreicht nach genau einem kontrollierten Neustart den erwarteten Stand.
-- Eine anschliessende Suche meldet keine verbleibenden Updates; ControlCenter
-  und Clientprotokoll zeigen denselben Paket- und IP-Verlauf.
-
-Notizen:
-- Ban- und falscher-Key-Negativfaelle werden vorher nur gegen den isolierten
-  Fixture-Server getestet, nicht gegen den produktiven Hardwarepfad.
-- Die zentrale Releaseversion kann sich bei dieser Abnahme erhoehen, ohne dass
-  sich die Kernelversion aendern muss.
+- 0.64.X liefert die tragfaehige Struktur. Die vollstaendige Auslagerung aller
+  grossen Anwendungen, Dienste, Treiber und Protokolle kann in folgenden
+  Versionen nach demselben bewiesenen Muster fortgesetzt werden.
