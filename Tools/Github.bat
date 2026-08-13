@@ -2,13 +2,21 @@
 setlocal EnableExtensions DisableDelayedExpansion
 
 for %%I in ("%~dp0..") do set "R4OS_PROJECT_ROOT=%%~fI"
+set "R4OS_GITHUB_ORGANIZATION=R4OSDev"
 
 if defined R4OS_GITHUB_ASKPASS goto askpass
-if /I "%~1"=="-push" if /I "%~2"=="-project" set "R4OS_ACTION=PUSH"
-if /I "%~1"=="-pull" if /I "%~2"=="-project" set "R4OS_ACTION=PULL"
-if defined R4OS_ACTION goto pull
-if "%~1"=="" goto interactive
-goto usage
+
+if /I "%~1"=="-push" set "R4OS_ACTION=PUSH"
+if /I "%~1"=="-pull" set "R4OS_ACTION=PULL"
+
+if not defined R4OS_ACTION if "%~1"=="" goto interactive
+if not defined R4OS_ACTION goto usage
+
+call :select_repository "%~2"
+if errorlevel 1 goto usage
+
+if /I "%R4OS_ACTION%"=="PUSH" goto upload
+goto pull
 
 :interactive
 echo.
@@ -20,153 +28,226 @@ if errorlevel 2 set "R4OS_INTERACTIVE_ACTION=-pull"
 if errorlevel 1 if not defined R4OS_INTERACTIVE_ACTION set "R4OS_INTERACTIVE_ACTION=-push"
 
 echo.
-echo Projekt auswaehlen:
+echo Repository auswaehlen:
 echo   [1] Project
-choice /C 1 /N /M "Auswahl"
+echo   [2] DevKit
+echo   [3] Contract
+choice /C 123 /N /M "Auswahl"
+if errorlevel 3 set "R4OS_INTERACTIVE_TARGET=-contract"
+if errorlevel 2 if not defined R4OS_INTERACTIVE_TARGET set "R4OS_INTERACTIVE_TARGET=-devkit"
+if errorlevel 1 if not defined R4OS_INTERACTIVE_TARGET set "R4OS_INTERACTIVE_TARGET=-project"
 
-call "%~f0" %R4OS_INTERACTIVE_ACTION% -project
-endlocal & exit /b %errorlevel%
+call "%~f0" %R4OS_INTERACTIVE_ACTION% %R4OS_INTERACTIVE_TARGET%
+set "R4OS_INTERACTIVE_EXIT=%ERRORLEVEL%"
+endlocal & exit /b %R4OS_INTERACTIVE_EXIT%
+
+:select_repository
+if /I "%~1"=="-project" goto select_project
+if /I "%~1"=="-devkit" goto select_devkit
+if /I "%~1"=="-contract" goto select_contract
+exit /b 1
+
+:select_project
+set "R4OS_REPOSITORY_KEY=project"
+set "R4OS_REPOSITORY_LABEL=Project"
+set "R4OS_REPOSITORY_ROOT=%R4OS_PROJECT_ROOT%"
+set "R4OS_REPOSITORY_NAME=r4os-project"
+set "R4OS_REPOSITORY_REMOTE=https://github.com/%R4OS_GITHUB_ORGANIZATION%/r4os-project.git"
+set "R4OS_REPOSITORY_DESCRIPTION=Private R4OS project workspace."
+set "R4OS_REPOSITORY_PRIVATE=true"
+set "R4OS_REPOSITORY_ALLOW_INIT=0"
+set "R4OS_DEFAULT_COMMIT_MESSAGE=Projektstand sichern"
+exit /b 0
+
+:select_devkit
+set "R4OS_REPOSITORY_KEY=devkit"
+set "R4OS_REPOSITORY_LABEL=DevKit"
+set "R4OS_REPOSITORY_ROOT=%R4OS_PROJECT_ROOT%\DevKit"
+set "R4OS_REPOSITORY_NAME=r4os-devkit"
+set "R4OS_REPOSITORY_REMOTE=https://github.com/%R4OS_GITHUB_ORGANIZATION%/r4os-devkit.git"
+set "R4OS_REPOSITORY_DESCRIPTION=Cross-platform bootstrap and setup scripts for the R4OS development kit."
+set "R4OS_REPOSITORY_PRIVATE=false"
+set "R4OS_REPOSITORY_ALLOW_INIT=1"
+set "R4OS_DEFAULT_COMMIT_MESSAGE=DevKit-Stand sichern"
+exit /b 0
+
+:select_contract
+set "R4OS_REPOSITORY_KEY=contract"
+set "R4OS_REPOSITORY_LABEL=Contract"
+set "R4OS_REPOSITORY_ROOT=%R4OS_PROJECT_ROOT%\Repositories\Contract"
+set "R4OS_REPOSITORY_NAME=r4os-contract"
+set "R4OS_REPOSITORY_REMOTE=https://github.com/%R4OS_GITHUB_ORGANIZATION%/r4os-contract.git"
+set "R4OS_REPOSITORY_DESCRIPTION=Canonical API and ABI contract for R4OS."
+set "R4OS_REPOSITORY_PRIVATE=false"
+set "R4OS_REPOSITORY_ALLOW_INIT=1"
+set "R4OS_DEFAULT_COMMIT_MESSAGE=Contract-Stand sichern"
+exit /b 0
 
 :pull
-if /I "%R4OS_ACTION%"=="PUSH" goto upload
 call :load_credentials
 if errorlevel 1 goto failure
 
-set "R4OS_PROJECT_REMOTE=https://github.com/R4OSDev/r4os-project.git"
+call :ensure_local_repository
+if errorlevel 1 goto failure
 
-if not exist "%R4OS_PROJECT_ROOT%\.git" (
-    echo FEHLER: %R4OS_PROJECT_ROOT% ist kein Git-Repository.
+call :verify_main_branch
+if errorlevel 1 goto failure
+
+call :github_repository_exists
+if errorlevel 1 (
+    echo FEHLER: %R4OS_GITHUB_ORGANIZATION%/%R4OS_REPOSITORY_NAME% ist auf GitHub nicht erreichbar.
     goto failure
 )
 
-for /f "delims=" %%B in ('git -C "%R4OS_PROJECT_ROOT%" branch --show-current') do set "R4OS_PROJECT_BRANCH=%%B"
-if /I not "%R4OS_PROJECT_BRANCH%"=="main" (
-    echo FEHLER: Das Projekt-Repository muss auf dem Branch main stehen.
-    goto failure
-)
-
-call :verify_project_remote
+call :ensure_local_remote
 if errorlevel 1 goto failure
 
 set "GIT_ASKPASS=%~f0"
 set "R4OS_GITHUB_ASKPASS=1"
 set "GIT_TERMINAL_PROMPT=0"
 
-git -C "%R4OS_PROJECT_ROOT%" pull --ff-only origin main
+git -C "%R4OS_REPOSITORY_ROOT%" pull --ff-only origin main
 if errorlevel 1 (
-    echo FEHLER: Der Projektstand konnte nicht von GitHub gepullt werden.
+    echo FEHLER: %R4OS_REPOSITORY_LABEL% konnte nicht von GitHub gepullt werden.
     goto failure
 )
 
-echo ERFOLG: %R4OS_PROJECT_ROOT% wurde von R4OSDev/r4os-project aktualisiert.
+echo ERFOLG: %R4OS_REPOSITORY_ROOT% wurde von %R4OS_GITHUB_ORGANIZATION%/%R4OS_REPOSITORY_NAME% aktualisiert.
 endlocal & exit /b 0
 
 :upload
 call :load_credentials
 if errorlevel 1 goto failure
 
-set "R4OS_PROJECT_REMOTE=https://github.com/R4OSDev/r4os-project.git"
 set "R4OS_COMMIT_MESSAGE=%~3"
-if "%R4OS_COMMIT_MESSAGE%"=="" set "R4OS_COMMIT_MESSAGE=Projektstand sichern"
+if "%R4OS_COMMIT_MESSAGE%"=="" set "R4OS_COMMIT_MESSAGE=%R4OS_DEFAULT_COMMIT_MESSAGE%"
 
-if not exist "%R4OS_PROJECT_ROOT%\.git" (
-    echo FEHLER: %R4OS_PROJECT_ROOT% ist kein Git-Repository.
-    goto failure
-)
+call :ensure_local_repository
+if errorlevel 1 goto failure
 
-for /f "delims=" %%B in ('git -C "%R4OS_PROJECT_ROOT%" branch --show-current') do set "R4OS_PROJECT_BRANCH=%%B"
-if /I not "%R4OS_PROJECT_BRANCH%"=="main" (
-    echo FEHLER: Das Projekt-Repository muss auf dem Branch main stehen.
-    goto failure
-)
+call :verify_main_branch
+if errorlevel 1 goto failure
 
-call :ensure_project_remote
+call :ensure_github_repository
+if errorlevel 1 goto failure
+
+call :ensure_local_remote
 if errorlevel 1 goto failure
 
 set "GIT_ASKPASS=%~f0"
 set "R4OS_GITHUB_ASKPASS=1"
 set "GIT_TERMINAL_PROMPT=0"
 
-git -C "%R4OS_PROJECT_ROOT%" add -A
+git -C "%R4OS_REPOSITORY_ROOT%" add -A
 if errorlevel 1 (
-    echo FEHLER: Dateien konnten nicht gestaged werden.
+    echo FEHLER: Dateien in %R4OS_REPOSITORY_LABEL% konnten nicht gestaged werden.
     goto failure
 )
 
-git -C "%R4OS_PROJECT_ROOT%" diff --cached --quiet
+git -C "%R4OS_REPOSITORY_ROOT%" diff --cached --quiet
 if errorlevel 1 goto commit
-echo Keine neuen Projektdateien zum Committen.
+echo Keine neuen Dateien in %R4OS_REPOSITORY_LABEL% zum Committen.
 goto pushbranch
 
 :commit
 call :ensure_identity
 if errorlevel 1 goto failure
 
-git -C "%R4OS_PROJECT_ROOT%" commit -m "%R4OS_COMMIT_MESSAGE%"
+git -C "%R4OS_REPOSITORY_ROOT%" commit -m "%R4OS_COMMIT_MESSAGE%"
 if errorlevel 1 (
-    echo FEHLER: Der Projektcommit konnte nicht erstellt werden.
+    echo FEHLER: Der Commit fuer %R4OS_REPOSITORY_LABEL% konnte nicht erstellt werden.
     goto failure
 )
 
 :pushbranch
-git -C "%R4OS_PROJECT_ROOT%" push -u origin main
+git -C "%R4OS_REPOSITORY_ROOT%" push -u origin main
 if errorlevel 1 (
-    echo FEHLER: Der Projektstand konnte nicht nach GitHub gepusht werden.
+    echo FEHLER: %R4OS_REPOSITORY_LABEL% konnte nicht nach GitHub gepusht werden.
     goto failure
 )
 
-echo ERFOLG: %R4OS_PROJECT_ROOT% wurde nach R4OSDev/r4os-project gepusht.
+echo ERFOLG: %R4OS_REPOSITORY_ROOT% wurde nach %R4OS_GITHUB_ORGANIZATION%/%R4OS_REPOSITORY_NAME% gepusht.
 endlocal & exit /b 0
 
-:ensure_project_remote
-git -C "%R4OS_PROJECT_ROOT%" remote get-url origin >nul 2>&1
-if errorlevel 1 goto create_project_remote
+:ensure_local_repository
+if exist "%R4OS_REPOSITORY_ROOT%\.git" exit /b 0
 
-call :verify_project_remote
-exit /b %errorlevel%
-
-:verify_project_remote
-git -C "%R4OS_PROJECT_ROOT%" remote get-url origin >nul 2>&1
-if errorlevel 1 (
-    echo FEHLER: Das Projekt-Repository besitzt kein Remote namens origin.
+if /I not "%R4OS_REPOSITORY_ALLOW_INIT%"=="1" (
+    echo FEHLER: %R4OS_REPOSITORY_ROOT% ist kein Git-Repository.
     exit /b 1
 )
 
-for /f "delims=" %%R in ('git -C "%R4OS_PROJECT_ROOT%" remote get-url origin') do set "R4OS_CURRENT_REMOTE=%%R"
-if /I "%R4OS_CURRENT_REMOTE%"=="%R4OS_PROJECT_REMOTE%" exit /b 0
+if not exist "%R4OS_REPOSITORY_ROOT%" (
+    mkdir "%R4OS_REPOSITORY_ROOT%" >nul 2>&1
+    if errorlevel 1 (
+        echo FEHLER: %R4OS_REPOSITORY_ROOT% konnte nicht erstellt werden.
+        exit /b 1
+    )
+)
 
-echo FEHLER: origin zeigt auf %R4OS_CURRENT_REMOTE% statt auf %R4OS_PROJECT_REMOTE%.
+git -C "%R4OS_REPOSITORY_ROOT%" init -b main
+if errorlevel 1 (
+    echo FEHLER: %R4OS_REPOSITORY_LABEL% konnte nicht als Git-Repository initialisiert werden.
+    exit /b 1
+)
+
+echo %R4OS_REPOSITORY_LABEL% wurde lokal als Git-Repository initialisiert.
+exit /b 0
+
+:verify_main_branch
+set "R4OS_REPOSITORY_BRANCH="
+for /f "delims=" %%B in ('git -C "%R4OS_REPOSITORY_ROOT%" branch --show-current') do set "R4OS_REPOSITORY_BRANCH=%%B"
+if /I "%R4OS_REPOSITORY_BRANCH%"=="main" exit /b 0
+
+echo FEHLER: %R4OS_REPOSITORY_LABEL% muss auf dem Branch main stehen.
 exit /b 1
 
-:create_project_remote
-call :ensure_github_project
-if errorlevel 1 exit /b 1
+:ensure_local_remote
+git -C "%R4OS_REPOSITORY_ROOT%" remote get-url origin >nul 2>&1
+if errorlevel 1 goto add_local_remote
 
-git -C "%R4OS_PROJECT_ROOT%" remote add origin "%R4OS_PROJECT_REMOTE%"
+call :verify_local_remote
+exit /b %ERRORLEVEL%
+
+:verify_local_remote
+set "R4OS_CURRENT_REMOTE="
+for /f "delims=" %%R in ('git -C "%R4OS_REPOSITORY_ROOT%" remote get-url origin') do set "R4OS_CURRENT_REMOTE=%%R"
+if /I "%R4OS_CURRENT_REMOTE%"=="%R4OS_REPOSITORY_REMOTE%" exit /b 0
+
+echo FEHLER: origin zeigt auf %R4OS_CURRENT_REMOTE% statt auf %R4OS_REPOSITORY_REMOTE%.
+exit /b 1
+
+:add_local_remote
+git -C "%R4OS_REPOSITORY_ROOT%" remote add origin "%R4OS_REPOSITORY_REMOTE%"
 if errorlevel 1 (
-    echo FEHLER: Das GitHub-Remote konnte lokal nicht eingetragen werden.
+    echo FEHLER: Das GitHub-Remote konnte in %R4OS_REPOSITORY_LABEL% nicht eingetragen werden.
     exit /b 1
 )
 exit /b 0
 
-:ensure_github_project
-curl.exe --silent --show-error --fail --request GET --header "Accept: application/vnd.github+json" --header "Authorization: Bearer %R4OS_GITHUB_TOKEN%" "https://api.github.com/repos/R4OSDev/r4os-project" >nul 2>&1
+:github_repository_exists
+curl.exe --silent --show-error --fail --request GET --header "Accept: application/vnd.github+json" --header "Authorization: Bearer %R4OS_GITHUB_TOKEN%" "https://api.github.com/repos/%R4OS_GITHUB_ORGANIZATION%/%R4OS_REPOSITORY_NAME%" >nul 2>&1
+if errorlevel 1 exit /b 1
+exit /b 0
+
+:ensure_github_repository
+call :github_repository_exists
 if not errorlevel 1 exit /b 0
 
-echo GitHub-Repository R4OSDev/r4os-project wird erstellt.
-curl.exe --silent --show-error --fail --request POST --header "Accept: application/vnd.github+json" --header "Authorization: Bearer %R4OS_GITHUB_TOKEN%" "https://api.github.com/orgs/R4OSDev/repos" --data "{\"name\":\"r4os-project\",\"description\":\"Private R4OS project workspace for Windows.\",\"private\":true}" >nul
+echo GitHub-Repository %R4OS_GITHUB_ORGANIZATION%/%R4OS_REPOSITORY_NAME% wird erstellt.
+curl.exe --silent --show-error --fail --request POST --header "Accept: application/vnd.github+json" --header "Authorization: Bearer %R4OS_GITHUB_TOKEN%" "https://api.github.com/orgs/%R4OS_GITHUB_ORGANIZATION%/repos" --data "{\"name\":\"%R4OS_REPOSITORY_NAME%\",\"description\":\"%R4OS_REPOSITORY_DESCRIPTION%\",\"private\":%R4OS_REPOSITORY_PRIVATE%}" >nul
 if errorlevel 1 (
-    echo FEHLER: Das private GitHub-Repository konnte nicht erstellt werden.
+    echo FEHLER: Das GitHub-Repository %R4OS_GITHUB_ORGANIZATION%/%R4OS_REPOSITORY_NAME% konnte nicht erstellt werden.
     exit /b 1
 )
 exit /b 0
 
 :ensure_identity
-git -C "%R4OS_PROJECT_ROOT%" config --get user.name >nul 2>&1
-if errorlevel 1 git -C "%R4OS_PROJECT_ROOT%" config user.name "%R4OS_GITHUB_USER%"
+git -C "%R4OS_REPOSITORY_ROOT%" config --get user.name >nul 2>&1
+if errorlevel 1 git -C "%R4OS_REPOSITORY_ROOT%" config user.name "%R4OS_GITHUB_USER%"
 
-git -C "%R4OS_PROJECT_ROOT%" config --get user.email >nul 2>&1
-if errorlevel 1 git -C "%R4OS_PROJECT_ROOT%" config user.email "%R4OS_GITHUB_USER%@users.noreply.github.com"
+git -C "%R4OS_REPOSITORY_ROOT%" config --get user.email >nul 2>&1
+if errorlevel 1 git -C "%R4OS_REPOSITORY_ROOT%" config user.email "%R4OS_GITHUB_USER%@users.noreply.github.com"
 exit /b 0
 
 :load_credentials
@@ -218,6 +299,10 @@ echo Verwendung:
 echo   Github.bat
 echo   Github.bat -push -project ["Commit-Beschreibung"]
 echo   Github.bat -pull -project
+echo   Github.bat -push -devkit ["Commit-Beschreibung"]
+echo   Github.bat -pull -devkit
+echo   Github.bat -push -contract ["Commit-Beschreibung"]
+echo   Github.bat -pull -contract
 endlocal & exit /b 1
 
 :failure
