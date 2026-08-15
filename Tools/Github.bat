@@ -35,8 +35,10 @@ echo   [3] Contract
 echo   [4] SDK
 echo   [5] Libraries
 echo   [6] Kernel
-choice /C 123456 /N /M "Auswahl"
-if errorlevel 6 set "R4OS_INTERACTIVE_TARGET=-kernel"
+echo   [7] Distribution
+choice /C 1234567 /N /M "Auswahl"
+if errorlevel 7 set "R4OS_INTERACTIVE_TARGET=-distribution"
+if errorlevel 6 if not defined R4OS_INTERACTIVE_TARGET set "R4OS_INTERACTIVE_TARGET=-kernel"
 if errorlevel 5 if not defined R4OS_INTERACTIVE_TARGET set "R4OS_INTERACTIVE_TARGET=-libraries"
 if errorlevel 4 if not defined R4OS_INTERACTIVE_TARGET set "R4OS_INTERACTIVE_TARGET=-sdk"
 if errorlevel 3 if not defined R4OS_INTERACTIVE_TARGET set "R4OS_INTERACTIVE_TARGET=-contract"
@@ -54,6 +56,7 @@ if /I "%~1"=="-contract" goto select_contract
 if /I "%~1"=="-sdk" goto select_sdk
 if /I "%~1"=="-libraries" goto select_libraries
 if /I "%~1"=="-kernel" goto select_kernel
+if /I "%~1"=="-distribution" goto select_distribution
 exit /b 1
 
 :select_project
@@ -126,6 +129,18 @@ set "R4OS_REPOSITORY_DESCRIPTION=R4OS kernel, boot integration and kernel-owned 
 set "R4OS_REPOSITORY_PRIVATE=false"
 set "R4OS_REPOSITORY_ALLOW_INIT=1"
 set "R4OS_DEFAULT_COMMIT_MESSAGE=Kernel-Stand sichern"
+exit /b 0
+
+:select_distribution
+set "R4OS_REPOSITORY_KEY=distribution"
+set "R4OS_REPOSITORY_LABEL=Distribution"
+set "R4OS_REPOSITORY_ROOT=%R4OS_PROJECT_ROOT%\Repositories\Distribution"
+set "R4OS_REPOSITORY_NAME=r4os-distribution"
+set "R4OS_REPOSITORY_REMOTE=https://github.com/%R4OS_GITHUB_ORGANIZATION%/r4os-distribution.git"
+set "R4OS_REPOSITORY_DESCRIPTION=R4OS image assembly, release configuration and distribution-owned host tools."
+set "R4OS_REPOSITORY_PRIVATE=false"
+set "R4OS_REPOSITORY_ALLOW_INIT=1"
+set "R4OS_DEFAULT_COMMIT_MESSAGE=Distribution-Stand sichern"
 exit /b 0
 
 :pull
@@ -354,6 +369,8 @@ echo   Github.bat -push -libraries ["Commit-Beschreibung"]
 echo   Github.bat -pull -libraries
 echo   Github.bat -push -kernel ["Commit-Beschreibung"]
 echo   Github.bat -pull -kernel
+echo   Github.bat -push -distribution ["Commit-Beschreibung"]
+echo   Github.bat -pull -distribution
 endlocal & exit /b 1
 
 :failure

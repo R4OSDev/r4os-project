@@ -26,10 +26,10 @@ Das alte ist: D:\AI\Projects\Claude Code\R4OS
   als `R4OSDev/r4os-devkit` auf dem Branch `main` verwaltet. Installierte
   Inhalte werden durch dessen eigene `.gitignore` ausgeschlossen.
 - `D:\R4OS\DevKit\Setup\Setup_Windows.bat` installiert Zig, Limine und QEMU,
-  klont beziehungsweise aktualisiert installierte Contract- und SDK-Kopien
-  unter `DevKit\SDK\Contract` und `DevKit\SDK\Core` und baut daraus
-  `api-contract-gen`, `r4l-contract-gen`, `r4xbuilder` und `module-catalog`
-  nach `DevKit\HostTools\bin`. Updates sind nur als Fast-Forward auf `main`
+  klont beziehungsweise aktualisiert installierte Contract-, SDK- und
+  Distribution-Kopien unter `DevKit\SDK` beziehungsweise
+  `DevKit\HostTools\Source` und baut deren elf Hostprogramme nach
+  `DevKit\HostTools\bin`. Updates sind nur als Fast-Forward auf `main`
   erlaubt; lokale Aenderungen in den Installationskopien fuehren zum Abbruch.
   Diese Kopien sind keine fachlichen Quellwahrheiten und werden nicht editiert.
 - Der kanonische API-/ABI-Vertrag liegt unter
@@ -47,6 +47,16 @@ Das alte ist: D:\AI\Projects\Claude Code\R4OS
   `R4OSDev/r4os-libraries` auf dem Branch `main` verwaltet.
 - Der Kernel liegt unter `D:\R4OS\Repositories\Kernel\` und wird als
   `R4OSDev/r4os-kernel` auf dem Branch `main` verwaltet.
+- Die Distribution liegt unter `D:\R4OS\Repositories\Distribution\` und wird
+  als `R4OSDev/r4os-distribution` auf dem Branch `main` verwaltet.
+- Distributionspfade stehen in
+  `D:\R4OS\Repositories\Distribution\Settings.R4S`. `Build.bat test` baut
+  die sieben distributionseigenen Hosttools und prueft die deterministischen
+  Slim-, Full- und Test-Imageplaene. `Build.bat plan`, `image`, `verify` und
+  `qemu` arbeiten je Profil ausschliesslich mit expliziten fertigen
+  Artefaktplaenen unter `Artifacts\Distribution\Inputs`; sie bauen niemals
+  Kernel, Libraries oder Module. Private Injection-Dateien liegen nur im
+  ignorierten `Artifacts\Distribution\PrivateInjection`-Overlay.
 - Kernel-Pfade stehen in `D:\R4OS\Repositories\Kernel\Settings.R4S`.
   `Build.bat` erzeugt `zig-out\bin\r4os.elf`; `Build.bat test` baut den
   Kernel und fuehrt die kernel-eigenen Host- und Negativtests aus. Der Build
@@ -61,10 +71,12 @@ Das alte ist: D:\AI\Projects\Claude Code\R4OS
   erlaubt. Linux-/macOS-Laufzeittests sind fuer den 0.64-Umbau kein Gate.
 - Fuer Push und Pull ausschliesslich `D:\R4OS\Tools\Github.bat` verwenden.
   Ohne Argumente fragt es interaktiv erst nach `Push` oder `Pull` und danach
-  nach `Project`, `DevKit`, `Contract`, `SDK`, `Libraries` oder `Kernel`.
+  nach `Project`, `DevKit`, `Contract`, `SDK`, `Libraries`, `Kernel` oder
+  `Distribution`.
 - Nach einem frischen Clone zuerst `D:\R4OS\Tools\Setup.bat` ausfuehren.
   Es erzeugt die ignorierten Workspace-Ordner `Artifacts`, `DevKit` und
-  `Repositories` sowie bei Bedarf die lokale GitHub-Credentials-Vorlage.
+  `Repositories`, die lokalen Distribution-Input-/Private-Overlayordner sowie
+  bei Bedarf die lokale GitHub-Credentials-Vorlage.
   Anschliessend das DevKit mit `Github.bat -pull -devkit` beziehen und darin
   `Setup\Setup_Windows.bat` ausfuehren.
 - Direkte Aufrufe:
@@ -80,6 +92,8 @@ Das alte ist: D:\AI\Projects\Claude Code\R4OS
   - `Github.bat -pull -libraries`
   - `Github.bat -push -kernel ["Commit-Beschreibung"]`
   - `Github.bat -pull -kernel`
+  - `Github.bat -push -distribution ["Commit-Beschreibung"]`
+  - `Github.bat -pull -distribution`
 - Ein Push staged nach der `.gitignore` des gewaehlten Repositorys, erstellt
   bei Aenderungen einen Commit und pusht `main`. Ein Pull verwendet
   ausschliesslich `git pull --ff-only`. Beim ersten Push eines neuen Ziels

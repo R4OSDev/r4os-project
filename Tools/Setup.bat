@@ -14,6 +14,24 @@ if not exist "%R4OS_PROJECT_ROOT%\Artifacts\" (
     echo Angelegt: Artifacts
 )
 
+if not exist "%R4OS_PROJECT_ROOT%\Artifacts\Distribution\Inputs\" (
+    mkdir "%R4OS_PROJECT_ROOT%\Artifacts\Distribution\Inputs"
+    if errorlevel 1 (
+        echo FEHLER: Artifacts\Distribution\Inputs konnte nicht erstellt werden.
+        endlocal & exit /b 1
+    )
+    echo Angelegt: Artifacts\Distribution\Inputs
+)
+
+if not exist "%R4OS_PROJECT_ROOT%\Artifacts\Distribution\PrivateInjection\" (
+    mkdir "%R4OS_PROJECT_ROOT%\Artifacts\Distribution\PrivateInjection"
+    if errorlevel 1 (
+        echo FEHLER: Artifacts\Distribution\PrivateInjection konnte nicht erstellt werden.
+        endlocal & exit /b 1
+    )
+    echo Angelegt: Artifacts\Distribution\PrivateInjection
+)
+
 if not exist "%R4OS_PROJECT_ROOT%\DevKit\" (
     mkdir "%R4OS_PROJECT_ROOT%\DevKit"
     if errorlevel 1 (

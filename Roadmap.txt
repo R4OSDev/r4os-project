@@ -168,9 +168,11 @@ Bereits eingerichtet:
   - Lokal: `D:\R4OS\Repositories\Kernel`
   - Ist seit 0.64.14 eigenstaendig gegen den Contract baubar und abgenommen.
   - Aktueller abgenommener Stand: Commit `48d802d`.
-- Distribution- und Modul-Repositories wurden noch nicht importiert.
+- Das leere GitHub-Ziel `R4OSDev/r4os-distribution` ist angelegt; seine
+  eigenstaendige Uebernahme laeuft in 0.64.16. Modul-Repositories wurden noch
+  nicht importiert.
 - `D:\R4OS\Tools\Github.bat` verwaltet die Ziele `-project`, `-devkit`,
-  `-contract`, `-sdk`, `-libraries` und `-kernel`.
+  `-contract`, `-sdk`, `-libraries`, `-kernel` und `-distribution`.
 - `D:\R4OS\Tools\Setup.bat` erzeugt die ignorierten Workspace-Ordner und bei
   Bedarf die lokale Credentials-Vorlage. Zugangsdaten bleiben ausschliesslich
   unter `D:\R4OS\Tools\Credentials` und werden nicht versioniert.
@@ -655,22 +657,68 @@ Notizen:
 
 0.64.16
 Titel: Distribution und reproduzierbare Imageintegration aufbauen
-Status: Geplant
+Status: Erledigt
 
 Offene Punkte:
-- Injection, Profile, Imagekonfiguration, Releasezusammenstellung und
-  Integrationsabnahmen uebernehmen.
-- ImageCreator, NtfsVerify, R4UPack, SerialLinkHost und die weiteren
-  distributionsspezifischen Hosttools uebernehmen und ueber das DevKit
-  installierbar machen.
-- Fertige Kernel-, Library- und Modulkomponenten explizit einspeisen.
-- Verstecktes Neubauen fachlicher Komponenten in der Distribution verbieten.
+- Keine.
 
 Erledigt:
-- Noch nichts.
+- Das oeffentliche Repository `R4OSDev/r4os-distribution` ist unter
+  `D:\R4OS\Repositories\Distribution` kanonisch eingerichtet. Abgenommener
+  Stand: Commit `d067578`.
+- Die oeffentliche `Injection`, das priorisierte `TestInjection`-Overlay, die
+  Profile Slim, Full und Test sowie die relative QEMU-Standardkonfiguration
+  wurden aus Altprojekt-Commit `259cbfac` uebernommen.
+- `R4TLSDEV.KEY` wurde bereits beim Transfer ausgeschlossen. Das generierte
+  `MODULES.JSON` ist keine zweite Quellwahrheit mehr und wird als explizites
+  Artefakt eingespeist. Beide Pfade waren nie Teil des oeffentlichen Repos.
+- Private Dateien werden nur ueber das ignorierte, in `Settings.R4S` gemappte
+  `Artifacts\Distribution\PrivateInjection`-Overlay eingebunden. Spaetere
+  Overlays ersetzen denselben relativen Pfad deterministisch.
+- ImageCreator, NtfsVerify, R4UPack, SerialLinkHost, PreloadImage und
+  DefaultRegistry wurden mit byteidentischem fachlichem Quellstand
+  uebernommen. Der alte monorepo-feste Imagegenerator wurde zum generischen
+  `image-plan` mit expliziten Planfragmenten, Baumen und Overlays umgebaut.
+- Der gemeinsame Zig-Build bezieht reine NTFS- und R4U-Formate aus SDK-Commit
+  `210372f` und dessen Contract-Commit `5521df0`. Alle Buildausgaben und
+  Eingaben liegen ausserhalb des Repos unter `D:\R4OS\Artifacts`.
+- `Settings.R4S`, `Build.bat` und `Build.sh` erlauben andere relative oder
+  absolute Pfade. Der Windows-Starter besitzt `tools`, `test`, `plan`,
+  `image`, `verify` und `qemu`; der hostneutrale Starter besitzt Hosttoolbau,
+  Tests und Plangenerierung.
+- Der explizite Inputvertrag steht in `INPUTS.txt`: `Common.plan` besitzt
+  fertigen Kernel, Bootvoraussetzungen, PRELOAD, Fonts, Registry und Inventar;
+  `Slim.plan`, `Full.plan` und `Test.plan` besitzen die fertigen Komponenten.
+  Keine Distribution-Aktion ruft einen fachlichen Komponentenbuild auf.
+- DevKit-Commit `0a8a045` klont den Distribution-Stand nach
+  `HostTools\Source\Distribution` und installiert dessen sieben Programme
+  zusammen mit den vier Contract-/SDK-Programmen nach `HostTools\bin`.
+- `D:\R4OS\Tools\Github.bat` verwaltet das neue Ziel mit
+  `-distribution`; `Tools\Setup.bat` erzeugt die lokalen Input- und
+  PrivateInjection-Ordner.
 
 Abnahme:
-- Slim-, Full- und Test-Imageplaene sind deterministisch und kollisionsfrei.
+- `Build.bat test` endet mit Exitcode 0 und baut alle sieben
+  Distribution-Hosttools gegen die getrennten SDK-/Contract-Repositories.
+- Die eingefrorenen Slim-, Full- und Test-Fixtures ergeben bytegenau 8, 10
+  und 12 Eintraege. Der Negativfall mit nur anders geschriebenem Zielpfad
+  wird als case-insensitive Kollision abgewiesen.
+- PRELOAD.R4I, Default-Registry, FAT32-Datenimage, kombiniertes
+  FAT32-/NTFS-Systemimage und R4U-Kernelpaket wurden funktional erzeugt;
+  NtfsVerify meldet fuer das Systemimage `OK`.
+- Ein frischer oeffentlicher DevKit-Clone installiert Zig 0.16.0, Limine
+  12.0.1, QEMU 11.0.0, Contract, SDK, Distribution und alle elf Hosttools
+  ausschliesslich unter seiner DevKit-Wurzel. Der zweite Lauf baut nichts neu,
+  alle drei installierten Repositories bleiben sauber und die installierte
+  Testprofil-Plankontrolle endet mit Exitcode 0.
+
+Notizen:
+- Die reale Gesamtimageeinspeisung aller ausgelagerten Module folgt in den
+  Unterversionen 0.64.17 bis 0.64.19. 0.64.16 friert bereits den vollstaendig
+  quellfreien, expliziten Distributionsvertrag ein, ohne vor der
+  Modulmigration wieder auf Altprojektquellen zuzugreifen.
+- Lokale Fresh-Testverzeichnisse bleiben bewusst ignoriert unter
+  `D:\R4OS\Artifacts`; sie sind keine Repositoryinhalte.
 
 0.64.17
 Titel: Je einen R4X-, R4D- und R4P-Piloten auslagern
