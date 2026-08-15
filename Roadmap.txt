@@ -906,10 +906,6 @@ Offene Punkte:
   Eigentuerrepository werden; im Altprojekt verbleiben duerfen sie nicht.
 - Alle 95 Einheiten nach Abhaengigkeiten in gepruefte Wellen gruppieren.
 - Pro Welle eigenstaendige Builds und Distributionsintegration abnehmen.
-- Die bisher vom alten Root-Build erzeugten modulnahen LOADERD-Testfixtures
-  (EXTMATH, Loader-Stress und Resolver-Negativfaelle) vor der
-  Mehrrepo-Gesamtintegration dem LoaderDiag- oder Distribution-Repository
-  zuordnen. Sie sind keine eigenstaendigen Produktkomponenten.
 - Bootkritische Komponenten zuletzt und nur mit funktionierendem Ersatzpfad
   aus dem integrierten Baum loesen.
 
@@ -975,10 +971,15 @@ Erledigt:
   R4STD werden als gepinnte Librarypakete konsumiert, CNETD bestand den
   eigenstaendigen C-Build und bleibt wegen `IMAGE_SCOPE=none` aus dem Image:
   - KFXLIVE: `1f87ec68d10c876dfd779e20520d1425908f01bb`
-  - LOADERD: `2ed2313752b7669e51ccab7237dff42c48177128`
+  - LOADERD: `74ec0847be2f2a4e9a252f74846f8c5d2f31ee4e`
   - CNETD: `ccdd0d44f7e5546bee201fac79cef87fb942ff2c`
   - R4CFGD: `bd0ca7cb9e561e145e5396afd8d438890b383c09`
   - STDDIAG: `8be72e56390c807f359f6fd5dccde3b7f0ebd228`
+- LoaderDiag besitzt nun auch die 14 zuvor vom alten Root-Build erzeugten
+  EXTMATH-, Resolver-, BADSTART- und Loader-Stressfixtures. Generator,
+  Zielmanifeste und Referenzhashes liegen modulnah unter `Fixtures/`; alle 14
+  erzeugten Container sind in Groesse und SHA-256 byteidentisch zu den
+  eingefrorenen Altprojektartefakten.
 - Die API-Antwortdateien von `Github.bat` enthalten nun den
   Repositoryschluessel im Tempnamen, sodass parallele private Neuanlagen sich
   nicht gegenseitig loeschen.
@@ -999,9 +1000,11 @@ Abnahme:
   kollisionsfreie Diagnoseeintraege.
 - Die vierte Welle erweitert denselben reproduzierbaren Plan auf 31
   eindeutige und kollisionsfreie Diagnoseeintraege.
-- Die fuenfte Welle erweitert den Testprofilplan auf 35 eindeutige,
-  kollisionsfreie Diagnoseartefakte. Zusammen mit dem bewusst ausgeschlossenen
-  scope-none-CNETD sind damit alle 36 Diagnosemodule abgenommen.
+- Die fuenfte Welle enthaelt 35 Diagnoseartefakte und 14 modulnahe
+  LoaderDiag-Fixtures. Der kombinierte Testprofilplan akzeptiert alle 49
+  Eintraege eindeutig und kollisionsfrei. Zusammen mit dem bewusst
+  ausgeschlossenen scope-none-CNETD sind damit alle 36 Diagnosemodule samt
+  benoetigten Laufzeitfixtures abgenommen.
 
 0.64.19
 Titel: Vollstaendige Mehrrepo-Gesamtintegration abnehmen

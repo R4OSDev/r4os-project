@@ -299,8 +299,12 @@ als feste Quellkante in Buildscript oder Paketmanifest.
 KlickifaxLive bezieht R4IMG, R4CfgDiag und StdDiag beziehen R4STD ueber den
 gepinnten Libraries-Commit. NetworkFacadeCDiag bleibt als echter C-Build mit
 `IMAGE_SCOPE=none` ausserhalb des Images. EXTMATH ist fuer LoaderDiag kein
-Quellpaket, sondern eine vom alten Root-Build erzeugte Laufzeit-Testfixture;
-ihre neue modulnahe Integration ist vor dem Mehrrepo-QEMU-Test noch offen.
+Quellpaket, sondern eine Laufzeit-Testfixture. LoaderDiag besitzt seit Commit
+`74ec0847be2f2a4e9a252f74846f8c5d2f31ee4e` alle 14 zuvor vom alten
+Root-Build erzeugten EXTMATH-, Resolver-, BADSTART- und Loader-Stressfixtures
+modulnah. Die neu erzeugten Container sind byteidentisch zu den
+eingefrorenen Altprojektartefakten; die Distribution konsumiert sie nur im
+Testprofil.
 
 Die Workspace-Ablage folgt derselben Rollenlogik wie die GitHub-Namen:
 `Repositories/Apps`, `Repositories/Services`, `Repositories/Diagnostics`,
