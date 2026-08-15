@@ -792,19 +792,174 @@ Notizen:
 
 0.64.18
 Titel: Auslieferbare Module in geprueften Wellen auslagern
-Status: Geplant
+Status: In Arbeit
 
 Offene Punkte:
-- Anwendungen, Dienste, Treiber und Protokolle nach Abhaengigkeiten gruppieren.
+- Verbindliche Inventarbasis ist Altprojekt-Commit `259cbfac`: In den fuenf
+  Komponentenwurzeln liegen 134 Manifestmodule. CLOCK, MIDI und JSON wurden
+  in 0.64.17 bereits ausgelagert; die folgenden 131 Einheiten verbleiben.
+- Anwendungen - 40 verbleibende R4X:
+  - AppDefaults (`APPDEF.R4X`, full)
+  - Appearance (`APPEARANCE.R4X`, full)
+  - Beep (`BEEP.R4X`, full)
+  - BootInfo (`BOOTINFO.R4X`, full)
+  - Calculator (`CALC.R4X`, full)
+  - Desktop (`R4DESK.R4X`, slim)
+  - DeviceManager (`DEVMGR.R4X`, full)
+  - Dhcp (`DHCP.R4X`, full)
+  - DnsLookup (`DNSLOOKUP.R4X`, full)
+  - Example (`EXAMPLE.R4X`, full)
+  - Explorer (`EXPLORER.R4X`, slim)
+  - Fonts (`FONTS.R4X`, full)
+  - Help (`HELP.R4X`, full)
+  - HttpGet (`HTTPGET.R4X`, full)
+  - IpConfig (`IPCONFIG.R4X`, full)
+  - Klickifax (`KLICKIFAX.R4X`, full)
+  - LogCenter (`LOGCENTER.R4X`, full)
+  - MemView (`MEMVIEW.R4X`, full)
+  - NetCat (`NETCAT.R4X`, full)
+  - NetConfig (`NETCFG.R4X`, full)
+  - Notepad (`NOTEPAD.R4X`, full)
+  - Paint (`PAINT.R4X`, full)
+  - Ping (`PING.R4X`, full)
+  - R4Code/R4Build (`R4BUILD.R4X`, full)
+  - R4Code/R4CC (`R4CC.R4X`, full)
+  - R4Code/R4Code (`R4CODE.R4X`, full)
+  - R4Code/R4Pack (`R4PACK.R4X`, full)
+  - R4Synth (`SYNTH.R4X`, full)
+  - Recv (`RECV.R4X`, full)
+  - RegEdit (`REGEDIT.R4X`, full)
+  - RegistryTool (`REG.R4X`, full)
+  - Send (`SEND.R4X`, full)
+  - ServiceManager (`SERVMAN.R4X`, slim)
+  - Services (`SERVICES.R4X`, full)
+  - SysInfo (`SYSINFO.R4X`, full)
+  - SysUpdate (`SYSUPD.R4X`, slim)
+  - TcpEcho (`TCPECHO.R4X`, full)
+  - Terminal (`TERMINAL.R4X`, slim)
+  - TimeSettings (`TIMESET.R4X`, full)
+  - UpdateCenter (`UPDATE.R4X`, slim)
+- Dienste - 15 verbleibende R4X:
+  - AudioService (`AUDSVC.R4X`, full)
+  - ClipboardService (`CLIPSVC.R4X`, slim)
+  - DhcpService (`DHCPSVC.R4X`, slim)
+  - DnsService (`DNSSVC.R4X`, slim)
+  - ExampleService (`EXSVC.R4X`, full)
+  - FtpService (`FTPSVC.R4X`, full)
+  - LogService (`LOGSVC.R4X`, slim)
+  - RdpService (`RDPSVC.R4X`, full)
+  - SerialLinkService (`R4SLSVC.R4X`, full)
+  - SshService (`SSHD.R4X`, full)
+  - TcpService (`TCPSVC.R4X`, slim)
+  - TimeService (`TIMESVC.R4X`, slim)
+  - UdpService (`UDPSVC.R4X`, slim)
+  - WindowService (`WINSVC.R4X`, slim)
+  - UpdateService (`UPDSVC.R4X`, slim; Quelle `Code/System/Software`)
+- Diagnoseprogramme - 36 verbleibende R4X:
+  - AppHeapDiag (`APPHEAPD.R4X`, test)
+  - AsyncIoDiag (`ASYNIOD.R4X`, test)
+  - AudioDiag (`AUDIOD.R4X`, test)
+  - BootCoreDiag (`BOOTDIAG.R4X`, test)
+  - CleanupDiag (`CLEANUPD.R4X`, test)
+  - ClipboardDiag (`CLIPD.R4X`, test)
+  - CStartSmoke (`CSTARTD.R4X`, test)
+  - DisplayDiag (`DISPLAYD.R4X`, test)
+  - DriverDiag (`DRVDIAG.R4X`, test)
+  - FsDiag (`FSDIAG.R4X`, test)
+  - HardwareDiag (`HWDIAG.R4X`, test)
+  - InputDiag (`INPUTD.R4X`, test)
+  - KlickifaxLive (`KFXLIVE.R4X`, test)
+  - LoaderDiag (`LOADERD.R4X`, test)
+  - LogServiceDiag (`LOGDIAG.R4X`, test)
+  - MemorySuite (`MEMSUITE.R4X`, test)
+  - NetDiag (`NETDIAG.R4X`, test)
+  - NetIoDiag (`NETIOD.R4X`, test)
+  - NetR4pDiag (`NETR4P.R4X`, test)
+  - NetSvcDiag (`NETSVC.R4X`, test)
+  - NetworkFacadeCDiag (`CNETD.R4X`, none)
+  - NtfsDiag (`NTFSDIAG.R4X`, test)
+  - PerformanceDiag (`PERFDIAG.R4X`, test)
+  - R4CfgDiag (`R4CFGD.R4X`, test)
+  - R4XStartSmoke (`R4XSTARTD.R4X`, test)
+  - RemoteFrameDiag (`RFDIAG.R4X`, test)
+  - ResourceDiag (`RESDIAG.R4X`, test)
+  - SerialLinkDiag (`R4SLD.R4X`, test)
+  - ServiceClassDiag (`SVCAPPD.R4X`, test)
+  - SimdDiag (`SIMDD.R4X`, test)
+  - StackDiag (`STACKD.R4X`, test)
+  - StdDiag (`STDDIAG.R4X`, test)
+  - StorageDiag (`STORDIAG.R4X`, test)
+  - SynthDiag (`SYNTHD.R4X`, test)
+  - ThreadDiag (`THREADD.R4X`, test)
+  - UsbDiag (`USBDIAG.R4X`, test)
+- Treiber - 14 verbleibende R4D:
+  - AC97 (`AC97.R4D`, full)
+  - AHCI (`AHCI.R4D`, slim)
+  - ATAPIO (`ATAPIO.R4D`, slim)
+  - AudioFail (`AC97FAIL.R4D`, none)
+  - Example (`EXAMPLE.R4D`, test)
+  - HDA (`HDA.R4D`, full)
+  - NVME (`NVME.R4D`, slim)
+  - OPL3 (`OPL3.R4D`, full)
+  - RTL8139 (`RTL8139.R4D`, slim)
+  - RTL8168 (`RTL8168.R4D`, slim)
+  - SID (`SID.R4D`, full)
+  - USBMSC (`USBMSC.R4D`, slim)
+  - VirtioNet (`VIRTNET.R4D`, slim)
+  - XHCI (`XHCI.R4D`, slim)
+- Protokolle - 26 verbleibende R4P:
+  - AudioMidi (`MIDI.R4P`, full)
+  - AudioOpl3 (`OPL3.R4P`, full)
+  - AudioSid (`SID.R4P`, full)
+  - BadDep (`BADDEP.R4P`, test)
+  - Conformance (`CONF.R4P`, test)
+  - Example (`EXAMPLE.R4P`, test)
+  - NetArp (`NETARP.R4P`, slim)
+  - NetDhcp (`NETDHCP.R4P`, slim)
+  - NetDns (`NETDNS.R4P`, slim)
+  - NetEthernet (`NETETH.R4P`, slim)
+  - NetIcmp (`NETICMP.R4P`, slim)
+  - NetIpv4 (`NETIPV4.R4P`, slim)
+  - NetSerialLink (`NETR4SL.R4P`, full)
+  - NetTcp (`NETTCP.R4P`, slim)
+  - NetUdp (`NETUDP.R4P`, slim)
+  - R4Auth (`R4AUTH.R4P`, slim)
+  - R4Css (`R4CSS.R4P`, full)
+  - R4Html (`R4HTML.R4P`, full)
+  - R4Http (`R4HTTP.R4P`, full)
+  - R4Js (`R4JS.R4P`, full)
+  - R4Tls (`R4TLS.R4P`, slim)
+  - Smoke (`SMOKE.R4P`, test)
+  - UsbHidBoot (`USBHID.R4P`, slim)
+  - UsbHidReport (`HIDREPORT.R4P`, slim)
+  - UsbMscBot (`USBBOT.R4P`, slim)
+  - UsbScsiBlock (`USBSCSI.R4P`, slim)
+- Einheiten mit `IMAGE_SCOPE=test` oder `none` bleiben Teil der verbindlichen
+  Liste. Vor ihrem Transfer wird nur entschieden, ob sie ein eigenes privates
+  Komponentenrepository oder eine modulnahe Fixture im fachlichen
+  Eigentuerrepository werden; im Altprojekt verbleiben duerfen sie nicht.
+- Alle 131 Einheiten nach Abhaengigkeiten in gepruefte Wellen gruppieren.
 - Pro Welle eigenstaendige Builds und Distributionsintegration abnehmen.
 - Bootkritische Komponenten zuletzt und nur mit funktionierendem Ersatzpfad
   aus dem integrierten Baum loesen.
 
 Erledigt:
-- Noch nichts.
+- Das verbleibende Transferinventar wurde aus allen `module.R4MF` des
+  eingefrorenen Altprojekt-Commits erzeugt und nach Rolle vollstaendig in den
+  offenen Punkten festgehalten: 40 Anwendungen, 15 Dienste, 36
+  Diagnoseprogramme, 14 Treiber und 26 Protokolle.
+- Diagnoseprogramme besitzen mit `Repositories/Diagnostics` und
+  `r4os-diagnostic-*` eine eigene Rolle. Setup, GitHub-Verwaltung,
+  Workspace-Dokumentation und die gemeinsamen Settings kennen diese Rolle.
+- Die Diagnose-Mappings wurden nach gruenen Komponententests gesichert: SDK
+  `74d2e31dfbcf2bb8531cac44f91200f5c31947b4`, Libraries
+  `506155df353addba5dd164713175f8ab875b0f91` und Distribution
+  `e81a20caa90405786ab2c569349a7c180a83aa8f`.
 
 Abnahme:
 - Jedes ausgelagerte Modul besitzt genau ein kanonisches Repository.
+- Der Inventarvergleich bildet alle 131 noch nicht ausgelagerten
+  Manifestmodule ohne fehlende, zusaetzliche oder doppelte Eintraege ab.
 
 0.64.19
 Titel: Vollstaendige Mehrrepo-Gesamtintegration abnehmen
