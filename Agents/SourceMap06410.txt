@@ -1,0 +1,289 @@
+﻿R4OS 0.64.10 - Eingefrorener Referenzstand und Dateizuordnung
+==================================================================
+
+Zweck
+-----
+
+Dieses Dokument friert den letzten vollstaendig integrierten R4OS-Stand ein
+und ordnet jede Quellklasse genau einer spaeteren Repositorywurzel zu. Es ist
+die Uebergabewahrheit fuer die Multi-Repository-Migration. Im Altprojekt wird
+waehrend der Migration nichts geloescht oder nachtraeglich fachlich geaendert.
+
+
+Kanonischer Referenzstand
+-------------------------
+
+Altprojekt:
+
+    D:\AI\Projects\Claude Code\R4OS
+    Gitea: R4mbo/R4OS
+
+Fachlicher 0.64.9-Quellcommit:
+
+    259cbfac272c47ac1a7828de973512d17b29ae10
+
+Archivierter Abschluss-Head:
+
+    2c0ca0473b5eeb5f3417db82fa666368ed67d5df
+
+Der zweite Commit fuegt ausschliesslich `Docs/Changelogs/V0.64.txt` hinzu.
+Alle zu migrierenden Quellen sind deshalb in beiden Ständen identisch; fuer
+bytegenaue Quellvergleiche wird der fachliche Commit 259cbfac verwendet.
+
+Neuer Workspace:
+
+    D:\R4OS
+    GitHub-Organisation: R4OSDev
+
+Bis eine Komponente ihre eigene Unterversion mit Einzelbuild und Tests
+bestanden hat, bleibt fuer diese Komponente ausschliesslich der oben genannte
+Altprojektstand kanonisch. Eine kopierte, aber noch nicht abgenommene Einheit
+ist kein zweiter aktiver Quellstand.
+
+
+Werkzeugbasis der Abnahme
+-------------------------
+
+    Zig       0.16.0
+    Limine    12.0.1
+    QEMU      11.0.0 (v11.0.0-12122-ga4bb4b10c9)
+    Git       2.53.0.windows.1
+    Ziel      x86_64-freestanding, Long Mode
+
+Das neue Windows-DevKit stellt dieselben Hauptversionen bereit. Binaries der
+Toolchain, von Limine und QEMU werden nicht in ein Quellrepository kopiert.
+
+
+Gruene Referenzabnahme
+----------------------
+
+- `DevTools/Scripts/Build.bat -norun` endete mit Exitcode 0.
+- Der Katalog enthielt 159 Manifeste, das Full-Inventar 102 Komponenten
+  inklusive Kernel und der konkrete Imageplan 101 Module.
+- SHA-256 blieb fuer alle 47 generierten Runtime-R4L-Artefakte vor und nach
+  dem normalen Build bytegenau gleich.
+- R4IMG, R4FONT und R4STD bestanden Einzelbuild, Zig-/C-Conformance und ihre
+  echten Runtime-Tabellentests.
+- `DevTools/Scripts/Build.bat -test` endete mit 600-Sekunden-Watchdog und
+  Exitcode 0.
+- Das Testinventar enthielt 124 Komponenten inklusive Kernel, der Imageplan
+  123 Module und das erzeugte Systemimage 265 Dateien.
+- QEMU, Boot, Gast-Poweroff, SYSUPD und der vollstaendige API-Markervertrag
+  waren gruen; die Auswertung meldete `Errors: none`.
+- R4IMG, R4FONT und R4STD wurden im Gast als gepinnte Runtime-R4Ls der
+  Generation 1 geladen und ihre benannten Tabellen produktiv aufgeloest.
+
+Der ausfuehrliche Abschluss steht im Altprojekt unter:
+
+    Docs/SDK/RuntimeR4L0649.txt
+    Docs/Changelogs/V0.64.txt
+
+
+Git-Baumidentitaeten des Quellcommits
+-------------------------------------
+
+    1580c4d5ac2dc352ac61c2a436fb5da1da87ebea  Code/System/SDK/Contract
+    b10438808264f3b24a8473058bd3666fcafd1fcb  Code/System/SDK
+    e3d47fc2ee4b5917727af288f39a0a6a07ee9003  Code/Kernel
+    8f756113c1f6c58a1c2c3f36cbd89af7a604e148  Code/System/Libraries/R4STD
+    34577d65631d81d438d24322a4aae78e3235c0c0  Code/System/Libraries/R4IMG
+    e8fc1282f1b58963f65decdd8e21673fe2dd7ddb  Code/System/Libraries/R4FONT
+    8cf3d941d47bab56794c0228fb86ee327085113c  Injection
+    9f22557fcdf20e57424b5fec69910f4edc950bb1  Code/System/Software
+    f8b34fb32cb98a1771fb954c44d83dbbf53b989e  Code/System/Services
+    5ccdc16a0cbff5ff02b552bdce8f3afb94401953  Code/System/Diagnostics
+    ae8f37d4f9021b177264705331e24772808ffb5b  Code/System/Driver
+    e808cca798354a03cae244daa53d9a0daa4b767f  Code/System/Protocols
+    382f41fed82238a7930bea0e379ed10f24a9c2ec  Code/BuildTools
+    ccef0fb7a2a057f901f65dd4e07a4f0e3eac46bc  Tests/Gate
+
+Diese IDs pruefen die unveraenderte Herkunft kompletter Teilbaeume. Fuer
+gezielt umgeordnete oder entkoppelte Dateien werden zusaetzlich Einzelhashes
+beziehungsweise semantische Generatorchecks verwendet.
+
+
+Repository-Zuordnung
+--------------------
+
+1. Plattform-Contract - `R4OSDev/r4os-contract`
+
+Zielwurzel:
+
+    D:\R4OS\Repositories\Contract
+
+Ausgangsquellen:
+
+    Code/System/SDK/Contract/
+    Code/BuildTools/ApiContractGen/
+    contractnahe API-Dokumentation
+    contractnahe Conformance-Fixtures und Generator-Selbsttests
+
+Der Contract besitzt R4M0, R4XStart, R4LQuery, den generischen
+Runtime-R4L-Tabellenheader, ApiContract-Schema und Baseline, die sechs
+kernelimplementierten Plattformgruppen, gemeinsame ABI-Typen, Fehler- und
+Versionsregeln. `ApiContractGen` gehoert fachlich in dieses Repository.
+
+Das Repository enthaelt keine R4STD-, R4IMG- oder R4FONT-Tabelle, keine
+handgeschriebene SDK-Fassade und keine Kernelproviderimplementierung.
+
+2. Kern-SDK - `R4OSDev/r4os-sdk`
+
+Zielwurzel:
+
+    D:\R4OS\Repositories\SDK
+
+Ausgangsquellen:
+
+    Code/System/SDK/ ohne Contract, Caches und Buildausgaben
+    Code/System/SDK/Tools/R4LContractGen/
+    Code/System/SDK/Tools/R4XBuilder/
+    Code/BuildTools/ModuleCatalog/
+
+Das SDK besitzt Plattformfassaden, Buildprofile, Templates, C-Integration,
+R4MF-Parser und generische R4X-/R4L-Helfer. `R4LContractGen`, `R4XBuilder` und
+`ModuleCatalog` sind generische SDK-Quellen; ihre gebauten Hostprogramme
+installiert spaeter das DevKit.
+
+Der SDK-Transfer schliesst konkrete Libraryimplementierungen und
+libraryspezifische Bindingwahrheiten aus. Contract-Artefakte werden als
+explizite Eingabe konsumiert und nicht im SDK neu definiert.
+
+3. Kernel - `R4OSDev/r4os-kernel`
+
+Zielwurzel:
+
+    D:\R4OS\Repositories\Kernel
+
+Ausgangsquellen:
+
+    Code/Kernel/
+    kernelbezogene Build-, Linker-, Limine- und Startkonfiguration
+    kernelnahe Tests und dauerhafte Kernelgrenz-Gates
+
+Der Kernel implementiert die sechs Plattformprovider, Boot, Speicher,
+Interrupts, Timer und den generischen R4M0-/Runtime-R4L-Lader. Er konsumiert
+versionierte Contract-Artefakte, aber keine SDK-, Library-, Modul- oder
+Distributionsquelle. Der bootkritische kleine R4F-Fallback bleibt Kernelcode.
+
+4. Offizielle Runtime-Libraries - `R4OSDev/r4os-libraries`
+
+Zielwurzel:
+
+    D:\R4OS\Repositories\Libraries
+
+Bytegenaue Ausgangseinheiten:
+
+    Code/System/Libraries/R4STD/
+    Code/System/Libraries/R4IMG/
+    Code/System/Libraries/R4FONT/
+
+Jede Einheit behaelt Contract, Baseline, generierte Implementierungs-ABI,
+Zig-/C-Bindings, Source, ThirdParty, Manifest, Tests, Dokumentation und
+Einzelbuild zusammen. Generierte Libraryartefakte bleiben versioniert bei der
+Library. Ein kompatibles Libraryupdate veraendert keine fachliche Datei in
+Contract, Kernel oder Kern-SDK.
+
+Die sechs kernelimplementierten R4L-Bruecken R4SYS, R4DESK, R4DRAW, R4NET,
+R4AUDIO und R4DEV gehoeren nicht in dieses Repository als zweite Provider.
+
+5. Distribution - `R4OSDev/r4os-distribution`
+
+Zielwurzel:
+
+    D:\R4OS\Repositories\Distribution
+
+Ausgangsquellen:
+
+    Injection/
+    Image- und Releasekonfiguration
+    Profile Slim, Full und Test
+    Integrations- und QEMU-Abnahmen
+    Code/BuildTools/ImageCreator/
+    Code/BuildTools/NtfsVerify/
+    Code/BuildTools/R4UPack/
+    Code/BuildTools/SerialLinkHost/
+
+Die Distribution konsumiert fertige Komponentenartefakte. Sie definiert
+keine API und baut Kernel, Libraries oder Module nicht heimlich aus deren
+fachlichen Quellen neu. Image-, NTFS-, R4U- und Hardwaretransportwerkzeuge
+gehoeren als Quellcode zur Distribution; ihre Hostbinaries installiert das
+DevKit unter `HostTools`.
+
+6. Module - spaetere `r4os-module-*`-Repositories
+
+Ausgangswurzeln:
+
+    Code/System/Software/       R4X-Anwendungen
+    Code/System/Services/       R4X-Dienste
+    Code/System/Diagnostics/    Diagnose-R4X
+    Code/System/Driver/         R4D-Treiber
+    Code/System/Protocols/      R4P-Protokolle
+
+Jedes Modul erhaelt Manifest, Source, Ressourcen, Hilfe und modulnahe Tests.
+Produktive Abhaengigkeiten bestehen nur zu explizitem SDK, Contract und den
+tatsaechlich importierten Librarybindings.
+
+7. Workspace und DevKit
+
+    D:\R4OS                 privates, schlankes Workspace-Repository
+    D:\R4OS\DevKit          oeffentlicher hostspezifischer Bootstrap
+    D:\R4OS\Artifacts       ausschliesslich lokale/CI-Ausgaben
+
+Cross-Repository-Orchestrierung gehoert in die privaten Workspace-Werkzeuge.
+Das DevKit beschafft Toolchain und freigegebene Komponentenpakete und baut
+beziehungsweise installiert Hosttools. Es besitzt keine fachliche
+Komponentenquelle und keine Zugangsdaten im Repository.
+
+
+Generierte Plattformartefakte
+------------------------------
+
+`ApiContractGen` ist derzeit noch auf Monorepo-Pfade zu SDK, Kernel, Docs und
+Tests ausgerichtet. Beim Contract-Transfer wird er repo-neutral gemacht:
+
+- Schema und Baseline bleiben im Contract.
+- Repo-lokale generierte Zig-, C- und Kernel-ABI-Pakete werden im Contract
+  materialisiert und bytegenau geprueft.
+- Repo-lokale Plattformdokumentation und Conformance-Fixtures entstehen aus
+  demselben Schema.
+- SDK und Kernel konsumieren diese Pakete als explizite Versionseingabe.
+- Normale Builds laufen nur im Checkmodus und schreiben nichts.
+
+`R4LContractGen` bleibt dagegen im SDK generisch. Er materialisiert nur in der
+explizit uebergebenen Librarywurzel. LibraryContract, Baseline und alle daraus
+erzeugten Bindings bleiben Eigentum der jeweiligen Library.
+
+
+Bekannte Uebergangskanten
+-------------------------
+
+Im integrierten Referenzbaum existieren noch relative Workspace-Pfade:
+
+- eine Library verweist in `build.zig.zon` auf das benachbarte Kern-SDK;
+- Produktmanifeste verweisen auf Bindings benachbarter Libraries;
+- Desktop- und UpdateService-Hosttests kompilieren testweise den echten
+  R4STD-Provider und dessen Implementierungs-ABI.
+
+Diese Kanten werden nicht unveraendert in getrennte Repositories uebernommen.
+Der Workspace beziehungsweise die jeweilige Buildinvokation liefert
+Abhaengigkeiten explizit. Die direkte R4STD-Providerkante bleibt rein
+testseitig und kann spaeter in einen Integrationstest-Workspace wandern; sie
+wird nie in ein Produktartefakt gelinkt.
+
+
+Kanonischer Wechsel pro Komponente
+----------------------------------
+
+1. Kopie aus Commit 259cbfac erstellen und Herkunft beweisen.
+2. Nur die fuer die neue Repositorygrenze zwingende Entkopplung vornehmen.
+3. Generatorcheck, Einzelbuild und repositoryeigene Tests ausfuehren.
+4. Abnahme und neuen GitHub-Commit in der Workspace-Roadmap dokumentieren.
+5. Erst dann wird das neue Repository fuer diese Komponente kanonisch.
+6. Der alte Teilbaum bleibt unveraenderte historische Referenz bis zur
+   bestandenen Mehrrepo-Gesamtintegration.
+
+Es wird niemals dieselbe fachliche Aenderung parallel in beiden Baeumen
+gepflegt. Ein Fehlschlag laesst die alte Komponente kanonisch und wird im
+neuen Repository korrigiert oder verworfen, ohne den Referenzstand zu
+veraendern.
+

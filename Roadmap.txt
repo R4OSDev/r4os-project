@@ -9,10 +9,15 @@ mehrrepositoryfaehigen Plattform weiterentwickelt. Kernel, Contract, SDK,
 Libraries, auslieferbare Module und Systemdistribution besitzen eindeutige
 Verantwortungen, eigene Quell-Repositories und eigenstaendige Buildgrenzen.
 
-Das SDK bleibt die einzige Entwickleroberflaeche. Die API-/ABI-Wahrheit liegt
-allein im Contract; Kernel und Libraries implementieren sie, Anwendungen,
-Dienste, Treiber und Protokolle konsumieren sie. Ein lokales DevKit stellt die
-passenden Hostwerkzeuge bereit, ohne Quell-Repositories oder Buildartefakte zu
+Der zentrale Contract bleibt die einzige Wahrheit fuer die R4OS-Plattform-API
+und -ABI. Der Kernel implementiert die Plattformprovider und den generischen
+Modullader; das Kern-SDK bildet den Plattformvertrag fuer Entwickler ab.
+Optionale Runtime-R4Ls besitzen dagegen ihren fachlichen Contract, ihre
+Implementierung und ihre Sprachbindings selbst. Dadurch entsteht weder im
+zentralen Contract noch im Kern-SDK eine zweite Library-Wahrheit.
+
+Ein lokales DevKit stellt SDK, Toolchain, Bootloader, Emulator und gebaute
+Hostwerkzeuge bereit, ohne Quell-Repositories oder Buildartefakte zu
 vermischen.
 
 Zielstruktur
@@ -40,18 +45,23 @@ Die oeffentlichen R4OS-Repositories unter der GitHub-Organisation `R4OSDev`:
     in die Git-Historie aufgenommen.
 
 - `r4os-contract`
-  - Einzige Quelle fuer R4M0, R4LQuery, R4XStart, API-IDs, Typen, Layouts,
-    Fehlercodes und Versionsvertraege.
-  - Enthält `ApiContract.json`, den Contract-Generator, erzeugte Zig-/C-
-    Bindings, API-Dokumentation und Conformance-Fixtures.
-  - Enthält weder Kernelimplementierung, Libraryimplementierung noch
-    handgeschriebene SDK-Fassaden.
+  - Einzige Quelle fuer den R4OS-Plattformvertrag: R4M0, R4XStart, den
+    allgemeinen R4LQuery-/Runtime-R4L-Mechanismus, kernelimplementierte
+    API-Gruppen, gemeinsame ABI-Typen, Layouts, Fehlercodes und
+    Versionsregeln.
+  - Enthält Plattform-Schema, Contract-Pruefer beziehungsweise Generator,
+    Plattformdokumentation und Conformance-Fixtures.
+  - Enthält keine konkrete optionale Library-API und weder Kernel-, Library-
+    noch handgeschriebene SDK-Implementierung.
 
 - `r4os-sdk`
-  - Konsumiert eine feste Contract-Version und stellt die handgeschriebenen
-    R4OS-Fassaden, Buildprofile, Templates, C-Integration und SDK-Werkzeuge
-    bereit.
-  - Definiert keine eigene ABI- oder API-Wahrheit.
+  - Konsumiert eine feste Plattform-Contract-Version und stellt die
+    handgeschriebenen Plattformfassaden, Buildprofile, Templates,
+    C-Integration und generischen Modul-/Runtime-R4L-Helfer bereit.
+  - Definiert keine eigene ABI- oder API-Wahrheit und kennt keine feste Liste
+    optionaler Libraries.
+  - Library-spezifische Bindings werden von der jeweiligen Library als
+    zusaetzliche Entwicklungsabhaengigkeit bereitgestellt.
   - Bleibt hostneutral; hostabhaengige Binaries werden durch das DevKit
     bereitgestellt.
 
@@ -59,13 +69,22 @@ Die oeffentlichen R4OS-Repositories unter der GitHub-Organisation `R4OSDev`:
   - Enthält Kernel, Bootintegration, zwingend built-in Bestandteile und deren
     kernelnahe Tests.
   - Konsumiert Contract-Artefakte und stellt die kernelimplementierten
-    API-Provider bereit.
+    API-Provider sowie die generische Aufloesung benannter R4M0-/R4L-Exporte
+    bereit.
+  - Kennt keine fachlichen Typen, Funktionstabellen oder Namenslisten
+    optionaler Runtime-Libraries.
   - Enthält keinen SDK-, Library- oder normalen Modulquellbaum.
 
 - `r4os-libraries`
-  - Enthält die eigenstaendigen R4L-Provider und deren Tests.
-  - Jede R4L implementiert ausschliesslich ihre im Contract beschriebene
-    Tabelle; sie kopiert oder definiert keinen Contract selbst.
+  - Enthält zunaechst die offiziellen optionalen Runtime-R4Ls R4STD, R4IMG und
+    R4FONT.
+  - Jede Library bildet mit eigenem fachlichem Contract, Baseline,
+    Implementierung, generierten Zig-/C-Bindings, Fremdcode, Manifest und
+    Tests eine geschlossene Einheit.
+  - Eine normale Library-Aenderung bleibt innerhalb dieser Einheit; nur
+    Anwendungen, die eine neue oder inkompatible API nutzen, werden angepasst.
+  - Weitere externe Libraries koennen spaeter dasselbe Format in eigenen
+    Repositories verwenden.
   - Eine API-Gruppe, die technisch im Kernel implementiert bleibt, wird nicht
     kuenstlich als zweiter Provider dupliziert.
 
@@ -91,8 +110,473 @@ Gemeinsame Regeln:
 - Ein Contract- oder SDK-Upgrade darf betroffene Repositories ueber den
   Workspace gezielt vorbereiten, aber nie ungeprueft in geschuetzte
   `main`-Branches schreiben.
-- Die Reihenfolge einer API-Aenderung ist immer Contract, Provider, SDK,
+- Die Reihenfolge einer Plattform-API-Aenderung ist Contract, Provider, SDK,
   nutzende Komponenten, Distribution und Gesamtintegration.
+- Eine konkrete Runtime-R4L-API wird ausschliesslich in ihrer Library-Einheit
+  geaendert. Der zentrale Contract beschreibt nur den allgemeinen
+  Runtime-R4L-Mechanismus.
 - Der Aufbau beginnt ohne Lockdatei. Reproduzierbare Versionslocks und
   veroeffentlichte Paketfeeds folgen erst, wenn die erste echte
   Mehrrepo-Integration steht.
+
+Arbeitsstand bei der Unterbrechung
+---------------------------------
+
+Stand: 13.08.2026
+
+Der Multi-Repository-Umbau ist bewusst pausiert. Der aktive und kanonische
+R4OS-Quellbaum bleibt bis zur vollstaendigen Runtime-R4L-Abnahme:
+
+    D:\AI\Projects\Claude Code\R4OS
+
+Der neue Workspace unter `D:\R4OS` ist waehrenddessen nur Zielstruktur,
+Bootstrap und Ablage bereits vorbereiteter Repositories. Unfertige
+Zwischenstaende aus dem Altprojekt werden nicht parallel hierher gespiegelt.
+
+Bereits eingerichtet:
+
+- Privater Workspace `R4OSDev/r4os-project`
+  - Lokal: `D:\R4OS`
+  - Enthaelt nur Workspace-Dokumentation, Setup und GitHub-Verwaltung.
+  - `Repositories`, `Artifacts`, installierte Werkzeuge und Zugangsdaten sind
+    vom Projekt-Repository getrennt beziehungsweise ignoriert.
+- Oeffentliches DevKit `R4OSDev/r4os-devkit`
+  - Lokal: `D:\R4OS\DevKit`
+  - Versioniert Setup-Skripte und Metadaten, aber keine heruntergeladenen
+    Tool-Binaries und kein installiertes SDK.
+  - `Setup_Windows.bat` installiert derzeit Zig 0.16.0, Limine 12.0.1 und
+    QEMU 11.0.0 relativ innerhalb des DevKits und prueft die Downloads.
+- Oeffentlicher Contract-Snapshot `R4OSDev/r4os-contract`
+  - Lokal: `D:\R4OS\Repositories\Contract`
+  - Enthaelt die 11 Dateien des damaligen
+    `Code\System\SDK\Contract` bytegenau und unveraendert.
+  - Dieser Stand ist ein Vor-Umbau-Snapshot und ausdruecklich noch nicht der
+    spaetere finale Plattform-Contract.
+- `D:\R4OS\Repositories\SDK` existiert nur als leerer Platzhalter und ist
+  noch kein Git-Repository.
+- Kernel-, Libraries-, Distribution- und Modul-Repositories wurden noch nicht
+  lokal angelegt oder importiert.
+- `D:\R4OS\Tools\Github.bat` verwaltet derzeit ausschliesslich die Ziele
+  `-project`, `-devkit` und `-contract`. Weitere Ziele werden erst zusammen
+  mit dem jeweiligen echten Repository ergaenzt.
+- `D:\R4OS\Tools\Setup.bat` erzeugt die ignorierten Workspace-Ordner und bei
+  Bedarf die lokale Credentials-Vorlage. Zugangsdaten bleiben ausschliesslich
+  unter `D:\R4OS\Tools\Credentials` und werden nicht versioniert.
+
+Parallelprojekt Runtime-R4L
+---------------------------
+
+Der Umbau von R4STD, R4IMG und R4FONT zu echten unabhaengigen Runtime-R4Ls
+wird vollstaendig im kanonischen Altprojekt geplant und umgesetzt:
+
+    D:\AI\Projects\Claude Code\R4OS\Roadmap.txt
+
+Dort ist er als 0.64.1 bis 0.64.9 geplant. Diese Workspace-Roadmap wiederholt
+die Umsetzungsschritte bewusst nicht. Fuer die spaetere Wiederaufnahme sind
+nur Ergebnis und Uebergabevertrag relevant:
+
+- R4STD, R4IMG und R4FONT enthalten ihren echten Runtime-Code selbst.
+- Jede dieser Libraries besitzt lokalen fachlichen Contract, Baseline,
+  Bindings, Fremdcode und Tests.
+- Kernel, zentraler Contract und Kern-SDK kennen keine konkreten optionalen
+  Library-Namen, Gruppen-IDs oder fachlichen Tabellen.
+- Eine beliebig benannte neue Runtime-R4L kann ohne fachliche Aenderung an
+  Kernel, zentralem Contract oder Kern-SDK gebaut und verwendet werden.
+- Ein kompatibles Library-Update funktioniert mit einem unveraenderten
+  Anwendungs-Binary nach dem festgelegten sicheren Aktivierungspunkt.
+- Der integrierte Gesamtbuild und die relevanten System-, Contract-,
+  Consumer- und Negativtests sind gruen.
+
+Voraussetzungen fuer die Wiederaufnahme
+---------------------------------------
+
+Die Multi-Repository-Arbeit unter `D:\R4OS` wird erst fortgesetzt, wenn alle
+folgenden Bedingungen erfuellt sind:
+
+1. Die Runtime-R4L-Roadmap im Altprojekt ist vollstaendig erledigt und
+   aufgeraeumt beziehungsweise als Changelog archiviert.
+2. Der letzte kanonische Altprojekt-Commit ist eindeutig festgehalten und nach
+   dem normalen Altprojekt-Workflow gepusht.
+3. `Build.bat`, der relevante vollstaendige `Build.bat -test`-Pfad sowie die
+   eigenstaendigen Builds von R4STD, R4IMG und R4FONT sind reproduzierbar
+   gruen.
+4. Generator-Checks laufen schreibfrei; generierte Dateien und Baselines sind
+   aktuell und besitzen genau eine Quelle der Wahrheit.
+5. Contract, SDK, Kernel und jede Library besitzen klare Dateigrenzen ohne
+   feste relative Quellimporte in eine fremde spaetere Repositorywurzel.
+6. Es existiert keine temporaere doppelte produktive Libraryimplementierung
+   mehr im Kern-SDK oder in Anwendungen.
+7. Docs und Inventories des Altprojekts beschreiben den abgenommenen Stand.
+
+Bis dahin gilt:
+
+- `D:\AI\Projects\Claude Code\R4OS` ist die einzige Quellwahrheit.
+- `D:\R4OS\Repositories\Contract` wird nicht mit Teilstaenden ueberschrieben.
+- Im neuen Workspace beginnt keine parallele SDK-, Kernel- oder
+  Libraryimplementierung.
+
+Wiederaufnahme und Migrationsreihenfolge
+---------------------------------------
+
+Nach der Runtime-R4L-Abnahme werden neue Unterversionen fuer diese Roadmap
+festgelegt. Die fachliche Abhaengigkeitsreihenfolge ist bereits verbindlich:
+
+1. Abgenommenen Altprojektstand einfrieren
+   - Kanonischen Commit, Toolversionen und gruene Abnahmen dokumentieren.
+   - Eine Dateizuordnung fuer Contract, SDK, Kernel, Libraries, Distribution,
+     Module und Hosttools erstellen.
+   - Im Altprojekt noch nichts loeschen.
+
+2. Plattform-Contract final uebernehmen
+   - Den heutigen Vor-Umbau-Snapshot in `r4os-contract` durch den abgenommenen
+     generischen Plattform-Contract ersetzen.
+   - R4M0, R4XStart, R4LQuery, Runtime-R4L-Grundvertrag und die sechs
+     kernelimplementierten Plattformgruppen uebernehmen.
+   - Konkrete R4STD-, R4IMG- und R4FONT-Contracts bleiben bei den Libraries.
+   - Contract-Pruefer, Baseline, Fixtures und Dokumentation gemeinsam
+     abnehmen; den neuen Contract-Stand erst danach pushen.
+
+3. Kern-SDK als eigenes Repository aufbauen
+   - `r4os-sdk` anlegen und in `D:\R4OS\Repositories\SDK` initialisieren.
+   - Plattformbindings, handgeschriebene Plattformfassaden, generische
+     Runtime-R4L-Helfer, Templates, C-Integration und hostneutrale Buildlogik
+     uebernehmen.
+   - Keine konkrete Runtime-R4L-Implementierung oder Library-spezifische
+     Bindingwahrheit uebernehmen.
+   - SDK eigenstaendig gegen eine explizite Contract-Version bauen und testen.
+
+4. Kernel als eigenes Repository aufbauen
+   - `r4os-kernel` unter `D:\R4OS\Repositories\Kernel` anlegen.
+   - Kernel, Bootintegration, Linker-/Limine-Konfiguration, zwingende Built-ins
+     und kernelnahe Tests uebernehmen.
+   - Generierte beziehungsweise konsumierte Contract-Artefakte klar von
+     Kernelquellen trennen.
+   - Kernel eigenstaendig gegen Contract bauen; keine SDK-, Library- oder
+     Distributionsquelle importieren.
+
+5. Offizielle Runtime-Libraries uebernehmen
+   - `r4os-libraries` unter `D:\R4OS\Repositories\Libraries` anlegen.
+   - Die vollstaendig abgenommenen Einheiten R4STD, R4IMG und R4FONT inklusive
+     lokaler Contracts, Bindings, Fremdcode, Manifeste und Tests uebernehmen.
+   - Jede Library eigenstaendig gegen Contract und benoetigte
+     Plattformbindings bauen und testen.
+   - Beweisen, dass eine Library-Aenderung keine fachliche Datei in Contract,
+     Kernel oder Kern-SDK erzeugt oder veraendert.
+
+6. Build- und Hostwerkzeuge zuordnen
+   - Contract-spezifische Generatoren, allgemeine SDK-/R4MF-Buildlogik,
+     ModuleCatalog, Imagewerkzeuge und sonstige Hosttools nach fachlicher
+     Verantwortung aufteilen.
+   - Host-Binaries nicht in Quell-Repositories einchecken; das DevKit baut
+     beziehungsweise installiert sie unter `HostTools`.
+   - Kein Werkzeug darf fremde Repositorywurzeln ueber feste relative Pfade
+     voraussetzen.
+
+7. Distribution aufbauen
+   - `r4os-distribution` unter `D:\R4OS\Repositories\Distribution` anlegen.
+   - Injection, Imagekonfiguration, Releasezusammenstellung und
+     Integrationsabnahmen uebernehmen.
+   - Distribution konsumiert fertige Komponentenstaende; sie definiert keine
+     fachliche API und kompiliert keine Komponente heimlich neu.
+
+8. Module schrittweise auslagern
+   - R4X-Anwendungen und Dienste, R4D-Treiber sowie R4P-Protokolle nach
+     stabilen Gruppen und Abhaengigkeiten priorisieren.
+   - Jedes Modul bringt Manifest, Source, Ressourcen und modulnahe Tests mit
+     und baut eigenstaendig gegen SDK sowie benoetigte Library-Bindings.
+   - Modul-Repositories werden erst angelegt, wenn ihre Grenzen und ihr
+     eigenstaendiger Build im integrierten Referenzstand bewiesen sind.
+
+9. Mehrrepo-Gesamtintegration abnehmen
+   - DevKit beschafft beziehungsweise baut alle benoetigten Abhaengigkeiten.
+   - Distribution erzeugt aus expliziten Komponentenstaenden bootfaehige
+     Slim-, Full- und Test-Images.
+   - Gesamtbuild, QEMU-/headless Tests und relevante Hardwareabnahmen laufen
+     ohne Zugriff auf den alten Monorepo-Quellbaum.
+   - Erst danach wird das Altprojekt zum historischen Referenzstand und der
+     neue Multi-Repository-Workspace zur einzigen aktiven Quellwahrheit.
+
+Migrationsregeln
+----------------
+
+- Zuerst kopieren und abnehmen, erst nach erfolgreichem Mehrrepo-Gesamtbuild
+  den alten produktiven Pfad stilllegen. Kein voreiliges Verschieben oder
+  Loeschen aus dem Altprojekt.
+- Waehrend der Uebernahme ist fuer jede Komponente schriftlich festgelegt,
+  welcher Pfad kanonisch ist. Dieselbe fachliche Aenderung wird niemals in
+  zwei Quellbaeumen parallel gepflegt.
+- Jeder uebernommene Stand verweist auf den kanonischen Altprojekt-Commit, aus
+  dem er stammt. Bytegenaue beziehungsweise semantische Vergleiche sichern die
+  Uebernahme ab.
+- Ein Repository muss eigenstaendig baubar und testbar sein, bevor die naechste
+  davon abhaengige Schicht als migriert gilt.
+- Abhaengigkeiten werden ueber explizite Versionen beziehungsweise
+  Workspace-Eingaben uebergeben, nicht ueber Nachbarverzeichnisse.
+- `Github.bat` erhaelt einen neuen Targetblock erst dann, wenn lokaler Pfad,
+  GitHub-Name, Sichtbarkeit und Initialisierungsregel des Repositorys feststehen.
+- Source bleibt in `Repositories`, installierte Werkzeuge im `DevKit` und alle
+  lokalen oder CI-erzeugten Ausgaben in `Artifacts`.
+- Git-Submodule, eingecheckte QEMU-/Zig-/Limine-Binaries und Zugangsdaten sind
+  dauerhaft ausgeschlossen.
+
+Noch offene Entscheidungen bei der Wiederaufnahme
+-------------------------------------------------
+
+- Endgueltige Eigentumsgrenze fuer Contract-Generator, Library-Contract-
+  Generator, ModuleCatalog und weitere allgemeine BuildTools.
+- Welche generierten Contract-Artefakte als Releasepaket konsumiert und welche
+  kontrolliert im jeweiligen Verbraucherrepository materialisiert werden.
+- Genaue Reihenfolge und Granularitaet der `r4os-module-*`-Repositories.
+- Mechanismus, mit dem der Workspace mehrere Repositories gezielt auf einen
+  kompatiblen Contract-/SDK-Stand aktualisiert.
+- Reproduzierbare Komponentenlocks und Paketfeed; beides bewusst erst nach der
+  ersten funktionierenden Mehrrepo-Integration.
+- Weitere hostspezifische DevKit-Setups nach Windows.
+- Repository-Lizenzen und Drittanbieter-Lizenzzusammenstellung; wie vereinbart
+  erst am Ende der Strukturarbeit.
+
+Gesamtabnahme der Umstrukturierung
+---------------------------------
+
+Die Umstrukturierung gilt erst als abgeschlossen, wenn:
+
+- ein frischer privater Workspace-Clone mit `Tools\Setup.bat` vorbereitet
+  werden kann;
+- das DevKit auf dem jeweiligen Host Toolchain, Bootloader, Emulator, SDK und
+  Hosttools reproduzierbar bereitstellt;
+- Contract, SDK, Kernel, Libraries und Distribution jeweils eigenstaendig
+  bauen und ihre eigenen Tests bestehen;
+- eine neue Anwendung nur DevKit, SDK, Contract-Artefakte und ihre expliziten
+  Library-Abhaengigkeiten benoetigt;
+- eine neue optionale Runtime-R4L ohne Aenderung an Kernel, zentralem Contract
+  oder Kern-SDK entwickelt werden kann;
+- die Distribution aus expliziten, geprueften Komponentenstaenden ein
+  bootfaehiges und getestetes R4OS-Image erzeugt;
+- keine Komponente fachliche Quellen aus einer fremden Repositorywurzel ueber
+  einen festen relativen Pfad importiert;
+- keine zweite API-/ABI-Wahrheit, keine versteckte Fallbackimplementierung und
+  keine zentrale Liste optionaler Libraries existiert;
+- der alte Monorepo-Pfad fuer normale Builds und Tests nicht mehr benoetigt
+  wird.
+
+Der Runtime-R4L-Umbau ist mit Altprojekt-Commit `259cbfac` fachlich und mit
+Archivcommit `2c0ca047` organisatorisch abgeschlossen. Die Wiederaufnahme
+erfolgt am 15.08.2026 mit den nachstehenden Unterversionen.
+
+0.64.10
+Titel: Referenzstand einfrieren und Dateizuordnung festlegen
+Status: Erledigt
+
+Offene Punkte:
+- Keine.
+
+Erledigt:
+- Fachlichen Quellcommit `259cbfac` und organisatorischen Abschlusscommit
+  `2c0ca047` samt Zig-, Limine-, QEMU- und Git-Version eingefroren.
+- Gruene Host-, Generator-, Library- und QEMU-Abnahmen aus 0.64.9 dauerhaft
+  festgehalten.
+- Contract, SDK, Kernel, Libraries, Distribution, Module, Workspace und
+  DevKit genau einer Zielwurzel zugeordnet.
+- ApiContractGen dem Contract, R4LContractGen/R4XBuilder/ModuleCatalog dem SDK
+  und Image-/NTFS-/R4U-/Transportwerkzeuge der Distribution zugeordnet.
+- Regeln fuer repo-lokale generierte Plattformpakete, libraryeigene
+  Generatorausgaben, bekannte Testkanten und den kanonischen Wechsel pro
+  Komponente festgelegt.
+- Vollstaendige Uebergabe unter `Agents/SourceMap06410.txt` dokumentiert und
+  in `AGENTS.md` als verbindliche Migrationswahrheit verankert.
+
+Abnahme:
+- Die dokumentierten Git-Baumidentitaeten stimmen mit Commit `259cbfac`
+  ueberein.
+- Im Altprojekt wurde keine Quelle verschoben, geloescht oder veraendert.
+- Jede Quellklasse besitzt genau einen vorgesehenen Repositorybesitzer.
+
+Notizen:
+- Der fachliche 0.64.9-Commit ist `259cbfac`; `2c0ca047` fuegt nur das
+  archivierte Changelog hinzu.
+
+0.64.11
+Titel: Finalen Plattform-Contract als eigenstaendiges Repository uebernehmen
+Status: In Arbeit
+
+Offene Punkte:
+- Den alten Vor-Umbau-Snapshot durch den abgenommenen Plattformcontract
+  ersetzen.
+- ApiContractGen repo-neutral machen und seine generierten Plattformpakete,
+  Dokumentation und Conformance-Fixtures repo-lokal materialisieren.
+- R4M0, R4XStart, R4LQuery, R4LInterface und die sechs Plattformgruppen
+  vollstaendig pruefen.
+- Alle konkreten R4STD-, R4IMG- und R4FONT-Vertraege ausschliessen.
+- Contract einzeln bauen, Check-/Negativtests ausfuehren und erst danach nach
+  `R4OSDev/r4os-contract` pushen.
+
+Erledigt:
+- Noch nichts.
+
+Abnahme:
+- Das Contract-Repository baut und prueft sich ohne Altprojektpfad.
+- Ein Normalbuild schreibt keine versionierte Datei.
+- SDK- und Kernelpaket werden aus genau demselben Schema erzeugt.
+
+0.64.12
+Titel: Kern-SDK als hostneutrales Repository aufbauen
+Status: Geplant
+
+Offene Punkte:
+- Plattformfassaden, Buildprofile, C-Integration, Templates und generische
+  R4X-/R4L-Helfer uebernehmen.
+- R4LContractGen, R4XBuilder und ModuleCatalog repo-neutral integrieren.
+- Contract als explizite Abhaengigkeit konsumieren.
+- Caches, Buildausgaben, Toolchainbinaries und konkrete Librarywahrheiten
+  ausschliessen.
+- SDK-Einzelbuild, Zig-/C-Conformance und portable Beispielprojekte abnehmen.
+
+Erledigt:
+- Noch nichts.
+
+Abnahme:
+- Das SDK baut ohne Altprojekt und ohne feste Nachbarpfade.
+- Ein neues R4X- und ein neues Runtime-R4L-Projekt lassen sich nur mit SDK,
+  Contract und expliziten Librarybindings erzeugen und bauen.
+
+0.64.13
+Titel: Kernel und Bootgrenze als eigenstaendiges Repository aufbauen
+Status: Geplant
+
+Offene Punkte:
+- Kernel, Linker-/Limine-Konfiguration, zwingende Built-ins und kernelnahe
+  Tests uebernehmen.
+- Contract-Kernelpaket explizit konsumieren und handgeschriebene Provider
+  davon trennen.
+- SDK-, Library-, Modul- und Distributionsimporte ausschliessen.
+- Kernel einzeln bauen und Loader-/Runtime-R4L-Negativfaelle pruefen.
+
+Erledigt:
+- Noch nichts.
+
+Abnahme:
+- Kernelartefakt und Loadervertraege entstehen ohne Altprojektpfad.
+- Keine konkrete optionale Runtime-Library ist im Kernel benannt.
+
+0.64.14
+Titel: R4STD, R4IMG und R4FONT in r4os-libraries uebernehmen
+Status: Geplant
+
+Offene Punkte:
+- Die drei abgenommenen Libraryeinheiten bytegenau aus Commit `259cbfac`
+  uebernehmen.
+- SDK und Contract als explizite Buildabhaengigkeiten statt ueber feste
+  Nachbarpfade bereitstellen.
+- Einzelbuilds, Zig-/C-Conformance, echte Formatpfade und Consumer-Fixtures
+  ausfuehren.
+- Beweisen, dass Librarybuilds keine Datei in Contract, Kernel oder SDK
+  erzeugen oder veraendern.
+
+Erledigt:
+- Noch nichts.
+
+Abnahme:
+- R4STD, R4IMG und R4FONT bauen getrennt und gemeinsam ohne Altprojektpfad.
+- Eine neue beliebig benannte Runtime-R4L benoetigt keine Aenderung an
+  Contract, Kernel oder Kern-SDK.
+
+0.64.15
+Titel: Hostwerkzeuge und DevKit-Installation verbinden
+Status: Geplant
+
+Offene Punkte:
+- Hosttool-Quellen nach Contract, SDK und Distribution bauen.
+- DevKit-Setup um SDK, Contractpakete und gebaute HostTools erweitern.
+- Github.bat um die tatsaechlich angelegten Repositoryziele erweitern.
+- Sicherstellen, dass keine Binaries oder Zugangsdaten versioniert werden.
+
+Erledigt:
+- Noch nichts.
+
+Abnahme:
+- Ein frisches DevKit installiert alle benoetigten Werkzeuge ausschliesslich
+  innerhalb seiner Wurzel.
+
+0.64.16
+Titel: Distribution und reproduzierbare Imageintegration aufbauen
+Status: Geplant
+
+Offene Punkte:
+- Injection, Profile, Imagekonfiguration, Releasezusammenstellung und
+  Integrationsabnahmen uebernehmen.
+- Fertige Kernel-, Library- und Modulkomponenten explizit einspeisen.
+- Verstecktes Neubauen fachlicher Komponenten in der Distribution verbieten.
+
+Erledigt:
+- Noch nichts.
+
+Abnahme:
+- Slim-, Full- und Test-Imageplaene sind deterministisch und kollisionsfrei.
+
+0.64.17
+Titel: Je einen R4X-, R4D- und R4P-Piloten auslagern
+Status: Geplant
+
+Offene Punkte:
+- Drei repraesentative, nicht bootkritische Module auswaehlen.
+- Manifest, Source, Ressourcen und modulnahe Tests vollstaendig uebernehmen.
+- Eigenstaendige Builds gegen SDK, Contract und explizite Librarybindings
+  beweisen.
+
+Erledigt:
+- Noch nichts.
+
+Abnahme:
+- Alle drei Modularten bauen ohne Zugriff auf den Altprojektquellbaum.
+
+0.64.18
+Titel: Auslieferbare Module in geprueften Wellen auslagern
+Status: Geplant
+
+Offene Punkte:
+- Anwendungen, Dienste, Treiber und Protokolle nach Abhaengigkeiten gruppieren.
+- Pro Welle eigenstaendige Builds und Distributionsintegration abnehmen.
+- Bootkritische Komponenten zuletzt und nur mit funktionierendem Ersatzpfad
+  aus dem integrierten Baum loesen.
+
+Erledigt:
+- Noch nichts.
+
+Abnahme:
+- Jedes ausgelagerte Modul besitzt genau ein kanonisches Repository.
+
+0.64.19
+Titel: Vollstaendige Mehrrepo-Gesamtintegration abnehmen
+Status: Geplant
+
+Offene Punkte:
+- Alle expliziten Komponentenstaende im Workspace zusammenfuehren.
+- Gesamtbuild, QEMU-headless Test und relevante Hardwareabnahmen ohne
+  Altprojektpfad ausfuehren.
+- Generator-Schreibfreiheit, API-/ABI-Eindeutigkeit und fehlende
+  Doppelimplementierungen erneut pruefen.
+
+Erledigt:
+- Noch nichts.
+
+Abnahme:
+- Das neue Multi-Repository-System erzeugt allein ein bootfaehiges und
+  vollstaendig getestetes R4OS-Image.
+
+0.64.20
+Titel: Lizenzen, Repositoryhygiene und kanonischen Wechsel abschliessen
+Status: Geplant
+
+Offene Punkte:
+- Projekt- und Drittanbieterlizenzen je Repository vervollstaendigen.
+- README, Sichtbarkeit, Releases und öffentliche Repositoryhygiene pruefen.
+- Erst nach gruenem Mehrrepo-Gesamtlauf den neuen Workspace zur einzigen
+  aktiven Quellwahrheit erklaeren.
+- Altprojekt als unveraenderte historische Referenz kennzeichnen.
+
+Erledigt:
+- Noch nichts.
+
+Abnahme:
+- Kein normaler Build und kein Test benoetigt den alten Monorepo-Pfad.
+- Alle Repositories besitzen klare Lizenz- und Drittanbieterhinweise.
