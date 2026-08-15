@@ -397,26 +397,55 @@ Notizen:
 
 0.64.11
 Titel: Finalen Plattform-Contract als eigenstaendiges Repository uebernehmen
-Status: In Arbeit
+Status: Erledigt
 
 Offene Punkte:
-- Den alten Vor-Umbau-Snapshot durch den abgenommenen Plattformcontract
-  ersetzen.
-- ApiContractGen repo-neutral machen und seine generierten Plattformpakete,
-  Dokumentation und Conformance-Fixtures repo-lokal materialisieren.
-- R4M0, R4XStart, R4LQuery, R4LInterface und die sechs Plattformgruppen
-  vollstaendig pruefen.
-- Alle konkreten R4STD-, R4IMG- und R4FONT-Vertraege ausschliessen.
-- Contract einzeln bauen, Check-/Negativtests ausfuehren und erst danach nach
-  `R4OSDev/r4os-contract` pushen.
+- Keine.
 
 Erledigt:
-- Noch nichts.
+- Den Vor-Umbau-Snapshot durch die zwoelf finalen Contract-Dateien aus dem
+  fachlichen Altprojekt-Commit `259cbfac` ersetzt und die Herkunft mit
+  Git-Baum `1580c4d5` unter `PROVENANCE.txt` festgehalten.
+- Schema, Baseline, ABI-Wurzeln, Fixturepfade und Payloadbesitz auf die
+  eigenstaendige Repositorywurzel umgestellt; die bestaetigte Baseline heisst
+  `standalone-contract-0.64.11`.
+- ApiContractGen dem Contract uebergeben, alle Dateizugriffe auf alte
+  Monorepo-Pfade entfernt und einen schreibfreien Root-Build fuer Zig 0.16.0
+  eingerichtet.
+- SDK-Zig-, Kernel-Zig- und C-ABI, reine Exportpakete, sechs
+  Plattformidentitaeten, Zig-/C-Conformance, API-Inventar und generierte
+  Dokumentation gemeinsam unter `Generated/` materialisiert.
+- R4M0, R4XStart, R4LQuery, den generischen R4LInterface-Vertrag,
+  R4MF v2 und die sechs Plattformgruppen repo-neutral dokumentiert.
+- Konkrete Runtime-R4L-Namen und -Vertraege aus Schema, Baseline, Generator
+  und generierten Ausgaben ausgeschlossen; die fachlichen SDK-Fixtures werden
+  erst mit dem SDK in 0.64.12 uebernommen.
+- LF fuer alle bytegenau geprueften Code- und Markdownausgaben in
+  `.gitattributes` erzwungen.
+- Das Windows-DevKit-Setup auf eine portable .NET-Hashpruefung umgestellt,
+  erfolgreich frisch installiert und idempotent nachgeprueft.
+- DevKit-Commit `2905043` und finalen Contract-Commit `8b77325` nach GitHub
+  gepusht.
 
 Abnahme:
-- Das Contract-Repository baut und prueft sich ohne Altprojektpfad.
-- Ein Normalbuild schreibt keine versionierte Datei.
-- SDK- und Kernelpaket werden aus genau demselben Schema erzeugt.
+- `zig build`, `zig build check` und `zig build test` laufen mit
+  `D:/R4OS/DevKit/Toolchains/Zig/zig.exe` ohne Altprojektzugriff erfolgreich.
+- Der kanonische Schemahash ist
+  `31c22f3ea8cd3d20091fba9de2d8d26ed9930fb26eecccf6b032af0665f4cb68`;
+  geprueft werden 6 Gruppen, 293 Slots und 107 Payloadtypen.
+- 26/26 Generator-Negativmutationen werden erkannt; darunter eine zentral
+  eingetragene Runtime-R4L-Gruppe. Gueltige Append-only-Erweiterungen,
+  Canaries und Inventarauswahl werden akzeptiert.
+- SDK-, Kernel- und Conformance-Zig sowie die C-Conformance kompilieren; der
+  Normalbuild mit Check und Test veraendert keine Repositorydatei.
+- Die drei vollstaendigen SDK-/Kernel-/C-ABI-Hauptartefakte und alle sechs
+  Plattformidentitaeten sind byteidentisch zum abgenommenen 0.64.9-Stand.
+- Ein frischer GitHub-Clone mit Windows-Checkoutregeln bleibt auf LF, besteht
+  Check und Test und bleibt danach git-clean.
+
+Notizen:
+- `b5a0a50` ist der vollstaendige Transfercommit; `8b77325` ergaenzt die im
+  frischen Windows-Clone nachgewiesene LF-Festlegung.
 
 0.64.12
 Titel: Kern-SDK als hostneutrales Repository aufbauen
