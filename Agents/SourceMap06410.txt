@@ -297,6 +297,16 @@ Rollenuebergreifende Test-/None-Welle seit 0.64.18:
     Protocols/Example     -> r4os-protocol-example
     Protocols/Smoke       -> r4os-protocol-smoke
 
+Audio-Stack-Welle seit 0.64.18:
+
+    Driver/AC97           -> r4os-driver-ac97
+    Driver/HDA            -> r4os-driver-hda
+    Driver/OPL3           -> r4os-driver-opl3
+    Driver/SID            -> r4os-driver-sid
+    Protocols/AudioMidi   -> r4os-protocol-audiomidi
+    Protocols/AudioOpl3   -> r4os-protocol-audioopl3
+    Protocols/AudioSid    -> r4os-protocol-audiosid
+
 Alle genannten Einheiten stammen fachlich aus Commit `259cbfac`. Der
 SDK-Build loest ZIG_MODULE-Pfade ueber explizite Paketpfade auf; ein
 Libraryname wird nicht im Buildscript dupliziert. JSON bezieht auch seine
@@ -304,6 +314,11 @@ ABI-Testfassade aus der gepinnten SDK-Abhaengigkeit, FSDIAG seine
 DATE_V1-Bindung aus dem gepinnten Librarypaket. Relative Workspacepfade
 stehen nur als austauschbare Defaults in der jeweiligen `Settings.R4S`, nie
 als feste Quellkante in Buildscript oder Paketmanifest.
+
+Die vier Audio-Treiber und drei Audio-Protokolle der ersten Audio-Stack-Welle
+beziehen ausschliesslich das gepinnte zentrale SDK. Ihre sieben
+`IMAGE_SCOPE=full`-Artefakte werden ueber getrennte Artefaktwurzeln in den
+gemeinsamen Distributionsplan eingespeist.
 
 KlickifaxLive bezieht R4IMG, R4CfgDiag und StdDiag beziehen R4STD ueber den
 gepinnten Libraries-Commit. NetworkFacadeCDiag bleibt als echter C-Build mit
