@@ -1095,17 +1095,55 @@ Abnahme:
 
 0.64.19
 Titel: Vollstaendige Mehrrepo-Gesamtintegration abnehmen
-Status: Geplant
+Status: In Arbeit
 
 Offene Punkte:
-- Alle expliziten Komponentenstaende im Workspace zusammenfuehren.
-- Gesamtbuild, QEMU-headless Test und relevante Hardwareabnahmen ohne
-  Altprojektpfad ausfuehren.
+- QEMU-headless Test und relevante Hardwareabnahmen ohne Altprojektpfad
+  ausfuehren.
 - Generator-Schreibfreiheit, API-/ABI-Eindeutigkeit und fehlende
   Doppelimplementierungen erneut pruefen.
 
 Erledigt:
-- Noch nichts.
+- `Tools\Build.bat` ist der relative Windows-Einstieg fuer den gesamten
+  Workspace. Ohne Argumente bietet er ein interaktives Menue; direkte Modi
+  decken zentrale Repositories, Kernel, alle oder einzelne Komponenten,
+  Slim-/Full-/Test-Plaene, Image, Verify, QEMU, Gesamtbuild und `-gui` ab.
+- Der Orchestrator entdeckt 134 Komponenten dynamisch in den fuenf
+  Rollenwurzeln und ruft sequenziell deren eigene `Build.bat` auf. Er zieht
+  keine Repositories automatisch und zeigt die verwendeten lokalen Commits.
+- `ModuleCatalog workspace-image-plan` nimmt eine explizite
+  Manifest-Artefakt-Zuordnung entgegen. R4MF-Parsing, Profilwahl,
+  Zielkollisionen und Runtime-R4L-Abhaengigkeitsschluss bleiben beim
+  gemeinsamen SDK-Vertrag; der Root besitzt keinen zweiten Manifestparser.
+- Der Testprofilvertrag bindet weiterhin die 18 expliziten Full-Komponenten
+  ein, die von Test-Injection und Headless-Abnahmen benoetigt werden. Die 14
+  LoaderDiag-Fixtures und vier testfaehigen SDK-Smokeprojekte werden aus
+  ihren Repositorymanifesten ebenfalls aufgenommen.
+- Die Workspace-Map umfasst 163 eindeutige Manifeste. Slim, Full und Test
+  ergeben 41, 95 beziehungsweise 117 Komponenten; Kernel und Limine liegen
+  getrennt im gemeinsamen Plan.
+- Contract, SDK, R4STD, R4IMG, R4FONT und Kernel bauen ueber den neuen
+  Einstieg. Anschliessend bauten alle 134 Komponentenrepositories mit ihren
+  aktuellen lokalen SDK-/Contract-/Libraries-Forks ohne Fehler.
+- Der echte Full-Lauf erzeugte ueber Distribution einen kollisionsfreien
+  Plan mit 222 Eintraegen und 97 expliziten Planzeilen sowie ein bootfaehig
+  strukturiertes `disk.img` und `data.img`. `verify Full` meldete OK mit 233
+  Dateien und 76 Verzeichnissen auf dem NTFS-Systemvolume.
+- Der echte Test-Imagelauf erzeugte 251 Planeintraege aus 119 expliziten
+  Planzeilen. `verify Test` meldete OK mit 262 Dateien und 79 Verzeichnissen
+  auf dem NTFS-Systemvolume.
+- Image-Erzeugung, Verifikation und QEMU bleiben ausschliesslich im bereits
+  vorhandenen `Repositories\Distribution\Build.bat`. Der `-gui`-Pfad wurde
+  bis zur Delegation `image Full` gefolgt von `qemu Full` geprueft; bei der
+  automatischen Abnahme wurde kein sichtbares QEMU-Fenster geoeffnet.
+- Die `build.zig.zon`-Commits sind als zuletzt gepruefte
+  Standalone-Referenzstaende dokumentiert. Normale Modul-Buildstarter nutzen
+  mit `--fork` immer die aktuell gemappten lokalen Repositories; ein
+  inkompatibler aktueller Stand darf den Verbraucher sichtbar brechen.
+- SDK-Commit `1c6fb6d2f22e9f3d48a340f51da487a00520aeb6` stellt den
+  Mehrrepo-Imageplan bereit; Distribution-Commit
+  `53bf7c49ad4ee847c230b26db66ab5937554bf64` dokumentiert die alleinige
+  Eigentuemerschaft von Image-Erzeugung, Verifikation und QEMU.
 
 Abnahme:
 - Das neue Multi-Repository-System erzeugt allein ein bootfaehiges und

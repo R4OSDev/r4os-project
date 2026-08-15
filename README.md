@@ -18,5 +18,11 @@ lokale Credentials-Vorlage ausfuellen. Anschliessend mit
 `Setup\Setup_Windows.bat` starten. Push und Pull erfolgen ausschliesslich ueber
 `Tools\Github.bat`.
 
+Der gemeinsame Windows-Build startet mit `Tools\Build.bat`; ohne Argumente
+erscheint das Menue. `Tools\Build.bat -all` baut den gesamten Workspace und
+das Full-Image, `-gui` startet danach QEMU sichtbar und `-qemu` startet nur ein
+bereits vorhandenes Image. Image-Erzeugung und QEMU bleiben Eigentum von
+`Repositories\Distribution\Build.bat`.
+
 Komponentenquellen, installierte Werkzeuge, Buildartefakte und Zugangsdaten
 werden nicht in diesem Repository gespeichert.

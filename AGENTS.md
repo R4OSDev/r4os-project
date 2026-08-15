@@ -62,10 +62,18 @@ Das alte ist: D:\AI\Projects\Claude Code\R4OS
   beginnen am jeweiligen Modulrepository und duerfen durch absolute Pfade
   ersetzt werden. Fertige Pilotartefakte landen standardmaessig unter
   `D:\R4OS\Artifacts\Modules\<Name>\`.
-- Ein Modul pinnt SDK, Contract und nur seine tatsaechlich benoetigten
-  Librarybindings. `Sdk.addR4MFWithOptions` ersetzt die im Manifest
-  deklarierten ZIG_MODULE-Quellpfade in Manifestreihenfolge durch explizite
-  Paketpfade. Namen und Importvertrag bleiben allein in `module.R4MF`.
+- Jeder Modul-Buildstarter bindet die in seiner `Settings.R4S` gemappten
+  aktuellen lokalen Checkouts von SDK, Contract und den tatsaechlich
+  benoetigten Librarybindings mit Zig `--fork` ein. Eine inkompatible lokale
+  Aenderung darf den Verbraucherbuild sichtbar brechen und wird dann im
+  Verbraucher angepasst.
+- URL und Commit in `build.zig.zon` sind der zuletzt gepruefte
+  Standalone-Referenzstand, kein verpflichtender Workspace-Lock. Sie werden
+  nur zum Fallback, wenn jemand den verbindlichen Buildstarter umgeht und
+  direkt `zig build` ohne lokale Forks aufruft.
+- `Sdk.addR4MFWithOptions` ersetzt die im Manifest deklarierten
+  ZIG_MODULE-Quellpfade in Manifestreihenfolge durch explizite Paketpfade.
+  Namen und Importvertrag bleiben allein in `module.R4MF`.
 - Distributionspfade stehen in
   `D:\R4OS\Repositories\Distribution\Settings.R4S`. `Build.bat test` baut
   die sieben distributionseigenen Hosttools und prueft die deterministischen
@@ -86,6 +94,28 @@ Das alte ist: D:\AI\Projects\Claude Code\R4OS
   `Build.bat R4IMG test` oder `Build.bat R4FONT test` wird genau eine Einheit
   gebaut und getestet. Relative und absolute SDK-/Contract-Pfade sind
   erlaubt. Linux-/macOS-Laufzeittests sind fuer den 0.64-Umbau kein Gate.
+
+# Workspace-Build
+- Der verbindliche Mehrrepo-Einstieg unter Windows ist
+  `D:\R4OS\Tools\Build.bat`. Ohne Argumente zeigt er ein interaktives Menue.
+- `Build.bat -central`, `-kernel`, `-modules`, `-module Rolle\Name`,
+  `-plan Profil`, `-image Profil`, `-verify Profil`, `-qemu Profil`,
+  `-all Profil`, `-slim` und `-gui` sind die direkten Aufrufe. Profile sind
+  `Slim`, `Full` und `Test`.
+- Der Workspace-Build entdeckt Komponenten dynamisch in `Apps`, `Services`,
+  `Diagnostics`, `Drivers` und `Protocols` und ruft immer deren eigenes
+  `Build.bat` auf. Versionierte sowie nicht ignorierte modulnahe
+  Zusatzmanifeste wie LoaderDiag-Fixtures werden aus ihrem Eigentuerrepo
+  ebenfalls in den Profilplan aufgenommen; ignorierte Paketkopien nicht. Er
+  aktualisiert keine Git-Repositories automatisch und zeigt die verwendeten
+  lokalen zentralen Commitstaende vor dem Lauf an.
+- Der Root baut kein Image selbst. Er erzeugt aus `module.R4MF` und den
+  fertigen Artefakten nur die expliziten Plaene unter
+  `Artifacts\Distribution\Inputs` und delegiert `image`, `verify` und `qemu`
+  ausschliesslich an `Repositories\Distribution\Build.bat`.
+- `Build.bat -gui` baut den kompletten Full-Workspace, laesst Distribution
+  das Full-Image erzeugen und startet danach QEMU sichtbar. `Build.bat -qemu`
+  startet dagegen nur ein bereits vorhandenes Image.
 - Fuer Push und Pull ausschliesslich `D:\R4OS\Tools\Github.bat` verwenden.
   Ohne Argumente fragt es interaktiv erst nach `Push` oder `Pull` und danach
   nach `Project`, `DevKit`, `Contract`, `SDK`, `Libraries`, `Kernel`,
