@@ -12,6 +12,7 @@ if /I "%~1"=="-pull" set "R4OS_ACTION=PULL"
 set "R4OS_COMPONENT_NAME=%~3"
 set "R4OS_COMMIT_MESSAGE=%~3"
 if /I "%~2"=="-app" set "R4OS_COMMIT_MESSAGE=%~4"
+if /I "%~2"=="-service" set "R4OS_COMMIT_MESSAGE=%~4"
 if /I "%~2"=="-driver" set "R4OS_COMMIT_MESSAGE=%~4"
 if /I "%~2"=="-protocol" set "R4OS_COMMIT_MESSAGE=%~4"
 
@@ -45,8 +46,10 @@ echo   [7] Distribution
 echo   [8] Anwendung
 echo   [9] Treiber
 echo   [A] Protokoll
-choice /C 123456789A /N /M "Auswahl"
-if errorlevel 10 set "R4OS_INTERACTIVE_TARGET=-protocol"
+echo   [B] Dienst
+choice /C 123456789AB /N /M "Auswahl"
+if errorlevel 11 set "R4OS_INTERACTIVE_TARGET=-service"
+if errorlevel 10 if not defined R4OS_INTERACTIVE_TARGET set "R4OS_INTERACTIVE_TARGET=-protocol"
 if errorlevel 9 if not defined R4OS_INTERACTIVE_TARGET set "R4OS_INTERACTIVE_TARGET=-driver"
 if errorlevel 8 if not defined R4OS_INTERACTIVE_TARGET set "R4OS_INTERACTIVE_TARGET=-app"
 if errorlevel 7 if not defined R4OS_INTERACTIVE_TARGET set "R4OS_INTERACTIVE_TARGET=-distribution"
@@ -58,6 +61,7 @@ if errorlevel 2 if not defined R4OS_INTERACTIVE_TARGET set "R4OS_INTERACTIVE_TAR
 if errorlevel 1 if not defined R4OS_INTERACTIVE_TARGET set "R4OS_INTERACTIVE_TARGET=-project"
 
 if /I "%R4OS_INTERACTIVE_TARGET%"=="-app" goto interactive_component
+if /I "%R4OS_INTERACTIVE_TARGET%"=="-service" goto interactive_component
 if /I "%R4OS_INTERACTIVE_TARGET%"=="-driver" goto interactive_component
 if /I "%R4OS_INTERACTIVE_TARGET%"=="-protocol" goto interactive_component
 
@@ -85,6 +89,7 @@ if /I "%~1"=="-libraries" goto select_libraries
 if /I "%~1"=="-kernel" goto select_kernel
 if /I "%~1"=="-distribution" goto select_distribution
 if /I "%~1"=="-app" goto select_app
+if /I "%~1"=="-service" goto select_service
 if /I "%~1"=="-driver" goto select_driver
 if /I "%~1"=="-protocol" goto select_protocol
 exit /b 1
@@ -177,18 +182,28 @@ exit /b 0
 set "R4OS_COMPONENT_KIND=app"
 set "R4OS_COMPONENT_LABEL=Anwendung"
 set "R4OS_COMPONENT_DESCRIPTION=Independent R4OS application"
+set "R4OS_COMPONENT_DIRECTORY=Apps"
+goto select_component
+
+:select_service
+set "R4OS_COMPONENT_KIND=service"
+set "R4OS_COMPONENT_LABEL=Dienst"
+set "R4OS_COMPONENT_DESCRIPTION=Independent R4OS service"
+set "R4OS_COMPONENT_DIRECTORY=Services"
 goto select_component
 
 :select_driver
 set "R4OS_COMPONENT_KIND=driver"
 set "R4OS_COMPONENT_LABEL=Treiber"
 set "R4OS_COMPONENT_DESCRIPTION=Independent R4OS driver module"
+set "R4OS_COMPONENT_DIRECTORY=Drivers"
 goto select_component
 
 :select_protocol
 set "R4OS_COMPONENT_KIND=protocol"
 set "R4OS_COMPONENT_LABEL=Protokoll"
 set "R4OS_COMPONENT_DESCRIPTION=Independent R4OS protocol module"
+set "R4OS_COMPONENT_DIRECTORY=Protocols"
 goto select_component
 
 :select_component
@@ -206,7 +221,7 @@ if not defined R4OS_COMPONENT_SLUG (
 
 set "R4OS_REPOSITORY_KEY=%R4OS_COMPONENT_KIND%-%R4OS_COMPONENT_SLUG%"
 set "R4OS_REPOSITORY_LABEL=%R4OS_COMPONENT_LABEL% %R4OS_COMPONENT_NAME%"
-set "R4OS_REPOSITORY_ROOT=%R4OS_PROJECT_ROOT%\Repositories\Modules\%R4OS_COMPONENT_NAME%"
+set "R4OS_REPOSITORY_ROOT=%R4OS_PROJECT_ROOT%\Repositories\%R4OS_COMPONENT_DIRECTORY%\%R4OS_COMPONENT_NAME%"
 set "R4OS_REPOSITORY_NAME=r4os-%R4OS_COMPONENT_KIND%-%R4OS_COMPONENT_SLUG%"
 set "R4OS_REPOSITORY_REMOTE=https://github.com/%R4OS_GITHUB_ORGANIZATION%/%R4OS_REPOSITORY_NAME%.git"
 set "R4OS_REPOSITORY_DESCRIPTION=%R4OS_COMPONENT_DESCRIPTION% %R4OS_COMPONENT_NAME%."
@@ -444,6 +459,8 @@ echo   Github.bat -push -distribution ["Commit-Beschreibung"]
 echo   Github.bat -pull -distribution
 echo   Github.bat -push -app NAME ["Commit-Beschreibung"]
 echo   Github.bat -pull -app NAME
+echo   Github.bat -push -service NAME ["Commit-Beschreibung"]
+echo   Github.bat -pull -service NAME
 echo   Github.bat -push -driver NAME ["Commit-Beschreibung"]
 echo   Github.bat -pull -driver NAME
 echo   Github.bat -push -protocol NAME ["Commit-Beschreibung"]

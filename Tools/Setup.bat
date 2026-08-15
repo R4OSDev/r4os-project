@@ -59,13 +59,15 @@ if not exist "%R4OS_PROJECT_ROOT%\Repositories\" (
     echo Angelegt: Repositories
 )
 
-if not exist "%R4OS_PROJECT_ROOT%\Repositories\Modules\" (
-    mkdir "%R4OS_PROJECT_ROOT%\Repositories\Modules"
-    if errorlevel 1 (
-        echo FEHLER: Repositories\Modules konnte nicht erstellt werden.
-        endlocal & exit /b 1
+for %%D in (Apps Services Drivers Protocols) do (
+    if not exist "%R4OS_PROJECT_ROOT%\Repositories\%%D\" (
+        mkdir "%R4OS_PROJECT_ROOT%\Repositories\%%D"
+        if errorlevel 1 (
+            echo FEHLER: Repositories\%%D konnte nicht erstellt werden.
+            endlocal & exit /b 1
+        )
+        echo Angelegt: Repositories\%%D
     )
-    echo Angelegt: Repositories\Modules
 )
 
 if not exist "%R4OS_CREDENTIAL_DIR%\" (

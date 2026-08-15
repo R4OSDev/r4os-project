@@ -226,15 +226,15 @@ tatsaechlich importierten Librarybindings.
 Pilotzuordnung seit 0.64.17:
 
     Code/System/Software/Clock
-      -> Repositories/Modules/Clock
+      -> Repositories/Apps/Clock
       -> R4OSDev/r4os-app-clock
 
     Code/System/Driver/MIDI
-      -> Repositories/Modules/MIDI
+      -> Repositories/Drivers/MIDI
       -> R4OSDev/r4os-driver-midi
 
     Code/System/Protocols/Json
-      -> Repositories/Modules/JSON
+      -> Repositories/Protocols/JSON
       -> R4OSDev/r4os-protocol-json
 
 Alle drei Einheiten stammen fachlich aus Commit `259cbfac`. Der SDK-Build
@@ -243,6 +243,11 @@ nicht im Buildscript dupliziert. JSON bezieht auch seine ABI-Testfassade aus
 der gepinnten SDK-Abhaengigkeit. Relative Workspacepfade stehen nur als
 austauschbare Defaults in der jeweiligen `Settings.R4S`, nie als feste
 Quellkante in Buildscript oder Paketmanifest.
+
+Die Workspace-Ablage folgt derselben Rollenlogik wie die GitHub-Namen:
+`Repositories/Apps`, `Repositories/Services`, `Repositories/Drivers` und
+`Repositories/Protocols`. Einen generischen `Repositories/Modules`-Sammelpfad
+gibt es nicht.
 
 7. Workspace und DevKit
 

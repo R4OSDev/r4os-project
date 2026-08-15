@@ -763,6 +763,16 @@ Erledigt:
     `9441d8c7668ebdfce547a310e300faa0d5bd7ab8`
   - JSON: `R4OSDev/r4os-protocol-json`, Commit
     `ebb1dc7d8ed35d3224b71f0385828e4b259c0315`
+- Auch die lokale Ablage ist rollenbezogen: CLOCK liegt unter
+  `Repositories/Apps`, MIDI unter `Repositories/Drivers` und JSON unter
+  `Repositories/Protocols`. `Repositories/Services` ist fuer die erste
+  Dienstwelle vorbereitet; der generische `Repositories/Modules`-Pfad wurde
+  entfernt.
+- Die gemeinsamen Rollen-Mappings wurden gruen getestet und separat
+  gesichert: SDK `9d965bd252c8cdf532f941fa44a881f273f01cee`,
+  Libraries `23e5e1315977d208a191c13329bdca552cf28346` und Distribution
+  `15758d658baef3c01f457b4d47ce9021686ca00b`. Die SDK-Strukturdokumentation
+  folgte in `00e28159b4dd87a26f383271883b408b9deed733`.
 
 Abnahme:
 - `Clock\Build.bat` erzeugt CLOCK.R4X mit sechs Imports und expliziter
