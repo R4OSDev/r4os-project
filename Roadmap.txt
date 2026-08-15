@@ -124,15 +124,17 @@ Aktueller Arbeitsstand
 
 Stand: 15.08.2026
 
-Der Runtime-R4L-Umbau im Altprojekt ist vollstaendig abgenommen. Der aktive
-und kanonische R4OS-Quellbaum bleibt waehrend der kontrollierten
-Repository-Uebernahme:
+Der Runtime-R4L-Umbau im Altprojekt ist vollstaendig abgenommen. Fuer noch
+nicht migrierte Komponenten und die spaetere Gesamtintegration bleibt der
+eingefrorene kanonische Referenzbaum:
 
     D:\AI\Projects\Claude Code\R4OS
 
 Der neue Workspace unter `D:\R4OS` ist Zielstruktur, Bootstrap und Ablage
-bereits einzeln abgenommener Repositories. Unfertige Zwischenstaende aus dem
-Altprojekt werden nicht zu einer zweiten kanonischen Wahrheit.
+bereits einzeln abgenommener Repositories. Contract, SDK, Libraries und
+Kernel sind nach ihrer jeweiligen Einzelabnahme dort kanonisch; Distribution
+und Module bleiben bis zu ihrer eigenen Abnahme im eingefrorenen Altprojekt.
+Unfertige Zwischenstaende werden nicht zu einer zweiten Quellwahrheit.
 
 Bereits eingerichtet:
 
@@ -150,29 +152,38 @@ Bereits eingerichtet:
 - Oeffentlicher Plattform-Contract `R4OSDev/r4os-contract`
   - Lokal: `D:\R4OS\Repositories\Contract`
   - Ist seit 0.64.11 repo-neutral, eigenstaendig baubar und abgenommen.
-  - Finaler uebernommener Stand: Commit `8b77325`.
-- Die oeffentlichen GitHub-Repositories `R4OSDev/r4os-sdk` und
-  `R4OSDev/r4os-libraries` sind angelegt, enthalten aber noch keinen
-  abgenommenen Quellstand.
-- Kernel-, Distribution- und Modul-Repositories wurden noch nicht lokal
-  angelegt oder importiert.
+  - Aktueller abgenommener Stand: Commit `5521df0`.
+- Oeffentliches Kern-SDK `R4OSDev/r4os-sdk`
+  - Lokal: `D:\R4OS\Repositories\SDK`
+  - Ist seit 0.64.12 hostneutral, eigenstaendig baubar und abgenommen.
+  - Aktueller abgenommener Stand: Commit `210372f`.
+- Oeffentliche Runtime-Libraries `R4OSDev/r4os-libraries`
+  - Lokal: `D:\R4OS\Repositories\Libraries`
+  - R4STD, R4IMG und R4FONT sind seit 0.64.13 unabhaengige, einzeln und
+    gemeinsam baubare Einheiten.
+  - Aktueller abgenommener Stand: Commit `b1b02b0`.
+- Oeffentlicher Kernel `R4OSDev/r4os-kernel`
+  - Lokal: `D:\R4OS\Repositories\Kernel`
+  - Ist seit 0.64.14 eigenstaendig gegen den Contract baubar und abgenommen.
+  - Aktueller abgenommener Stand: Commit `48d802d`.
+- Distribution- und Modul-Repositories wurden noch nicht importiert.
 - `D:\R4OS\Tools\Github.bat` verwaltet die Ziele `-project`, `-devkit`,
-  `-contract`, `-sdk` und `-libraries`.
+  `-contract`, `-sdk`, `-libraries` und `-kernel`.
 - `D:\R4OS\Tools\Setup.bat` erzeugt die ignorierten Workspace-Ordner und bei
   Bedarf die lokale Credentials-Vorlage. Zugangsdaten bleiben ausschliesslich
   unter `D:\R4OS\Tools\Credentials` und werden nicht versioniert.
 
-Parallelprojekt Runtime-R4L
----------------------------
+Abgeschlossenes Parallelprojekt Runtime-R4L
+--------------------------------------------
 
 Der Umbau von R4STD, R4IMG und R4FONT zu echten unabhaengigen Runtime-R4Ls
-wird vollstaendig im kanonischen Altprojekt geplant und umgesetzt:
+wurde vollstaendig im damaligen kanonischen Altprojekt geplant und umgesetzt:
 
     D:\AI\Projects\Claude Code\R4OS\Roadmap.txt
 
-Dort ist er als 0.64.1 bis 0.64.9 geplant. Diese Workspace-Roadmap wiederholt
-die Umsetzungsschritte bewusst nicht. Fuer die spaetere Wiederaufnahme sind
-nur Ergebnis und Uebergabevertrag relevant:
+Dort wurde er als 0.64.1 bis 0.64.9 abgeschlossen. Diese Workspace-Roadmap
+wiederholt die Umsetzungsschritte bewusst nicht. Fuer die weitere Migration
+sind nur Ergebnis und Uebergabevertrag relevant:
 
 - R4STD, R4IMG und R4FONT enthalten ihren echten Runtime-Code selbst.
 - Jede dieser Libraries besitzt lokalen fachlichen Contract, Baseline,
@@ -549,22 +560,52 @@ Notizen:
 
 0.64.14
 Titel: Kernel und Bootgrenze als eigenstaendiges Repository aufbauen
-Status: Geplant
+Status: Erledigt
 
 Offene Punkte:
-- Kernel, Linker-/Limine-Konfiguration, zwingende Built-ins und kernelnahe
-  Tests uebernehmen.
-- Contract-Kernelpaket explizit konsumieren und handgeschriebene Provider
-  davon trennen.
-- SDK-, Library-, Modul- und Distributionsimporte ausschliessen.
-- Kernel einzeln bauen und Loader-/Runtime-R4L-Negativfaelle pruefen.
+- Keine.
 
 Erledigt:
-- Noch nichts.
+- Das oeffentliche GitHub-Ziel `R4OSDev/r4os-kernel` ist angelegt und der
+  abgenommene Rootcommit `48d802d` auf `main` gepusht.
+- `Tools/Github.bat` und die Workspace-Anleitung verwalten den Kernel unter
+  `D:\R4OS\Repositories\Kernel` mit dem Zielschalter `-kernel`.
+- Alle 185 Dateien aus `Code/Kernel` wurden vor der Grenzanpassung gegen ihre
+  Git-Blobs aus `259cbfac` geprueft. Linker, Limine-Konfiguration und die
+  zwingenden Built-ins sind im Kernelrepository enthalten.
+- Die fuenf beim Referenzbuild benoetigten allokationsfreien Helfer fuer NTFS,
+  Update-Recovery, Upload-Publish-Claims und Registry liegen als bytegleiche
+  kernel-eigene Supportquellen innerhalb der neuen Grenze. Es besteht kein
+  SDK-Quellimport mehr.
+- Der alte Root-Build samt Modul-Aggregat wurde durch einen reinen
+  ReleaseSafe-Kernelbuild ersetzt. `Settings.R4S`, `Build.bat` und `Build.sh`
+  mappen Contract, DevKit und Zig relativ oder absolut.
+- `build.zig.zon` pinnt Contract-Commit `5521df0` samt Inhaltshash. Die
+  generierte Kernel-ABI wird direkt aus dessen Contract-Paket konsumiert;
+  `program/r4x_api.zig` bleibt die handgeschriebene Providerfassade und die
+  alte lokale Datei `r4x_api_generated.zig` ist entfernt.
+- Sechzehn kernelnahe Hosttestwurzeln, zwei Compile-Fail-Providerfixtures und
+  produktionsnahe Loader-/Runtime-R4L-Negativtests sind in `Build.bat test`
+  zusammengefuehrt.
+- Quell- und Konfigurationsaudit finden weder SDK-, Library-, Modul- oder
+  Distributionsimporte noch konkrete optionale Runtime-Librarynamen.
 
 Abnahme:
-- Kernelartefakt und Loadervertraege entstehen ohne Altprojektpfad.
-- Keine konkrete optionale Runtime-Library ist im Kernel benannt.
+- Der normale Installbuild und `-Dcom1-debug=false` bauen erfolgreich mit Zig
+  0.16.0. `Build.bat test` besteht 39 von 39 Schritten und 68 von 68 Tests.
+- Ein frischer isolierter Windows-Workspace mit eigenen Kernel- und
+  Contract-Clones besteht Test und Installbuild mit unveraenderten relativen
+  Settings; beide Repositories bleiben danach git-clean.
+- Das neue `r4os.elf` ist mit 19.100.696 Bytes und SHA-256
+  `6CFB8629E2C0AC25EDD1837A99F73671CDB8BA20718FE4CFE4F3E29F6B1E05AB`
+  byteidentisch zum eingefrorenen Referenzartefakt. `KERNEL_VERSION` bleibt
+  deshalb unveraendert.
+- Kernelartefakt und Loadervertraege entstehen ohne Zugriff auf den
+  Altprojektpfad; keine konkrete optionale Runtime-Library ist benannt.
+
+Notizen:
+- Linux- und macOS-Laufzeittests wurden wie fuer diese Umbauphase vereinbart
+  nicht ausgefuehrt. Der Shell-Starter bleibt hostneutral versioniert.
 
 0.64.15
 Titel: Hostwerkzeuge und DevKit-Installation verbinden

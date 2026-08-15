@@ -34,8 +34,10 @@ echo   [2] DevKit
 echo   [3] Contract
 echo   [4] SDK
 echo   [5] Libraries
-choice /C 12345 /N /M "Auswahl"
-if errorlevel 5 set "R4OS_INTERACTIVE_TARGET=-libraries"
+echo   [6] Kernel
+choice /C 123456 /N /M "Auswahl"
+if errorlevel 6 set "R4OS_INTERACTIVE_TARGET=-kernel"
+if errorlevel 5 if not defined R4OS_INTERACTIVE_TARGET set "R4OS_INTERACTIVE_TARGET=-libraries"
 if errorlevel 4 if not defined R4OS_INTERACTIVE_TARGET set "R4OS_INTERACTIVE_TARGET=-sdk"
 if errorlevel 3 if not defined R4OS_INTERACTIVE_TARGET set "R4OS_INTERACTIVE_TARGET=-contract"
 if errorlevel 2 if not defined R4OS_INTERACTIVE_TARGET set "R4OS_INTERACTIVE_TARGET=-devkit"
@@ -51,6 +53,7 @@ if /I "%~1"=="-devkit" goto select_devkit
 if /I "%~1"=="-contract" goto select_contract
 if /I "%~1"=="-sdk" goto select_sdk
 if /I "%~1"=="-libraries" goto select_libraries
+if /I "%~1"=="-kernel" goto select_kernel
 exit /b 1
 
 :select_project
@@ -111,6 +114,18 @@ set "R4OS_REPOSITORY_DESCRIPTION=Official independent runtime libraries for R4OS
 set "R4OS_REPOSITORY_PRIVATE=false"
 set "R4OS_REPOSITORY_ALLOW_INIT=1"
 set "R4OS_DEFAULT_COMMIT_MESSAGE=Library-Stand sichern"
+exit /b 0
+
+:select_kernel
+set "R4OS_REPOSITORY_KEY=kernel"
+set "R4OS_REPOSITORY_LABEL=Kernel"
+set "R4OS_REPOSITORY_ROOT=%R4OS_PROJECT_ROOT%\Repositories\Kernel"
+set "R4OS_REPOSITORY_NAME=r4os-kernel"
+set "R4OS_REPOSITORY_REMOTE=https://github.com/%R4OS_GITHUB_ORGANIZATION%/r4os-kernel.git"
+set "R4OS_REPOSITORY_DESCRIPTION=R4OS kernel, boot integration and kernel-owned tests."
+set "R4OS_REPOSITORY_PRIVATE=false"
+set "R4OS_REPOSITORY_ALLOW_INIT=1"
+set "R4OS_DEFAULT_COMMIT_MESSAGE=Kernel-Stand sichern"
 exit /b 0
 
 :pull
@@ -337,6 +352,8 @@ echo   Github.bat -push -sdk ["Commit-Beschreibung"]
 echo   Github.bat -pull -sdk
 echo   Github.bat -push -libraries ["Commit-Beschreibung"]
 echo   Github.bat -pull -libraries
+echo   Github.bat -push -kernel ["Commit-Beschreibung"]
+echo   Github.bat -pull -kernel
 endlocal & exit /b 1
 
 :failure
