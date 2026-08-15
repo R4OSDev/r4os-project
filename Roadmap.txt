@@ -119,19 +119,20 @@ Gemeinsame Regeln:
   veroeffentlichte Paketfeeds folgen erst, wenn die erste echte
   Mehrrepo-Integration steht.
 
-Arbeitsstand bei der Unterbrechung
----------------------------------
+Aktueller Arbeitsstand
+----------------------
 
-Stand: 13.08.2026
+Stand: 15.08.2026
 
-Der Multi-Repository-Umbau ist bewusst pausiert. Der aktive und kanonische
-R4OS-Quellbaum bleibt bis zur vollstaendigen Runtime-R4L-Abnahme:
+Der Runtime-R4L-Umbau im Altprojekt ist vollstaendig abgenommen. Der aktive
+und kanonische R4OS-Quellbaum bleibt waehrend der kontrollierten
+Repository-Uebernahme:
 
     D:\AI\Projects\Claude Code\R4OS
 
-Der neue Workspace unter `D:\R4OS` ist waehrenddessen nur Zielstruktur,
-Bootstrap und Ablage bereits vorbereiteter Repositories. Unfertige
-Zwischenstaende aus dem Altprojekt werden nicht parallel hierher gespiegelt.
+Der neue Workspace unter `D:\R4OS` ist Zielstruktur, Bootstrap und Ablage
+bereits einzeln abgenommener Repositories. Unfertige Zwischenstaende aus dem
+Altprojekt werden nicht zu einer zweiten kanonischen Wahrheit.
 
 Bereits eingerichtet:
 
@@ -146,19 +147,17 @@ Bereits eingerichtet:
     Tool-Binaries und kein installiertes SDK.
   - `Setup_Windows.bat` installiert derzeit Zig 0.16.0, Limine 12.0.1 und
     QEMU 11.0.0 relativ innerhalb des DevKits und prueft die Downloads.
-- Oeffentlicher Contract-Snapshot `R4OSDev/r4os-contract`
+- Oeffentlicher Plattform-Contract `R4OSDev/r4os-contract`
   - Lokal: `D:\R4OS\Repositories\Contract`
-  - Enthaelt die 11 Dateien des damaligen
-    `Code\System\SDK\Contract` bytegenau und unveraendert.
-  - Dieser Stand ist ein Vor-Umbau-Snapshot und ausdruecklich noch nicht der
-    spaetere finale Plattform-Contract.
-- `D:\R4OS\Repositories\SDK` existiert nur als leerer Platzhalter und ist
-  noch kein Git-Repository.
-- Kernel-, Libraries-, Distribution- und Modul-Repositories wurden noch nicht
-  lokal angelegt oder importiert.
-- `D:\R4OS\Tools\Github.bat` verwaltet derzeit ausschliesslich die Ziele
-  `-project`, `-devkit` und `-contract`. Weitere Ziele werden erst zusammen
-  mit dem jeweiligen echten Repository ergaenzt.
+  - Ist seit 0.64.11 repo-neutral, eigenstaendig baubar und abgenommen.
+  - Finaler uebernommener Stand: Commit `8b77325`.
+- Die oeffentlichen GitHub-Repositories `R4OSDev/r4os-sdk` und
+  `R4OSDev/r4os-libraries` sind angelegt, enthalten aber noch keinen
+  abgenommenen Quellstand.
+- Kernel-, Distribution- und Modul-Repositories wurden noch nicht lokal
+  angelegt oder importiert.
+- `D:\R4OS\Tools\Github.bat` verwaltet die Ziele `-project`, `-devkit`,
+  `-contract`, `-sdk` und `-libraries`.
 - `D:\R4OS\Tools\Setup.bat` erzeugt die ignorierten Workspace-Ordner und bei
   Bedarf die lokale Credentials-Vorlage. Zugangsdaten bleiben ausschliesslich
   unter `D:\R4OS\Tools\Credentials` und werden nicht versioniert.
@@ -449,7 +448,7 @@ Notizen:
 
 0.64.12
 Titel: Kern-SDK als hostneutrales Repository aufbauen
-Status: Geplant
+Status: In Arbeit
 
 Offene Punkte:
 - Plattformfassaden, Buildprofile, C-Integration, Templates und generische
@@ -461,7 +460,8 @@ Offene Punkte:
 - SDK-Einzelbuild, Zig-/C-Conformance und portable Beispielprojekte abnehmen.
 
 Erledigt:
-- Noch nichts.
+- Das oeffentliche Zielrepository `R4OSDev/r4os-sdk` ist angelegt.
+- Workspace-Workflow und Dokumentation kennen das Ziel `-sdk`.
 
 Abnahme:
 - Das SDK baut ohne Altprojekt und ohne feste Nachbarpfade.
@@ -469,6 +469,29 @@ Abnahme:
   Contract und expliziten Librarybindings erzeugen und bauen.
 
 0.64.13
+Titel: R4STD, R4IMG und R4FONT in r4os-libraries uebernehmen
+Status: Geplant
+
+Offene Punkte:
+- Die drei abgenommenen Libraryeinheiten bytegenau aus Commit `259cbfac`
+  uebernehmen.
+- SDK und Contract als explizite Buildabhaengigkeiten statt ueber feste
+  Nachbarpfade bereitstellen.
+- Einzelbuilds, Zig-/C-Conformance, echte Formatpfade und Consumer-Fixtures
+  ausfuehren.
+- Beweisen, dass Librarybuilds keine Datei in Contract, Kernel oder SDK
+  erzeugen oder veraendern.
+
+Erledigt:
+- Das oeffentliche Zielrepository `R4OSDev/r4os-libraries` ist angelegt.
+- Workspace-Workflow und Dokumentation kennen das Ziel `-libraries`.
+
+Abnahme:
+- R4STD, R4IMG und R4FONT bauen getrennt und gemeinsam ohne Altprojektpfad.
+- Eine neue beliebig benannte Runtime-R4L benoetigt keine Aenderung an
+  Contract, Kernel oder Kern-SDK.
+
+0.64.14
 Titel: Kernel und Bootgrenze als eigenstaendiges Repository aufbauen
 Status: Geplant
 
@@ -487,28 +510,6 @@ Abnahme:
 - Kernelartefakt und Loadervertraege entstehen ohne Altprojektpfad.
 - Keine konkrete optionale Runtime-Library ist im Kernel benannt.
 
-0.64.14
-Titel: R4STD, R4IMG und R4FONT in r4os-libraries uebernehmen
-Status: Geplant
-
-Offene Punkte:
-- Die drei abgenommenen Libraryeinheiten bytegenau aus Commit `259cbfac`
-  uebernehmen.
-- SDK und Contract als explizite Buildabhaengigkeiten statt ueber feste
-  Nachbarpfade bereitstellen.
-- Einzelbuilds, Zig-/C-Conformance, echte Formatpfade und Consumer-Fixtures
-  ausfuehren.
-- Beweisen, dass Librarybuilds keine Datei in Contract, Kernel oder SDK
-  erzeugen oder veraendern.
-
-Erledigt:
-- Noch nichts.
-
-Abnahme:
-- R4STD, R4IMG und R4FONT bauen getrennt und gemeinsam ohne Altprojektpfad.
-- Eine neue beliebig benannte Runtime-R4L benoetigt keine Aenderung an
-  Contract, Kernel oder Kern-SDK.
-
 0.64.15
 Titel: Hostwerkzeuge und DevKit-Installation verbinden
 Status: Geplant
@@ -516,7 +517,6 @@ Status: Geplant
 Offene Punkte:
 - Hosttool-Quellen nach Contract, SDK und Distribution bauen.
 - DevKit-Setup um SDK, Contractpakete und gebaute HostTools erweitern.
-- Github.bat um die tatsaechlich angelegten Repositoryziele erweitern.
 - Sicherstellen, dass keine Binaries oder Zugangsdaten versioniert werden.
 
 Erledigt:

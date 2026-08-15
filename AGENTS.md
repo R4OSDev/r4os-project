@@ -28,9 +28,14 @@ Das alte ist: D:\AI\Projects\Claude Code\R4OS
 - Der kanonische API-/ABI-Vertrag liegt unter
   `D:\R4OS\Repositories\Contract\` und wird als `R4OSDev/r4os-contract` auf
   dem Branch `main` verwaltet.
+- Das hostneutrale SDK liegt unter `D:\R4OS\Repositories\SDK\` und wird als
+  `R4OSDev/r4os-sdk` auf dem Branch `main` verwaltet.
+- Die offiziellen unabhaengigen Runtime-Libraries liegen unter
+  `D:\R4OS\Repositories\Libraries\` und werden als
+  `R4OSDev/r4os-libraries` auf dem Branch `main` verwaltet.
 - Fuer Push und Pull ausschliesslich `D:\R4OS\Tools\Github.bat` verwenden.
   Ohne Argumente fragt es interaktiv erst nach `Push` oder `Pull` und danach
-  nach `Project`, `DevKit` oder `Contract`.
+  nach `Project`, `DevKit`, `Contract`, `SDK` oder `Libraries`.
 - Nach einem frischen Clone zuerst `D:\R4OS\Tools\Setup.bat` ausfuehren.
   Es erzeugt die ignorierten Workspace-Ordner `Artifacts`, `DevKit` und
   `Repositories` sowie bei Bedarf die lokale GitHub-Credentials-Vorlage.
@@ -41,6 +46,10 @@ Das alte ist: D:\AI\Projects\Claude Code\R4OS
   - `Github.bat -pull -devkit`
   - `Github.bat -push -contract ["Commit-Beschreibung"]`
   - `Github.bat -pull -contract`
+  - `Github.bat -push -sdk ["Commit-Beschreibung"]`
+  - `Github.bat -pull -sdk`
+  - `Github.bat -push -libraries ["Commit-Beschreibung"]`
+  - `Github.bat -pull -libraries`
 - Ein Push staged nach der `.gitignore` des gewaehlten Repositorys, erstellt
   bei Aenderungen einen Commit und pusht `main`. Ein Pull verwendet
   ausschliesslich `git pull --ff-only`. Beim ersten Push eines neuen Ziels

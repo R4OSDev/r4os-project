@@ -238,15 +238,16 @@ Komponentenquelle und keine Zugangsdaten im Repository.
 Generierte Plattformartefakte
 ------------------------------
 
-`ApiContractGen` ist derzeit noch auf Monorepo-Pfade zu SDK, Kernel, Docs und
-Tests ausgerichtet. Beim Contract-Transfer wird er repo-neutral gemacht:
+`ApiContractGen` wurde mit dem Contract-Transfer in 0.64.11 repo-neutral
+gemacht. Der abgenommene Stand liegt im Contract-Commit `8b77325`:
 
 - Schema und Baseline bleiben im Contract.
 - Repo-lokale generierte Zig-, C- und Kernel-ABI-Pakete werden im Contract
   materialisiert und bytegenau geprueft.
 - Repo-lokale Plattformdokumentation und Conformance-Fixtures entstehen aus
   demselben Schema.
-- SDK und Kernel konsumieren diese Pakete als explizite Versionseingabe.
+- SDK und Kernel konsumieren diese Pakete als explizite Versionseingabe;
+  diese Anbindung erfolgt bei der jeweiligen Repository-Uebernahme.
 - Normale Builds laufen nur im Checkmodus und schreiben nichts.
 
 `R4LContractGen` bleibt dagegen im SDK generisch. Er materialisiert nur in der
@@ -286,4 +287,3 @@ Es wird niemals dieselbe fachliche Aenderung parallel in beiden Baeumen
 gepflegt. Ein Fehlschlag laesst die alte Komponente kanonisch und wird im
 neuen Repository korrigiert oder verworfen, ohne den Referenzstand zu
 veraendern.
-
