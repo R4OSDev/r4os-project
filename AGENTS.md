@@ -11,6 +11,14 @@ Aktuell strukturieren wir alles um.
 Das neue und aktuelle R4OS Projekt-Verzeichnis ist D:\R4OS\
 Das alte ist: D:\AI\Projects\Claude Code\R4OS
 
+- Der eingefrorene fachliche Referenzstand ist Altprojekt-Commit `259cbfac`;
+  der archivierte Abschluss-Head ist `2c0ca047`.
+- Die verbindliche Repository- und Dateizuordnung steht unter
+  `Agents/SourceMap06410.txt`.
+- Eine Komponente wird erst nach eigenstaendigem Build und ihren Tests im
+  neuen Repository kanonisch. Bis dahin bleibt ihr Teilbaum aus `259cbfac`
+  die einzige fachliche Wahrheit.
+
 # GitHub
 - Das private GitHub-Projektverzeichnis `D:\R4OS\` wird als
   `R4OSDev/r4os-project` auf dem Branch `main` gesichert.
