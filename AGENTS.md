@@ -38,6 +38,15 @@ Das alte ist: D:\AI\Projects\Claude Code\R4OS
 - Die offiziellen unabhaengigen Runtime-Libraries liegen unter
   `D:\R4OS\Repositories\Libraries\` und werden als
   `R4OSDev/r4os-libraries` auf dem Branch `main` verwaltet.
+- Der Kernel liegt unter `D:\R4OS\Repositories\Kernel\` und wird als
+  `R4OSDev/r4os-kernel` auf dem Branch `main` verwaltet.
+- Kernel-Pfade stehen in `D:\R4OS\Repositories\Kernel\Settings.R4S`.
+  `Build.bat` erzeugt `zig-out\bin\r4os.elf`; `Build.bat test` baut den
+  Kernel und fuehrt die kernel-eigenen Host- und Negativtests aus. Der Build
+  konsumiert nur den gemappten Contract und bleibt fest auf ReleaseSafe ohne
+  SIMD. `Build.sh` ist der hostneutrale Starter; Linux-/macOS-Laufzeittests
+  sind fuer den 0.64-Umbau kein Gate. `VERSION.R4S` nur erhoehen, wenn sich
+  das Kernelartefakt tatsaechlich aendert.
 - Library-Pfade stehen in `D:\R4OS\Repositories\Libraries\Settings.R4S`.
   `Build.bat test` prueft alle Libraries; mit `Build.bat R4STD test`,
   `Build.bat R4IMG test` oder `Build.bat R4FONT test` wird genau eine Einheit
@@ -45,7 +54,7 @@ Das alte ist: D:\AI\Projects\Claude Code\R4OS
   erlaubt. Linux-/macOS-Laufzeittests sind fuer den 0.64-Umbau kein Gate.
 - Fuer Push und Pull ausschliesslich `D:\R4OS\Tools\Github.bat` verwenden.
   Ohne Argumente fragt es interaktiv erst nach `Push` oder `Pull` und danach
-  nach `Project`, `DevKit`, `Contract`, `SDK` oder `Libraries`.
+  nach `Project`, `DevKit`, `Contract`, `SDK`, `Libraries` oder `Kernel`.
 - Nach einem frischen Clone zuerst `D:\R4OS\Tools\Setup.bat` ausfuehren.
   Es erzeugt die ignorierten Workspace-Ordner `Artifacts`, `DevKit` und
   `Repositories` sowie bei Bedarf die lokale GitHub-Credentials-Vorlage.
@@ -60,6 +69,8 @@ Das alte ist: D:\AI\Projects\Claude Code\R4OS
   - `Github.bat -pull -sdk`
   - `Github.bat -push -libraries ["Commit-Beschreibung"]`
   - `Github.bat -pull -libraries`
+  - `Github.bat -push -kernel ["Commit-Beschreibung"]`
+  - `Github.bat -pull -kernel`
 - Ein Push staged nach der `.gitignore` des gewaehlten Repositorys, erstellt
   bei Aenderungen einen Commit und pusht `main`. Ein Pull verwendet
   ausschliesslich `git pull --ff-only`. Beim ersten Push eines neuen Ziels
