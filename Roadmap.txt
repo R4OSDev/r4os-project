@@ -799,7 +799,8 @@ Offene Punkte:
   Komponentenwurzeln liegen 134 Manifestmodule. CLOCK, MIDI und JSON wurden
   in 0.64.17 und alle 36 Diagnoseprogramme in fuenf Wellen von 0.64.18
   ausgelagert. Eine erste rollenuebergreifende Testwelle uebernahm danach
-  sechs Treiber-/Protokollkomponenten; die folgenden 89 Einheiten verbleiben.
+  sechs Treiber-/Protokollkomponenten, die erste Audio-Stack-Welle weitere
+  sieben; die folgenden 82 Einheiten verbleiben.
 - Anwendungen - 40 verbleibende R4X:
   - AppDefaults (`APPDEF.R4X`, full)
   - Appearance (`APPEARANCE.R4X`, full)
@@ -859,23 +860,16 @@ Offene Punkte:
   - UpdateService (`UPDSVC.R4X`, slim; Quelle `Code/System/Software`)
 - Diagnoseprogramme - 0 verbleibende R4X:
   - Keine.
-- Treiber - 12 verbleibende R4D:
-  - AC97 (`AC97.R4D`, full)
+- Treiber - 8 verbleibende R4D:
   - AHCI (`AHCI.R4D`, slim)
   - ATAPIO (`ATAPIO.R4D`, slim)
-  - HDA (`HDA.R4D`, full)
   - NVME (`NVME.R4D`, slim)
-  - OPL3 (`OPL3.R4D`, full)
   - RTL8139 (`RTL8139.R4D`, slim)
   - RTL8168 (`RTL8168.R4D`, slim)
-  - SID (`SID.R4D`, full)
   - USBMSC (`USBMSC.R4D`, slim)
   - VirtioNet (`VIRTNET.R4D`, slim)
   - XHCI (`XHCI.R4D`, slim)
-- Protokolle - 22 verbleibende R4P:
-  - AudioMidi (`MIDI.R4P`, full)
-  - AudioOpl3 (`OPL3.R4P`, full)
-  - AudioSid (`SID.R4P`, full)
+- Protokolle - 19 verbleibende R4P:
   - NetArp (`NETARP.R4P`, slim)
   - NetDhcp (`NETDHCP.R4P`, slim)
   - NetDns (`NETDNS.R4P`, slim)
@@ -899,7 +893,7 @@ Offene Punkte:
   Liste. Vor ihrem Transfer wird nur entschieden, ob sie ein eigenes privates
   Komponentenrepository oder eine modulnahe Fixture im fachlichen
   Eigentuerrepository werden; im Altprojekt verbleiben duerfen sie nicht.
-- Alle 89 Einheiten nach Abhaengigkeiten in gepruefte Wellen gruppieren.
+- Alle 82 Einheiten nach Abhaengigkeiten in gepruefte Wellen gruppieren.
 - Pro Welle eigenstaendige Builds und Distributionsintegration abnehmen.
 - Bootkritische Komponenten zuletzt und nur mit funktionierendem Ersatzpfad
   aus dem integrierten Baum loesen.
@@ -984,6 +978,17 @@ Erledigt:
   - CONF: `43523a57e07309ba9deeb7db91f028c33a440cc3`
   - EXAMPLE.R4P: `ed9d30f7c39922a1116d90893043aa37f002fbed`
   - SMOKE: `0ffe10d066d5e7700385b6b8fd1385a501d09ad9`
+- Die erste Audio-Stack-Welle lagerte vier Treiber und drei Protokolle mit
+  byteidentischem Source, Manifest, Buildscript und Dokumentation aus. Alle
+  sieben privaten Repositories bauen eigenstaendig gegen SDK und Contract
+  und liegen synchron auf `main`:
+  - AC97.R4D: `420614445811c1be4e2bd43378aa9331e57602e8`
+  - HDA.R4D: `2f2d4ba229364aa0b9553b1baa5e56b851281d8c`
+  - OPL3.R4D: `064e2422da62e43e1be5c5299cc4709b7ae7d541`
+  - SID.R4D: `ce2242b974acb10b5f4e84910de5500c87c0f397`
+  - MIDI.R4P: `bda3f70d94ec71d8867073c9d152020df4fc8851`
+  - OPL3.R4P: `d5b5178cbf5a2e4c0b029b83f10771e543863214`
+  - SID.R4P: `eb990ac9ce884ecb30b893b36f6138be74be5e79`
 - Die API-Antwortdateien von `Github.bat` enthalten nun den
   Repositoryschluessel im Tempnamen, sodass parallele private Neuanlagen sich
   nicht gegenseitig loeschen.
@@ -991,8 +996,9 @@ Erledigt:
 Abnahme:
 - Jedes ausgelagerte Modul besitzt genau ein kanonisches Repository.
 - Der Inventarvergleich bildete das Ausgangsinventar von 131 Einheiten exakt
-  ab; nach Diagnose- und erster Test-/None-Welle verbleiben 89 offene
-  Manifestmodule ohne fehlende, zusaetzliche oder doppelte Eintraege.
+  ab; nach Diagnose-, erster Test-/None- und erster Audio-Stack-Welle
+  verbleiben 82 offene Manifestmodule ohne fehlende, zusaetzliche oder
+  doppelte Eintraege.
 - `FsDiag\Build.bat` erzeugt FSDIAG.R4X eigenstaendig mit drei Imports gegen
   SDK, Contract und die gepinnte R4STD-Bindung. Das Artefakt wurde als
   explizites Testprofil-Planfragment von der Distribution angenommen.
@@ -1012,6 +1018,9 @@ Abnahme:
 - Die fuenf neuen Testprofilmodule erweitern den gemeinsamen Plan auf 54
   eindeutige, kollisionsfreie Eintraege. AC97FAIL baut erfolgreich, bleibt als
   scope-none-Negativfixture aber bewusst ausserhalb jedes Images.
+- Die sieben Full-Profil-Artefakte der Audio-Stack-Welle erweitern denselben
+  reproduzierbaren Distributionsplan auf 61 eindeutige und kollisionsfreie
+  Eintraege.
 
 0.64.19
 Titel: Vollstaendige Mehrrepo-Gesamtintegration abnehmen
