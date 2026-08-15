@@ -451,22 +451,44 @@ Titel: Kern-SDK als hostneutrales Repository aufbauen
 Status: In Arbeit
 
 Offene Punkte:
-- Plattformfassaden, Buildprofile, C-Integration, Templates und generische
-  R4X-/R4L-Helfer uebernehmen.
-- R4LContractGen, R4XBuilder und ModuleCatalog repo-neutral integrieren.
-- Contract als explizite Abhaengigkeit konsumieren.
-- Caches, Buildausgaben, Toolchainbinaries und konkrete Librarywahrheiten
-  ausschliessen.
-- SDK-Einzelbuild, Zig-/C-Conformance und portable Beispielprojekte abnehmen.
+- Die Hostneutralitaet der Shell-Variante auf Linux/macOS pruefen.
+- Eigenstaendige portable R4X- und Runtime-R4L-Beispielprojekte nur gegen die
+  expliziten SDK-/Contract-Eingaben abnehmen.
 
 Erledigt:
 - Das oeffentliche Zielrepository `R4OSDev/r4os-sdk` ist angelegt.
 - Workspace-Workflow und Dokumentation kennen das Ziel `-sdk`.
+- Plattformfassaden, Buildprofile, C-Integration, Templates, Smokeprojekte
+  und generische R4X-/R4L-Helfer sind aus `259cbfac` uebernommen.
+- R4LContractGen, R4XBuilder und ModuleCatalog sind repo-neutral in den
+  SDK-Rootbuild integriert.
+- Die gemeinsame Zig- und C-ABI kommt ausschliesslich aus dem expliziten
+  Contract-Paket; lokale zweite ABI-Wahrheiten wurden entfernt.
+- Caches, `zig-pkg`, Buildausgaben, Toolchainbinaries und konkrete
+  Librarywahrheiten sind ausgeschlossen.
+- `Settings.R4S` mappt Workspace, Repositories, Komponenten, DevKit,
+  Artifacts und Zig. Relative sowie absolute Windows-Pfade wurden gegen den
+  Buildstarter erfolgreich geprueft.
+- `Build.bat test` baut den SDK-Root, alle drei Hostwerkzeuge und die
+  R4X-/R4D-/R4P- sowie C-/Zig-Smokeprojekte erfolgreich.
+- Ein isolierter frischer Windows-Clone von SDK und Contract besteht mit den
+  unveraenderten relativen Settings den vollstaendigen Test und bleibt danach
+  git-clean. Batch, Shell, Settings und Templates besitzen die festgelegten
+  Checkout-Zeilenenden.
 
 Abnahme:
 - Das SDK baut ohne Altprojekt und ohne feste Nachbarpfade.
 - Ein neues R4X- und ein neues Runtime-R4L-Projekt lassen sich nur mit SDK,
   Contract und expliziten Librarybindings erzeugen und bauen.
+
+Notizen:
+- `build.zig.zon` pinnt die Contract-Identitaet und den abgenommenen
+  Inhaltshash. `Build.bat` beziehungsweise `Build.sh` loesen den in
+  `Settings.R4S` gemappten Checkout auf und uebergeben ihn vor dem Build als
+  passenden lokalen Zig-Fork. Deshalb ist `../Contract` keine fest
+  einkompilierte Nachbarschaft.
+- `5f5bf7a` ist der vollstaendige SDK-Transfercommit; `210372f` ergaenzt die
+  hostneutralen Checkoutregeln und das Ausfuehrungsbit von `Build.sh`.
 
 0.64.13
 Titel: R4STD, R4IMG und R4FONT in r4os-libraries uebernehmen
