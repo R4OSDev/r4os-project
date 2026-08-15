@@ -722,19 +722,51 @@ Notizen:
 
 0.64.17
 Titel: Je einen R4X-, R4D- und R4P-Piloten auslagern
-Status: Geplant
+Status: In Arbeit
 
 Offene Punkte:
-- Drei repraesentative, nicht bootkritische Module auswaehlen.
-- Manifest, Source, Ressourcen und modulnahe Tests vollstaendig uebernehmen.
-- Eigenstaendige Builds gegen SDK, Contract und explizite Librarybindings
-  beweisen.
+- Die drei leeren oeffentlichen GitHub-Repositories anlegen, nachdem die
+  automatische Organisationserstellung mit HTTP 403 abgewiesen wurde:
+  `r4os-module-clock`, `r4os-driver-midi`, `r4os-protocol-json`.
+- Die vorbereiteten lokalen Repositories pushen und Remote-/Sauberkeitsaudit
+  ausfuehren.
 
 Erledigt:
-- Noch nichts.
+- CLOCK.R4X, MIDI.R4D und JSON.R4P als repraesentative, nicht bootkritische
+  Piloten gewaehlt und Source, Manifest, Dokumentation sowie vorhandene
+  JSON-Tests aus Altprojekt-Commit `259cbfac` uebernommen.
+- SDK 0.64.17 um `addR4MFWithOptions` erweitert: Manifestnamen und Reihenfolge
+  bleiben kanonisch, explizite Paketpfade ersetzen nur die hostseitigen
+  ZIG_MODULE-Quellwurzeln. Integrationstest SDKMAP beweist auch den Ersatz
+  eines absichtlich nicht vorhandenen Manifestpfads. GitHub-Commit:
+  `1671dbaafa726e039e5be6229fa465c16bc679c1`.
+- Das Rootpaket `r4os_libraries` exportiert R4STD-, R4IMG- und R4FONT-Bindings
+  als benannte Zig-/C-Pfade, ohne eine Runtime-Implementierung einzubetten.
+  Alle Librarytests blieben gruen. GitHub-Commit:
+  `20507b4504345e8ddc399735efdbaedca8776d5d`.
+- Alle Piloten besitzen repositorylokale Settings, Windows-/POSIX-Starter,
+  Paketpins, Provenienz, Git-Hygiene und zentrale Artefaktausgabe unter
+  `Artifacts/Modules/<Name>`.
+- CLOCK konsumiert ausschliesslich `r4std_zig_binding` aus dem gepinnten
+  Librarypaket. JSON bezieht seine SDK-Fassade im ABI-Test ueber die gepinnte
+  SDK-Abhaengigkeit; MIDI benoetigt nur SDK und Contract.
+- `Tools/Github.bat` kann App-Module, Treiber und Protokolle dynamisch nach
+  sicher validiertem Komponentennamen verwalten. `Tools/Setup.bat` legt die
+  gemeinsamen Module- und Artefaktwurzeln idempotent an.
 
 Abnahme:
-- Alle drei Modularten bauen ohne Zugriff auf den Altprojektquellbaum.
+- `Clock\Build.bat` erzeugt CLOCK.R4X mit sechs Imports und expliziter
+  R4STD-Bindung ohne Zugriff auf den Altprojektquellbaum.
+- `MIDI\Build.bat` erzeugt MIDI.R4D eigenstaendig gegen SDK und Contract.
+- `JSON\Build.bat test` baut JSON.R4P und besteht Core- sowie
+  ABI-Conformance-Tests gegen die gepinnte SDK-Fassade.
+- Die Produktivquellen aller drei Piloten sind byteidentisch zu Commit
+  `259cbfac`; geaendert wurden ausschliesslich Repository-/Buildgrenzen und
+  ein veralteter Pfadkommentar im JSON-Conformance-Test.
+
+Notizen:
+- Der verwendete GitHub-Token darf bestehende Repositories pushen, besitzt
+  aber keine Berechtigung zum Anlegen neuer Organisations-Repositories.
 
 0.64.18
 Titel: Auslieferbare Module in geprueften Wellen auslagern
