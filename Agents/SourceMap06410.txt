@@ -349,6 +349,23 @@ Abschliessende Treiberwelle seit 0.64.18:
     Driver/VirtioNet  -> r4os-driver-virtionet
     Driver/XHCI       -> r4os-driver-xhci
 
+Abschliessende Dienstwelle seit 0.64.18:
+
+    Services/ClipboardService  -> r4os-service-clipboardservice
+    Services/DhcpService       -> r4os-service-dhcpservice
+    Services/DnsService        -> r4os-service-dnsservice
+    Services/ExampleService    -> r4os-service-exampleservice
+    Services/FtpService        -> r4os-service-ftpservice
+    Services/LogService        -> r4os-service-logservice
+    Services/RdpService        -> r4os-service-rdpservice
+    Services/SerialLinkService -> r4os-service-seriallinkservice
+    Services/SshService        -> r4os-service-sshservice
+    Services/TcpService        -> r4os-service-tcpservice
+    Services/TimeService       -> r4os-service-timeservice
+    Services/UdpService        -> r4os-service-udpservice
+    Services/WindowService     -> r4os-service-windowservice
+    Software/UpdateService     -> r4os-service-updateservice
+
 Alle genannten Einheiten stammen fachlich aus Commit `259cbfac`. Der
 SDK-Build loest ZIG_MODULE-Pfade ueber explizite Paketpfade auf; ein
 Libraryname wird nicht im Buildscript dupliziert. JSON bezieht auch seine
@@ -382,6 +399,12 @@ Der RTL8168-Generator verbleibt zusammen mit Firmwaretabellen, Hostmodell und
 Warmfix im Treiber-Repo. Die `boot.path`-Metadaten der Storage-/USB-Treiber
 bleiben unveraendert; die eigentliche Bootumschaltung erfolgt erst in der
 Gesamtintegration.
+
+Die Dienste behalten ihre `service.config`-Metadaten, besitzen die
+Konfiguration aber nicht selbst; sie bleibt Eigentum der Distribution.
+TimeService und UpdateService beziehen R4STD explizit aus dem gepinnten
+Libraries-Paket. UpdateService liegt im neuen Workspace unter
+`Repositories/Services`, unabhaengig von seinem historischen Quellpfad.
 
 KlickifaxLive bezieht R4IMG, R4CfgDiag und StdDiag beziehen R4STD ueber den
 gepinnten Libraries-Commit. NetworkFacadeCDiag bleibt als echter C-Build mit
