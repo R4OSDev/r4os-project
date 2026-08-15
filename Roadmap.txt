@@ -1193,18 +1193,36 @@ Abnahme:
 
 0.64.20
 Titel: Lizenzen, Repositoryhygiene und kanonischen Wechsel abschliessen
-Status: Geplant
+Status: In Arbeit
 
 Offene Punkte:
-- Projekt- und Drittanbieterlizenzen je Repository vervollstaendigen.
+- Drittanbieterinhalte repositorybezogen inventarisieren und ihre jeweiligen
+  Lizenz-/Herkunftshinweise vervollstaendigen.
+- Apache-Lizenz und erforderliche Hinweise in spaetere Binaer-Releases und
+  Distributionsimages aufnehmen.
 - README, Sichtbarkeit, Releases und öffentliche Repositoryhygiene pruefen.
 - Erst nach gruenem Mehrrepo-Gesamtlauf den neuen Workspace zur einzigen
   aktiven Quellwahrheit erklaeren.
 - Altprojekt als unveraenderte historische Referenz kennzeichnen.
 
 Erledigt:
-- Noch nichts.
+- Apache-2.0 wurde als einheitliche Lizenz fuer originales R4OS-Material
+  festgelegt. Der offizielle, unveraenderte Apache-2.0-Text liegt als
+  `LICENSE` im Root aller 141 kanonischen Repositories.
+- Jedes Repository besitzt ein einheitliches `NOTICE` mit `Copyright 2026 R4`
+  und der Nennung `R4OS was originally created by R4`. Fremdmaterial wird
+  darin ausdruecklich nicht pauschal umlizenziert.
+- Alle 139 als Zig-Paket nutzbaren Quell-Repositories liefern `LICENSE` und
+  `NOTICE` ueber ihre jeweilige `build.zig.zon` mit aus.
+- Projekt- und Agentendokumentation halten die Lizenzgrenze fest. Das DevKit
+  stellt klar, dass nur seine eigenen Skripte Apache-2.0 sind; die lokal
+  heruntergeladenen Werkzeuge Zig, Limine und QEMU behalten ihre Lizenzen.
 
 Abnahme:
 - Kein normaler Build und kein Test benoetigt den alten Monorepo-Pfad.
 - Alle Repositories besitzen klare Lizenz- und Drittanbieterhinweise.
+- Lizenz- und Notice-Dateien sind ueber alle 141 Repositories bytegleich;
+  alle 139 Root-Manifeste bestehen `zig fmt --check` und enthalten beide
+  Dateien genau einmal in `.paths`.
+- Workspace-Zentralbuild, Einzelbuild von `Apps/Clock` sowie der
+  Distribution-Test mit Imageplan- und QEMU-Markerauswertung sind gruen.
