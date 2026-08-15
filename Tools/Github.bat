@@ -393,7 +393,7 @@ call :github_repository_exists
 if not errorlevel 1 exit /b 0
 
 echo GitHub-Repository %R4OS_GITHUB_ORGANIZATION%/%R4OS_REPOSITORY_NAME% wird erstellt.
-set "R4OS_GITHUB_API_RESPONSE=%TEMP%\R4OS-GitHub-%RANDOM%-%RANDOM%.json"
+set "R4OS_GITHUB_API_RESPONSE=%TEMP%\R4OS-GitHub-%R4OS_REPOSITORY_KEY%-%RANDOM%.json"
 curl.exe --silent --show-error --fail-with-body --request POST --header "Accept: application/vnd.github+json" --header "Content-Type: application/json" --header "X-GitHub-Api-Version: 2022-11-28" --header "Authorization: Bearer %R4OS_GITHUB_TOKEN%" "https://api.github.com/orgs/%R4OS_GITHUB_ORGANIZATION%/repos" --data "{\"name\":\"%R4OS_REPOSITORY_NAME%\",\"description\":\"%R4OS_REPOSITORY_DESCRIPTION%\",\"private\":%R4OS_REPOSITORY_PRIVATE%}" --output "%R4OS_GITHUB_API_RESPONSE%"
 if errorlevel 1 (
     echo FEHLER: Das GitHub-Repository %R4OS_GITHUB_ORGANIZATION%/%R4OS_REPOSITORY_NAME% konnte nicht erstellt werden.
