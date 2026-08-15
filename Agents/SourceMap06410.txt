@@ -280,6 +280,14 @@ Diagnosewelle 4 seit 0.64.18:
     PerformanceDiag   -> r4os-diagnostic-performancediag
     SynthDiag         -> r4os-diagnostic-synthdiag
 
+Diagnosewelle 5 seit 0.64.18:
+
+    KlickifaxLive         -> r4os-diagnostic-klickifaxlive
+    LoaderDiag            -> r4os-diagnostic-loaderdiag
+    NetworkFacadeCDiag    -> r4os-diagnostic-networkfacadecdiag
+    R4CfgDiag             -> r4os-diagnostic-r4cfgdiag
+    StdDiag               -> r4os-diagnostic-stddiag
+
 Alle genannten Einheiten stammen fachlich aus Commit `259cbfac`. Der
 SDK-Build loest ZIG_MODULE-Pfade ueber explizite Paketpfade auf; ein
 Libraryname wird nicht im Buildscript dupliziert. JSON bezieht auch seine
@@ -287,6 +295,12 @@ ABI-Testfassade aus der gepinnten SDK-Abhaengigkeit, FSDIAG seine
 DATE_V1-Bindung aus dem gepinnten Librarypaket. Relative Workspacepfade
 stehen nur als austauschbare Defaults in der jeweiligen `Settings.R4S`, nie
 als feste Quellkante in Buildscript oder Paketmanifest.
+
+KlickifaxLive bezieht R4IMG, R4CfgDiag und StdDiag beziehen R4STD ueber den
+gepinnten Libraries-Commit. NetworkFacadeCDiag bleibt als echter C-Build mit
+`IMAGE_SCOPE=none` ausserhalb des Images. EXTMATH ist fuer LoaderDiag kein
+Quellpaket, sondern eine vom alten Root-Build erzeugte Laufzeit-Testfixture;
+ihre neue modulnahe Integration ist vor dem Mehrrepo-QEMU-Test noch offen.
 
 Die Workspace-Ablage folgt derselben Rollenlogik wie die GitHub-Namen:
 `Repositories/Apps`, `Repositories/Services`, `Repositories/Diagnostics`,

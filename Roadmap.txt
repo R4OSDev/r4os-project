@@ -797,8 +797,8 @@ Status: In Arbeit
 Offene Punkte:
 - Verbindliche Inventarbasis ist Altprojekt-Commit `259cbfac`: In den fuenf
   Komponentenwurzeln liegen 134 Manifestmodule. CLOCK, MIDI und JSON wurden
-  in 0.64.17 und 31 Diagnoseprogramme in den ersten vier Wellen von 0.64.18
-  ausgelagert; die folgenden 100 Einheiten verbleiben.
+  in 0.64.17 und alle 36 Diagnoseprogramme in fuenf Wellen von 0.64.18
+  ausgelagert; die folgenden 95 Einheiten verbleiben.
 - Anwendungen - 40 verbleibende R4X:
   - AppDefaults (`APPDEF.R4X`, full)
   - Appearance (`APPEARANCE.R4X`, full)
@@ -856,12 +856,8 @@ Offene Punkte:
   - UdpService (`UDPSVC.R4X`, slim)
   - WindowService (`WINSVC.R4X`, slim)
   - UpdateService (`UPDSVC.R4X`, slim; Quelle `Code/System/Software`)
-- Diagnoseprogramme - 5 verbleibende R4X:
-  - KlickifaxLive (`KFXLIVE.R4X`, test)
-  - LoaderDiag (`LOADERD.R4X`, test)
-  - NetworkFacadeCDiag (`CNETD.R4X`, none)
-  - R4CfgDiag (`R4CFGD.R4X`, test)
-  - StdDiag (`STDDIAG.R4X`, test)
+- Diagnoseprogramme - 0 verbleibende R4X:
+  - Keine.
 - Treiber - 14 verbleibende R4D:
   - AC97 (`AC97.R4D`, full)
   - AHCI (`AHCI.R4D`, slim)
@@ -908,8 +904,12 @@ Offene Punkte:
   Liste. Vor ihrem Transfer wird nur entschieden, ob sie ein eigenes privates
   Komponentenrepository oder eine modulnahe Fixture im fachlichen
   Eigentuerrepository werden; im Altprojekt verbleiben duerfen sie nicht.
-- Alle 100 Einheiten nach Abhaengigkeiten in gepruefte Wellen gruppieren.
+- Alle 95 Einheiten nach Abhaengigkeiten in gepruefte Wellen gruppieren.
 - Pro Welle eigenstaendige Builds und Distributionsintegration abnehmen.
+- Die bisher vom alten Root-Build erzeugten modulnahen LOADERD-Testfixtures
+  (EXTMATH, Loader-Stress und Resolver-Negativfaelle) vor der
+  Mehrrepo-Gesamtintegration dem LoaderDiag- oder Distribution-Repository
+  zuordnen. Sie sind keine eigenstaendigen Produktkomponenten.
 - Bootkritische Komponenten zuletzt und nur mit funktionierendem Ersatzpfad
   aus dem integrierten Baum loesen.
 
@@ -971,6 +971,14 @@ Erledigt:
   - NETSVC: `7108f7b243de2bcce7d3df9eaa1a169c6b72d268`
   - PERFDIAG: `7e2e4db1be05d17aa1df6da0030b007f16486c9f`
   - SYNTHD: `e61e74e90d1b758add4a0df864fd533df275b854`
+- Die fuenfte Diagnosewelle schloss die gesamte Diagnoseklasse ab. R4IMG und
+  R4STD werden als gepinnte Librarypakete konsumiert, CNETD bestand den
+  eigenstaendigen C-Build und bleibt wegen `IMAGE_SCOPE=none` aus dem Image:
+  - KFXLIVE: `1f87ec68d10c876dfd779e20520d1425908f01bb`
+  - LOADERD: `2ed2313752b7669e51ccab7237dff42c48177128`
+  - CNETD: `ccdd0d44f7e5546bee201fac79cef87fb942ff2c`
+  - R4CFGD: `bd0ca7cb9e561e145e5396afd8d438890b383c09`
+  - STDDIAG: `8be72e56390c807f359f6fd5dccde3b7f0ebd228`
 - Die API-Antwortdateien von `Github.bat` enthalten nun den
   Repositoryschluessel im Tempnamen, sodass parallele private Neuanlagen sich
   nicht gegenseitig loeschen.
@@ -978,7 +986,7 @@ Erledigt:
 Abnahme:
 - Jedes ausgelagerte Modul besitzt genau ein kanonisches Repository.
 - Der Inventarvergleich bildete das Ausgangsinventar von 131 Einheiten exakt
-  ab; nach den ersten vier Diagnosewellen verbleiben 100 offene
+  ab; nach allen fuenf Diagnosewellen verbleiben 95 offene
   Manifestmodule ohne fehlende, zusaetzliche oder doppelte Eintraege.
 - `FsDiag\Build.bat` erzeugt FSDIAG.R4X eigenstaendig mit drei Imports gegen
   SDK, Contract und die gepinnte R4STD-Bindung. Das Artefakt wurde als
@@ -991,6 +999,9 @@ Abnahme:
   kollisionsfreie Diagnoseeintraege.
 - Die vierte Welle erweitert denselben reproduzierbaren Plan auf 31
   eindeutige und kollisionsfreie Diagnoseeintraege.
+- Die fuenfte Welle erweitert den Testprofilplan auf 35 eindeutige,
+  kollisionsfreie Diagnoseartefakte. Zusammen mit dem bewusst ausgeschlossenen
+  scope-none-CNETD sind damit alle 36 Diagnosemodule abgenommen.
 
 0.64.19
 Titel: Vollstaendige Mehrrepo-Gesamtintegration abnehmen
