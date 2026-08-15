@@ -32,8 +32,12 @@ echo Repository auswaehlen:
 echo   [1] Project
 echo   [2] DevKit
 echo   [3] Contract
-choice /C 123 /N /M "Auswahl"
-if errorlevel 3 set "R4OS_INTERACTIVE_TARGET=-contract"
+echo   [4] SDK
+echo   [5] Libraries
+choice /C 12345 /N /M "Auswahl"
+if errorlevel 5 set "R4OS_INTERACTIVE_TARGET=-libraries"
+if errorlevel 4 if not defined R4OS_INTERACTIVE_TARGET set "R4OS_INTERACTIVE_TARGET=-sdk"
+if errorlevel 3 if not defined R4OS_INTERACTIVE_TARGET set "R4OS_INTERACTIVE_TARGET=-contract"
 if errorlevel 2 if not defined R4OS_INTERACTIVE_TARGET set "R4OS_INTERACTIVE_TARGET=-devkit"
 if errorlevel 1 if not defined R4OS_INTERACTIVE_TARGET set "R4OS_INTERACTIVE_TARGET=-project"
 
@@ -45,6 +49,8 @@ endlocal & exit /b %R4OS_INTERACTIVE_EXIT%
 if /I "%~1"=="-project" goto select_project
 if /I "%~1"=="-devkit" goto select_devkit
 if /I "%~1"=="-contract" goto select_contract
+if /I "%~1"=="-sdk" goto select_sdk
+if /I "%~1"=="-libraries" goto select_libraries
 exit /b 1
 
 :select_project
@@ -81,6 +87,30 @@ set "R4OS_REPOSITORY_DESCRIPTION=Canonical API and ABI contract for R4OS."
 set "R4OS_REPOSITORY_PRIVATE=false"
 set "R4OS_REPOSITORY_ALLOW_INIT=1"
 set "R4OS_DEFAULT_COMMIT_MESSAGE=Contract-Stand sichern"
+exit /b 0
+
+:select_sdk
+set "R4OS_REPOSITORY_KEY=sdk"
+set "R4OS_REPOSITORY_LABEL=SDK"
+set "R4OS_REPOSITORY_ROOT=%R4OS_PROJECT_ROOT%\Repositories\SDK"
+set "R4OS_REPOSITORY_NAME=r4os-sdk"
+set "R4OS_REPOSITORY_REMOTE=https://github.com/%R4OS_GITHUB_ORGANIZATION%/r4os-sdk.git"
+set "R4OS_REPOSITORY_DESCRIPTION=Host-neutral SDK and platform bindings for R4OS."
+set "R4OS_REPOSITORY_PRIVATE=false"
+set "R4OS_REPOSITORY_ALLOW_INIT=1"
+set "R4OS_DEFAULT_COMMIT_MESSAGE=SDK-Stand sichern"
+exit /b 0
+
+:select_libraries
+set "R4OS_REPOSITORY_KEY=libraries"
+set "R4OS_REPOSITORY_LABEL=Libraries"
+set "R4OS_REPOSITORY_ROOT=%R4OS_PROJECT_ROOT%\Repositories\Libraries"
+set "R4OS_REPOSITORY_NAME=r4os-libraries"
+set "R4OS_REPOSITORY_REMOTE=https://github.com/%R4OS_GITHUB_ORGANIZATION%/r4os-libraries.git"
+set "R4OS_REPOSITORY_DESCRIPTION=Official independent runtime libraries for R4OS."
+set "R4OS_REPOSITORY_PRIVATE=false"
+set "R4OS_REPOSITORY_ALLOW_INIT=1"
+set "R4OS_DEFAULT_COMMIT_MESSAGE=Library-Stand sichern"
 exit /b 0
 
 :pull
@@ -303,6 +333,10 @@ echo   Github.bat -push -devkit ["Commit-Beschreibung"]
 echo   Github.bat -pull -devkit
 echo   Github.bat -push -contract ["Commit-Beschreibung"]
 echo   Github.bat -pull -contract
+echo   Github.bat -push -sdk ["Commit-Beschreibung"]
+echo   Github.bat -pull -sdk
+echo   Github.bat -push -libraries ["Commit-Beschreibung"]
+echo   Github.bat -pull -libraries
 endlocal & exit /b 1
 
 :failure
