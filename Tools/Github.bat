@@ -118,7 +118,7 @@ set "R4OS_REPOSITORY_ROOT=%R4OS_PROJECT_ROOT%\DevKit"
 set "R4OS_REPOSITORY_NAME=r4os-devkit"
 set "R4OS_REPOSITORY_REMOTE=https://github.com/%R4OS_GITHUB_ORGANIZATION%/r4os-devkit.git"
 set "R4OS_REPOSITORY_DESCRIPTION=Cross-platform bootstrap and setup scripts for the R4OS development kit."
-set "R4OS_REPOSITORY_PRIVATE=false"
+set "R4OS_REPOSITORY_PRIVATE=true"
 set "R4OS_REPOSITORY_ALLOW_INIT=1"
 set "R4OS_DEFAULT_COMMIT_MESSAGE=DevKit-Stand sichern"
 exit /b 0
@@ -130,7 +130,7 @@ set "R4OS_REPOSITORY_ROOT=%R4OS_PROJECT_ROOT%\Repositories\Contract"
 set "R4OS_REPOSITORY_NAME=r4os-contract"
 set "R4OS_REPOSITORY_REMOTE=https://github.com/%R4OS_GITHUB_ORGANIZATION%/r4os-contract.git"
 set "R4OS_REPOSITORY_DESCRIPTION=Canonical API and ABI contract for R4OS."
-set "R4OS_REPOSITORY_PRIVATE=false"
+set "R4OS_REPOSITORY_PRIVATE=true"
 set "R4OS_REPOSITORY_ALLOW_INIT=1"
 set "R4OS_DEFAULT_COMMIT_MESSAGE=Contract-Stand sichern"
 exit /b 0
@@ -142,7 +142,7 @@ set "R4OS_REPOSITORY_ROOT=%R4OS_PROJECT_ROOT%\Repositories\SDK"
 set "R4OS_REPOSITORY_NAME=r4os-sdk"
 set "R4OS_REPOSITORY_REMOTE=https://github.com/%R4OS_GITHUB_ORGANIZATION%/r4os-sdk.git"
 set "R4OS_REPOSITORY_DESCRIPTION=Host-neutral SDK and platform bindings for R4OS."
-set "R4OS_REPOSITORY_PRIVATE=false"
+set "R4OS_REPOSITORY_PRIVATE=true"
 set "R4OS_REPOSITORY_ALLOW_INIT=1"
 set "R4OS_DEFAULT_COMMIT_MESSAGE=SDK-Stand sichern"
 exit /b 0
@@ -154,7 +154,7 @@ set "R4OS_REPOSITORY_ROOT=%R4OS_PROJECT_ROOT%\Repositories\Libraries"
 set "R4OS_REPOSITORY_NAME=r4os-libraries"
 set "R4OS_REPOSITORY_REMOTE=https://github.com/%R4OS_GITHUB_ORGANIZATION%/r4os-libraries.git"
 set "R4OS_REPOSITORY_DESCRIPTION=Official independent runtime libraries for R4OS."
-set "R4OS_REPOSITORY_PRIVATE=false"
+set "R4OS_REPOSITORY_PRIVATE=true"
 set "R4OS_REPOSITORY_ALLOW_INIT=1"
 set "R4OS_DEFAULT_COMMIT_MESSAGE=Library-Stand sichern"
 exit /b 0
@@ -166,7 +166,7 @@ set "R4OS_REPOSITORY_ROOT=%R4OS_PROJECT_ROOT%\Repositories\Kernel"
 set "R4OS_REPOSITORY_NAME=r4os-kernel"
 set "R4OS_REPOSITORY_REMOTE=https://github.com/%R4OS_GITHUB_ORGANIZATION%/r4os-kernel.git"
 set "R4OS_REPOSITORY_DESCRIPTION=R4OS kernel, boot integration and kernel-owned tests."
-set "R4OS_REPOSITORY_PRIVATE=false"
+set "R4OS_REPOSITORY_PRIVATE=true"
 set "R4OS_REPOSITORY_ALLOW_INIT=1"
 set "R4OS_DEFAULT_COMMIT_MESSAGE=Kernel-Stand sichern"
 exit /b 0
@@ -178,7 +178,7 @@ set "R4OS_REPOSITORY_ROOT=%R4OS_PROJECT_ROOT%\Repositories\Distribution"
 set "R4OS_REPOSITORY_NAME=r4os-distribution"
 set "R4OS_REPOSITORY_REMOTE=https://github.com/%R4OS_GITHUB_ORGANIZATION%/r4os-distribution.git"
 set "R4OS_REPOSITORY_DESCRIPTION=R4OS image assembly, release configuration and distribution-owned host tools."
-set "R4OS_REPOSITORY_PRIVATE=false"
+set "R4OS_REPOSITORY_PRIVATE=true"
 set "R4OS_REPOSITORY_ALLOW_INIT=1"
 set "R4OS_DEFAULT_COMMIT_MESSAGE=Distribution-Stand sichern"
 exit /b 0
@@ -237,7 +237,7 @@ set "R4OS_REPOSITORY_ROOT=%R4OS_PROJECT_ROOT%\Repositories\%R4OS_COMPONENT_DIREC
 set "R4OS_REPOSITORY_NAME=r4os-%R4OS_COMPONENT_KIND%-%R4OS_COMPONENT_SLUG%"
 set "R4OS_REPOSITORY_REMOTE=https://github.com/%R4OS_GITHUB_ORGANIZATION%/%R4OS_REPOSITORY_NAME%.git"
 set "R4OS_REPOSITORY_DESCRIPTION=%R4OS_COMPONENT_DESCRIPTION% %R4OS_COMPONENT_NAME%."
-set "R4OS_REPOSITORY_PRIVATE=false"
+set "R4OS_REPOSITORY_PRIVATE=true"
 set "R4OS_REPOSITORY_ALLOW_INIT=1"
 set "R4OS_DEFAULT_COMMIT_MESSAGE=%R4OS_COMPONENT_NAME%-Stand sichern"
 exit /b 0
@@ -393,11 +393,15 @@ call :github_repository_exists
 if not errorlevel 1 exit /b 0
 
 echo GitHub-Repository %R4OS_GITHUB_ORGANIZATION%/%R4OS_REPOSITORY_NAME% wird erstellt.
-curl.exe --silent --show-error --fail --request POST --header "Accept: application/vnd.github+json" --header "Authorization: Bearer %R4OS_GITHUB_TOKEN%" "https://api.github.com/orgs/%R4OS_GITHUB_ORGANIZATION%/repos" --data "{\"name\":\"%R4OS_REPOSITORY_NAME%\",\"description\":\"%R4OS_REPOSITORY_DESCRIPTION%\",\"private\":%R4OS_REPOSITORY_PRIVATE%}" >nul
+set "R4OS_GITHUB_API_RESPONSE=%TEMP%\R4OS-GitHub-%RANDOM%-%RANDOM%.json"
+curl.exe --silent --show-error --fail-with-body --request POST --header "Accept: application/vnd.github+json" --header "Content-Type: application/json" --header "X-GitHub-Api-Version: 2022-11-28" --header "Authorization: Bearer %R4OS_GITHUB_TOKEN%" "https://api.github.com/orgs/%R4OS_GITHUB_ORGANIZATION%/repos" --data "{\"name\":\"%R4OS_REPOSITORY_NAME%\",\"description\":\"%R4OS_REPOSITORY_DESCRIPTION%\",\"private\":%R4OS_REPOSITORY_PRIVATE%}" --output "%R4OS_GITHUB_API_RESPONSE%"
 if errorlevel 1 (
     echo FEHLER: Das GitHub-Repository %R4OS_GITHUB_ORGANIZATION%/%R4OS_REPOSITORY_NAME% konnte nicht erstellt werden.
+    if exist "%R4OS_GITHUB_API_RESPONSE%" type "%R4OS_GITHUB_API_RESPONSE%"
+    if exist "%R4OS_GITHUB_API_RESPONSE%" del /q "%R4OS_GITHUB_API_RESPONSE%"
     exit /b 1
 )
+if exist "%R4OS_GITHUB_API_RESPONSE%" del /q "%R4OS_GITHUB_API_RESPONSE%"
 exit /b 0
 
 :ensure_identity
