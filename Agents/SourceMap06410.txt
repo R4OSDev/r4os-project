@@ -288,6 +288,15 @@ Diagnosewelle 5 seit 0.64.18:
     R4CfgDiag             -> r4os-diagnostic-r4cfgdiag
     StdDiag               -> r4os-diagnostic-stddiag
 
+Rollenuebergreifende Test-/None-Welle seit 0.64.18:
+
+    Driver/AudioFail      -> r4os-driver-audiofail
+    Driver/Example        -> r4os-driver-example
+    Protocols/BadDep      -> r4os-protocol-baddep
+    Protocols/Conformance -> r4os-protocol-conformance
+    Protocols/Example     -> r4os-protocol-example
+    Protocols/Smoke       -> r4os-protocol-smoke
+
 Alle genannten Einheiten stammen fachlich aus Commit `259cbfac`. Der
 SDK-Build loest ZIG_MODULE-Pfade ueber explizite Paketpfade auf; ein
 Libraryname wird nicht im Buildscript dupliziert. JSON bezieht auch seine

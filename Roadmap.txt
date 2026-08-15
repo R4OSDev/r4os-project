@@ -798,7 +798,8 @@ Offene Punkte:
 - Verbindliche Inventarbasis ist Altprojekt-Commit `259cbfac`: In den fuenf
   Komponentenwurzeln liegen 134 Manifestmodule. CLOCK, MIDI und JSON wurden
   in 0.64.17 und alle 36 Diagnoseprogramme in fuenf Wellen von 0.64.18
-  ausgelagert; die folgenden 95 Einheiten verbleiben.
+  ausgelagert. Eine erste rollenuebergreifende Testwelle uebernahm danach
+  sechs Treiber-/Protokollkomponenten; die folgenden 89 Einheiten verbleiben.
 - Anwendungen - 40 verbleibende R4X:
   - AppDefaults (`APPDEF.R4X`, full)
   - Appearance (`APPEARANCE.R4X`, full)
@@ -858,12 +859,10 @@ Offene Punkte:
   - UpdateService (`UPDSVC.R4X`, slim; Quelle `Code/System/Software`)
 - Diagnoseprogramme - 0 verbleibende R4X:
   - Keine.
-- Treiber - 14 verbleibende R4D:
+- Treiber - 12 verbleibende R4D:
   - AC97 (`AC97.R4D`, full)
   - AHCI (`AHCI.R4D`, slim)
   - ATAPIO (`ATAPIO.R4D`, slim)
-  - AudioFail (`AC97FAIL.R4D`, none)
-  - Example (`EXAMPLE.R4D`, test)
   - HDA (`HDA.R4D`, full)
   - NVME (`NVME.R4D`, slim)
   - OPL3 (`OPL3.R4D`, full)
@@ -873,13 +872,10 @@ Offene Punkte:
   - USBMSC (`USBMSC.R4D`, slim)
   - VirtioNet (`VIRTNET.R4D`, slim)
   - XHCI (`XHCI.R4D`, slim)
-- Protokolle - 26 verbleibende R4P:
+- Protokolle - 22 verbleibende R4P:
   - AudioMidi (`MIDI.R4P`, full)
   - AudioOpl3 (`OPL3.R4P`, full)
   - AudioSid (`SID.R4P`, full)
-  - BadDep (`BADDEP.R4P`, test)
-  - Conformance (`CONF.R4P`, test)
-  - Example (`EXAMPLE.R4P`, test)
   - NetArp (`NETARP.R4P`, slim)
   - NetDhcp (`NETDHCP.R4P`, slim)
   - NetDns (`NETDNS.R4P`, slim)
@@ -895,7 +891,6 @@ Offene Punkte:
   - R4Http (`R4HTTP.R4P`, full)
   - R4Js (`R4JS.R4P`, full)
   - R4Tls (`R4TLS.R4P`, slim)
-  - Smoke (`SMOKE.R4P`, test)
   - UsbHidBoot (`USBHID.R4P`, slim)
   - UsbHidReport (`HIDREPORT.R4P`, slim)
   - UsbMscBot (`USBBOT.R4P`, slim)
@@ -904,7 +899,7 @@ Offene Punkte:
   Liste. Vor ihrem Transfer wird nur entschieden, ob sie ein eigenes privates
   Komponentenrepository oder eine modulnahe Fixture im fachlichen
   Eigentuerrepository werden; im Altprojekt verbleiben duerfen sie nicht.
-- Alle 95 Einheiten nach Abhaengigkeiten in gepruefte Wellen gruppieren.
+- Alle 89 Einheiten nach Abhaengigkeiten in gepruefte Wellen gruppieren.
 - Pro Welle eigenstaendige Builds und Distributionsintegration abnehmen.
 - Bootkritische Komponenten zuletzt und nur mit funktionierendem Ersatzpfad
   aus dem integrierten Baum loesen.
@@ -980,6 +975,15 @@ Erledigt:
   Zielmanifeste und Referenzhashes liegen modulnah unter `Fixtures/`; alle 14
   erzeugten Container sind in Groesse und SHA-256 byteidentisch zu den
   eingefrorenen Altprojektartefakten.
+- Die erste rollenuebergreifende Test-/None-Welle lagerte zwei Treiber und vier
+  Protokolle mit byteidentischem Source, Manifest, Buildscript und
+  Dokumentation in private Repositories aus:
+  - AC97FAIL: `fe447fb969487ea6040ce007a53fcb255fdb83e2`
+  - EXAMPLE.R4D: `877d1f937161efc5f7b237574d5ccd92946d8303`
+  - BADDEP: `9f7f37ffdfa1a199b386695e8264dd33afb11a3e`
+  - CONF: `43523a57e07309ba9deeb7db91f028c33a440cc3`
+  - EXAMPLE.R4P: `ed9d30f7c39922a1116d90893043aa37f002fbed`
+  - SMOKE: `0ffe10d066d5e7700385b6b8fd1385a501d09ad9`
 - Die API-Antwortdateien von `Github.bat` enthalten nun den
   Repositoryschluessel im Tempnamen, sodass parallele private Neuanlagen sich
   nicht gegenseitig loeschen.
@@ -987,7 +991,7 @@ Erledigt:
 Abnahme:
 - Jedes ausgelagerte Modul besitzt genau ein kanonisches Repository.
 - Der Inventarvergleich bildete das Ausgangsinventar von 131 Einheiten exakt
-  ab; nach allen fuenf Diagnosewellen verbleiben 95 offene
+  ab; nach Diagnose- und erster Test-/None-Welle verbleiben 89 offene
   Manifestmodule ohne fehlende, zusaetzliche oder doppelte Eintraege.
 - `FsDiag\Build.bat` erzeugt FSDIAG.R4X eigenstaendig mit drei Imports gegen
   SDK, Contract und die gepinnte R4STD-Bindung. Das Artefakt wurde als
@@ -1005,6 +1009,9 @@ Abnahme:
   Eintraege eindeutig und kollisionsfrei. Zusammen mit dem bewusst
   ausgeschlossenen scope-none-CNETD sind damit alle 36 Diagnosemodule samt
   benoetigten Laufzeitfixtures abgenommen.
+- Die fuenf neuen Testprofilmodule erweitern den gemeinsamen Plan auf 54
+  eindeutige, kollisionsfreie Eintraege. AC97FAIL baut erfolgreich, bleibt als
+  scope-none-Negativfixture aber bewusst ausserhalb jedes Images.
 
 0.64.19
 Titel: Vollstaendige Mehrrepo-Gesamtintegration abnehmen
