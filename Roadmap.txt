@@ -792,74 +792,10 @@ Notizen:
 
 0.64.18
 Titel: Auslieferbare Module in geprueften Wellen auslagern
-Status: In Arbeit
+Status: Erledigt
 
 Offene Punkte:
-- Verbindliche Inventarbasis ist Altprojekt-Commit `259cbfac`: In den fuenf
-  Komponentenwurzeln liegen 134 Manifestmodule. CLOCK, MIDI und JSON wurden
-  in 0.64.17 und alle 36 Diagnoseprogramme in fuenf Wellen von 0.64.18
-  ausgelagert. Eine erste rollenuebergreifende Testwelle uebernahm danach
-  sechs Treiber-/Protokollkomponenten, die erste Audio-Stack-Welle weitere
-  sieben, die zugehoerige Verbraucherwelle drei und die geschlossene
-  Basis-Netzwerkwelle neun. Die abschliessende Protokollwelle uebernahm die
-  letzten zehn R4P, die abschliessende Treiberwelle alle acht restlichen R4D;
-  die abschliessende Dienstwelle alle 14 restlichen Services. Die folgenden
-  38 Anwendungen verbleiben.
-- Anwendungen - 38 verbleibende R4X:
-  - AppDefaults (`APPDEF.R4X`, full)
-  - Appearance (`APPEARANCE.R4X`, full)
-  - BootInfo (`BOOTINFO.R4X`, full)
-  - Calculator (`CALC.R4X`, full)
-  - Desktop (`R4DESK.R4X`, slim)
-  - DeviceManager (`DEVMGR.R4X`, full)
-  - Dhcp (`DHCP.R4X`, full)
-  - DnsLookup (`DNSLOOKUP.R4X`, full)
-  - Example (`EXAMPLE.R4X`, full)
-  - Explorer (`EXPLORER.R4X`, slim)
-  - Fonts (`FONTS.R4X`, full)
-  - Help (`HELP.R4X`, full)
-  - HttpGet (`HTTPGET.R4X`, full)
-  - IpConfig (`IPCONFIG.R4X`, full)
-  - Klickifax (`KLICKIFAX.R4X`, full)
-  - LogCenter (`LOGCENTER.R4X`, full)
-  - MemView (`MEMVIEW.R4X`, full)
-  - NetCat (`NETCAT.R4X`, full)
-  - NetConfig (`NETCFG.R4X`, full)
-  - Notepad (`NOTEPAD.R4X`, full)
-  - Paint (`PAINT.R4X`, full)
-  - Ping (`PING.R4X`, full)
-  - R4Code/R4Build (`R4BUILD.R4X`, full)
-  - R4Code/R4CC (`R4CC.R4X`, full)
-  - R4Code/R4Code (`R4CODE.R4X`, full)
-  - R4Code/R4Pack (`R4PACK.R4X`, full)
-  - Recv (`RECV.R4X`, full)
-  - RegEdit (`REGEDIT.R4X`, full)
-  - RegistryTool (`REG.R4X`, full)
-  - Send (`SEND.R4X`, full)
-  - ServiceManager (`SERVMAN.R4X`, slim)
-  - Services (`SERVICES.R4X`, full)
-  - SysInfo (`SYSINFO.R4X`, full)
-  - SysUpdate (`SYSUPD.R4X`, slim)
-  - TcpEcho (`TCPECHO.R4X`, full)
-  - Terminal (`TERMINAL.R4X`, slim)
-  - TimeSettings (`TIMESET.R4X`, full)
-  - UpdateCenter (`UPDATE.R4X`, slim)
-- Dienste - 0 verbleibende R4X:
-  - Keine.
-- Diagnoseprogramme - 0 verbleibende R4X:
-  - Keine.
-- Treiber - 0 verbleibende R4D:
-  - Keine.
-- Protokolle - 0 verbleibende R4P:
-  - Keine.
-- Einheiten mit `IMAGE_SCOPE=test` oder `none` bleiben Teil der verbindlichen
-  Liste. Vor ihrem Transfer wird nur entschieden, ob sie ein eigenes privates
-  Komponentenrepository oder eine modulnahe Fixture im fachlichen
-  Eigentuerrepository werden; im Altprojekt verbleiben duerfen sie nicht.
-- Alle 38 Einheiten nach Abhaengigkeiten in gepruefte Wellen gruppieren.
-- Pro Welle eigenstaendige Builds und Distributionsintegration abnehmen.
-- Bootkritische Komponenten zuletzt und nur mit funktionierendem Ersatzpfad
-  aus dem integrierten Baum loesen.
+- Keine.
 
 Erledigt:
 - Das verbleibende Transferinventar wurde aus allen `module.R4MF` des
@@ -1015,19 +951,92 @@ Erledigt:
   - R4SLSVC: `6a3138342c604a994d40ad451b96640a42283bf2`
   - SSHD: `d454cc16ac45491f763ae4eea0d138d3206c17d9`
   - TCPSVC: `ac90ab2a9e9fbf7c64879bb89ccaee9739e5258e`
-  - TIMESVC: `fb922b0e4004860eae6751ff5fa932ed34b5f640`
+  - TIMESVC: `f3e487b2a8377400c6459631033bb020f1734fcf`
   - UDPSVC: `26bc707ee2631c01604736d63b2e7560df736f97`
   - WINSVC: `2584267bfddd85c48ca23e00a465214625194666`
-  - UPDSVC: `55ef4cc23eac616ae56e7bc3580329785c6f33ed`
+  - UPDSVC: `41303e3f13f6d2ec6e4ca05cba3ecd40e23e22ae`
+- SDK `418f49a795bcff0177fa622dddab57262bf503ed` exportiert seine beiden
+  Update-Module, Libraries `11d1786cb557d70313a6d67aa2eb6debe43830c4`
+  die R4FONT-Helfer als benannte Paketpfade. TimeService und UpdateService
+  wurden daraufhin von zufaellig funktionierenden Workspace-Nachbarpfaden
+  auf explizite Paketpfade umgestellt und erneut gebaut sowie gepusht.
+- Die erste Anwendungswelle uebernahm 22 Apps ohne externe Zig-Module. Alle
+  privaten Repositories bauen eigenstaendig, ihre committed Fachdateien
+  entsprechen bytegenau Commit `259cbfac`, und lokale HEADs stimmen mit
+  `origin/main` ueberein:
+  - BOOTINFO.R4X: `21a4b7f6b140d9fb65d70db9cc9b9e96b4b8c9b0`
+  - CALC.R4X: `32df344757761d16a51b64257f74dcfdd4973f78`
+  - DEVMGR.R4X: `df8c083dbf85e7ed259e9db92da3ce9ebf55e6ac`
+  - DHCP.R4X: `c84985bf482036807493aa92a6d91819b882981d`
+  - DNSLOOKUP.R4X: `8332e91ba51d9edfba89612cfce2bd7559459190`
+  - EXAMPLE.R4X: `4d35635ae92c67526a310357e1e4e76ed323024b`
+  - HELP.R4X: `7400f3d77c4548bd6336f3def130c009175eb5fe`
+  - HTTPGET.R4X: `f39b70320e8ccd9f27b3f4e8018f6a07efc726ab`
+  - IPCONFIG.R4X: `c401b685581af50f95f405cdea8c4cd50b9a5b32`
+  - LOGCENTER.R4X: `6006b5d2f2b198ba1adbc269601c6dda79477069`
+  - MEMVIEW.R4X: `2a34640725d764efc58abb20a4b34c3ff1096934`
+  - NETCAT.R4X: `7cea391fc44a76fab63f2959ba9f1ea75b2e405e`
+  - NETCFG.R4X: `d8f9c38184ec07ecb55a1042b5abd6fd05dcb641`
+  - NOTEPAD.R4X: `b88a1f426765986ff98c1008bf0b98074c8e37cc`
+  - PING.R4X: `d82b440af88b474e7dfbdd30982fbe5b0944cff0`
+  - RECV.R4X: `5304c6028c5a9a1228d4e396e01166cc16bb92df`
+  - REGEDIT.R4X: `652a3f3565a7cd28fbad6551689d454cd59acc03`
+  - SEND.R4X: `4285846184adeca09c9d6c10b5db2cbee84c3943`
+  - SERVMAN.R4X: `44de993908a36dc2c760b53d3540b40a84169fee`
+  - SERVICES.R4X: `85202e4752b81289515e7137780b9ef0ad147475`
+  - SYSINFO.R4X: `aa355ff6784e1f9c56f51d5db8059ba3630b4087`
+  - TCPECHO.R4X: `c5736b0ed4469f74009c79390d226b9420ee4e13`
+- Die zweite Anwendungswelle uebernahm acht regulaere R4STD-, R4IMG- und
+  R4FONT-Verbraucher. Externe ZIG_MODULE-Eintraege werden in Manifestreihenfolge
+  auf benannte Pfade des gepinnten Libraries-Pakets abgebildet. Alle privaten
+  Repositories bauen eigenstaendig und liegen quelltreu sowie synchron auf
+  `main`:
+  - APPDEF.R4X: `6d4490cf059d4bcc139eafbcb85406476e4d1ff0`
+  - APPEARANCE.R4X: `d25984905fdb7a9cbb7c33386c8cadeb8e5dfbaf`
+  - EXPLORER.R4X: `792408791f0e5bbddcb8512fc7f13ffe1b93364c`
+  - FONTS.R4X: `dbf6c77eecc43b1e248391ae387c5322b994d58c`
+  - PAINT.R4X: `0400c5199c4c9807be7201c4cb90fa27ccdcbbd4`
+  - REG.R4X: `2cca8524a10db05bf3452fd08159a3e0a9ae07b4`
+  - TERMINAL.R4X: `904b4dda7cb51c67dc448b32829a6dfab62d6903`
+  - TIMESET.R4X: `a36c375afd36500ec7ab41dc9929879476271af9`
+- Libraries `11d1786cb557d70313a6d67aa2eb6debe43830c4`
+  exportiert den vorhandenen R4FONT-Hostdecoder-Helfer ueber das Rootpaket.
+  Dadurch benoetigt Klickifax weder ein Subdirectory-Paket noch einen festen
+  Nachbarpfad.
+- Die dritte Anwendungswelle uebernahm die beiden komplexen Library-Apps samt
+  ihrer vorhandenen Hosttests. Desktop bestand Modulbuild und gesamten
+  Hosttestsatz. Klickifax bestand Modulbuild sowie alle 47 Hosttests; seine
+  sechs Webfont-Fixturedateien stammen bytegenau aus demselben eingefrorenen
+  Commit und liegen nun testlokal im App-Repo:
+  - R4DESK.R4X: `510683ea15d0b4691b8da60daa0501c216dfb659`
+  - KLICKIFAX.R4X: `f52bf00a661322dfafe05a6c7d0a6c825a29d041`
+- Die vierte Anwendungswelle uebernahm SYSUPD und UPDATE. Ihre externen
+  `system_update_engine`- beziehungsweise `update_service_contract`-Module
+  werden ueber benannte Pfade des gepinnten SDK-Pakets aufgeloest. Beide
+  privaten Repositories bauen eigenstaendig, sind quelltreu und synchron:
+  - SYSUPD.R4X: `463f8c2114d8e64912495c83cf1e0213affa85de`
+  - UPDATE.R4X: `0d112dd27c7e964665af2530f7ce04d82b4133b7`
+- Die fuenfte und abschliessende Anwendungswelle uebernahm die vier
+  R4Code-Einheiten als geschlossene Buildgruppe. R4CC und R4Pack besitzen die
+  jeweilige eingefrorene Core-Quelle; R4Build konsumiert beide ueber gepinnte
+  Paketpfade. R4Code bindet R4STD ueber das gepinnte Libraries-Paket. Alle
+  vier privaten Repositories bauen eigenstaendig, sind quelltreu und synchron:
+  - R4CC.R4X: `58d6e4ca7e318d29e653772e0c8a1454c67481d9`
+  - R4PACK.R4X: `4658316474124812b5b1426234e81dc756c2c5ea`
+  - R4BUILD.R4X: `27f59c027da3b09f003d139822cfca4486f91ce1`
+  - R4CODE.R4X: `ce27370f747d0f06298a638720f137fa7162341f`
+- Damit sind alle 134 Manifestmodule des eingefrorenen Altprojektstands einem
+  privaten Komponentenrepository zugeordnet und aus dem offenen
+  Transferinventar entfernt.
 - Die API-Antwortdateien von `Github.bat` enthalten nun den
   Repositoryschluessel im Tempnamen, sodass parallele private Neuanlagen sich
   nicht gegenseitig loeschen.
 
 Abnahme:
-- Jedes ausgelagerte Modul besitzt genau ein kanonisches Repository.
-- Der Inventarvergleich bildete das Ausgangsinventar von 131 Einheiten exakt
-  ab; nach Diagnose-, erster Test-/None-, Audio-, Protokoll-, Treiber- und
-  Dienstwellen verbleiben 38 offene Manifestmodule ohne fehlende,
+- Jedes der 134 ausgelagerten Manifestmodule besitzt genau ein kanonisches
+  Komponentenrepository.
+- Der Inventarvergleich bildet das Ausgangsinventar von 134 Einheiten exakt
+  ab. Nach allen Wellen verbleiben null offene Manifestmodule ohne fehlende,
   zusaetzliche oder doppelte Eintraege.
 - `FsDiag\Build.bat` erzeugt FSDIAG.R4X eigenstaendig mit drei Imports gegen
   SDK, Contract und die gepinnte R4STD-Bindung. Das Artefakt wurde als
@@ -1066,6 +1075,23 @@ Abnahme:
 - Die 14 Slim-/Full-Profil-Artefakte der Dienstwelle erweitern den gemeinsamen
   Plan auf 105 eindeutige und kollisionsfreie Eintraege. Damit ist die
   gesamte Dienstklasse abgenommen.
+- Die 22 Full-/Slim-Profil-Artefakte der ersten Anwendungswelle erweitern den
+  gemeinsamen Plan auf 127 eindeutige und kollisionsfreie Eintraege.
+- Die acht Full-/Slim-Profil-Artefakte der zweiten Anwendungswelle erweitern
+  den gemeinsamen Plan auf 135 eindeutige und kollisionsfreie Eintraege.
+- Desktop und Klickifax erweitern den gemeinsamen Plan auf 137 eindeutige und
+  kollisionsfreie Eintraege; beide Hosttestsuiten sind ebenfalls gruen.
+- SYSUPD und UPDATE erweitern den gemeinsamen Plan auf 139 eindeutige und
+  kollisionsfreie Eintraege.
+- Die vier R4Code-Artefakte erweitern den Wellenplan auf 143 eindeutige und
+  kollisionsfreie Eintraege. Der finale Plan nimmt zusaetzlich die drei Piloten
+  aus 0.64.17 auf und enthaelt damit 146 Eintraege.
+- Der finale Distributionsplan besteht aus 132 installierbaren Modulen und 14
+  LoaderDiag-Fixtures. CNETD und AC97FAIL sind als die beiden
+  `IMAGE_SCOPE=none`-Einheiten bewusst nicht im Imageplan enthalten.
+- Der kanonische Audit pruefte 139 Repositories: fuenf zentrale und 134
+  Komponentenrepositories. Alle Arbeitsbaeume sind sauber, liegen auf `main`,
+  zeigen auf `R4OSDev` und stimmen mit `origin/main` ueberein.
 
 0.64.19
 Titel: Vollstaendige Mehrrepo-Gesamtintegration abnehmen

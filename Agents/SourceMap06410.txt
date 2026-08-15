@@ -366,6 +366,59 @@ Abschliessende Dienstwelle seit 0.64.18:
     Services/WindowService     -> r4os-service-windowservice
     Software/UpdateService     -> r4os-service-updateservice
 
+Erste Anwendungswelle seit 0.64.18:
+
+    Software/BootInfo        -> r4os-app-bootinfo
+    Software/Calculator      -> r4os-app-calculator
+    Software/DeviceManager   -> r4os-app-devicemanager
+    Software/Dhcp            -> r4os-app-dhcp
+    Software/DnsLookup       -> r4os-app-dnslookup
+    Software/Example         -> r4os-app-example
+    Software/Help            -> r4os-app-help
+    Software/HttpGet         -> r4os-app-httpget
+    Software/IpConfig        -> r4os-app-ipconfig
+    Software/LogCenter       -> r4os-app-logcenter
+    Software/MemView         -> r4os-app-memview
+    Software/NetCat          -> r4os-app-netcat
+    Software/NetConfig       -> r4os-app-netconfig
+    Software/Notepad         -> r4os-app-notepad
+    Software/Ping            -> r4os-app-ping
+    Software/Recv            -> r4os-app-recv
+    Software/RegEdit         -> r4os-app-regedit
+    Software/Send            -> r4os-app-send
+    Software/ServiceManager  -> r4os-app-servicemanager
+    Software/Services        -> r4os-app-services
+    Software/SysInfo         -> r4os-app-sysinfo
+    Software/TcpEcho         -> r4os-app-tcpecho
+
+Zweite Anwendungswelle seit 0.64.18:
+
+    Software/AppDefaults   -> r4os-app-appdefaults
+    Software/Appearance    -> r4os-app-appearance
+    Software/Explorer      -> r4os-app-explorer
+    Software/Fonts         -> r4os-app-fonts
+    Software/Paint         -> r4os-app-paint
+    Software/RegistryTool  -> r4os-app-registrytool
+    Software/Terminal      -> r4os-app-terminal
+    Software/TimeSettings  -> r4os-app-timesettings
+
+Dritte Anwendungswelle seit 0.64.18:
+
+    Software/Desktop    -> r4os-app-desktop
+    Software/Klickifax  -> r4os-app-klickifax
+
+Vierte Anwendungswelle seit 0.64.18:
+
+    Software/SysUpdate      -> r4os-app-sysupdate
+    Software/UpdateCenter   -> r4os-app-updatecenter
+
+Fuenfte und abschliessende Anwendungswelle seit 0.64.18:
+
+    Software/R4Code/Modules/R4CC    -> r4os-app-r4cc
+    Software/R4Code/Modules/R4Pack  -> r4os-app-r4pack
+    Software/R4Code/Modules/R4Build -> r4os-app-r4build
+    Software/R4Code/Modules/R4Code  -> r4os-app-r4code
+
 Alle genannten Einheiten stammen fachlich aus Commit `259cbfac`. Der
 SDK-Build loest ZIG_MODULE-Pfade ueber explizite Paketpfade auf; ein
 Libraryname wird nicht im Buildscript dupliziert. JSON bezieht auch seine
@@ -405,6 +458,43 @@ Konfiguration aber nicht selbst; sie bleibt Eigentum der Distribution.
 TimeService und UpdateService beziehen R4STD explizit aus dem gepinnten
 Libraries-Paket. UpdateService liegt im neuen Workspace unter
 `Repositories/Services`, unabhaengig von seinem historischen Quellpfad.
+
+Die erste Anwendungswelle umfasst 22 Apps ohne externe ZIG_MODULE-Kante.
+Jede bezieht ausschliesslich das gepinnte SDK; Laufzeitabhaengigkeiten bleiben
+als IMPORT-Zeilen im unveraenderten Manifest. Icons und Hilfetexte verbleiben
+als modulnahe Ressourcen im jeweiligen App-Repository. Der gemeinsame
+Distributionsplan akzeptiert nach dieser Welle 127 eindeutige Artefakte.
+
+Die zweite Anwendungswelle umfasst acht regulaere Library-Verbraucher. Ihre
+Manifestnamen und -reihenfolge bleiben unveraendert, waehrend der jeweilige
+Build R4STD, R4IMG oder die R4FONT-Helfer ueber benannte Pfade des gepinnten
+Libraries-Pakets aufloest. Der gemeinsame Plan umfasst danach 135 Artefakte.
+
+Desktop und Klickifax behalten ihre umfangreichen Hosttests. Deren SDK-,
+R4STD-, R4IMG- und R4FONT-Kanten werden ebenfalls ueber Paketpfade aufgeloest.
+Klickifax besitzt die zuvor rootweiten Browser-Webfont-Fixtures nun testlokal;
+alle sechs Dateien stammen unveraendert aus Commit `259cbfac`. Der gemeinsame
+Plan umfasst danach 137 Artefakte.
+
+SYSUPD und UPDATE beziehen ihre externen Buildmodule ueber die benannten
+Paketpfade `system_update_engine` und `update_service_contract` des gepinnten
+SDKs. Ihre Laufzeitimports bleiben unveraendert im Manifest. Der gemeinsame
+Plan umfasst danach 139 Artefakte.
+
+R4CC besitzt `Shared/r4cc_core.zig`, R4Pack entsprechend
+`Shared/r4pack_core.zig`; beide exportieren ihren Core als benannten
+Paketpfad. R4Build pinnt diese beiden Komponenten und konsumiert die
+Paketpfade in Manifestreihenfolge. R4Code bezieht R4STD aus dem gepinnten
+Libraries-Paket. Nach diesen vier Artefakten umfasst der Wellenplan 143
+Eintraege. Der finale Plan nimmt auch CLOCK, MIDI und JSON aus 0.64.17 auf und
+enthaelt 146 kollisionsfreie Eintraege: 132 installierbare Manifestmodule und
+14 LoaderDiag-Fixtures. NetworkFacadeCDiag und AudioFail bleiben als die zwei
+`IMAGE_SCOPE=none`-Module bewusst ausserhalb des Imageplans.
+
+Damit sind alle 134 Manifestmodule des eingefrorenen Commits einem privaten
+Komponentenrepository zugeordnet; das offene Transferinventar ist leer. Der
+Abschlussaudit umfasst fuenf zentrale und 134 Komponentenrepositories. Alle
+139 Arbeitsbaeume liegen sauber und synchron auf `main` bei `R4OSDev`.
 
 KlickifaxLive bezieht R4IMG, R4CfgDiag und StdDiag beziehen R4STD ueber den
 gepinnten Libraries-Commit. NetworkFacadeCDiag bleibt als echter C-Build mit
