@@ -95,10 +95,11 @@ Die oeffentlichen R4OS-Repositories unter der GitHub-Organisation `R4OSDev`:
     Integrationsabnahmen und den spaeteren reproduzierbaren
     Komponentenstand.
 
-- `r4os-module-*`
+- Rollenbezogene Komponentenrepositories
   - Jedes auslieferbare R4X-, R4D- oder R4P-Projekt wird langfristig ein
-    eigenes Repository, zum Beispiel `r4os-module-terminal`,
-    `r4os-driver-rtl8168` oder `r4os-service-sshd`.
+    eigenes Repository. Anwendungen, Dienste, Treiber und Protokolle heissen
+    zum Beispiel `r4os-app-terminal`, `r4os-service-sshd`,
+    `r4os-driver-rtl8168` und `r4os-protocol-json`.
   - Jedes Modul baut eigenstaendig gegen SDK und Contract und bringt seine
     modulnahen Tests mit.
   - Externe Entwickler benoetigen nur DevKit, SDK und ihr Modulrepository.
@@ -340,7 +341,8 @@ Noch offene Entscheidungen bei der Wiederaufnahme
   Image-, NTFS-, R4U- und Transport-Hosttools.
 - Welche generierten Contract-Artefakte als Releasepaket konsumiert und welche
   kontrolliert im jeweiligen Verbraucherrepository materialisiert werden.
-- Genaue Reihenfolge und Granularitaet der `r4os-module-*`-Repositories.
+- Genaue Reihenfolge und Granularitaet der rollenbezogenen
+  Komponentenrepositories.
 - Mechanismus, mit dem der Workspace mehrere Repositories gezielt auf einen
   kompatiblen Contract-/SDK-Stand aktualisiert.
 - Reproduzierbare Komponentenlocks und Paketfeed; beides bewusst erst nach der
@@ -722,14 +724,10 @@ Notizen:
 
 0.64.17
 Titel: Je einen R4X-, R4D- und R4P-Piloten auslagern
-Status: In Arbeit
+Status: Erledigt
 
 Offene Punkte:
-- Die drei leeren oeffentlichen GitHub-Repositories anlegen, nachdem die
-  automatische Organisationserstellung mit HTTP 403 abgewiesen wurde:
-  `r4os-module-clock`, `r4os-driver-midi`, `r4os-protocol-json`.
-- Die vorbereiteten lokalen Repositories pushen und Remote-/Sauberkeitsaudit
-  ausfuehren.
+- Keine.
 
 Erledigt:
 - CLOCK.R4X, MIDI.R4D und JSON.R4P als repraesentative, nicht bootkritische
@@ -750,9 +748,21 @@ Erledigt:
 - CLOCK konsumiert ausschliesslich `r4std_zig_binding` aus dem gepinnten
   Librarypaket. JSON bezieht seine SDK-Fassade im ABI-Test ueber die gepinnte
   SDK-Abhaengigkeit; MIDI benoetigt nur SDK und Contract.
-- `Tools/Github.bat` kann App-Module, Treiber und Protokolle dynamisch nach
+- `Tools/Github.bat` kann Anwendungen, Treiber und Protokolle dynamisch nach
   sicher validiertem Komponentennamen verwalten. `Tools/Setup.bat` legt die
   gemeinsamen Module- und Artefaktwurzeln idempotent an.
+- Die Repositorynamen folgen der fachlichen Rolle statt dem generischen
+  Modulbegriff: `r4os-app-*`, `r4os-service-*`, `r4os-driver-*` und
+  `r4os-protocol-*`. Die drei Pilotziele wurden zunaechst privat angelegt;
+  ihre Veroeffentlichung folgt mit der Repositoryhygiene am Ende des Umbaus.
+- Alle drei Pilot-Repositories wurden auf `main` gepusht und gegen den
+  jeweiligen GitHub-Remote bytegenau synchronisiert:
+  - CLOCK: `R4OSDev/r4os-app-clock`, Commit
+    `6341dfd66aade9108c3246194572448424700667`
+  - MIDI: `R4OSDev/r4os-driver-midi`, Commit
+    `9441d8c7668ebdfce547a310e300faa0d5bd7ab8`
+  - JSON: `R4OSDev/r4os-protocol-json`, Commit
+    `ebb1dc7d8ed35d3224b71f0385828e4b259c0315`
 
 Abnahme:
 - `Clock\Build.bat` erzeugt CLOCK.R4X mit sechs Imports und expliziter
@@ -763,6 +773,8 @@ Abnahme:
 - Die Produktivquellen aller drei Piloten sind byteidentisch zu Commit
   `259cbfac`; geaendert wurden ausschliesslich Repository-/Buildgrenzen und
   ein veralteter Pfadkommentar im JSON-Conformance-Test.
+- Alle drei Worktrees sind sauber; lokale HEADs, `origin/main` und die
+  GitHub-Branchreferenzen stimmen jeweils exakt ueberein.
 
 Notizen:
 - Der verwendete GitHub-Token darf bestehende Repositories pushen, besitzt
