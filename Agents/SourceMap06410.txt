@@ -325,6 +325,19 @@ Basis-Netzwerkwelle seit 0.64.18:
     Protocols/NetTcp        -> r4os-protocol-nettcp
     Protocols/NetUdp        -> r4os-protocol-netudp
 
+Abschliessende Protokollwelle seit 0.64.18:
+
+    Protocols/R4Auth        -> r4os-protocol-r4auth
+    Protocols/R4Css         -> r4os-protocol-r4css
+    Protocols/R4Html        -> r4os-protocol-r4html
+    Protocols/R4Http        -> r4os-protocol-r4http
+    Protocols/R4Js          -> r4os-protocol-r4js
+    Protocols/R4Tls         -> r4os-protocol-r4tls
+    Protocols/UsbHidBoot    -> r4os-protocol-usbhidboot
+    Protocols/UsbHidReport  -> r4os-protocol-usbhidreport
+    Protocols/UsbMscBot     -> r4os-protocol-usbmscbot
+    Protocols/UsbScsiBlock  -> r4os-protocol-usbscsiblock
+
 Alle genannten Einheiten stammen fachlich aus Commit `259cbfac`. Der
 SDK-Build loest ZIG_MODULE-Pfade ueber explizite Paketpfade auf; ein
 Libraryname wird nicht im Buildscript dupliziert. JSON bezieht auch seine
@@ -347,6 +360,11 @@ Die Basis-Netzwerkwelle ist ueber ihre `META=r4p.dep`-Kanten geschlossen:
 Ethernet ist die Basis, darauf folgen ARP und IPv4 sowie ICMP, UDP, TCP, DHCP
 und DNS. SerialLink besitzt innerhalb der Welle keine weitere Protokollkante.
 Alle neun Einheiten beziehen zur Buildzeit ausschliesslich das zentrale SDK.
+
+Die restlichen Protokolle bilden zwei weitere geschlossene Kanten:
+R4AUTH haengt an R4TLS, USBSCSI an USBBOT. R4CSS, R4HTML, R4HTTP, R4JS sowie
+die beiden HID-Protokolle besitzen keine weitere R4P-Abhaengigkeit. Damit ist
+die gesamte Protokollklasse aus dem Altprojekt auf Einzelrepos abgebildet.
 
 KlickifaxLive bezieht R4IMG, R4CfgDiag und StdDiag beziehen R4STD ueber den
 gepinnten Libraries-Commit. NetworkFacadeCDiag bleibt als echter C-Build mit

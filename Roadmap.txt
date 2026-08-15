@@ -801,7 +801,8 @@ Offene Punkte:
   ausgelagert. Eine erste rollenuebergreifende Testwelle uebernahm danach
   sechs Treiber-/Protokollkomponenten, die erste Audio-Stack-Welle weitere
   sieben, die zugehoerige Verbraucherwelle drei und die geschlossene
-  Basis-Netzwerkwelle neun; die folgenden 70 Einheiten verbleiben.
+  Basis-Netzwerkwelle neun. Die abschliessende Protokollwelle uebernahm die
+  letzten zehn R4P; die folgenden 60 Einheiten verbleiben.
 - Anwendungen - 38 verbleibende R4X:
   - AppDefaults (`APPDEF.R4X`, full)
   - Appearance (`APPEARANCE.R4X`, full)
@@ -867,22 +868,13 @@ Offene Punkte:
   - USBMSC (`USBMSC.R4D`, slim)
   - VirtioNet (`VIRTNET.R4D`, slim)
   - XHCI (`XHCI.R4D`, slim)
-- Protokolle - 10 verbleibende R4P:
-  - R4Auth (`R4AUTH.R4P`, slim)
-  - R4Css (`R4CSS.R4P`, full)
-  - R4Html (`R4HTML.R4P`, full)
-  - R4Http (`R4HTTP.R4P`, full)
-  - R4Js (`R4JS.R4P`, full)
-  - R4Tls (`R4TLS.R4P`, slim)
-  - UsbHidBoot (`USBHID.R4P`, slim)
-  - UsbHidReport (`HIDREPORT.R4P`, slim)
-  - UsbMscBot (`USBBOT.R4P`, slim)
-  - UsbScsiBlock (`USBSCSI.R4P`, slim)
+- Protokolle - 0 verbleibende R4P:
+  - Keine.
 - Einheiten mit `IMAGE_SCOPE=test` oder `none` bleiben Teil der verbindlichen
   Liste. Vor ihrem Transfer wird nur entschieden, ob sie ein eigenes privates
   Komponentenrepository oder eine modulnahe Fixture im fachlichen
   Eigentuerrepository werden; im Altprojekt verbleiben duerfen sie nicht.
-- Alle 70 Einheiten nach Abhaengigkeiten in gepruefte Wellen gruppieren.
+- Alle 60 Einheiten nach Abhaengigkeiten in gepruefte Wellen gruppieren.
 - Pro Welle eigenstaendige Builds und Distributionsintegration abnehmen.
 - Bootkritische Komponenten zuletzt und nur mit funktionierendem Ersatzpfad
   aus dem integrierten Baum loesen.
@@ -1000,6 +992,20 @@ Erledigt:
   - NETR4SL: `86deedb7020fe504bade604715a2bfae884ed220`
   - NETTCP: `fc219951145cad1e643ab47b54b4e179412d63e5`
   - NETUDP: `5c2667e448a67135f81a68f53b85d35a6d6fd732`
+- Die abschliessende Protokollwelle uebernahm den Web-/Security-Block und die
+  vier USB-Vertragsmodule. R4AUTH/R4TLS und USBSCSI/USBBOT bilden jeweils
+  geschlossene Laufzeit-Abhaengigkeitsgruppen; damit sind alle R4P in eigenen
+  privaten Repositories auf `main` gesichert:
+  - R4AUTH: `e6fc7fd7e581d15e44c70b5b65b57b253cad16ef`
+  - R4CSS: `9100844f57da96f30870dd90ca04d20d5144ac1a`
+  - R4HTML: `ba56445cbccd8c161b8a89a99340ad393e90c64c`
+  - R4HTTP: `93e98843e639e62d2959c9b610e666407de3da4c`
+  - R4JS: `806197819d603ebceec53b736b1aa9d210ccc18d`
+  - R4TLS: `9b5cb0f9f83bbe16651752d2db274a43d2adc98b`
+  - USBHID: `859e3af584b5f7c5079c734891cdf76f2629c094`
+  - HIDREPORT: `226176bcc67d7788d5f6eab1129a44952b940b97`
+  - USBBOT: `5118092153d2512543e1a7f0e6a0f9860b924017`
+  - USBSCSI: `0b8bcb9881359b4449d7e2c44b3ec22609f8ce73`
 - Die API-Antwortdateien von `Github.bat` enthalten nun den
   Repositoryschluessel im Tempnamen, sodass parallele private Neuanlagen sich
   nicht gegenseitig loeschen.
@@ -1007,8 +1013,8 @@ Erledigt:
 Abnahme:
 - Jedes ausgelagerte Modul besitzt genau ein kanonisches Repository.
 - Der Inventarvergleich bildete das Ausgangsinventar von 131 Einheiten exakt
-  ab; nach Diagnose-, erster Test-/None-, Audio- und Basis-Netzwerkwelle
-  verbleiben 70 offene Manifestmodule ohne fehlende, zusaetzliche oder
+  ab; nach Diagnose-, erster Test-/None-, Audio- und allen Protokollwellen
+  verbleiben 60 offene Manifestmodule ohne fehlende, zusaetzliche oder
   doppelte Eintraege.
 - `FsDiag\Build.bat` erzeugt FSDIAG.R4X eigenstaendig mit drei Imports gegen
   SDK, Contract und die gepinnte R4STD-Bindung. Das Artefakt wurde als
@@ -1038,6 +1044,9 @@ Abnahme:
 - Die acht Slim- und das eine Full-Profil-Artefakt der Basis-Netzwerkwelle
   erweitern den gemeinsamen Plan auf 73 eindeutige und kollisionsfreie
   Eintraege.
+- Die zehn Artefakte der abschliessenden Protokollwelle bauen eigenstaendig
+  und erweitern den gemeinsamen Plan auf 83 eindeutige, kollisionsfreie
+  Eintraege. Damit ist die gesamte Protokollklasse abgenommen.
 
 0.64.19
 Titel: Vollstaendige Mehrrepo-Gesamtintegration abnehmen
