@@ -21,8 +21,12 @@ lokale Credentials-Vorlage ausfuellen. Anschliessend mit
 Der gemeinsame Windows-Build startet mit `Tools\Build.bat`; ohne Argumente
 erscheint das Menue. `Tools\Build.bat -all` baut den gesamten Workspace und
 das Full-Image, `-gui` startet danach QEMU sichtbar und `-qemu` startet nur ein
-bereits vorhandenes Image. Image-Erzeugung und QEMU bleiben Eigentum von
-`Repositories\Distribution\Build.bat`.
+bereits vorhandenes Image. `-test` baut das Testprofil und nimmt es headless
+ab; `-testonly` beziehungsweise `-headless` prueft ein vorhandenes Test-Image.
+Image-Erzeugung und QEMU-Aufruf bleiben Eigentum von
+`Repositories\Distribution\Build.bat`. Die QEMU-Binaries liegen dabei nur
+unter `DevKit\Emulation\QEMU`; die Distribution besitzt lediglich die
+R4OS-Konfiguration und Testlogik.
 
 Komponentenquellen, installierte Werkzeuge, Buildartefakte und Zugangsdaten
 werden nicht in diesem Repository gespeichert.

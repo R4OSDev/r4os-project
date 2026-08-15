@@ -1,6 +1,6 @@
 param(
     [Parameter(Mandatory = $true)]
-    [ValidateSet('central', 'kernel', 'modules', 'module', 'plan', 'image', 'verify', 'qemu', 'all', 'gui')]
+    [ValidateSet('central', 'kernel', 'modules', 'module', 'plan', 'image', 'verify', 'qemu', 'headless', 'all', 'test', 'gui')]
     [string]$Action,
 
     [ValidateSet('Slim', 'Full', 'Test')]
@@ -24,7 +24,26 @@ $zigExe = Join-Path $devKitRoot 'Toolchains/Zig/zig.exe'
 $moduleCatalogExe = Join-Path $sdkRoot 'zig-out/bin/module-catalog.exe'
 $distributionInputRoot = Join-Path $artifactsRoot 'Distribution/Inputs'
 $workspaceMapPath = Join-Path $distributionInputRoot 'WorkspaceModules.map'
+$distributionToolRoot = Join-Path $artifactsRoot 'Distribution/HostTools/bin'
+$distributionFontRoot = Join-Path $artifactsRoot 'Distribution/HostTools/share/r4os/fonts'
+$distributionGeneratedRoot = Join-Path $artifactsRoot 'Distribution/Generated'
 $dryRun = $env:R4OS_BUILD_DRYRUN -eq '1'
+$systemFontNames = @(
+    'R4SANS08.R4F',
+    'R4SANS08B.R4F',
+    'R4SANS12.R4F',
+    'R4SANS12B.R4F',
+    'R4SANS16.R4F',
+    'R4SANS16B.R4F',
+    'R4SANS24.R4F',
+    'R4SANS24B.R4F',
+    'R4SANS32.R4F',
+    'R4SANS32B.R4F',
+    'R4SANS40.R4F',
+    'R4SANS40B.R4F',
+    'TERMINAL16.R4F',
+    'TERMINAL8.R4F'
+)
 $testImageIncludes = @(
     '/R4OS/SOFTWARE/TERMINAL/BEEP.R4X',
     '/R4OS/SOFTWARE/DESKTOP/NOTEPAD.R4X',
@@ -301,25 +320,115 @@ function Write-WorkspaceMap {
     Write-Host ('Workspace-Map: ' + $lines.Count + ' Manifeste -> ' + $workspaceMapPath)
 }
 
-function Write-CommonPlan {
+function Get-WorkspaceArtifact([string]$Name, [string]$Kind) {
+    Assert-File $workspaceMapPath 'Workspace-Map'
+    $matches = [Collections.Generic.List[string]]::new()
+    foreach ($line in [IO.File]::ReadAllLines($workspaceMapPath)) {
+        if ([string]::IsNullOrWhiteSpace($line)) { continue }
+        $separator = $line.IndexOf('|')
+        if ($separator -le 0 -or $separator -ge $line.Length - 1) {
+            throw ('Ungueltige Workspace-Map-Zeile: ' + $line)
+        }
+        $manifest = $line.Substring(0, $separator)
+        if (-not (Get-ManifestValue $manifest 'NAME').Equals($Name, [StringComparison]::OrdinalIgnoreCase)) { continue }
+        if (-not (Get-ManifestValue $manifest 'KIND').Equals($Kind, [StringComparison]::OrdinalIgnoreCase)) { continue }
+        $matches.Add([IO.Path]::GetFullPath($line.Substring($separator + 1)))
+    }
+    if ($matches.Count -ne 1) {
+        throw ('Workspace-Artefakt muss genau einmal vorhanden sein: ' + $Name + '.' + $Kind + ' (gefunden: ' + $matches.Count + ')')
+    }
+    Assert-File $matches[0] ('Workspace-Artefakt ' + $Name + '.' + $Kind)
+    return $matches[0]
+}
+
+function Prepare-DistributionCommonArtifacts {
+    Write-Section 'Gemeinsame Distributionsartefakte'
+    $preloadTool = Join-Path $distributionToolRoot 'preload-image.exe'
+    $registryTool = Join-Path $distributionToolRoot 'default-registry.exe'
+    $distributionToolsMissing =
+        -not (Test-Path -LiteralPath $preloadTool -PathType Leaf) -or
+        -not (Test-Path -LiteralPath $registryTool -PathType Leaf)
+    foreach ($fontName in $systemFontNames) {
+        if (-not (Test-Path -LiteralPath (Join-Path $distributionFontRoot $fontName) -PathType Leaf)) {
+            $distributionToolsMissing = $true
+        }
+    }
+    if ($distributionToolsMissing) {
+        Invoke-External (Join-Path $distributionRoot 'Build.bat') @('tools') $distributionRoot
+    }
+    Assert-File $preloadTool 'Preload-Image-Tool'
+    Assert-File $registryTool 'Default-Registry-Tool'
+    if (-not (Test-Path -LiteralPath $distributionGeneratedRoot)) {
+        New-Item -ItemType Directory -Path $distributionGeneratedRoot | Out-Null
+    }
+
+    $preloadPath = Join-Path $distributionGeneratedRoot 'PRELOAD.R4I'
+    Invoke-External $preloadTool @(
+        '--output', $preloadPath,
+        '--add', 'r4l', 'R4DEV.R4L', 'R4DEV', (Get-WorkspaceArtifact 'R4DEV' 'R4L'),
+        '--add', 'r4p', 'HIDREPORT.R4P', 'usb.hid_report', (Get-WorkspaceArtifact 'HIDREPORT' 'R4P'),
+        '--add', 'r4p', 'USBHID.R4P', 'usb.hid_boot', (Get-WorkspaceArtifact 'USBHID' 'R4P'),
+        '--add', 'r4p', 'USBBOT.R4P', 'usb.msc_bot', (Get-WorkspaceArtifact 'USBBOT' 'R4P'),
+        '--add', 'r4p', 'USBSCSI.R4P', 'usb.scsi_block', (Get-WorkspaceArtifact 'USBSCSI' 'R4P'),
+        '--add', 'r4d', 'XHCI.R4D', 'usb.host.xhci', (Get-WorkspaceArtifact 'XHCI' 'R4D'),
+        '--add', 'r4d', 'USBMSC.R4D', 'usb.storage.msc', (Get-WorkspaceArtifact 'USBMSC' 'R4D'),
+        '--add', 'r4d', 'AHCI.R4D', 'storage.ahci', (Get-WorkspaceArtifact 'AHCI' 'R4D'),
+        '--add', 'r4d', 'NVME.R4D', 'storage.nvme', (Get-WorkspaceArtifact 'NVME' 'R4D'),
+        '--add', 'r4d', 'ATAPIO.R4D', 'storage.ata', (Get-WorkspaceArtifact 'ATAPIO' 'R4D')
+    ) $workspaceRoot
+
+    $registryRoot = Join-Path $distributionGeneratedRoot 'RegistryDefaults'
+    if (-not (Test-Path -LiteralPath $registryRoot)) {
+        New-Item -ItemType Directory -Path $registryRoot | Out-Null
+    }
+    Invoke-External $registryTool @('--output', $registryRoot) $workspaceRoot
+}
+
+function Write-CommonPlan([string]$SelectedProfile) {
     $kernelArtifact = Join-Path $kernelRoot 'zig-out/bin/r4os.elf'
+    $limineConfig = Join-Path $kernelRoot 'Boot/limine.conf'
     $limineArtifact = Join-Path $devKitRoot 'Boot/Limine/limine-bios.sys'
+    $limineEfiArtifact = Join-Path $devKitRoot 'Boot/Limine/BOOTX64.EFI'
+    $preloadArtifact = Join-Path $distributionGeneratedRoot 'PRELOAD.R4I'
+    $registryArtifact = Join-Path $distributionGeneratedRoot 'RegistryDefaults/SYSTEM.R4R'
+    $modulesInventory = Join-Path $distributionGeneratedRoot 'MODULES.JSON'
     Assert-File $kernelArtifact 'Kernelartefakt'
+    Assert-File $limineConfig 'Limine-Konfiguration'
     Assert-File $limineArtifact 'Limine BIOS-Datei'
+    Assert-File $limineEfiArtifact 'Limine EFI-Datei'
+    Assert-File $preloadArtifact 'PRELOAD.R4I'
+    Assert-File $registryArtifact 'Default-Registry'
+    Assert-File $modulesInventory 'Modulinventar'
     $commonPlan = Join-Path $distributionInputRoot 'Common.plan'
-    Write-Utf8NoBomLines $commonPlan @(
-        ((Convert-ToPlanPath $kernelArtifact) + ':/boot/r4os.elf'),
-        ((Convert-ToPlanPath $limineArtifact) + ':/boot/limine-bios.sys')
-    )
-    Write-Host ('Common-Plan: 2 Eintraege -> ' + $commonPlan)
+    $commonEntries = [Collections.Generic.List[string]]::new()
+    $commonEntries.Add((Convert-ToPlanPath $limineConfig) + ':/boot/limine.conf')
+    $commonEntries.Add((Convert-ToPlanPath $limineEfiArtifact) + ':/EFI/BOOT/BOOTX64.EFI')
+    $commonEntries.Add((Convert-ToPlanPath $kernelArtifact) + ':/boot/r4os.elf')
+    $commonEntries.Add((Convert-ToPlanPath $limineArtifact) + ':/boot/limine-bios.sys')
+    $commonEntries.Add((Convert-ToPlanPath $preloadArtifact) + ':/boot/preload.r4i')
+    $commonEntries.Add((Convert-ToPlanPath (Get-WorkspaceArtifact 'R4DEV' 'R4L')) + ':/boot/preload/r4dev.r4l')
+    $commonEntries.Add((Convert-ToPlanPath (Get-WorkspaceArtifact 'HIDREPORT' 'R4P')) + ':/boot/preload/hidreport.r4p')
+    $commonEntries.Add((Convert-ToPlanPath (Get-WorkspaceArtifact 'USBHID' 'R4P')) + ':/boot/preload/usbhid.r4p')
+    $commonEntries.Add((Convert-ToPlanPath (Get-WorkspaceArtifact 'USBBOT' 'R4P')) + ':/boot/preload/usbbot.r4p')
+    $commonEntries.Add((Convert-ToPlanPath (Get-WorkspaceArtifact 'USBSCSI' 'R4P')) + ':/boot/preload/usbscsi.r4p')
+    $commonEntries.Add((Convert-ToPlanPath $registryArtifact) + ':/R4OS/REGISTRY/SYSTEM.R4R')
+    $commonEntries.Add((Convert-ToPlanPath $modulesInventory) + ':/R4OS/CONFIG/MODULES.JSON')
+    foreach ($fontName in $systemFontNames) {
+        $fontArtifact = Join-Path $distributionFontRoot $fontName
+        Assert-File $fontArtifact ('Systemfont ' + $fontName)
+        $commonEntries.Add((Convert-ToPlanPath $fontArtifact) + ':/R4OS/FONTS/' + $fontName)
+    }
+    Write-Utf8NoBomLines $commonPlan $commonEntries.ToArray()
+    Write-Host ('Common-Plan: ' + $commonEntries.Count + ' Eintraege -> ' + $commonPlan)
 }
 
 function New-ImagePlan([string]$SelectedProfile) {
     Write-Section ($SelectedProfile + '-Imageplan')
     Ensure-ModuleCatalog
     Write-WorkspaceMap
-    Write-CommonPlan
+    Prepare-DistributionCommonArtifacts
     $componentPlan = Join-Path $distributionInputRoot ($SelectedProfile + '.plan')
+    $modulesInventory = Join-Path $distributionGeneratedRoot 'MODULES.JSON'
     $arguments = [Collections.Generic.List[string]]::new()
     $arguments.Add('workspace-image-plan')
     $arguments.Add('--workspace-map')
@@ -334,9 +443,16 @@ function New-ImagePlan([string]$SelectedProfile) {
     }
     $arguments.Add('--output')
     $arguments.Add($componentPlan)
+    $arguments.Add('--kernel-version-source')
+    $arguments.Add((Join-Path $kernelRoot 'VERSION.R4S'))
+    $arguments.Add('--kernel-artifact')
+    $arguments.Add((Join-Path $kernelRoot 'zig-out/bin/r4os.elf'))
+    $arguments.Add('--inventory-output')
+    $arguments.Add($modulesInventory)
     Invoke-External $moduleCatalogExe @(
         $arguments.ToArray()
     ) $workspaceRoot
+    Write-CommonPlan $SelectedProfile
     Write-Host ('Komponentenplan: ' + $componentPlan)
 }
 
@@ -369,7 +485,14 @@ switch ($Action) {
     }
     'verify' { Invoke-Distribution 'verify' $Profile }
     'qemu' { Invoke-Distribution 'qemu' $Profile }
+    'headless' { Invoke-Distribution 'headless' 'Test' }
     'all' { Build-All $Profile }
+    'test' {
+        Invoke-Distribution 'test' 'Test'
+        Build-All 'Test'
+        Invoke-Distribution 'verify' 'Test'
+        Invoke-Distribution 'headless' 'Test'
+    }
     'gui' {
         Build-All 'Full'
         Invoke-Distribution 'qemu' 'Full'

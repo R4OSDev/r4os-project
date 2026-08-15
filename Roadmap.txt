@@ -1095,19 +1095,18 @@ Abnahme:
 
 0.64.19
 Titel: Vollstaendige Mehrrepo-Gesamtintegration abnehmen
-Status: In Arbeit
+Status: Erledigt
 
 Offene Punkte:
-- QEMU-headless Test und relevante Hardwareabnahmen ohne Altprojektpfad
-  ausfuehren.
-- Generator-Schreibfreiheit, API-/ABI-Eindeutigkeit und fehlende
-  Doppelimplementierungen erneut pruefen.
+- Keine.
 
 Erledigt:
 - `Tools\Build.bat` ist der relative Windows-Einstieg fuer den gesamten
   Workspace. Ohne Argumente bietet er ein interaktives Menue; direkte Modi
   decken zentrale Repositories, Kernel, alle oder einzelne Komponenten,
-  Slim-/Full-/Test-Plaene, Image, Verify, QEMU, Gesamtbuild und `-gui` ab.
+  Slim-/Full-/Test-Plaene, Image, Verify, QEMU, Gesamtbuild, `-gui` sowie die
+  kombinierten Testpfade `-test`, `-testimage`, `-testimageonly`, `-testonly`
+  und `-headless` ab.
 - Der Orchestrator entdeckt 134 Komponenten dynamisch in den fuenf
   Rollenwurzeln und ruft sequenziell deren eigene `Build.bat` auf. Er zieht
   keine Repositories automatisch und zeigt die verwendeten lokalen Commits.
@@ -1115,39 +1114,82 @@ Erledigt:
   Manifest-Artefakt-Zuordnung entgegen. R4MF-Parsing, Profilwahl,
   Zielkollisionen und Runtime-R4L-Abhaengigkeitsschluss bleiben beim
   gemeinsamen SDK-Vertrag; der Root besitzt keinen zweiten Manifestparser.
+  `MODULES.JSON` entsteht optional aus exakt derselben Auswahl und nimmt den
+  explizit uebergebenen Kernel auf.
 - Der Testprofilvertrag bindet weiterhin die 18 expliziten Full-Komponenten
   ein, die von Test-Injection und Headless-Abnahmen benoetigt werden. Die 14
   LoaderDiag-Fixtures und vier testfaehigen SDK-Smokeprojekte werden aus
   ihren Repositorymanifesten ebenfalls aufgenommen.
-- Die Workspace-Map umfasst 163 eindeutige Manifeste. Slim, Full und Test
-  ergeben 41, 95 beziehungsweise 117 Komponenten; Kernel und Limine liegen
-  getrennt im gemeinsamen Plan.
-- Contract, SDK, R4STD, R4IMG, R4FONT und Kernel bauen ueber den neuen
+- Die sechs kernelimplementierten Plattformgruppen R4SYS, R4DESK, R4DRAW,
+  R4NET, R4AUDIO und R4DEV besitzen genau je eine kleine SDK-Querybruecke.
+  Sie verpackt ausschliesslich Contract-generierte Gruppendaten; Contract
+  bleibt Tabellenwahrheit und Kernel bleibt Provider. R4STD, R4IMG und
+  R4FONT verbleiben als unabhaengige Runtime-R4Ls im Libraries-Repository.
+- Die Workspace-Map umfasst 169 eindeutige Manifeste. Slim, Full und Test
+  ergeben 47, 101 beziehungsweise 123 Komponenten; die zugehoerigen
+  Inventare enthalten mit Kernel 48, 102 beziehungsweise 124 Eintraege.
+- Der gemeinsame Plan liefert Kernel, Limine-Konfiguration samt BIOS/EFI,
+  PRELOAD mit zehn Fruehladeeinheiten, Default-Registry, das generierte
+  Inventar und 14 erzeugte Systemfonts. Er umfasst 26 explizite Eintraege.
+- Contract, SDK, alle drei Runtime-Libraries und Kernel bauen ueber den neuen
   Einstieg. Anschliessend bauten alle 134 Komponentenrepositories mit ihren
   aktuellen lokalen SDK-/Contract-/Libraries-Forks ohne Fehler.
-- Der echte Full-Lauf erzeugte ueber Distribution einen kollisionsfreien
-  Plan mit 222 Eintraegen und 97 expliziten Planzeilen sowie ein bootfaehig
-  strukturiertes `disk.img` und `data.img`. `verify Full` meldete OK mit 233
-  Dateien und 76 Verzeichnissen auf dem NTFS-Systemvolume.
-- Der echte Test-Imagelauf erzeugte 251 Planeintraege aus 119 expliziten
-  Planzeilen. `verify Test` meldete OK mit 262 Dateien und 79 Verzeichnissen
-  auf dem NTFS-Systemvolume.
+- Der finale Test-Imagelauf erzeugte 282 Imagezuordnungen aus 149 expliziten
+  Planzeilen, zehn Bootdateien und 272 NTFS-Dateien. `verify Test` meldete
+  `OK records=371 files=285 dirs=81 entries=367`.
 - Image-Erzeugung, Verifikation und QEMU bleiben ausschliesslich im bereits
   vorhandenen `Repositories\Distribution\Build.bat`. Der `-gui`-Pfad wurde
   bis zur Delegation `image Full` gefolgt von `qemu Full` geprueft; bei der
   automatischen Abnahme wurde kein sichtbares QEMU-Fenster geoeffnet.
+- QEMU selbst ist nur einmal unter `DevKit\Emulation\QEMU` installiert. Das
+  Distribution-Repository besitzt unter `QEMU` ausschliesslich die
+  R4OS-Konfiguration und unter `Tests` die Headless-/Markerlogik; der Audit
+  fand dort keine QEMU-Binary.
+- Das Testprofil besitzt ein synthetisches, oeffentliches TLS-Schluessel- und
+  Zertifikatpaar in `TestInjection`. Es ist nicht bytegleich mit dem alten
+  lokalen Entwicklungsschluessel, erfuellt aber den vorhandenen
+  R4TLS-Harness. Slim und Full erhalten keinen privaten Schluessel aus dem
+  Repository.
+- Der nicht portable FONTS-Selbsttest mit sechs proprietaeren, nie
+  versionierten Windows-FON-Fixtures wurde aus AUTOEXEC entfernt. Die
+  installierten R4F-Systemfonts und der vollstaendige Klickifax-Font-/TLS-Test
+  bleiben Bestandteil der Headless-Abnahme.
 - Die `build.zig.zon`-Commits sind als zuletzt gepruefte
   Standalone-Referenzstaende dokumentiert. Normale Modul-Buildstarter nutzen
   mit `--fork` immer die aktuell gemappten lokalen Repositories; ein
   inkompatibler aktueller Stand darf den Verbraucher sichtbar brechen.
-- SDK-Commit `1c6fb6d2f22e9f3d48a340f51da487a00520aeb6` stellt den
-  Mehrrepo-Imageplan bereit; Distribution-Commit
-  `53bf7c49ad4ee847c230b26db66ab5937554bf64` dokumentiert die alleinige
-  Eigentuemerschaft von Image-Erzeugung, Verifikation und QEMU.
+- Der LoaderDiag-Metadatenpfad verweist auf den neuen Contract und seine
+  Modulversion ist 0.1.5. Commit:
+  `fe2b526eab7098a7a31c0dc228093b67ba26c1a3`.
+- Libraries-Commit `79d1fe8545356a3a224c57fbc4a57cb3022124f5`
+  exportiert die formatreine R4FONT-Definition fuer die Systemfontgeneratoren.
+  SDK-Commit `7f6752ac216cc9fe98ea0e84747bfd12344ae394` stellt
+  Plattformbruecken, Mehrrepo-Imageplan und Inventar bereit. Distribution-
+  Commit `1584ce2434af61034b99ecd1737db6172488360b` besitzt die
+  vollstaendige Image-, Font-, QEMU- und Headless-Integration.
+- `RELEASE_VERSION` steht auf 0.64.19. Kernelcode und Kernelartefakt wurden
+  durch diese reine Repository-/Verpackungsintegration nicht geaendert;
+  `KERNEL_VERSION` bleibt deshalb unveraendert.
 
 Abnahme:
-- Das neue Multi-Repository-System erzeugt allein ein bootfaehiges und
-  vollstaendig getestetes R4OS-Image.
+- `Tools\Build.bat -test` baute Contract, SDK, Libraries, Kernel und alle 134
+  Komponenten, erzeugte das Testimage und bestand die reale QEMU-Abnahme.
+- Contract-Generatorcheck und 26 Mutationen, SDK-Test, alle drei
+  Library-Contractchecks, Kerneltest und Distribution-Test waren gruen. Kein
+  normaler Build schrieb in Contract, SDK, Libraries, Kernel oder
+  Distribution zurueck.
+- Der API-/ABI-Audit fand genau je einen R4L-Provider fuer R4SYS, R4DESK,
+  R4DRAW, R4NET, R4AUDIO, R4DEV, R4STD, R4IMG und R4FONT, keine produktiven
+  Altprojektpfade und keine doppelte optionale Runtime-Implementierung.
+- Der finale QEMU-Headless-Lauf bootete 0.64.19 ueber Limine, bestand alle
+  geforderten Loader-, Ressourcen-, GUI-, Font-, TLS-, R4Code- und
+  Zig/C-Paritaetsmarker und endete mit kontrolliertem Poweroff ohne Fehler.
+- Ein einzelner vorheriger TCG-Lauf blieb ohne Panic-/Fatal-Marker frueh im
+  Terminal-Selbsttest stehen und wurde nach 600 Sekunden kontrolliert
+  beendet; der unveraenderte Gegenlauf und der finale Lauf waren gruen.
+- Eine Hardwareabnahme war fuer diese reine Quellgrenzen-/Imageintegration
+  nicht erforderlich. Linux- und macOS-Laufzeittests wurden wie fuer den
+  Umbau vereinbart nicht ausgefuehrt.
 
 0.64.20
 Titel: Lizenzen, Repositoryhygiene und kanonischen Wechsel abschliessen

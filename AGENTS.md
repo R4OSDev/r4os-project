@@ -1,4 +1,4 @@
-# Einleitung
+﻿# Einleitung
 R4OS ist ein in Zig entwickeltes Betriebssystem fuer x86_64. Es startet ueber
 Limine im Long Mode und verbindet eine an DOS und Windows 98 angelehnte
 Systemstruktur mit eigenstaendigen Anwendungen, Diensten, Libraries, Treibern
@@ -77,11 +77,15 @@ Das alte ist: D:\AI\Projects\Claude Code\R4OS
 - Distributionspfade stehen in
   `D:\R4OS\Repositories\Distribution\Settings.R4S`. `Build.bat test` baut
   die sieben distributionseigenen Hosttools und prueft die deterministischen
-  Slim-, Full- und Test-Imageplaene. `Build.bat plan`, `image`, `verify` und
-  `qemu` arbeiten je Profil ausschliesslich mit expliziten fertigen
+  Slim-, Full- und Test-Imageplaene. `Build.bat plan`, `image`, `verify`,
+  `qemu` und `headless Test` arbeiten je Profil ausschliesslich mit expliziten fertigen
   Artefaktplaenen unter `Artifacts\Distribution\Inputs`; sie bauen niemals
   Kernel, Libraries oder Module. Private Injection-Dateien liegen nur im
   ignorierten `Artifacts\Distribution\PrivateInjection`-Overlay.
+- Die QEMU-Binaries gehoeren ausschliesslich in
+  `D:\R4OS\DevKit\Emulation\QEMU`. `Repositories\Distribution\QEMU` enthaelt
+  nur R4OS-spezifische Konfiguration; der Headless-Lauf schreibt seine Logs
+  nach `Artifacts\Distribution\Logs` und verlangt Bootmarker sowie Poweroff.
 - Kernel-Pfade stehen in `D:\R4OS\Repositories\Kernel\Settings.R4S`.
   `Build.bat` erzeugt `zig-out\bin\r4os.elf`; `Build.bat test` baut den
   Kernel und fuehrt die kernel-eigenen Host- und Negativtests aus. Der Build
@@ -100,8 +104,9 @@ Das alte ist: D:\AI\Projects\Claude Code\R4OS
   `D:\R4OS\Tools\Build.bat`. Ohne Argumente zeigt er ein interaktives Menue.
 - `Build.bat -central`, `-kernel`, `-modules`, `-module Rolle\Name`,
   `-plan Profil`, `-image Profil`, `-verify Profil`, `-qemu Profil`,
-  `-all Profil`, `-slim` und `-gui` sind die direkten Aufrufe. Profile sind
-  `Slim`, `Full` und `Test`.
+  `-all Profil`, `-slim`, `-gui`, `-test`, `-testimage`, `-testimageonly`,
+  `-testonly` und `-headless` sind die direkten Aufrufe. Profile sind `Slim`,
+  `Full` und `Test`.
 - Der Workspace-Build entdeckt Komponenten dynamisch in `Apps`, `Services`,
   `Diagnostics`, `Drivers` und `Protocols` und ruft immer deren eigenes
   `Build.bat` auf. Versionierte sowie nicht ignorierte modulnahe
@@ -111,8 +116,9 @@ Das alte ist: D:\AI\Projects\Claude Code\R4OS
   lokalen zentralen Commitstaende vor dem Lauf an.
 - Der Root baut kein Image selbst. Er erzeugt aus `module.R4MF` und den
   fertigen Artefakten nur die expliziten Plaene unter
-  `Artifacts\Distribution\Inputs` und delegiert `image`, `verify` und `qemu`
-  ausschliesslich an `Repositories\Distribution\Build.bat`.
+  `Artifacts\Distribution\Inputs` sowie das dazu passende `MODULES.JSON` und
+  delegiert `image`, `verify`, `qemu` und `headless` ausschliesslich an
+  `Repositories\Distribution\Build.bat`.
 - `Build.bat -gui` baut den kompletten Full-Workspace, laesst Distribution
   das Full-Image erzeugen und startet danach QEMU sichtbar. `Build.bat -qemu`
   startet dagegen nur ein bereits vorhandenes Image.
