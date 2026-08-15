@@ -797,8 +797,8 @@ Status: In Arbeit
 Offene Punkte:
 - Verbindliche Inventarbasis ist Altprojekt-Commit `259cbfac`: In den fuenf
   Komponentenwurzeln liegen 134 Manifestmodule. CLOCK, MIDI und JSON wurden
-  in 0.64.17 und 21 Diagnoseprogramme in den ersten drei Wellen von 0.64.18
-  ausgelagert; die folgenden 110 Einheiten verbleiben.
+  in 0.64.17 und 31 Diagnoseprogramme in den ersten vier Wellen von 0.64.18
+  ausgelagert; die folgenden 100 Einheiten verbleiben.
 - Anwendungen - 40 verbleibende R4X:
   - AppDefaults (`APPDEF.R4X`, full)
   - Appearance (`APPEARANCE.R4X`, full)
@@ -856,22 +856,12 @@ Offene Punkte:
   - UdpService (`UDPSVC.R4X`, slim)
   - WindowService (`WINSVC.R4X`, slim)
   - UpdateService (`UPDSVC.R4X`, slim; Quelle `Code/System/Software`)
-- Diagnoseprogramme - 15 verbleibende R4X:
-  - AudioDiag (`AUDIOD.R4X`, test)
-  - CleanupDiag (`CLEANUPD.R4X`, test)
-  - DisplayDiag (`DISPLAYD.R4X`, test)
-  - InputDiag (`INPUTD.R4X`, test)
+- Diagnoseprogramme - 5 verbleibende R4X:
   - KlickifaxLive (`KFXLIVE.R4X`, test)
   - LoaderDiag (`LOADERD.R4X`, test)
-  - NetDiag (`NETDIAG.R4X`, test)
-  - NetIoDiag (`NETIOD.R4X`, test)
-  - NetR4pDiag (`NETR4P.R4X`, test)
-  - NetSvcDiag (`NETSVC.R4X`, test)
   - NetworkFacadeCDiag (`CNETD.R4X`, none)
-  - PerformanceDiag (`PERFDIAG.R4X`, test)
   - R4CfgDiag (`R4CFGD.R4X`, test)
   - StdDiag (`STDDIAG.R4X`, test)
-  - SynthDiag (`SYNTHD.R4X`, test)
 - Treiber - 14 verbleibende R4D:
   - AC97 (`AC97.R4D`, full)
   - AHCI (`AHCI.R4D`, slim)
@@ -918,7 +908,7 @@ Offene Punkte:
   Liste. Vor ihrem Transfer wird nur entschieden, ob sie ein eigenes privates
   Komponentenrepository oder eine modulnahe Fixture im fachlichen
   Eigentuerrepository werden; im Altprojekt verbleiben duerfen sie nicht.
-- Alle 110 Einheiten nach Abhaengigkeiten in gepruefte Wellen gruppieren.
+- Alle 100 Einheiten nach Abhaengigkeiten in gepruefte Wellen gruppieren.
 - Pro Welle eigenstaendige Builds und Distributionsintegration abnehmen.
 - Bootkritische Komponenten zuletzt und nur mit funktionierendem Ersatzpfad
   aus dem integrierten Baum loesen.
@@ -968,6 +958,19 @@ Erledigt:
   - STORDIAG: `72c3d0e4d6dbe901b4c0b7dcfdace314b9cc55e5`
   - THREADD: `c57aa2775f0a2d95006fca731a14057123fda50f`
   - USBDIAG: `71958d12e16a95bce250ab29f3a63c5f5d919032`
+- Die vierte Diagnosewelle uebernahm die zehn verbleibenden regulaeren
+  Plattformdiagnosen. Alle privaten Repositories wurden eigenstaendig gebaut,
+  auf `main` gepusht und als byteidentische Quelluebernahmen bestaetigt:
+  - AUDIOD: `076fa0c9b7cdac3a6bb91ffa9511ca51667c0e26`
+  - CLEANUPD: `8af69e2b53288f45881836251edb8f97eb35c096`
+  - DISPLAYD: `8cd7c2c16d5543c58feb53c6128f1791c5cac5a4`
+  - INPUTD: `393414998efaa4d695178e3c85665640d7c5c0b2`
+  - NETDIAG: `11d8ae61652bbcec8a97cb702e064efe354f4ca0`
+  - NETIOD: `644cceea9143fc2795188635df8473b46c4bedef`
+  - NETR4P: `25b368a73e6c46694f7654b0ec08c059bdb5ff8c`
+  - NETSVC: `7108f7b243de2bcce7d3df9eaa1a169c6b72d268`
+  - PERFDIAG: `7e2e4db1be05d17aa1df6da0030b007f16486c9f`
+  - SYNTHD: `e61e74e90d1b758add4a0df864fd533df275b854`
 - Die API-Antwortdateien von `Github.bat` enthalten nun den
   Repositoryschluessel im Tempnamen, sodass parallele private Neuanlagen sich
   nicht gegenseitig loeschen.
@@ -975,7 +978,7 @@ Erledigt:
 Abnahme:
 - Jedes ausgelagerte Modul besitzt genau ein kanonisches Repository.
 - Der Inventarvergleich bildete das Ausgangsinventar von 131 Einheiten exakt
-  ab; nach den ersten drei Diagnosewellen verbleiben 110 offene
+  ab; nach den ersten vier Diagnosewellen verbleiben 100 offene
   Manifestmodule ohne fehlende, zusaetzliche oder doppelte Eintraege.
 - `FsDiag\Build.bat` erzeugt FSDIAG.R4X eigenstaendig mit drei Imports gegen
   SDK, Contract und die gepinnte R4STD-Bindung. Das Artefakt wurde als
@@ -986,6 +989,8 @@ Abnahme:
 - Alle zehn Artefakte der dritten Welle bauen ebenfalls eigenstaendig. Der
   kombinierte Distribution-Plan akzeptiert nun 21 eindeutige,
   kollisionsfreie Diagnoseeintraege.
+- Die vierte Welle erweitert denselben reproduzierbaren Plan auf 31
+  eindeutige und kollisionsfreie Diagnoseeintraege.
 
 0.64.19
 Titel: Vollstaendige Mehrrepo-Gesamtintegration abnehmen
