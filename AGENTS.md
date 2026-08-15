@@ -30,6 +30,11 @@ Das alte ist: D:\AI\Projects\Claude Code\R4OS
   dem Branch `main` verwaltet.
 - Das hostneutrale SDK liegt unter `D:\R4OS\Repositories\SDK\` und wird als
   `R4OSDev/r4os-sdk` auf dem Branch `main` verwaltet.
+- Die SDK-Pfade stehen in `D:\R4OS\Repositories\SDK\Settings.R4S`.
+  Relative Komponentenpfade beginnen am dort gemappten Repositories-Ordner;
+  absolute Pfade sind ebenfalls erlaubt. SDK-Builds werden unter Windows mit
+  `Build.bat`, unter Linux/macOS mit `Build.sh` gestartet, damit die Mappings
+  bereits vor der Zig-Paketaufloesung gelten.
 - Die offiziellen unabhaengigen Runtime-Libraries liegen unter
   `D:\R4OS\Repositories\Libraries\` und werden als
   `R4OSDev/r4os-libraries` auf dem Branch `main` verwaltet.
