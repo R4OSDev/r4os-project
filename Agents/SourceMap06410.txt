@@ -254,6 +254,19 @@ Diagnose-Basiswelle seit 0.64.18:
     SimdDiag          -> r4os-diagnostic-simddiag
     StackDiag         -> r4os-diagnostic-stackdiag
 
+Diagnosewelle 3 seit 0.64.18:
+
+    AppHeapDiag       -> r4os-diagnostic-appheapdiag
+    BootCoreDiag      -> r4os-diagnostic-bootcorediag
+    ClipboardDiag     -> r4os-diagnostic-clipboarddiag
+    DriverDiag        -> r4os-diagnostic-driverdiag
+    HardwareDiag      -> r4os-diagnostic-hardwarediag
+    MemorySuite       -> r4os-diagnostic-memorysuite
+    RemoteFrameDiag   -> r4os-diagnostic-remoteframediag
+    StorageDiag       -> r4os-diagnostic-storagediag
+    ThreadDiag        -> r4os-diagnostic-threaddiag
+    UsbDiag           -> r4os-diagnostic-usbdiag
+
 Alle genannten Einheiten stammen fachlich aus Commit `259cbfac`. Der
 SDK-Build loest ZIG_MODULE-Pfade ueber explizite Paketpfade auf; ein
 Libraryname wird nicht im Buildscript dupliziert. JSON bezieht auch seine
