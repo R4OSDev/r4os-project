@@ -9,6 +9,12 @@ if defined R4OS_GITHUB_ASKPASS goto askpass
 if /I "%~1"=="-push" set "R4OS_ACTION=PUSH"
 if /I "%~1"=="-pull" set "R4OS_ACTION=PULL"
 
+set "R4OS_COMPONENT_NAME=%~3"
+set "R4OS_COMMIT_MESSAGE=%~3"
+if /I "%~2"=="-module" set "R4OS_COMMIT_MESSAGE=%~4"
+if /I "%~2"=="-driver" set "R4OS_COMMIT_MESSAGE=%~4"
+if /I "%~2"=="-protocol" set "R4OS_COMMIT_MESSAGE=%~4"
+
 if not defined R4OS_ACTION if "%~1"=="" goto interactive
 if not defined R4OS_ACTION goto usage
 
@@ -36,8 +42,14 @@ echo   [4] SDK
 echo   [5] Libraries
 echo   [6] Kernel
 echo   [7] Distribution
-choice /C 1234567 /N /M "Auswahl"
-if errorlevel 7 set "R4OS_INTERACTIVE_TARGET=-distribution"
+echo   [8] App-Modul
+echo   [9] Treiber
+echo   [A] Protokoll
+choice /C 123456789A /N /M "Auswahl"
+if errorlevel 10 set "R4OS_INTERACTIVE_TARGET=-protocol"
+if errorlevel 9 if not defined R4OS_INTERACTIVE_TARGET set "R4OS_INTERACTIVE_TARGET=-driver"
+if errorlevel 8 if not defined R4OS_INTERACTIVE_TARGET set "R4OS_INTERACTIVE_TARGET=-module"
+if errorlevel 7 if not defined R4OS_INTERACTIVE_TARGET set "R4OS_INTERACTIVE_TARGET=-distribution"
 if errorlevel 6 if not defined R4OS_INTERACTIVE_TARGET set "R4OS_INTERACTIVE_TARGET=-kernel"
 if errorlevel 5 if not defined R4OS_INTERACTIVE_TARGET set "R4OS_INTERACTIVE_TARGET=-libraries"
 if errorlevel 4 if not defined R4OS_INTERACTIVE_TARGET set "R4OS_INTERACTIVE_TARGET=-sdk"
@@ -45,7 +57,22 @@ if errorlevel 3 if not defined R4OS_INTERACTIVE_TARGET set "R4OS_INTERACTIVE_TAR
 if errorlevel 2 if not defined R4OS_INTERACTIVE_TARGET set "R4OS_INTERACTIVE_TARGET=-devkit"
 if errorlevel 1 if not defined R4OS_INTERACTIVE_TARGET set "R4OS_INTERACTIVE_TARGET=-project"
 
+if /I "%R4OS_INTERACTIVE_TARGET%"=="-module" goto interactive_component
+if /I "%R4OS_INTERACTIVE_TARGET%"=="-driver" goto interactive_component
+if /I "%R4OS_INTERACTIVE_TARGET%"=="-protocol" goto interactive_component
+
 call "%~f0" %R4OS_INTERACTIVE_ACTION% %R4OS_INTERACTIVE_TARGET%
+set "R4OS_INTERACTIVE_EXIT=%ERRORLEVEL%"
+endlocal & exit /b %R4OS_INTERACTIVE_EXIT%
+
+:interactive_component
+echo.
+set /p "R4OS_INTERACTIVE_COMPONENT=Komponentenname: "
+if not defined R4OS_INTERACTIVE_COMPONENT (
+    echo FEHLER: Ein Komponentenname ist erforderlich.
+    endlocal & exit /b 1
+)
+call "%~f0" %R4OS_INTERACTIVE_ACTION% %R4OS_INTERACTIVE_TARGET% "%R4OS_INTERACTIVE_COMPONENT%"
 set "R4OS_INTERACTIVE_EXIT=%ERRORLEVEL%"
 endlocal & exit /b %R4OS_INTERACTIVE_EXIT%
 
@@ -57,6 +84,9 @@ if /I "%~1"=="-sdk" goto select_sdk
 if /I "%~1"=="-libraries" goto select_libraries
 if /I "%~1"=="-kernel" goto select_kernel
 if /I "%~1"=="-distribution" goto select_distribution
+if /I "%~1"=="-module" goto select_module
+if /I "%~1"=="-driver" goto select_driver
+if /I "%~1"=="-protocol" goto select_protocol
 exit /b 1
 
 :select_project
@@ -143,6 +173,48 @@ set "R4OS_REPOSITORY_ALLOW_INIT=1"
 set "R4OS_DEFAULT_COMMIT_MESSAGE=Distribution-Stand sichern"
 exit /b 0
 
+:select_module
+set "R4OS_COMPONENT_KIND=module"
+set "R4OS_COMPONENT_LABEL=App-Modul"
+set "R4OS_COMPONENT_DESCRIPTION=Independent R4OS application module"
+goto select_component
+
+:select_driver
+set "R4OS_COMPONENT_KIND=driver"
+set "R4OS_COMPONENT_LABEL=Treiber"
+set "R4OS_COMPONENT_DESCRIPTION=Independent R4OS driver module"
+goto select_component
+
+:select_protocol
+set "R4OS_COMPONENT_KIND=protocol"
+set "R4OS_COMPONENT_LABEL=Protokoll"
+set "R4OS_COMPONENT_DESCRIPTION=Independent R4OS protocol module"
+goto select_component
+
+:select_component
+if not defined R4OS_COMPONENT_NAME (
+    echo FEHLER: Fuer -%R4OS_COMPONENT_KIND% ist ein Komponentenname erforderlich.
+    exit /b 1
+)
+
+set "R4OS_COMPONENT_SLUG="
+for /f "usebackq delims=" %%N in (`powershell.exe -NoProfile -Command "$value = $env:R4OS_COMPONENT_NAME; if ($value -cnotmatch '^[A-Za-z0-9][A-Za-z0-9-]*$') { exit 1 }; $value.ToLowerInvariant()"`) do set "R4OS_COMPONENT_SLUG=%%N"
+if not defined R4OS_COMPONENT_SLUG (
+    echo FEHLER: Der Komponentenname darf nur Buchstaben, Ziffern und Bindestriche enthalten.
+    exit /b 1
+)
+
+set "R4OS_REPOSITORY_KEY=%R4OS_COMPONENT_KIND%-%R4OS_COMPONENT_SLUG%"
+set "R4OS_REPOSITORY_LABEL=%R4OS_COMPONENT_LABEL% %R4OS_COMPONENT_NAME%"
+set "R4OS_REPOSITORY_ROOT=%R4OS_PROJECT_ROOT%\Repositories\Modules\%R4OS_COMPONENT_NAME%"
+set "R4OS_REPOSITORY_NAME=r4os-%R4OS_COMPONENT_KIND%-%R4OS_COMPONENT_SLUG%"
+set "R4OS_REPOSITORY_REMOTE=https://github.com/%R4OS_GITHUB_ORGANIZATION%/%R4OS_REPOSITORY_NAME%.git"
+set "R4OS_REPOSITORY_DESCRIPTION=%R4OS_COMPONENT_DESCRIPTION% %R4OS_COMPONENT_NAME%."
+set "R4OS_REPOSITORY_PRIVATE=false"
+set "R4OS_REPOSITORY_ALLOW_INIT=1"
+set "R4OS_DEFAULT_COMMIT_MESSAGE=%R4OS_COMPONENT_NAME%-Stand sichern"
+exit /b 0
+
 :pull
 call :load_credentials
 if errorlevel 1 goto failure
@@ -179,7 +251,6 @@ endlocal & exit /b 0
 call :load_credentials
 if errorlevel 1 goto failure
 
-set "R4OS_COMMIT_MESSAGE=%~3"
 if "%R4OS_COMMIT_MESSAGE%"=="" set "R4OS_COMMIT_MESSAGE=%R4OS_DEFAULT_COMMIT_MESSAGE%"
 
 call :ensure_local_repository
@@ -371,6 +442,12 @@ echo   Github.bat -push -kernel ["Commit-Beschreibung"]
 echo   Github.bat -pull -kernel
 echo   Github.bat -push -distribution ["Commit-Beschreibung"]
 echo   Github.bat -pull -distribution
+echo   Github.bat -push -module NAME ["Commit-Beschreibung"]
+echo   Github.bat -pull -module NAME
+echo   Github.bat -push -driver NAME ["Commit-Beschreibung"]
+echo   Github.bat -pull -driver NAME
+echo   Github.bat -push -protocol NAME ["Commit-Beschreibung"]
+echo   Github.bat -pull -protocol NAME
 endlocal & exit /b 1
 
 :failure

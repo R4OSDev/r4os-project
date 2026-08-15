@@ -49,6 +49,17 @@ Das alte ist: D:\AI\Projects\Claude Code\R4OS
   `R4OSDev/r4os-kernel` auf dem Branch `main` verwaltet.
 - Die Distribution liegt unter `D:\R4OS\Repositories\Distribution\` und wird
   als `R4OSDev/r4os-distribution` auf dem Branch `main` verwaltet.
+- Eigenstaendige Module liegen unter `D:\R4OS\Repositories\Modules\<Name>\`.
+  Die ersten Piloten sind CLOCK als `R4OSDev/r4os-module-clock`, MIDI als
+  `R4OSDev/r4os-driver-midi` und JSON als `R4OSDev/r4os-protocol-json`.
+  Jedes Modul besitzt eigene Settings und Buildstarter; relative Settings
+  beginnen am jeweiligen Modulrepository und duerfen durch absolute Pfade
+  ersetzt werden. Fertige Pilotartefakte landen standardmaessig unter
+  `D:\R4OS\Artifacts\Modules\<Name>\`.
+- Ein Modul pinnt SDK, Contract und nur seine tatsaechlich benoetigten
+  Librarybindings. `Sdk.addR4MFWithOptions` ersetzt die im Manifest
+  deklarierten ZIG_MODULE-Quellpfade in Manifestreihenfolge durch explizite
+  Paketpfade. Namen und Importvertrag bleiben allein in `module.R4MF`.
 - Distributionspfade stehen in
   `D:\R4OS\Repositories\Distribution\Settings.R4S`. `Build.bat test` baut
   die sieben distributionseigenen Hosttools und prueft die deterministischen
@@ -71,12 +82,12 @@ Das alte ist: D:\AI\Projects\Claude Code\R4OS
   erlaubt. Linux-/macOS-Laufzeittests sind fuer den 0.64-Umbau kein Gate.
 - Fuer Push und Pull ausschliesslich `D:\R4OS\Tools\Github.bat` verwenden.
   Ohne Argumente fragt es interaktiv erst nach `Push` oder `Pull` und danach
-  nach `Project`, `DevKit`, `Contract`, `SDK`, `Libraries`, `Kernel` oder
-  `Distribution`.
+  nach `Project`, `DevKit`, `Contract`, `SDK`, `Libraries`, `Kernel`,
+  `Distribution`, einem App-Modul, Treiber oder Protokoll.
 - Nach einem frischen Clone zuerst `D:\R4OS\Tools\Setup.bat` ausfuehren.
   Es erzeugt die ignorierten Workspace-Ordner `Artifacts`, `DevKit` und
-  `Repositories`, die lokalen Distribution-Input-/Private-Overlayordner sowie
-  bei Bedarf die lokale GitHub-Credentials-Vorlage.
+  `Repositories`, deren `Modules`-Unterordner, die lokalen Modul-/Distribution-
+  Artefaktwurzeln und bei Bedarf die lokale GitHub-Credentials-Vorlage.
   Anschliessend das DevKit mit `Github.bat -pull -devkit` beziehen und darin
   `Setup\Setup_Windows.bat` ausfuehren.
 - Direkte Aufrufe:
@@ -94,10 +105,19 @@ Das alte ist: D:\AI\Projects\Claude Code\R4OS
   - `Github.bat -pull -kernel`
   - `Github.bat -push -distribution ["Commit-Beschreibung"]`
   - `Github.bat -pull -distribution`
+  - `Github.bat -push -module Clock ["Commit-Beschreibung"]`
+  - `Github.bat -pull -module Clock`
+  - `Github.bat -push -driver MIDI ["Commit-Beschreibung"]`
+  - `Github.bat -pull -driver MIDI`
+  - `Github.bat -push -protocol JSON ["Commit-Beschreibung"]`
+  - `Github.bat -pull -protocol JSON`
 - Ein Push staged nach der `.gitignore` des gewaehlten Repositorys, erstellt
   bei Aenderungen einen Commit und pusht `main`. Ein Pull verwendet
   ausschliesslich `git pull --ff-only`. Beim ersten Push eines neuen Ziels
-  werden das lokale Repository und bei Bedarf das GitHub-Repository angelegt.
+  werden das lokale Repository und bei ausreichender Token-Berechtigung auch
+  das GitHub-Repository angelegt. Verweigert GitHub die Organisationserstellung,
+  wird das leere Repository einmalig manuell angelegt und derselbe Push erneut
+  gestartet.
 - Zugangsdaten liegen nur lokal unter
   `D:\R4OS\Tools\Credentials\Github.bat` und duerfen nie gelesen,
   angezeigt oder gepusht werden.

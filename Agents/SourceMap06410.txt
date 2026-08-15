@@ -209,7 +209,7 @@ fachlichen Quellen neu. Image-, NTFS-, R4U- und Hardwaretransportwerkzeuge
 gehoeren als Quellcode zur Distribution; ihre Hostbinaries installiert das
 DevKit unter `HostTools`.
 
-6. Module - spaetere `r4os-module-*`-Repositories
+6. Module - eigenstaendige Komponentenrepositories
 
 Ausgangswurzeln:
 
@@ -222,6 +222,27 @@ Ausgangswurzeln:
 Jedes Modul erhaelt Manifest, Source, Ressourcen, Hilfe und modulnahe Tests.
 Produktive Abhaengigkeiten bestehen nur zu explizitem SDK, Contract und den
 tatsaechlich importierten Librarybindings.
+
+Pilotzuordnung seit 0.64.17:
+
+    Code/System/Software/Clock
+      -> Repositories/Modules/Clock
+      -> R4OSDev/r4os-module-clock
+
+    Code/System/Driver/MIDI
+      -> Repositories/Modules/MIDI
+      -> R4OSDev/r4os-driver-midi
+
+    Code/System/Protocols/Json
+      -> Repositories/Modules/JSON
+      -> R4OSDev/r4os-protocol-json
+
+Alle drei Einheiten stammen fachlich aus Commit `259cbfac`. Der SDK-Build
+loest ZIG_MODULE-Pfade ueber explizite Paketpfade auf; ein Libraryname wird
+nicht im Buildscript dupliziert. JSON bezieht auch seine ABI-Testfassade aus
+der gepinnten SDK-Abhaengigkeit. Relative Workspacepfade stehen nur als
+austauschbare Defaults in der jeweiligen `Settings.R4S`, nie als feste
+Quellkante in Buildscript oder Paketmanifest.
 
 7. Workspace und DevKit
 

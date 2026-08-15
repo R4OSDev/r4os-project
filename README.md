@@ -4,6 +4,7 @@ Privater Workspace fuer die Entwicklung und Aufteilung von R4OS.
 
     DevKit\        Installierte SDK- und Hostwerkzeuge
     Repositories\  Eigenstaendige R4OS-Quell-Repositories
+      Modules\     Je ein Repository pro Anwendung, Treiber oder Protokoll
     Artifacts\     Lokale Build- und Testergebnisse
     Tools\         Workspace-Setup und GitHub-Verwaltung
 

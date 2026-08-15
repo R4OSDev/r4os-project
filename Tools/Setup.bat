@@ -32,6 +32,15 @@ if not exist "%R4OS_PROJECT_ROOT%\Artifacts\Distribution\PrivateInjection\" (
     echo Angelegt: Artifacts\Distribution\PrivateInjection
 )
 
+if not exist "%R4OS_PROJECT_ROOT%\Artifacts\Modules\" (
+    mkdir "%R4OS_PROJECT_ROOT%\Artifacts\Modules"
+    if errorlevel 1 (
+        echo FEHLER: Artifacts\Modules konnte nicht erstellt werden.
+        endlocal & exit /b 1
+    )
+    echo Angelegt: Artifacts\Modules
+)
+
 if not exist "%R4OS_PROJECT_ROOT%\DevKit\" (
     mkdir "%R4OS_PROJECT_ROOT%\DevKit"
     if errorlevel 1 (
@@ -48,6 +57,15 @@ if not exist "%R4OS_PROJECT_ROOT%\Repositories\" (
         endlocal & exit /b 1
     )
     echo Angelegt: Repositories
+)
+
+if not exist "%R4OS_PROJECT_ROOT%\Repositories\Modules\" (
+    mkdir "%R4OS_PROJECT_ROOT%\Repositories\Modules"
+    if errorlevel 1 (
+        echo FEHLER: Repositories\Modules konnte nicht erstellt werden.
+        endlocal & exit /b 1
+    )
+    echo Angelegt: Repositories\Modules
 )
 
 if not exist "%R4OS_CREDENTIAL_DIR%\" (
