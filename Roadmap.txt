@@ -448,12 +448,10 @@ Notizen:
 
 0.64.12
 Titel: Kern-SDK als hostneutrales Repository aufbauen
-Status: In Arbeit
+Status: Erledigt
 
 Offene Punkte:
-- Die Hostneutralitaet der Shell-Variante auf Linux/macOS pruefen.
-- Eigenstaendige portable R4X- und Runtime-R4L-Beispielprojekte nur gegen die
-  expliziten SDK-/Contract-Eingaben abnehmen.
+- Keine.
 
 Erledigt:
 - Das oeffentliche Zielrepository `R4OSDev/r4os-sdk` ist angelegt.
@@ -475,6 +473,12 @@ Erledigt:
   unveraenderten relativen Settings den vollstaendigen Test und bleibt danach
   git-clean. Batch, Shell, Settings und Templates besitzen die festgelegten
   Checkout-Zeilenenden.
+- Die ausserhalb des SDK liegenden R4STD-, R4IMG- und R4FONT-Pakete bauen als
+  echte Runtime-R4Ls ausschliesslich gegen die expliziten SDK-/Contract-
+  Eingaben. Die R4IMG- und R4FONT-C-Consumer bauen als eigenstaendige R4X.
+- Weder SDK noch Plattform-Contract enthalten einen der drei Librarynamen;
+  die erfolgreiche 0.64.13-Abnahme belegt damit zugleich den generischen
+  R4L-/Consumer-Pfad des SDK.
 
 Abnahme:
 - Das SDK baut ohne Altprojekt und ohne feste Nachbarpfade.
@@ -489,29 +493,59 @@ Notizen:
   einkompilierte Nachbarschaft.
 - `5f5bf7a` ist der vollstaendige SDK-Transfercommit; `210372f` ergaenzt die
   hostneutralen Checkoutregeln und das Ausfuehrungsbit von `Build.sh`.
+- Linux- und macOS-Laufzeittests sind fuer den 0.64-Umbau ausdruecklich keine
+  Abnahmebedingung. Die Dateien bleiben hostneutral angelegt; praktisch
+  abgenommen wird in dieser Umbauphase auf Windows.
 
 0.64.13
 Titel: R4STD, R4IMG und R4FONT in r4os-libraries uebernehmen
-Status: Geplant
+Status: Erledigt
 
 Offene Punkte:
-- Die drei abgenommenen Libraryeinheiten bytegenau aus Commit `259cbfac`
-  uebernehmen.
-- SDK und Contract als explizite Buildabhaengigkeiten statt ueber feste
-  Nachbarpfade bereitstellen.
-- Einzelbuilds, Zig-/C-Conformance, echte Formatpfade und Consumer-Fixtures
-  ausfuehren.
-- Beweisen, dass Librarybuilds keine Datei in Contract, Kernel oder SDK
-  erzeugen oder veraendern.
+- Keine.
 
 Erledigt:
 - Das oeffentliche Zielrepository `R4OSDev/r4os-libraries` ist angelegt.
 - Workspace-Workflow und Dokumentation kennen das Ziel `-libraries`.
+- Diese Unterversion wird auf ausdruecklichen Wunsch vor dem formalen
+  Abschluss von 0.64.12 abgearbeitet. Ihre externen Consumer-Fixtures dienen
+  zugleich als noch offene SDK-Abnahme.
+- R4STD mit 31, R4IMG mit 32 und R4FONT mit 440 Dateien wurden vor den
+  notwendigen Grenzanpassungen vollstaendig bytegenau gegen Commit
+  `259cbfac` verglichen.
+- Das Repository besitzt eigene relative `Settings.R4S`; Contract, SDK,
+  DevKit und Zig lassen sich ebenso auf andere relative oder absolute Pfade
+  mappen. Jeder Library-Build konsumiert das inhaltlich gepinnte SDK, dieses
+  wiederum den gepinnten Plattform-Contract.
+- `Build.bat R4STD test`, `Build.bat R4IMG test`, `Build.bat R4FONT test`,
+  der gemeinsame `Build.bat test` und der Installbuild sind gruen.
+- R4LContractGen meldet fuer R4STD 5 Interfaces und 11 Typen, fuer R4IMG
+  1 Interface und 3 Typen sowie fuer R4FONT 1 Interface und 6 Typen.
+- Provider-, Binding-, Runtime-, Decoder- und C-Consumer-Tests sind gruen.
+  Der R4FONT-Vendorcheck pinnt 399 Dateien; die Font-Fixtures sind samt
+  Hashes, Lizenzen und Generator reproduzierbar.
+- R4STD.R4L, R4IMG.R4L und R4FONT.R4L sind SHA-256-byteidentisch zu den
+  abgenommenen Altprojektartefakten; die Hashes stehen unter
+  `Repositories/Libraries/PROVENANCE.txt`.
+- Ein isolierter frischer Windows-Clone von Libraries, SDK und Contract
+  besteht alle Tests und bleibt git-clean. SDK und Contract bleiben waehrend
+  der Librarybuilds ebenfalls git-clean; ein Kernelcheckout wird nicht
+  benoetigt.
 
 Abnahme:
 - R4STD, R4IMG und R4FONT bauen getrennt und gemeinsam ohne Altprojektpfad.
 - Eine neue beliebig benannte Runtime-R4L benoetigt keine Aenderung an
   Contract, Kernel oder Kern-SDK.
+
+Notizen:
+- `db485c7` ist der vollstaendige Transfer- und Entkopplungscommit;
+  `ea36967` stellt die bytegenauen Upstream-Zeilenenden der gepinnten
+  FreeType-/Brotli-Quellen und das Ausfuehrungsbit von `Build.sh` sicher;
+  `b1b02b0` schliesst lokale Python-Caches aus.
+- Die historischen `source.owner=Code/System/Libraries/...`-Strings bleiben
+  fuer den reinen Transfer im R4M0 erhalten, weil schon ihre Umbenennung das
+  Artefakt aendern wuerde. Sie sind keine Buildpfade und werden erst mit
+  einer normalen neuen Libraryversion aktualisiert.
 
 0.64.14
 Titel: Kernel und Bootgrenze als eigenstaendiges Repository aufbauen

@@ -38,6 +38,11 @@ Das alte ist: D:\AI\Projects\Claude Code\R4OS
 - Die offiziellen unabhaengigen Runtime-Libraries liegen unter
   `D:\R4OS\Repositories\Libraries\` und werden als
   `R4OSDev/r4os-libraries` auf dem Branch `main` verwaltet.
+- Library-Pfade stehen in `D:\R4OS\Repositories\Libraries\Settings.R4S`.
+  `Build.bat test` prueft alle Libraries; mit `Build.bat R4STD test`,
+  `Build.bat R4IMG test` oder `Build.bat R4FONT test` wird genau eine Einheit
+  gebaut und getestet. Relative und absolute SDK-/Contract-Pfade sind
+  erlaubt. Linux-/macOS-Laufzeittests sind fuer den 0.64-Umbau kein Gate.
 - Fuer Push und Pull ausschliesslich `D:\R4OS\Tools\Github.bat` verwenden.
   Ohne Argumente fragt es interaktiv erst nach `Push` oder `Pull` und danach
   nach `Project`, `DevKit`, `Contract`, `SDK` oder `Libraries`.
