@@ -313,6 +313,18 @@ Audio-Verbraucherwelle seit 0.64.18:
     Software/Beep         -> r4os-app-beep
     Software/R4Synth      -> r4os-app-r4synth
 
+Basis-Netzwerkwelle seit 0.64.18:
+
+    Protocols/NetArp        -> r4os-protocol-netarp
+    Protocols/NetDhcp       -> r4os-protocol-netdhcp
+    Protocols/NetDns        -> r4os-protocol-netdns
+    Protocols/NetEthernet   -> r4os-protocol-netethernet
+    Protocols/NetIcmp       -> r4os-protocol-neticmp
+    Protocols/NetIpv4       -> r4os-protocol-netipv4
+    Protocols/NetSerialLink -> r4os-protocol-netseriallink
+    Protocols/NetTcp        -> r4os-protocol-nettcp
+    Protocols/NetUdp        -> r4os-protocol-netudp
+
 Alle genannten Einheiten stammen fachlich aus Commit `259cbfac`. Der
 SDK-Build loest ZIG_MODULE-Pfade ueber explizite Paketpfade auf; ein
 Libraryname wird nicht im Buildscript dupliziert. JSON bezieht auch seine
@@ -330,6 +342,11 @@ AudioService, Beep und R4Synth bilden die erste Verbraucherwelle ueber diesem
 Unterbau. Auch sie besitzen nur die gepinnte SDK-Paketkante; ihre
 R4AUDIO-Verwendung ist eine deklarierte Laufzeit-Importkante im jeweiligen
 Manifest. Das SYNTH-Icon bleibt als modulnahe Ressource in seinem App-Repo.
+
+Die Basis-Netzwerkwelle ist ueber ihre `META=r4p.dep`-Kanten geschlossen:
+Ethernet ist die Basis, darauf folgen ARP und IPv4 sowie ICMP, UDP, TCP, DHCP
+und DNS. SerialLink besitzt innerhalb der Welle keine weitere Protokollkante.
+Alle neun Einheiten beziehen zur Buildzeit ausschliesslich das zentrale SDK.
 
 KlickifaxLive bezieht R4IMG, R4CfgDiag und StdDiag beziehen R4STD ueber den
 gepinnten Libraries-Commit. NetworkFacadeCDiag bleibt als echter C-Build mit

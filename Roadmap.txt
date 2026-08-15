@@ -800,8 +800,8 @@ Offene Punkte:
   in 0.64.17 und alle 36 Diagnoseprogramme in fuenf Wellen von 0.64.18
   ausgelagert. Eine erste rollenuebergreifende Testwelle uebernahm danach
   sechs Treiber-/Protokollkomponenten, die erste Audio-Stack-Welle weitere
-  sieben und die zugehoerige Verbraucherwelle drei; die folgenden 79
-  Einheiten verbleiben.
+  sieben, die zugehoerige Verbraucherwelle drei und die geschlossene
+  Basis-Netzwerkwelle neun; die folgenden 70 Einheiten verbleiben.
 - Anwendungen - 38 verbleibende R4X:
   - AppDefaults (`APPDEF.R4X`, full)
   - Appearance (`APPEARANCE.R4X`, full)
@@ -867,16 +867,7 @@ Offene Punkte:
   - USBMSC (`USBMSC.R4D`, slim)
   - VirtioNet (`VIRTNET.R4D`, slim)
   - XHCI (`XHCI.R4D`, slim)
-- Protokolle - 19 verbleibende R4P:
-  - NetArp (`NETARP.R4P`, slim)
-  - NetDhcp (`NETDHCP.R4P`, slim)
-  - NetDns (`NETDNS.R4P`, slim)
-  - NetEthernet (`NETETH.R4P`, slim)
-  - NetIcmp (`NETICMP.R4P`, slim)
-  - NetIpv4 (`NETIPV4.R4P`, slim)
-  - NetSerialLink (`NETR4SL.R4P`, full)
-  - NetTcp (`NETTCP.R4P`, slim)
-  - NetUdp (`NETUDP.R4P`, slim)
+- Protokolle - 10 verbleibende R4P:
   - R4Auth (`R4AUTH.R4P`, slim)
   - R4Css (`R4CSS.R4P`, full)
   - R4Html (`R4HTML.R4P`, full)
@@ -891,7 +882,7 @@ Offene Punkte:
   Liste. Vor ihrem Transfer wird nur entschieden, ob sie ein eigenes privates
   Komponentenrepository oder eine modulnahe Fixture im fachlichen
   Eigentuerrepository werden; im Altprojekt verbleiben duerfen sie nicht.
-- Alle 79 Einheiten nach Abhaengigkeiten in gepruefte Wellen gruppieren.
+- Alle 70 Einheiten nach Abhaengigkeiten in gepruefte Wellen gruppieren.
 - Pro Welle eigenstaendige Builds und Distributionsintegration abnehmen.
 - Bootkritische Komponenten zuletzt und nur mit funktionierendem Ersatzpfad
   aus dem integrierten Baum loesen.
@@ -995,6 +986,20 @@ Erledigt:
   - AUDSVC.R4X: `04c57f78cc7b61812eb3ed851238f911f00d1f43`
   - BEEP.R4X: `2e6930576459a664cbb793bf76094483aba9f94c`
   - SYNTH.R4X: `da5d0ffb00077f8fb04cb5de7f0dfb2eb10fb360`
+- Die Basis-Netzwerkwelle lagerte Ethernet, ARP, IPv4, ICMP, UDP, TCP, DHCP,
+  DNS und SerialLink als geschlossene Laufzeit-Abhaengigkeitsgruppe aus. Alle
+  neun privaten Protokoll-Repositories bewahren Source, Manifest,
+  Buildscript und Dokumentation byteidentisch und liegen synchron auf
+  `main`:
+  - NETARP: `20b385cbe8c146efc259c1f8214aa98c9e07e578`
+  - NETDHCP: `98d91f94702840d4f5d768da98d2a37d7939405e`
+  - NETDNS: `126c87839a5ae32a37a7b3e42299c09fec3c8708`
+  - NETETH: `77837cc92fa9c435e10373a7fc0628b76db987e6`
+  - NETICMP: `73cee6a0ae05bc47f158ce2fddcfd669a77fdaeb`
+  - NETIPV4: `7bfbff572dae22dd75bac173de74e874491f1654`
+  - NETR4SL: `86deedb7020fe504bade604715a2bfae884ed220`
+  - NETTCP: `fc219951145cad1e643ab47b54b4e179412d63e5`
+  - NETUDP: `5c2667e448a67135f81a68f53b85d35a6d6fd732`
 - Die API-Antwortdateien von `Github.bat` enthalten nun den
   Repositoryschluessel im Tempnamen, sodass parallele private Neuanlagen sich
   nicht gegenseitig loeschen.
@@ -1002,9 +1007,9 @@ Erledigt:
 Abnahme:
 - Jedes ausgelagerte Modul besitzt genau ein kanonisches Repository.
 - Der Inventarvergleich bildete das Ausgangsinventar von 131 Einheiten exakt
-  ab; nach Diagnose-, erster Test-/None-, erster Audio-Stack- und erster
-  Audio-Verbraucherwelle verbleiben 79 offene Manifestmodule ohne fehlende,
-  zusaetzliche oder doppelte Eintraege.
+  ab; nach Diagnose-, erster Test-/None-, Audio- und Basis-Netzwerkwelle
+  verbleiben 70 offene Manifestmodule ohne fehlende, zusaetzliche oder
+  doppelte Eintraege.
 - `FsDiag\Build.bat` erzeugt FSDIAG.R4X eigenstaendig mit drei Imports gegen
   SDK, Contract und die gepinnte R4STD-Bindung. Das Artefakt wurde als
   explizites Testprofil-Planfragment von der Distribution angenommen.
@@ -1030,6 +1035,9 @@ Abnahme:
 - AUDSVC, BEEP und SYNTH bauen als eigenstaendige Full-Profil-R4X; zusammen
   mit den vorigen Wellen akzeptiert die Distribution 64 eindeutige und
   kollisionsfreie Eintraege.
+- Die acht Slim- und das eine Full-Profil-Artefakt der Basis-Netzwerkwelle
+  erweitern den gemeinsamen Plan auf 73 eindeutige und kollisionsfreie
+  Eintraege.
 
 0.64.19
 Titel: Vollstaendige Mehrrepo-Gesamtintegration abnehmen
