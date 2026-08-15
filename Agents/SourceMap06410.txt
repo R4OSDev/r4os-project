@@ -227,7 +227,7 @@ Pilotzuordnung seit 0.64.17:
 
     Code/System/Software/Clock
       -> Repositories/Modules/Clock
-      -> R4OSDev/r4os-module-clock
+      -> R4OSDev/r4os-app-clock
 
     Code/System/Driver/MIDI
       -> Repositories/Modules/MIDI
