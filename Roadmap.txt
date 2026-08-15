@@ -148,7 +148,9 @@ Bereits eingerichtet:
   - Versioniert Setup-Skripte und Metadaten, aber keine heruntergeladenen
     Tool-Binaries und kein installiertes SDK.
   - `Setup_Windows.bat` installiert derzeit Zig 0.16.0, Limine 12.0.1 und
-    QEMU 11.0.0 relativ innerhalb des DevKits und prueft die Downloads.
+    QEMU 11.0.0 relativ innerhalb des DevKits und prueft die Downloads. Es
+    installiert ausserdem Contract und SDK sowie vier daraus gebaute HostTools.
+  - Aktueller abgenommener Stand: Commit `c47c392`.
 - Oeffentlicher Plattform-Contract `R4OSDev/r4os-contract`
   - Lokal: `D:\R4OS\Repositories\Contract`
   - Ist seit 0.64.11 repo-neutral, eigenstaendig baubar und abgenommen.
@@ -332,8 +334,8 @@ Migrationsregeln
 Noch offene Entscheidungen bei der Wiederaufnahme
 -------------------------------------------------
 
-- Endgueltige Eigentumsgrenze fuer Contract-Generator, Library-Contract-
-  Generator, ModuleCatalog und weitere allgemeine BuildTools.
+- Installationsschnittstelle fuer die erst mit der Distribution uebernommenen
+  Image-, NTFS-, R4U- und Transport-Hosttools.
 - Welche generierten Contract-Artefakte als Releasepaket konsumiert und welche
   kontrolliert im jeweiligen Verbraucherrepository materialisiert werden.
 - Genaue Reihenfolge und Granularitaet der `r4os-module-*`-Repositories.
@@ -609,19 +611,47 @@ Notizen:
 
 0.64.15
 Titel: Hostwerkzeuge und DevKit-Installation verbinden
-Status: Geplant
+Status: Erledigt
 
 Offene Punkte:
-- Hosttool-Quellen nach Contract, SDK und Distribution bauen.
-- DevKit-Setup um SDK, Contractpakete und gebaute HostTools erweitern.
-- Sicherstellen, dass keine Binaries oder Zugangsdaten versioniert werden.
+- Keine.
 
 Erledigt:
-- Noch nichts.
+- `Setup_Windows.bat` klont beziehungsweise aktualisiert die oeffentlichen
+  Installationskopien `SDK\Contract` und `SDK\Core`. Bestehende Checkouts
+  werden nur sauber auf `main` per `git pull --ff-only` aktualisiert; lokale
+  Aenderungen, ein anderer Branch oder ein fremdes Origin fuehren zum Abbruch.
+- Erstinstallationen werden im temporaeren Setupbereich vollstaendig geklont
+  und erst danach atomar an ihren Zielpfad verschoben. Ein fehlgeschlagener
+  Clone hinterlaesst dadurch keinen halbfertigen Komponentenordner.
+- ApiContractGen wird aus dem Contract gebaut. R4LContractGen, R4XBuilder und
+  ModuleCatalog werden aus dem SDK gegen dessen explizit gemappten Contract
+  gebaut und ausschliesslich als EXE unter `HostTools\bin` installiert.
+- Eine lokale Setup-Statusdatei bindet die vier HostTools an Contract-Commit
+  `5521df0`, SDK-Commit `210372f` und Zig 0.16.0. Ein unveraenderter erneuter
+  Aufruf aktualisiert die Git-Checkouts, ueberspringt aber den Werkzeugbuild.
+- Temporaere Dateien und Zig-Caches liegen unterhalb der DevKit-Wurzel.
+  `SDK`, `HostTools`, `.Cache` und Setup-Tempordner bleiben ignoriert; weder
+  Quellcheckouts noch Binaries oder Zugangsdaten wurden versioniert.
+- DevKit-Commit `c47c392` ist auf `R4OSDev/r4os-devkit` gepusht.
 
 Abnahme:
-- Ein frisches DevKit installiert alle benoetigten Werkzeuge ausschliesslich
-  innerhalb seiner Wurzel.
+- Ein frischer GitHub-Clone von DevKit-Commit `c47c392` installiert Zig
+  0.16.0, Limine 12.0.1, QEMU 11.0.0, Contract, SDK und alle vier HostTools
+  ausschliesslich innerhalb seiner DevKit-Wurzel.
+- Ein zweiter Setupaufruf endet erfolgreich und ohne Neubau. DevKit, Contract
+  und SDK bleiben git-clean; kein temporaerer Setupordner bleibt zurueck.
+- Die installierten Programme bestehen Contract-Check, R4IMG-Contract-Check,
+  R4M0-Inspektion und Manifestvalidierung jeweils mit Exitcode 0.
+- Ein absichtlich lokal veraenderter SDK-Checkout wird erkannt und ohne Pull
+  oder Ueberschreiben abgewiesen.
+
+Notizen:
+- ImageCreator, NtfsVerify, R4UPack, SerialLinkHost und weitere
+  distributionsspezifische Hosttools folgen in 0.64.16, sobald ihre kanonische
+  Quelle im Distribution-Repository existiert.
+- Weitere Hostbetriebssysteme und ein Komponentenlock bleiben wie vereinbart
+  ausserhalb dieser Unterversion.
 
 0.64.16
 Titel: Distribution und reproduzierbare Imageintegration aufbauen
@@ -630,6 +660,9 @@ Status: Geplant
 Offene Punkte:
 - Injection, Profile, Imagekonfiguration, Releasezusammenstellung und
   Integrationsabnahmen uebernehmen.
+- ImageCreator, NtfsVerify, R4UPack, SerialLinkHost und die weiteren
+  distributionsspezifischen Hosttools uebernehmen und ueber das DevKit
+  installierbar machen.
 - Fertige Kernel-, Library- und Modulkomponenten explizit einspeisen.
 - Verstecktes Neubauen fachlicher Komponenten in der Distribution verbieten.
 

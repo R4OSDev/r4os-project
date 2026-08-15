@@ -25,6 +25,13 @@ Das alte ist: D:\AI\Projects\Claude Code\R4OS
 - Das oeffentliche DevKit-Repository liegt unter `D:\R4OS\DevKit\` und wird
   als `R4OSDev/r4os-devkit` auf dem Branch `main` verwaltet. Installierte
   Inhalte werden durch dessen eigene `.gitignore` ausgeschlossen.
+- `D:\R4OS\DevKit\Setup\Setup_Windows.bat` installiert Zig, Limine und QEMU,
+  klont beziehungsweise aktualisiert installierte Contract- und SDK-Kopien
+  unter `DevKit\SDK\Contract` und `DevKit\SDK\Core` und baut daraus
+  `api-contract-gen`, `r4l-contract-gen`, `r4xbuilder` und `module-catalog`
+  nach `DevKit\HostTools\bin`. Updates sind nur als Fast-Forward auf `main`
+  erlaubt; lokale Aenderungen in den Installationskopien fuehren zum Abbruch.
+  Diese Kopien sind keine fachlichen Quellwahrheiten und werden nicht editiert.
 - Der kanonische API-/ABI-Vertrag liegt unter
   `D:\R4OS\Repositories\Contract\` und wird als `R4OSDev/r4os-contract` auf
   dem Branch `main` verwaltet.
@@ -58,6 +65,8 @@ Das alte ist: D:\AI\Projects\Claude Code\R4OS
 - Nach einem frischen Clone zuerst `D:\R4OS\Tools\Setup.bat` ausfuehren.
   Es erzeugt die ignorierten Workspace-Ordner `Artifacts`, `DevKit` und
   `Repositories` sowie bei Bedarf die lokale GitHub-Credentials-Vorlage.
+  Anschliessend das DevKit mit `Github.bat -pull -devkit` beziehen und darin
+  `Setup\Setup_Windows.bat` ausfuehren.
 - Direkte Aufrufe:
   - `Github.bat -push -project ["Commit-Beschreibung"]`
   - `Github.bat -pull -project`
