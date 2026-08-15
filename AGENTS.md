@@ -54,7 +54,8 @@ Das alte ist: D:\AI\Projects\Claude Code\R4OS
   oder `Protocols\`.
   Die ersten Piloten sind `Apps\Clock` als `R4OSDev/r4os-app-clock`,
   `Drivers\MIDI` als `R4OSDev/r4os-driver-midi` und `Protocols\JSON` als
-  `R4OSDev/r4os-protocol-json`.
+  `R4OSDev/r4os-protocol-json`. Der erste Diagnosepilot ist
+  `Diagnostics\FsDiag` als `R4OSDev/r4os-diagnostic-fsdiag`.
   Diese Komponentenrepositories sind waehrend des Umbaus privat und werden
   erst mit der abschliessenden Repositoryhygiene veroeffentlicht.
   Jedes Modul besitzt eigene Settings und Buildstarter; relative Settings

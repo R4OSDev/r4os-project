@@ -797,7 +797,8 @@ Status: In Arbeit
 Offene Punkte:
 - Verbindliche Inventarbasis ist Altprojekt-Commit `259cbfac`: In den fuenf
   Komponentenwurzeln liegen 134 Manifestmodule. CLOCK, MIDI und JSON wurden
-  in 0.64.17 bereits ausgelagert; die folgenden 131 Einheiten verbleiben.
+  in 0.64.17 und elf Diagnoseprogramme in den ersten beiden Wellen von
+  0.64.18 ausgelagert; die folgenden 120 Einheiten verbleiben.
 - Anwendungen - 40 verbleibende R4X:
   - AppDefaults (`APPDEF.R4X`, full)
   - Appearance (`APPEARANCE.R4X`, full)
@@ -855,38 +856,27 @@ Offene Punkte:
   - UdpService (`UDPSVC.R4X`, slim)
   - WindowService (`WINSVC.R4X`, slim)
   - UpdateService (`UPDSVC.R4X`, slim; Quelle `Code/System/Software`)
-- Diagnoseprogramme - 36 verbleibende R4X:
+- Diagnoseprogramme - 25 verbleibende R4X:
   - AppHeapDiag (`APPHEAPD.R4X`, test)
-  - AsyncIoDiag (`ASYNIOD.R4X`, test)
   - AudioDiag (`AUDIOD.R4X`, test)
   - BootCoreDiag (`BOOTDIAG.R4X`, test)
   - CleanupDiag (`CLEANUPD.R4X`, test)
   - ClipboardDiag (`CLIPD.R4X`, test)
-  - CStartSmoke (`CSTARTD.R4X`, test)
   - DisplayDiag (`DISPLAYD.R4X`, test)
   - DriverDiag (`DRVDIAG.R4X`, test)
-  - FsDiag (`FSDIAG.R4X`, test)
   - HardwareDiag (`HWDIAG.R4X`, test)
   - InputDiag (`INPUTD.R4X`, test)
   - KlickifaxLive (`KFXLIVE.R4X`, test)
   - LoaderDiag (`LOADERD.R4X`, test)
-  - LogServiceDiag (`LOGDIAG.R4X`, test)
   - MemorySuite (`MEMSUITE.R4X`, test)
   - NetDiag (`NETDIAG.R4X`, test)
   - NetIoDiag (`NETIOD.R4X`, test)
   - NetR4pDiag (`NETR4P.R4X`, test)
   - NetSvcDiag (`NETSVC.R4X`, test)
   - NetworkFacadeCDiag (`CNETD.R4X`, none)
-  - NtfsDiag (`NTFSDIAG.R4X`, test)
   - PerformanceDiag (`PERFDIAG.R4X`, test)
   - R4CfgDiag (`R4CFGD.R4X`, test)
-  - R4XStartSmoke (`R4XSTARTD.R4X`, test)
   - RemoteFrameDiag (`RFDIAG.R4X`, test)
-  - ResourceDiag (`RESDIAG.R4X`, test)
-  - SerialLinkDiag (`R4SLD.R4X`, test)
-  - ServiceClassDiag (`SVCAPPD.R4X`, test)
-  - SimdDiag (`SIMDD.R4X`, test)
-  - StackDiag (`STACKD.R4X`, test)
   - StdDiag (`STDDIAG.R4X`, test)
   - StorageDiag (`STORDIAG.R4X`, test)
   - SynthDiag (`SYNTHD.R4X`, test)
@@ -938,7 +928,7 @@ Offene Punkte:
   Liste. Vor ihrem Transfer wird nur entschieden, ob sie ein eigenes privates
   Komponentenrepository oder eine modulnahe Fixture im fachlichen
   Eigentuerrepository werden; im Altprojekt verbleiben duerfen sie nicht.
-- Alle 131 Einheiten nach Abhaengigkeiten in gepruefte Wellen gruppieren.
+- Alle 120 Einheiten nach Abhaengigkeiten in gepruefte Wellen gruppieren.
 - Pro Welle eigenstaendige Builds und Distributionsintegration abnehmen.
 - Bootkritische Komponenten zuletzt und nur mit funktionierendem Ersatzpfad
   aus dem integrierten Baum loesen.
@@ -955,11 +945,40 @@ Erledigt:
   `74d2e31dfbcf2bb8531cac44f91200f5c31947b4`, Libraries
   `506155df353addba5dd164713175f8ab875b0f91` und Distribution
   `e81a20caa90405786ab2c569349a7c180a83aa8f`.
+- FSDIAG.R4X wurde als erster Diagnosepilot nach
+  `Repositories/Diagnostics/FsDiag` ausgelagert. Die Implementierung ist
+  byteidentisch zu `259cbfac`; nur Paketpins, Buildgrenzen und der zuvor feste
+  R4STD-Nachbarpfad wurden ersetzt. GitHub-Commit:
+  `8817d6757bcce2b0988168a8060e0d7fb2913bd0`.
+- Die zweite Diagnosewelle uebernahm zehn R4SYS-nahe Einheiten mit
+  byteidentischem Source, Manifest und vorhandener Moduldokumentation. Alle
+  Repositories wurden automatisch privat angelegt, eigenstaendig gebaut und
+  auf `main` gepusht:
+  - ASYNIOD: `7c423de676bde54632cfa2e2a10e2e4c4f7b8eb6`
+  - CSTARTD: `22eb099d1ef8ebd1da9aa26b5c9220b87145496e`
+  - LOGDIAG: `53704e846eef462eaca6c2c8602231adb9bf49a7`
+  - NTFSDIAG: `f9023eb8f30f45a302ba4edf500afe868ce70f96`
+  - R4XSTARTD: `ac50bda348a9aefb26f98865a3585d890a4c966e`
+  - RESDIAG: `d62769fe46768d7569617ba0d2722d70a59d276f`
+  - R4SLD: `4548a078f06dd9f2efe822ea81c031ef85cd1aaf`
+  - SVCAPPD: `92e30d754b4a9b9dac5454f5c4e769b80aba253e`
+  - SIMDD: `9eb26a431dead3a28d521fe7145dc672f6229b3f`
+  - STACKD: `30b2a598ee06f0937a162ca95453ead5b92664ed`
+- Die API-Antwortdateien von `Github.bat` enthalten nun den
+  Repositoryschluessel im Tempnamen, sodass parallele private Neuanlagen sich
+  nicht gegenseitig loeschen.
 
 Abnahme:
 - Jedes ausgelagerte Modul besitzt genau ein kanonisches Repository.
-- Der Inventarvergleich bildet alle 131 noch nicht ausgelagerten
-  Manifestmodule ohne fehlende, zusaetzliche oder doppelte Eintraege ab.
+- Der Inventarvergleich bildete das Ausgangsinventar von 131 Einheiten exakt
+  ab; nach den ersten beiden Diagnosewellen verbleiben 120 offene
+  Manifestmodule ohne fehlende, zusaetzliche oder doppelte Eintraege.
+- `FsDiag\Build.bat` erzeugt FSDIAG.R4X eigenstaendig mit drei Imports gegen
+  SDK, Contract und die gepinnte R4STD-Bindung. Das Artefakt wurde als
+  explizites Testprofil-Planfragment von der Distribution angenommen.
+- Alle zehn Artefakte der zweiten Welle bauen eigenstaendig gegen SDK und
+  Contract. Zusammen mit FSDIAG akzeptiert die Distribution elf eindeutige,
+  kollisionsfreie Testprofil-Eintraege.
 
 0.64.19
 Titel: Vollstaendige Mehrrepo-Gesamtintegration abnehmen
