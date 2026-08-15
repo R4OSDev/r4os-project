@@ -800,11 +800,11 @@ Offene Punkte:
   in 0.64.17 und alle 36 Diagnoseprogramme in fuenf Wellen von 0.64.18
   ausgelagert. Eine erste rollenuebergreifende Testwelle uebernahm danach
   sechs Treiber-/Protokollkomponenten, die erste Audio-Stack-Welle weitere
-  sieben; die folgenden 82 Einheiten verbleiben.
-- Anwendungen - 40 verbleibende R4X:
+  sieben und die zugehoerige Verbraucherwelle drei; die folgenden 79
+  Einheiten verbleiben.
+- Anwendungen - 38 verbleibende R4X:
   - AppDefaults (`APPDEF.R4X`, full)
   - Appearance (`APPEARANCE.R4X`, full)
-  - Beep (`BEEP.R4X`, full)
   - BootInfo (`BOOTINFO.R4X`, full)
   - Calculator (`CALC.R4X`, full)
   - Desktop (`R4DESK.R4X`, slim)
@@ -829,7 +829,6 @@ Offene Punkte:
   - R4Code/R4CC (`R4CC.R4X`, full)
   - R4Code/R4Code (`R4CODE.R4X`, full)
   - R4Code/R4Pack (`R4PACK.R4X`, full)
-  - R4Synth (`SYNTH.R4X`, full)
   - Recv (`RECV.R4X`, full)
   - RegEdit (`REGEDIT.R4X`, full)
   - RegistryTool (`REG.R4X`, full)
@@ -842,8 +841,7 @@ Offene Punkte:
   - Terminal (`TERMINAL.R4X`, slim)
   - TimeSettings (`TIMESET.R4X`, full)
   - UpdateCenter (`UPDATE.R4X`, slim)
-- Dienste - 15 verbleibende R4X:
-  - AudioService (`AUDSVC.R4X`, full)
+- Dienste - 14 verbleibende R4X:
   - ClipboardService (`CLIPSVC.R4X`, slim)
   - DhcpService (`DHCPSVC.R4X`, slim)
   - DnsService (`DNSSVC.R4X`, slim)
@@ -893,7 +891,7 @@ Offene Punkte:
   Liste. Vor ihrem Transfer wird nur entschieden, ob sie ein eigenes privates
   Komponentenrepository oder eine modulnahe Fixture im fachlichen
   Eigentuerrepository werden; im Altprojekt verbleiben duerfen sie nicht.
-- Alle 82 Einheiten nach Abhaengigkeiten in gepruefte Wellen gruppieren.
+- Alle 79 Einheiten nach Abhaengigkeiten in gepruefte Wellen gruppieren.
 - Pro Welle eigenstaendige Builds und Distributionsintegration abnehmen.
 - Bootkritische Komponenten zuletzt und nur mit funktionierendem Ersatzpfad
   aus dem integrierten Baum loesen.
@@ -989,6 +987,14 @@ Erledigt:
   - MIDI.R4P: `bda3f70d94ec71d8867073c9d152020df4fc8851`
   - OPL3.R4P: `d5b5178cbf5a2e4c0b029b83f10771e543863214`
   - SID.R4P: `eb990ac9ce884ecb30b893b36f6138be74be5e79`
+- Die erste Audio-Verbraucherwelle vervollstaendigte den nicht bootkritischen
+  Audio-Block mit einem Dienst und zwei Anwendungen. Quellcode, Manifeste,
+  Buildskripte, Dokumentation und das SYNTH-Icon entsprechen dem
+  eingefrorenen Stand; alle drei privaten Repositories bauen eigenstaendig
+  und liegen synchron auf `main`:
+  - AUDSVC.R4X: `04c57f78cc7b61812eb3ed851238f911f00d1f43`
+  - BEEP.R4X: `2e6930576459a664cbb793bf76094483aba9f94c`
+  - SYNTH.R4X: `da5d0ffb00077f8fb04cb5de7f0dfb2eb10fb360`
 - Die API-Antwortdateien von `Github.bat` enthalten nun den
   Repositoryschluessel im Tempnamen, sodass parallele private Neuanlagen sich
   nicht gegenseitig loeschen.
@@ -996,9 +1002,9 @@ Erledigt:
 Abnahme:
 - Jedes ausgelagerte Modul besitzt genau ein kanonisches Repository.
 - Der Inventarvergleich bildete das Ausgangsinventar von 131 Einheiten exakt
-  ab; nach Diagnose-, erster Test-/None- und erster Audio-Stack-Welle
-  verbleiben 82 offene Manifestmodule ohne fehlende, zusaetzliche oder
-  doppelte Eintraege.
+  ab; nach Diagnose-, erster Test-/None-, erster Audio-Stack- und erster
+  Audio-Verbraucherwelle verbleiben 79 offene Manifestmodule ohne fehlende,
+  zusaetzliche oder doppelte Eintraege.
 - `FsDiag\Build.bat` erzeugt FSDIAG.R4X eigenstaendig mit drei Imports gegen
   SDK, Contract und die gepinnte R4STD-Bindung. Das Artefakt wurde als
   explizites Testprofil-Planfragment von der Distribution angenommen.
@@ -1021,6 +1027,9 @@ Abnahme:
 - Die sieben Full-Profil-Artefakte der Audio-Stack-Welle erweitern denselben
   reproduzierbaren Distributionsplan auf 61 eindeutige und kollisionsfreie
   Eintraege.
+- AUDSVC, BEEP und SYNTH bauen als eigenstaendige Full-Profil-R4X; zusammen
+  mit den vorigen Wellen akzeptiert die Distribution 64 eindeutige und
+  kollisionsfreie Eintraege.
 
 0.64.19
 Titel: Vollstaendige Mehrrepo-Gesamtintegration abnehmen
