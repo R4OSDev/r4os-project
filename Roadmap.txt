@@ -802,7 +802,8 @@ Offene Punkte:
   sechs Treiber-/Protokollkomponenten, die erste Audio-Stack-Welle weitere
   sieben, die zugehoerige Verbraucherwelle drei und die geschlossene
   Basis-Netzwerkwelle neun. Die abschliessende Protokollwelle uebernahm die
-  letzten zehn R4P; die folgenden 60 Einheiten verbleiben.
+  letzten zehn R4P, die abschliessende Treiberwelle alle acht restlichen R4D;
+  die folgenden 52 Einheiten verbleiben.
 - Anwendungen - 38 verbleibende R4X:
   - AppDefaults (`APPDEF.R4X`, full)
   - Appearance (`APPEARANCE.R4X`, full)
@@ -859,22 +860,15 @@ Offene Punkte:
   - UpdateService (`UPDSVC.R4X`, slim; Quelle `Code/System/Software`)
 - Diagnoseprogramme - 0 verbleibende R4X:
   - Keine.
-- Treiber - 8 verbleibende R4D:
-  - AHCI (`AHCI.R4D`, slim)
-  - ATAPIO (`ATAPIO.R4D`, slim)
-  - NVME (`NVME.R4D`, slim)
-  - RTL8139 (`RTL8139.R4D`, slim)
-  - RTL8168 (`RTL8168.R4D`, slim)
-  - USBMSC (`USBMSC.R4D`, slim)
-  - VirtioNet (`VIRTNET.R4D`, slim)
-  - XHCI (`XHCI.R4D`, slim)
+- Treiber - 0 verbleibende R4D:
+  - Keine.
 - Protokolle - 0 verbleibende R4P:
   - Keine.
 - Einheiten mit `IMAGE_SCOPE=test` oder `none` bleiben Teil der verbindlichen
   Liste. Vor ihrem Transfer wird nur entschieden, ob sie ein eigenes privates
   Komponentenrepository oder eine modulnahe Fixture im fachlichen
   Eigentuerrepository werden; im Altprojekt verbleiben duerfen sie nicht.
-- Alle 60 Einheiten nach Abhaengigkeiten in gepruefte Wellen gruppieren.
+- Alle 52 Einheiten nach Abhaengigkeiten in gepruefte Wellen gruppieren.
 - Pro Welle eigenstaendige Builds und Distributionsintegration abnehmen.
 - Bootkritische Komponenten zuletzt und nur mit funktionierendem Ersatzpfad
   aus dem integrierten Baum loesen.
@@ -1006,6 +1000,18 @@ Erledigt:
   - HIDREPORT: `226176bcc67d7788d5f6eab1129a44952b940b97`
   - USBBOT: `5118092153d2512543e1a7f0e6a0f9860b924017`
   - USBSCSI: `0b8bcb9881359b4449d7e2c44b3ec22609f8ce73`
+- Die abschliessende Treiberwelle uebernahm die acht noch offenen Storage-,
+  Netzwerk- und USB-Treiber. RTL8168 behaelt seine sechs Quellteile und den
+  modulnahen Firmwaretabellen-Generator; alle privaten Repositories liegen
+  quellidentisch und synchron auf `main`:
+  - AHCI: `83c757aebb4e37ba4cd6683267d08d79b84f5eae`
+  - ATAPIO: `a62d80f15d88b4b319794701d8af58d2f8d157ca`
+  - NVME: `79862c5d6a61825e340bb963a6c362e801eae3fa`
+  - RTL8139: `3cfed43f0ccd87e10754b3761adcbd30f6c6e264`
+  - RTL8168: `a674ec6d84aebe3083454e40f8696255bb3a8710`
+  - USBMSC: `8e5ee0a5aec3c84c6b2175d1546068d0ec83adfc`
+  - VIRTNET: `399402f329f6de2b4e3b10b006c3897c9d7118a6`
+  - XHCI: `8278949dd8588a92882f0aac2a62c3b877e88716`
 - Die API-Antwortdateien von `Github.bat` enthalten nun den
   Repositoryschluessel im Tempnamen, sodass parallele private Neuanlagen sich
   nicht gegenseitig loeschen.
@@ -1013,9 +1019,9 @@ Erledigt:
 Abnahme:
 - Jedes ausgelagerte Modul besitzt genau ein kanonisches Repository.
 - Der Inventarvergleich bildete das Ausgangsinventar von 131 Einheiten exakt
-  ab; nach Diagnose-, erster Test-/None-, Audio- und allen Protokollwellen
-  verbleiben 60 offene Manifestmodule ohne fehlende, zusaetzliche oder
-  doppelte Eintraege.
+  ab; nach Diagnose-, erster Test-/None-, Audio-, Protokoll- und
+  Treiberwellen verbleiben 52 offene Manifestmodule ohne fehlende,
+  zusaetzliche oder doppelte Eintraege.
 - `FsDiag\Build.bat` erzeugt FSDIAG.R4X eigenstaendig mit drei Imports gegen
   SDK, Contract und die gepinnte R4STD-Bindung. Das Artefakt wurde als
   explizites Testprofil-Planfragment von der Distribution angenommen.
@@ -1047,6 +1053,9 @@ Abnahme:
 - Die zehn Artefakte der abschliessenden Protokollwelle bauen eigenstaendig
   und erweitern den gemeinsamen Plan auf 83 eindeutige, kollisionsfreie
   Eintraege. Damit ist die gesamte Protokollklasse abgenommen.
+- Die acht Slim-Profil-Artefakte der abschliessenden Treiberwelle erweitern
+  den gemeinsamen Plan auf 91 eindeutige und kollisionsfreie Eintraege.
+  Damit ist auch die gesamte Treiberklasse abgenommen.
 
 0.64.19
 Titel: Vollstaendige Mehrrepo-Gesamtintegration abnehmen
