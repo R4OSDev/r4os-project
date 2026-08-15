@@ -6,6 +6,16 @@ und Protokollen. R4OS ist ein Single-User-System, gilt vollstaendig als
 vertrauenswuerdig und besitzt bewusst kein Benutzer-, Rechte- oder
 Sandboxmodell.
 
+# Lizenz
+- Originales R4OS-Material steht in allen kanonischen Repositories unter der
+  Apache License 2.0.
+- Jedes Repository besitzt im Root die bytegleiche `LICENSE` und ein kurzes
+  `NOTICE` mit `Copyright 2026 R4` sowie der Nennung von R4 als
+  urspruenglichem Autor.
+- Material Dritter wird dadurch nicht umlizenziert. Dessen Lizenz- und
+  Herkunftshinweise bleiben erhalten und werden vor einer Veroeffentlichung
+  beziehungsweise Auslieferung repositorybezogen dokumentiert.
+
 # Umbau
 Aktuell strukturieren wir alles um.
 Das neue und aktuelle R4OS Projekt-Verzeichnis ist D:\R4OS\

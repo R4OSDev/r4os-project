@@ -30,3 +30,9 @@ R4OS-Konfiguration und Testlogik.
 
 Komponentenquellen, installierte Werkzeuge, Buildartefakte und Zugangsdaten
 werden nicht in diesem Repository gespeichert.
+
+## Lizenz
+
+Originales R4OS-Material steht unter der Apache License 2.0. Der vollstaendige
+Lizenztext liegt in `LICENSE`; `NOTICE` nennt R4 als urspruenglichen Autor.
+Material Dritter behaelt stets seine jeweilige eigene Lizenz.
