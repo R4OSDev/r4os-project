@@ -245,9 +245,9 @@ austauschbare Defaults in der jeweiligen `Settings.R4S`, nie als feste
 Quellkante in Buildscript oder Paketmanifest.
 
 Die Workspace-Ablage folgt derselben Rollenlogik wie die GitHub-Namen:
-`Repositories/Apps`, `Repositories/Services`, `Repositories/Drivers` und
-`Repositories/Protocols`. Einen generischen `Repositories/Modules`-Sammelpfad
-gibt es nicht.
+`Repositories/Apps`, `Repositories/Services`, `Repositories/Diagnostics`,
+`Repositories/Drivers` und `Repositories/Protocols`. Einen generischen
+`Repositories/Modules`-Sammelpfad gibt es nicht.
 
 7. Workspace und DevKit
 

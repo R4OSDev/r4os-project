@@ -6,6 +6,7 @@ Privater Workspace fuer die Entwicklung und Aufteilung von R4OS.
     Repositories\  Eigenstaendige R4OS-Quell-Repositories
       Apps\         Anwendungen
       Services\     Dienste
+      Diagnostics\  Diagnoseprogramme
       Drivers\      Treiber
       Protocols\    Protokolle
     Artifacts\     Lokale Build- und Testergebnisse

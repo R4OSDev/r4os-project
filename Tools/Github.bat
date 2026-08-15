@@ -13,6 +13,7 @@ set "R4OS_COMPONENT_NAME=%~3"
 set "R4OS_COMMIT_MESSAGE=%~3"
 if /I "%~2"=="-app" set "R4OS_COMMIT_MESSAGE=%~4"
 if /I "%~2"=="-service" set "R4OS_COMMIT_MESSAGE=%~4"
+if /I "%~2"=="-diagnostic" set "R4OS_COMMIT_MESSAGE=%~4"
 if /I "%~2"=="-driver" set "R4OS_COMMIT_MESSAGE=%~4"
 if /I "%~2"=="-protocol" set "R4OS_COMMIT_MESSAGE=%~4"
 
@@ -47,8 +48,10 @@ echo   [8] Anwendung
 echo   [9] Treiber
 echo   [A] Protokoll
 echo   [B] Dienst
-choice /C 123456789AB /N /M "Auswahl"
-if errorlevel 11 set "R4OS_INTERACTIVE_TARGET=-service"
+echo   [C] Diagnose
+choice /C 123456789ABC /N /M "Auswahl"
+if errorlevel 12 set "R4OS_INTERACTIVE_TARGET=-diagnostic"
+if errorlevel 11 if not defined R4OS_INTERACTIVE_TARGET set "R4OS_INTERACTIVE_TARGET=-service"
 if errorlevel 10 if not defined R4OS_INTERACTIVE_TARGET set "R4OS_INTERACTIVE_TARGET=-protocol"
 if errorlevel 9 if not defined R4OS_INTERACTIVE_TARGET set "R4OS_INTERACTIVE_TARGET=-driver"
 if errorlevel 8 if not defined R4OS_INTERACTIVE_TARGET set "R4OS_INTERACTIVE_TARGET=-app"
@@ -62,6 +65,7 @@ if errorlevel 1 if not defined R4OS_INTERACTIVE_TARGET set "R4OS_INTERACTIVE_TAR
 
 if /I "%R4OS_INTERACTIVE_TARGET%"=="-app" goto interactive_component
 if /I "%R4OS_INTERACTIVE_TARGET%"=="-service" goto interactive_component
+if /I "%R4OS_INTERACTIVE_TARGET%"=="-diagnostic" goto interactive_component
 if /I "%R4OS_INTERACTIVE_TARGET%"=="-driver" goto interactive_component
 if /I "%R4OS_INTERACTIVE_TARGET%"=="-protocol" goto interactive_component
 
@@ -90,6 +94,7 @@ if /I "%~1"=="-kernel" goto select_kernel
 if /I "%~1"=="-distribution" goto select_distribution
 if /I "%~1"=="-app" goto select_app
 if /I "%~1"=="-service" goto select_service
+if /I "%~1"=="-diagnostic" goto select_diagnostic
 if /I "%~1"=="-driver" goto select_driver
 if /I "%~1"=="-protocol" goto select_protocol
 exit /b 1
@@ -190,6 +195,13 @@ set "R4OS_COMPONENT_KIND=service"
 set "R4OS_COMPONENT_LABEL=Dienst"
 set "R4OS_COMPONENT_DESCRIPTION=Independent R4OS service"
 set "R4OS_COMPONENT_DIRECTORY=Services"
+goto select_component
+
+:select_diagnostic
+set "R4OS_COMPONENT_KIND=diagnostic"
+set "R4OS_COMPONENT_LABEL=Diagnose"
+set "R4OS_COMPONENT_DESCRIPTION=Independent R4OS diagnostic"
+set "R4OS_COMPONENT_DIRECTORY=Diagnostics"
 goto select_component
 
 :select_driver
@@ -461,6 +473,8 @@ echo   Github.bat -push -app NAME ["Commit-Beschreibung"]
 echo   Github.bat -pull -app NAME
 echo   Github.bat -push -service NAME ["Commit-Beschreibung"]
 echo   Github.bat -pull -service NAME
+echo   Github.bat -push -diagnostic NAME ["Commit-Beschreibung"]
+echo   Github.bat -pull -diagnostic NAME
 echo   Github.bat -push -driver NAME ["Commit-Beschreibung"]
 echo   Github.bat -pull -driver NAME
 echo   Github.bat -push -protocol NAME ["Commit-Beschreibung"]

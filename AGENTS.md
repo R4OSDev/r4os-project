@@ -50,7 +50,8 @@ Das alte ist: D:\AI\Projects\Claude Code\R4OS
 - Die Distribution liegt unter `D:\R4OS\Repositories\Distribution\` und wird
   als `R4OSDev/r4os-distribution` auf dem Branch `main` verwaltet.
 - Eigenstaendige Komponenten liegen nach ihrer fachlichen Rolle unter
-  `D:\R4OS\Repositories\Apps\`, `Services\`, `Drivers\` oder `Protocols\`.
+  `D:\R4OS\Repositories\Apps\`, `Services\`, `Diagnostics\`, `Drivers\`
+  oder `Protocols\`.
   Die ersten Piloten sind `Apps\Clock` als `R4OSDev/r4os-app-clock`,
   `Drivers\MIDI` als `R4OSDev/r4os-driver-midi` und `Protocols\JSON` als
   `R4OSDev/r4os-protocol-json`.
@@ -87,12 +88,13 @@ Das alte ist: D:\AI\Projects\Claude Code\R4OS
 - Fuer Push und Pull ausschliesslich `D:\R4OS\Tools\Github.bat` verwenden.
   Ohne Argumente fragt es interaktiv erst nach `Push` oder `Pull` und danach
   nach `Project`, `DevKit`, `Contract`, `SDK`, `Libraries`, `Kernel`,
-  `Distribution`, einer Anwendung, einem Dienst, Treiber oder Protokoll.
+  `Distribution`, einer Anwendung, einem Dienst, Diagnoseprogramm, Treiber
+  oder Protokoll.
 - Nach einem frischen Clone zuerst `D:\R4OS\Tools\Setup.bat` ausfuehren.
   Es erzeugt die ignorierten Workspace-Ordner `Artifacts`, `DevKit` und
-  `Repositories`, die Rollenordner `Apps`, `Services`, `Drivers` und
-  `Protocols`, die lokalen Modul-/Distribution-Artefaktwurzeln und bei Bedarf
-  die lokale GitHub-Credentials-Vorlage.
+  `Repositories`, die Rollenordner `Apps`, `Services`, `Diagnostics`,
+  `Drivers` und `Protocols`, die lokalen Modul-/Distribution-Artefaktwurzeln
+  und bei Bedarf die lokale GitHub-Credentials-Vorlage.
   Anschliessend das DevKit mit `Github.bat -pull -devkit` beziehen und darin
   `Setup\Setup_Windows.bat` ausfuehren.
 - Direkte Aufrufe:
@@ -114,6 +116,8 @@ Das alte ist: D:\AI\Projects\Claude Code\R4OS
   - `Github.bat -pull -app Clock`
   - `Github.bat -push -service SSHD ["Commit-Beschreibung"]`
   - `Github.bat -pull -service SSHD`
+  - `Github.bat -push -diagnostic FsDiag ["Commit-Beschreibung"]`
+  - `Github.bat -pull -diagnostic FsDiag`
   - `Github.bat -push -driver MIDI ["Commit-Beschreibung"]`
   - `Github.bat -pull -driver MIDI`
   - `Github.bat -push -protocol JSON ["Commit-Beschreibung"]`

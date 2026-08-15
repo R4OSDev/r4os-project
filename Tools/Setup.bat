@@ -59,7 +59,7 @@ if not exist "%R4OS_PROJECT_ROOT%\Repositories\" (
     echo Angelegt: Repositories
 )
 
-for %%D in (Apps Services Drivers Protocols) do (
+for %%D in (Apps Services Diagnostics Drivers Protocols) do (
     if not exist "%R4OS_PROJECT_ROOT%\Repositories\%%D\" (
         mkdir "%R4OS_PROJECT_ROOT%\Repositories\%%D"
         if errorlevel 1 (
