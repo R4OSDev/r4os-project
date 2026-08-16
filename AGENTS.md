@@ -22,7 +22,7 @@ Sandboxmodell.
 - Besondere Lizenzgrenze: Die mechanisch aus dem GPL-2.0-only-Realtek-
   Vendortreiber erzeugten Firmwaretabellen in `Drivers/RTL8168` sowie
   Binaerartefakte, die sie enthalten, werden als GPL-2.0-only dokumentiert.
-- Oeffentliche Repository-Einstiege und sonstige `README*`-Dateien sind
+- Repository-Einstiege und sonstige `README*`-Dateien sind
   Englisch. Ausfuehrliche uebernommene deutsche Root-Dokumentation bleibt als
   `DOCUMENTATION.de.txt` erhalten.
 
@@ -42,7 +42,7 @@ Das alte ist: D:\AI\Projects\Claude Code\R4OS
 # GitHub
 - Das private GitHub-Projektverzeichnis `D:\R4OS` wird als
   `R4OSDev/r4os-project` auf dem Branch `main` gesichert.
-- Das oeffentliche DevKit-Repository liegt unter `D:\R4OS\DevKit` und wird
+- Das private DevKit-Repository liegt unter `D:\R4OS\DevKit` und wird
   als `R4OSDev/r4os-devkit` auf dem Branch `main` verwaltet. Installierte
   Inhalte werden durch dessen eigene `.gitignore` ausgeschlossen.
 - `D:\R4OS\DevKit\Setup\Setup_Windows.bat` installiert Zig, Limine und QEMU,
@@ -76,8 +76,8 @@ Das alte ist: D:\AI\Projects\Claude Code\R4OS
   `Drivers\MIDI` als `R4OSDev/r4os-driver-midi` und `Protocols\JSON` als
   `R4OSDev/r4os-protocol-json`. Der erste Diagnosepilot ist
   `Diagnostics\FsDiag` als `R4OSDev/r4os-diagnostic-fsdiag`.
-  Diese Komponentenrepositories sind waehrend des Umbaus privat und werden
-  erst mit der abschliessenden Repositoryhygiene veroeffentlicht.
+  Diese Komponentenrepositories bleiben vorerst privat. Eine spaetere
+  Veroeffentlichung ist eine separate Entscheidung.
   Jedes Modul besitzt eigene Settings und Buildstarter; relative Settings
   beginnen am jeweiligen Modulrepository und duerfen durch absolute Pfade
   ersetzt werden. Fertige Pilotartefakte landen standardmaessig unter
