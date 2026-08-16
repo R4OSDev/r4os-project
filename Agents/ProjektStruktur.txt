@@ -27,7 +27,8 @@ Workspace-Ueberblick
 `Tools/Setup.bat` erzeugt nach einem frischen Clone die ignorierten
 Grundordner und die beiden lokalen Textdateien, ohne vorhandenen Inhalt zu
 ueberschreiben. GitHub-Push und -Pull laufen ausschliesslich ueber
-`Tools/Github.bat`.
+`Tools/Github.bat`. Oeffentliche Pulls laufen anonym; nur Push und
+Repository-Erstellung verwenden die lokale Credentials-Datei.
 
 
 Repositories/

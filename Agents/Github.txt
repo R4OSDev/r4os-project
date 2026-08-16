@@ -19,6 +19,11 @@ Grundregeln
 - Der private Package-Server ist die einzige Ausnahme. Er wird ausschließlich
   mit D:\R4OS\Server\Push.bat und D:\R4OS\Server\Pull.bat verwaltet und
   besitzt bewusst kein Ziel im globalen Github.bat.
+- Pulls aus allen vom globalen Script verwalteten öffentlichen Repositories
+  laufen anonym. Github.bat lädt dafür keine Credentials und deaktiviert
+  interaktive Anmeldung sowie lokale Git-Credential-Helper.
+- Pushes und die automatische Repository-Erstellung bleiben
+  tokenauthentifiziert.
 - Keine direkten Aufrufe von git push oder git pull verwenden.
 - Read-only-Aufrufe wie git status, git diff, git log und git rev-parse sind
   zur Prüfung erlaubt.
@@ -71,9 +76,10 @@ Die lokalen Zugangsdaten liegen ausschließlich hier:
 
 Die Datei definiert intern R4OS_GITHUB_USER und R4OS_GITHUB_TOKEN. Agents
 dürfen die Datei nicht öffnen oder ihren Inhalt ausgeben. Github.bat lädt sie
-selbst und übergibt die Daten über seinen AskPass-Pfad an Git und über einen
+ausschließlich für Pushes und schreibende GitHub-API-Aufrufe. Dabei übergibt
+es die Daten über seinen AskPass-Pfad an Git und über einen
 Authorization-Header an die GitHub-API. Zugangsdaten werden nicht in der
-Remote-URL gespeichert. Interaktive Git-Anmeldeabfragen sind deaktiviert.
+Remote-URL gespeichert.
 
 Nach einem frischen Checkout wird ausgeführt:
 
@@ -81,13 +87,15 @@ Nach einem frischen Checkout wird ausgeführt:
 
 Setup.bat erzeugt den Credentials-Ordner und eine Platzhalterdatei, falls sie
 noch nicht existieren. Eine vorhandene Credentials-Datei wird nicht
-überschrieben. Der Benutzer trägt Benutzername und Token selbst ein.
+überschrieben. Für einen rein lesenden Workspace-Aufbau bleibt der Platzhalter
+unverändert; erst vor einem Push trägt der Benutzer Benutzername und Token ein.
 
-Der Token benoetigt fuer vorhandene private Repositories mindestens Lesezugriff
-fuer Pull und Schreibzugriff auf Repository-Inhalte fuer Push. Soll Github.bat
-ein fehlendes Repository automatisch anlegen, muss der Token ausserdem in der
-Organisation R4OSDev Repositories erstellen duerfen. Eine Berechtigung fuer
-Pull Requests ist fuer diesen Arbeitsablauf nicht erforderlich.
+Der Token benoetigt Schreibzugriff auf Repository-Inhalte fuer Push. Soll
+Github.bat ein fehlendes Repository automatisch anlegen, muss der Token
+ausserdem in der Organisation R4OSDev Repositories erstellen duerfen. Eine
+Berechtigung fuer Pull Requests ist fuer diesen Arbeitsablauf nicht
+erforderlich. Pulls aus den öffentlichen R4OSDev-Repositories benötigen
+weder Token noch GitHub-Benutzerkonto.
 
 Die Credentials-Datei und ihr Verzeichnis sind im Project-Repository
 ignoriert. Trotzdem vor einem Push prüfen, dass weder Token noch Kopien davon
@@ -310,13 +318,12 @@ Was ein Pull ausführt
 
 Github.bat führt für das gewählte Repository in dieser Reihenfolge aus:
 
-1. Credentials laden.
-2. Lokales Repository prüfen oder, außer beim Project-Root, bei Bedarf mit
+1. Lokales Repository prüfen oder, außer beim Project-Root, bei Bedarf mit
    main initialisieren.
-3. Sicherstellen, dass der aktuell ausgecheckte Branch main ist.
-4. Erreichbarkeit des erwarteten GitHub-Repositories prüfen.
-5. origin ergänzen oder seine exakte URL prüfen.
-6. git pull --ff-only origin main ausführen.
+2. Sicherstellen, dass der aktuell ausgecheckte Branch main ist.
+3. origin ergänzen oder seine exakte öffentliche HTTPS-URL prüfen.
+4. Interaktive Anmeldung und lokale Git-Credential-Helper deaktivieren.
+5. git pull --ff-only origin main anonym ausführen.
 
 Der Pull erlaubt ausschließlich Fast-Forward. Das Script führt keinen Merge,
 keinen Rebase, keinen Reset, kein Clean und kein automatisches Stash aus. Bei
@@ -371,17 +378,20 @@ Github.bat kann den Project-Root nicht selbst initialisieren, weil das Script
 erst aus dem vorhandenen r4os-project-Checkout verfügbar ist. Sobald dieser
 Checkout unter D:\R4OS existiert:
 
-1. D:\R4OS\Tools\Setup.bat ausführen.
-2. Benutzername und Token durch den Benutzer in der erzeugten lokalen
-   Credentials-Datei eintragen lassen.
-3. DevKit mit Github.bat -pull -devkit beziehen.
+1. Das öffentliche Repository R4OSDev/r4os-project ohne Credentials nach
+   D:\R4OS klonen.
+2. D:\R4OS\Tools\Setup.bat ausführen.
+3. DevKit mit Github.bat -pull -devkit anonym beziehen.
 4. Docs, Contract, SDK, Libraries, Kernel, Distribution und bei Bedarf das
    Organisationsprofil mit ihren jeweiligen Pull-Zielen beziehen.
 5. Den privaten Package-Server bei Bedarf separat klonen und danach mit
    D:\R4OS\Server\Pull.bat aktualisieren.
 6. Benötigte Apps, Services, Diagnostics, Drivers und Protocols einzeln mit
    Rollenflag und Komponentenname beziehen.
-7. Die DevKit-Abhängigkeiten anschließend über dessen Setup installieren.
+7. Die DevKit-Abhängigkeiten anschließend über dessen Setup installieren; die
+   dortigen öffentlichen Quellkopien werden ebenfalls anonym bezogen.
+8. Nur wenn in R4OSDev gepusht werden soll, Benutzername und Token in die
+   lokale Credentials-Datei eintragen.
 
 Der DevKit-Checkout ist nicht mit den dort installierten Quellkopien zu
 verwechseln. Kanonische Quellen werden unter D:\R4OS\Repositories bearbeitet;
@@ -392,8 +402,10 @@ Fehlerbehandlung
 ----------------
 
 Credentials fehlen oder enthalten Platzhalter
-    D:\R4OS\Tools\Setup.bat ausführen und den Benutzer die lokale Datei
-    ausfüllen lassen. Credentials nicht selbst auslesen oder ausgeben.
+    Nur Push und Repository-Erstellung sind betroffen. D:\R4OS\Tools\Setup.bat
+    ausführen und den Benutzer die lokale Datei vor dem Push ausfüllen lassen.
+    Öffentliche Pulls und Setups funktionieren weiterhin anonym. Credentials
+    nicht selbst auslesen oder ausgeben.
 
 Repository steht nicht auf main
     Status und Branches prüfen. Nicht automatisch wechseln, wenn dadurch
@@ -409,8 +421,8 @@ Pull ist kein Fast-Forward
     kein Reset und kein automatischer Merge. Die Divergenz bewusst auflösen.
 
 GitHub-Repository ist nicht erreichbar
-    Zielname, Organisationszugriff und Tokenberechtigung prüfen lassen. Pull
-    legt kein fehlendes Remote-Repository an.
+    Bei Pull Zielname, Netzwerk und öffentliche Sichtbarkeit prüfen. Ein Pull
+    verwendet keinen Token und legt kein fehlendes Remote-Repository an.
 
 Repository kann nicht erstellt werden
     Der Token darf in R4OSDev vermutlich keine Repositories anlegen.
