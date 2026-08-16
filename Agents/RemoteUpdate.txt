@@ -7,12 +7,7 @@ auf einem laufenden System atomar installieren.
 Vertragswahrheiten:
 
     Docs/Deployment/R4UComponentContract.txt
-    Docs/Deployment/SystemUpdater05914.txt
-    Docs/Deployment/UpdateService06316.txt
-    Docs/Deployment/UpdateSearch06317.txt
-    Docs/Deployment/UpdateDownload06318.txt
-    Docs/Deployment/UpdateCenter06319.txt
-    Docs/Deployment/UpdateAll06320.txt
+    Docs/Deployment/SystemUpdate.txt
 
 
 Gesamtweg
@@ -36,6 +31,11 @@ Komponenten und Versionen
 Ein R4U enthaelt nur die fuer das Paket vorgesehenen Payloads.
 R4X, R4L, R4D, R4P und Kernel tragen ihre eigene eingebettete
 Komponentenversion.
+
+Die sechs Platform APIs sind keine R4L-Komponenten und kein eigenes
+Updateziel. Ihre Implementierung aendert sich nur mit dem Kernelartefakt;
+ihre ABI-Wahrheit liegt im zentralen Contract. Unabhaengige Runtime-R4Ls
+bleiben dagegen normale versionierte R4U-Komponenten.
 
     VERSION.R4S    sichtbarer Systemrelease
     MODULES.JSON   installierte Komponenten und Imageprofil
@@ -70,8 +70,7 @@ Beispiel fuer einen Dienst:
       --package RDP --version <PAKETVERSION> --release <RELEASE> ^
       --title "RDP service update" ^
       --description-file Artifacts\Distribution\Packages\RDP-DESCRIPTION.TXT ^
-      --payload "Artifacts\Modules\RdpService\RDPSVC.R4X|C:\R4OS\SERVICES\RDPSVC.R4X|service" ^
-      --require "R4L|R4SYS|/R4OS/LIBS/R4SYS.R4L|0.1.1|installed"
+      --payload "Artifacts\Modules\RdpService\RDPSVC.R4X|C:\R4OS\SERVICES\RDPSVC.R4X|service"
 
 Das Ausgabe- und Beschreibungsverzeichnis muss lokal vorhanden sein.
 
@@ -240,5 +239,5 @@ Weiterfuehrend
     Agents/Build.txt
     Server/Agents/Server.txt
     Docs/Deployment/R4UComponentContract.txt
-    Docs/Deployment/SystemUpdater05914.txt
+    Docs/Deployment/SystemUpdate.txt
     Docs/SupportedHardware.txt

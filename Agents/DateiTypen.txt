@@ -19,11 +19,12 @@ Vier Endungen verwenden den gemeinsamen R4M0-Container:
             Ziele liegen unter C:\R4OS\SOFTWARE\ oder
             C:\R4OS\SERVICES\.
 
-    .R4L    Library
-            Exportiert Query:1. Plattform-Bridges stellen R4SYS, R4DESK,
-            R4DRAW, R4NET, R4AUDIO und R4DEV bereit. Runtime-Libraries wie
-            R4STD, R4IMG und R4FONT exportieren eigene versionierte Tabellen.
-            Ziel: C:\R4OS\LIBS\.
+    .R4L    unabhaengige Runtime-Library
+            Exportiert Query:1 und eigene versionierte Tabellen. R4STD,
+            R4IMG und R4FONT sind aktuelle Beispiele. Die sechs Platform APIs
+            R4SYS bis R4DEV sind eingebaute Kernel-Provider und besitzen
+            keine R4L-Datei. Ziel echter Runtime-Libraries:
+            C:\R4OS\LIBS\.
 
     .R4D    Treiber
             Verwendet den Driver-Entryvertrag.
@@ -98,9 +99,10 @@ Systemartefakte
             Default-Registry unter
             Artifacts/Distribution/Generated/RegistryDefaults/.
 
-    .R4I    Preload-Image mit Magic R4I0. Es buendelt die Module, die vor
-            dem vollstaendigen Dateisystempfad benoetigt werden. Der
-            Workspace erzeugt PRELOAD.R4I unter
+    .R4I    Preload-Image mit Magic R4I0. Es buendelt die R4D- und
+            R4P-Module, die vor dem vollstaendigen Dateisystempfad benoetigt
+            werden. Platform APIs sind zu diesem Zeitpunkt bereits im Kernel
+            registriert. Der Workspace erzeugt PRELOAD.R4I unter
             Artifacts/Distribution/Generated/.
 
     .R4F    Systemfont. Die Fontgeneratoren liegen unter
@@ -153,7 +155,7 @@ Begriffe ohne Dateiendung
     R4S     Name der Konfigurationsfamilie
 
 Ein Modulname bezeichnet die logische Identitaet. Die zugehoerige Datei
-enthaelt zusaetzlich die Modulart, beispielsweise R4SYS.R4L.
+enthaelt zusaetzlich die Modulart, beispielsweise R4STD.R4L.
 
 
 Weiterfuehrend
@@ -164,5 +166,5 @@ Weiterfuehrend
     Docs/Drivers/R4DFormat.txt
     Docs/Protocols/R4PFormat.txt
     Docs/Fonts/R4FFormat.txt
-    Docs/Core/RegistryFormat046.txt
+    Docs/Core/RegistryFormat.txt
     Docs/Desktop/IconFormat.txt

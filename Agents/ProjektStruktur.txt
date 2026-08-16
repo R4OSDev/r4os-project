@@ -46,7 +46,6 @@ Zentrale Repositories:
     SDK/            hostneutrales SDK und Modul-Baugrundlage
       BuildProfiles/  R4X/R4D/R4P/R4L- und C-Bauprofile
       Hosts/          Hostanpassungen fuer Windows, Linux und R4OS
-      PlatformBridges/ R4SYS, R4DESK, R4DRAW, R4NET, R4AUDIO, R4DEV
       r4os/           Zig-Fassaden und Linkerunterstuetzung
       Shared/         gemeinsame Zig-/C-Bindings und Startup-Quellen
       Templates/      Projektvorlagen
@@ -96,8 +95,13 @@ Contract, SDK und Libraries
 Der Contract definiert die zentrale Plattform-API und -ABI. Er enthaelt
 keine Implementierung optionaler Runtime-Libraries.
 
-Das SDK baut auf dem Contract auf. Die sechs Plattform-Bridges liegen im
-SDK, weil sie den kernelnahen zentralen Plattformvertrag transportieren.
+Der Kernel implementiert R4SYS, R4DESK, R4DRAW, R4NET, R4AUDIO und R4DEV als
+sechs eingebaute Platform-API-Provider. Sie werden vor dem Modulpreload
+registriert, besitzen kein eigenes R4L-Artefakt und werden mit Kernel und
+zentralem Contract versioniert.
+
+Das SDK baut auf dem Contract auf und stellt Startup, Bindings, Fassaden und
+Modulbau bereit. Es implementiert und verpackt die sechs Platform APIs nicht.
 
 R4STD, R4IMG und R4FONT liegen als unabhaengige Einheiten im Libraries-
 Repository. Jede besitzt Implementierung, eigenen Contract, Baseline,
@@ -161,9 +165,11 @@ werden. Wichtige erzeugte Orte sind:
     Distribution/PrivateInjection/     lokales optionales Imageoverlay
 
 Der Kernel schreibt sein Artefakt weiterhin repositorylokal nach
-`Repositories/Kernel/zig-out/bin/r4os.elf`. SDK-Plattform-Bridges und
+`Repositories/Kernel/zig-out/bin/r4os.elf`. SDK-Hosttools und
 Runtime-Libraries besitzen ebenfalls repositorylokale `zig-out`-Ausgaben.
-Diese `zig-out`-Verzeichnisse sind erzeugt und nicht versioniert.
+Diese `zig-out`-Verzeichnisse sind erzeugt und nicht versioniert. Die sechs
+Platform APIs erscheinen weder hier als getrennte Artefakte noch unter
+`Artifacts/Modules/`.
 
 
 Inventare

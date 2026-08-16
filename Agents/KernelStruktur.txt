@@ -36,12 +36,13 @@ voraus:
     memory_boot.initCore         Map, Blocks, PMM, Paging, Page Tables,
                                  Virtual Ranges und Heap
     storage_boot.initFoundation  Drive- und Blockgrundlage
-    module_boot                  Modulregistry
+    module_boot                  Modulregistry und sechs eingebaute
+                                 Platform-API-Provider
     platform_boot                ACPI, PCIe, Device-Mappings und CR3
     usb_protocol_preload_boot    USB-Protokolle vor dem Hostcontroller
     service_boot                 Registry, Endpoints und Queues
     storage_boot.initControllers Controller, Blockdevice-Scan, MBR und Mounts
-    loader_boot                  Systemlibraries, R4D-Discovery und BOOT.R4S
+    loader_boot                  Runtime-Libraries, R4D-Discovery und BOOT.R4S
     system_update_recovery_boot  SYSUPD-Journale, siehe RemoteUpdate.txt
     upload_claim_boot            offene Uploadtransaktionen
     platform_irq_boot            APIC, IOAPIC, HPET und Timer-Handoff
@@ -113,8 +114,9 @@ Der Sammelort fuer Kerndienste und Bootschnitte.
     irq_router.zig    IRQ-Routen-Registry: shared INTx, Level/Edge,
                       MSI-Fenster 24..31
     timer.zig         Timer-Core: PIT-Start, HPET-/LAPIC-Umschaltung
-    modules.zig, module_file.zig, module_r4m.zig   Modulregistry und
-                      gemeinsamer Modul-Dateizugriff
+    modules.zig, module_file.zig, module_r4m.zig   Modulregistry,
+                      eingebaute Platform-API-Provider und gemeinsamer
+                      Modul-Dateizugriff
     services.zig, service_core.zig, service_ipc.zig   Service-Registry,
                       Endpoints, Queues und Kanal-IPC
     protocol_api.zig  Protokollzugriff fuer Kernelverbraucher
@@ -139,8 +141,7 @@ memory/
     heap.zig          Kernel-Heap
     backing_store.zig, reclaim.zig   Auslagerung und globaler Reclaim
 
-Details: `Docs/Core/MemoryManagement.txt` und
-`Docs/Core/AdressraumLayout.txt`.
+Details: `Docs/Core/Speicherverwaltung.txt`.
 
 
 program/
@@ -156,7 +157,8 @@ Die Programm- und ABI-Ebene.
                       Protokollmodule
     r4x_start.zig     R4XStart-Kontext und Startvertrag
     r4x_api.zig       zyklusfreie Fassade auf das als
-                      r4os_kernel_contract importierte Contractmodul
+                      r4os_kernel_contract importierte Contractmodul samt
+                      erzeugten Platform-API-Metadaten
     r4api.zig         zentraler Export der API-Gruppenmodule
     r4sys.zig         R4SYS-Systembasis
     r4desk.zig, r4draw.zig, r4net.zig, r4audio.zig, r4dev.zig
@@ -180,7 +182,8 @@ sched/
                       Semaphore, dynamische WaitQueue
     task_registry_selftest.zig   gebundene QEMU-Laufzeitprobe
 
-Details: `Docs/Core/DynamicTaskRegistry.txt`.
+Details: `Docs/Core/ProgramLifecycle.txt` und
+`Docs/Core/Speicherverwaltung.txt`.
 
 
 fs/ und storage/
@@ -269,6 +272,6 @@ Weiterfuehrend
 
     Docs/Core/Architektur.txt          Systemmodell und Besitzgrenzen
     Docs/Core/Modulsystem.txt          R4M0, Manifest, Loader
-    Docs/Core/DynamicTaskRegistry.txt  Tasks, Waiter, Threads
     Docs/Core/ProgramLifecycle.txt     Programmlebenszyklus
+    Docs/Core/Speicherverwaltung.txt   Speicher- und Registryinvarianten
     Agents/ProjektStruktur.txt         der Baum ausserhalb des Kernels

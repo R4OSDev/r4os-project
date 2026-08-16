@@ -18,14 +18,16 @@ Container in Kuerze
 R4M0 ist der gemeinsame Little-Endian-Container fuer:
 
     1 = R4X  Programm oder Dienst
-    2 = R4L  Library
+    2 = R4L  unabhaengige Runtime-Library
     3 = R4D  Treiber
     4 = R4P  Protokollmodul
-    5 = KernelProvider
+    5 = reservierte Identitaet eingebauter Platform-API-Provider
     6 = reserviertes Kernelmodul
 
 Architektur 1 bezeichnet x86_64. Die sichtbare Dateiendung entspricht der
-Modulart: .R4X, .R4L, .R4D oder .R4P.
+Modulart: .R4X, .R4L, .R4D oder .R4P. Die Kinds 5 und 6 sind keine gueltigen
+Dateicontainer. R4SYS, R4DESK, R4DRAW, R4NET, R4AUDIO und R4DEV werden unter
+Kind 5 ausschliesslich als eingebaute Kernel-Provider registriert.
 
 Der Header ist 64 Byte gross und adressiert Sections, Imports, Exports,
 Relocations, Entry sowie den Meta-/Stringbereich ausschliesslich ueber
@@ -62,6 +64,9 @@ sein.
 
 Ein normales R4X exportiert R4XStart:1 und importiert R4SYS:Query:1. Weitere
 Anforderungen stehen als geordnete IMPORT=-Zeilen im Manifest.
+
+Importe der sechs Platform APIs werden gegen die bereits registrierten
+Kernel-Provider aufgeloest. Sie erzeugen keine Datei- oder Imageabhaengigkeit.
 
 Eine Runtime-R4L exportiert Query:1 und mindestens eine fachliche,
 versionierte Tabelle. Der Manifestwert
@@ -321,7 +326,9 @@ Image und Laufzeit
 
 Der Workspace-Plan verbindet jedes Manifest mit genau einem gebauten
 Artefakt. ModuleCatalog prueft Identitaeten, Ziele, Scopes und bekannte
-Providerabhaengigkeiten. Das profilgebundene Ergebnis steht unter:
+Providerabhaengigkeiten. Die sechs eingebauten Platform APIs gelten dabei als
+vorhanden, erscheinen aber nicht als Module oder Artefakte. Das
+profilgebundene Ergebnis steht unter:
 
     Artifacts/Distribution/Generated/MODULES.JSON
 

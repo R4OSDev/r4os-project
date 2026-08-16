@@ -87,16 +87,18 @@ Ablauf eines Gesamtbuilds
    die generierten Contractartefakte.
 3. SDK ueber dessen `Build.bat` mit dem lokal gemappten Contract bauen.
 4. R4STD, R4IMG und R4FONT ueber `Repositories/Libraries/Build.bat` bauen.
-5. Kernel ueber `Repositories/Kernel/Build.bat` bauen.
+5. Kernel ueber `Repositories/Kernel/Build.bat` bauen. Die sechs Platform
+   APIs sind Teil dieses Kernelartefakts und keine getrennten Modulbuilds.
 6. Alle direkten Repositoryprojekte unter Apps, Services, Diagnostics,
    Drivers und Protocols dynamisch entdecken und deren eigenes `Build.bat`
    aufrufen.
 7. Aus allen versionierten und nicht ignorierten `module.R4MF` sowie den
    zugehoerigen Artefakten `WorkspaceModules.map` erzeugen. Dazu gehoeren
-   auch SDK-Plattform-Bridges, Runtime-Libraries und modulnahe, versionierte
-   Zusatzmanifeste.
-8. Distribution-Hosttools und Systemfonts bei Bedarf bauen, danach
-   `PRELOAD.R4I` und die Default-Registry erzeugen.
+   Runtime-Libraries und modulnahe, versionierte Zusatzmanifeste. Eingebaute
+   Platform APIs besitzen kein Manifest und erscheinen nicht in der Map.
+8. Distribution-Hosttools und Systemfonts bei Bedarf bauen, danach das nur
+   aus fruehen R4D-/R4P-Modulen bestehende `PRELOAD.R4I` und die
+   Default-Registry erzeugen.
 9. Mit ModuleCatalog den Komponentenplan des Profils und das dazu passende
    `MODULES.JSON` erzeugen. Der Kernel wird mit seiner eingebetteten
    Version als eigene Komponente aufgenommen.
@@ -182,7 +184,7 @@ Artefakte und Inventare
         gebauter Kernel
 
     Repositories/SDK/zig-out/
-        SDK-Hosttools und Plattform-Bridges
+        SDK-Hosttools
 
     Repositories/Libraries/<Library>/zig-out/
         Runtime-R4L-Artefakte
