@@ -16,12 +16,13 @@ Sandboxmodell.
 - Lokal arbeiten. Es duerfen keine Subagents gestartet oder verwendet werden.
 - Aenderungen vor dem Abschluss in einem ihrem Risiko angemessenen Umfang
   bauen und testen.
-- Manuelle Inventare sind Teil der jeweiligen Aenderung: Neue, verschobene
-  oder entfernte kanonische Module in `Docs/Inventory/AllModules.json`
-  nachziehen. Neue, geaenderte, verschobene oder entfernte Tests in
-  `Docs/Inventory/Tests.json` nachziehen. Neue, geaenderte, verschobene oder
-  entfernte projektweite Dokumente in `Docs/Inventory/Docs.json` nachziehen;
-  die dort definierten Ausschluesse bleiben unberuehrt.
+- Inventare sind Teil der jeweiligen Aenderung: Neue, verschobene oder
+  entfernte kanonische Module in `Docs/Inventory/AllModules.json` nachziehen.
+  Neue, geaenderte, verschobene oder entfernte Tests in
+  `Docs/Inventory/Tests.json` nachziehen. Der Workspace-Build gleicht den
+  Dateibestand von `Docs/Inventory/Docs.json` automatisch ab; Beschreibung,
+  letzter Pruefstand in `Status` und optionale `Notes` werden bei der
+  inhaltlichen Dokumentarbeit manuell gepflegt.
 - Fuer jedes neue kanonische Projekt unter Apps, Services, Diagnostics,
   Drivers oder Protocols ein eigenes oeffentliches Repository in der
   GitHub-Organisation `R4OSDev` anlegen. Benennung und Zielzuordnung stehen in
@@ -79,8 +80,9 @@ Sandboxmodell.
   `Docs/Inventory/Docs.json` gepflegt. `Agents/`, `Docs/Inventory/` und
   Changelogs werden dort nicht aufgenommen.
 - `Docs/Inventory/AllModules.json`, `Docs/Inventory/Tests.json` und
-  `Docs/Inventory/Docs.json` werden manuell gepflegt. Das profilspezifische
-  technische Inventar
+  `Docs/Inventory/Browser.json` werden manuell gepflegt. In `Docs.json` wird
+  der Dateibestand automatisch und werden die inhaltlichen Felder manuell
+  gepflegt. Das profilspezifische technische Inventar
   `Artifacts/Distribution/Generated/MODULES.JSON` entsteht beim Imageplan.
 - Die API-Uebersicht liegt unter
   `Repositories/Contract/Generated/Inventory/API.json`.
