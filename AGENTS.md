@@ -33,8 +33,6 @@ Das alte ist: D:\AI\Projects\Claude Code\R4OS
 
 - Der eingefrorene fachliche Referenzstand ist Altprojekt-Commit `259cbfac`;
   der archivierte Abschluss-Head ist `2c0ca047`.
-- Die verbindliche Repository- und Dateizuordnung steht unter
-  `Agents/SourceMap06410.txt`.
 - Eine Komponente wird erst nach eigenstaendigem Build und ihren Tests im
   neuen Repository kanonisch. Bis dahin bleibt ihr Teilbaum aus `259cbfac`
   die einzige fachliche Wahrheit.
@@ -42,6 +40,8 @@ Das alte ist: D:\AI\Projects\Claude Code\R4OS
 # GitHub
 - Das private GitHub-Projektverzeichnis `D:\R4OS` wird als
   `R4OSDev/r4os-project` auf dem Branch `main` gesichert.
+- Die projektuebergreifende Dokumentation liegt unter `D:\R4OS\Docs` und
+  wird als privates `R4OSDev/r4os-docs` auf `main` verwaltet.
 - Das private DevKit-Repository liegt unter `D:\R4OS\DevKit` und wird
   als `R4OSDev/r4os-devkit` auf dem Branch `main` verwaltet. Installierte
   Inhalte werden durch dessen eigene `.gitignore` ausgeschlossen.
@@ -148,11 +148,11 @@ Das alte ist: D:\AI\Projects\Claude Code\R4OS
 - Fuer Push und Pull ausschliesslich `D:\R4OS\Tools\Github.bat` verwenden.
   Ohne Argumente fragt es interaktiv erst nach `Push` oder `Pull` und danach
   nach `Project`, `DevKit`, `Contract`, `SDK`, `Libraries`, `Kernel`,
-  `Distribution`, einer Anwendung, einem Dienst, Diagnoseprogramm, Treiber
-  oder Protokoll.
+  `Distribution`, `Docs`, einer Anwendung, einem Dienst, Diagnoseprogramm,
+  Treiber oder Protokoll.
 - Nach einem frischen Clone zuerst `D:\R4OS\Tools\Setup.bat` ausfuehren.
-  Es erzeugt die ignorierten Workspace-Ordner `Artifacts`, `DevKit` und
-  `Repositories`, die Rollenordner `Apps`, `Services`, `Diagnostics`,
+  Es erzeugt die ignorierten Workspace-Ordner `Artifacts`, `DevKit`, `Docs`
+  und `Repositories`, die Rollenordner `Apps`, `Services`, `Diagnostics`,
   `Drivers` und `Protocols`, die lokalen Modul-/Distribution-Artefaktwurzeln
   und bei Bedarf die lokale GitHub-Credentials-Vorlage.
   Anschliessend das DevKit mit `Github.bat -pull -devkit` beziehen und darin
@@ -172,6 +172,8 @@ Das alte ist: D:\AI\Projects\Claude Code\R4OS
   - `Github.bat -pull -kernel`
   - `Github.bat -push -distribution ["Commit-Beschreibung"]`
   - `Github.bat -pull -distribution`
+  - `Github.bat -push -docs ["Commit-Beschreibung"]`
+  - `Github.bat -pull -docs`
   - `Github.bat -push -app Clock ["Commit-Beschreibung"]`
   - `Github.bat -pull -app Clock`
   - `Github.bat -push -service SSHD ["Commit-Beschreibung"]`
