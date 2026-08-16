@@ -171,7 +171,9 @@ damit keinen Zustand aus einem vorherigen Lauf.
 Sichtbare QEMU-Sitzungen behalten die Datenplatte ihres Profils dagegen
 absichtlich. Wird eine GUI-Sitzung hart beendet, kann ihre `data.img`
 inkonsistent sein. Bei ungewoehnlichem Verhalten einer manuellen Sitzung die
-betroffene Profilausgabe bewusst neu erzeugen.
+betroffene Profilausgabe bewusst neu erzeugen. Ein Schaden auf der
+Datenplatte meldet sich oft erst beim ersten Verbraucher; dessen Fehlerstelle
+ist deshalb nicht automatisch die Ursache.
 
 
 Markervertrag

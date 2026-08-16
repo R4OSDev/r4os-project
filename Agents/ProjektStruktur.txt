@@ -198,6 +198,20 @@ Git-Zugehoerigkeit schliessen. Vor einem Commit immer das zustaendige
 Unterrepository bestimmen.
 
 
+Externes Partnerprojekt R4CodePad
+---------------------------------
+
+R4CodePad ist die externe C#/.NET-WPF Host-IDE fuer R4OS-Anwendungen. Im
+aktuellen Workspace ist kein R4CodePad-Checkout gemappt und es existiert kein
+Ziel in `Tools/Github.bat`. Vor Arbeiten daran muss der User deshalb den
+aktuellen externen Repositorypfad nennen; ein alter lokaler Pfad wird nicht
+vorausgesetzt.
+
+Der Integrationsvertrag bleibt `module.R4MF` v2. R4CodePad bezieht Plaene vom
+ModuleCatalog und baut ueber `sdk.addR4MF`. `.R4CP` ist nur Quelle eines
+ausdruecklichen Einmalimports und keine normale Projektwahrheit.
+
+
 Weiterfuehrend
 --------------
 

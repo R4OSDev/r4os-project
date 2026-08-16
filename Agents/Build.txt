@@ -246,6 +246,10 @@ bewusst erhalten.
 Bei einem Fehler:
 
 - Exitcode und letzte `=== ... ===`-Stufe lesen.
+- `unable to load '<stdlib>.zig': Unexpected` kann ein transient gesperrter
+  Zugriff auf `DevKit/Toolchains/Zig/lib` unter hoher Hostlast sein. Den
+  unveraenderten Build einmal wiederholen, bevor der Produktcode geaendert
+  wird.
 - Den zuerst fehlgeschlagenen Repository-Build direkt mit dessen
   `Build.bat` wiederholen.
 - Pfadmappings in dessen `Settings.R4S` pruefen.

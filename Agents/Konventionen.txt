@@ -1,0 +1,127 @@
+﻿R4OS technische Konventionen - Agent-Referenz
+=============================================
+
+Zweck: Nicht offensichtliche Invarianten, deren Verletzung bereits zu
+schwer erkennbaren Kernel-, ABI- oder Laufzeitfehlern gefuehrt hat. Fuer
+Details gelten die jeweils genannten Besitzervertraege und der aktuelle Code.
+
+
+Kernelgrenze und Hardware
+-------------------------
+
+- In den Kernel kommt nur, was dort technisch zwingend hingehoert. Boot,
+  `C:\`, der fruehe Zugriff auf `C:\R4OS\DRIVERS\`, fruehe Ausgabe, Speicher,
+  Interrupts und Timer bleiben built-in, bis ein sicherer Fruehladepfad
+  existiert. Nicht bootkritische Built-ins werden nach echter R4D- oder
+  R4P-Abnahme entfernt und nicht als stiller Fallback behalten.
+- PCI-Config-Zugriffe auf fremde Geraete sind ausschliesslich im
+  Treiber-Init-Kontext erlaubt. Inventarscan, Bridge-Reads oder -Writes aus
+  Recovery- und Poll-Tasks sind nicht tasksicher und koennen einen GPF
+  ausloesen.
+- Der produktive Kernel baut `ReleaseSafe` und ohne SIMD (`soft_float`). R4X,
+  R4D, R4P und R4L duerfen die vom SDK freigegebenen SIMD-Features bis AVX2
+  sowie AES-NI/PCLMULQDQ nutzen. Zielhardware ist die AVX2-Klasse; der
+  Scheduler sichert den nach CPUID/XCR0 benoetigten FPU-State nur fuer
+  SIMD-faehige Tasks. Ein Debug-Kernel ist kein unterstuetztes Ersatzprofil
+  fuer den produktiven Build.
+- `Repositories/Kernel/kernel/font.zig` ist Kernelcode. Die Fontquellen und
+  Hostgeneratoren unter `Repositories/Distribution/Assets/SystemFonts/`
+  importieren keinen Kernelcode; die Glyphquellen bleiben bewusst getrennt.
+- Limine-Requestsektionen bleiben alphabetisch als
+  `.limine_reqs_a_start`, `.limine_reqs_m_data`, `.limine_reqs_z_end`
+  sortiert. Vom Bootloader befuellte Antworten benoetigen volatile Reads.
+- COM1-Debug haengt an `config.enable_com1_debug` und ist standardmaessig an,
+  weil die Headless-Abnahme den seriellen Pfad benoetigt.
+  `Repositories/Kernel/Build.bat -Dcom1-debug=false` muss weiterhin bauen;
+  `kernel/log.zig` importiert `driver/com.zig` nicht direkt.
+
+Die Baum- und Besitzdetails stehen in `Agents/KernelStruktur.txt`.
+
+
+Programme, Tasks und Speicher
+-----------------------------
+
+Programme, Tasks und Threads sind stabil adressierte Heapobjekte mit ID und
+Generation. Testzahlen sind nur nachgewiesene Untergrenzen und niemals
+einkompilierte Kapazitaeten.
+
+Vor Aenderungen an Registry, Lifecycle, Waits oder Reaping gelten diese
+Invarianten:
+
+- Kein Registry-Lock wird ueber I/O, Yield, Wait, Async-Cancel oder
+  Ressourcenfreigabe gehalten.
+- Programmpayloads werden weder im IRQ-Kontext noch ueber Yield oder Wait
+  innerhalb einer Heap- oder Registrymutation allokiert oder freigegeben.
+  Freigabe erfolgt in umgekehrter Anlagereihenfolge.
+- Hard-Kill und Reap duerfen nur bei `held_lock_count=0` und
+  `unwind_guard_count=0` fortfahren.
+- `sync.UnwindGuard` ist der wait-spannende Owner-Lock.
+  `task_context.UnwindToken` ist kein Lock, sondern der Kill-Schutzzaehler des
+  laufenden Tasks.
+- Ein unvollstaendiger Inventardurchlauf oder OOM darf nie als leere oder
+  gekuerzte Erfolgssicht erscheinen. Bei `restart` verwirft der Aufrufer alle
+  Teilseiten.
+- Aktivitaetsproduzenten veroeffentlichen Queueeintrag, Eingabestatus oder
+  GUI-/Console-Revision vor `desktop_events.signal()`. Sequenzinkrement und
+  WaitQueue-Wake bleiben ein gemeinsamer kritischer Abschnitt.
+
+`ProgramStatus` und `ProgramInstanceInfo` bleiben fixed-layout. Die
+gebundenen R4DEV-v3-Slots 29/30 werden nicht in-place veraendert; Erweiterung
+erfolgt ueber die dafuer vorgesehenen neueren Tabellen und append-only-
+Vertraege.
+
+Vor solchen Arbeiten vollstaendig lesen:
+
+    Docs/Core/ProgramInstanceStorage.txt
+    Docs/Core/DynamicProgramRegistry.txt
+    Docs/Core/ProgramLifecycle.txt
+    Docs/Core/DynamicTaskRegistry.txt
+
+
+Systempfade und Laufzeitverhalten
+--------------------------------
+
+- Die R4OS-Releaseversion steht in
+  `Repositories/Distribution/Injection/R4OS/CONFIG/VERSION.R4S`. Die
+  eigenstaendige Kernelversion steht in `Repositories/Kernel/VERSION.R4S`,
+  wird in `r4os.elf` eingebettet und ueber R4DEV bereitgestellt. Oberflaechen
+  wie TERMINAL, R4DESK und SYSINFO muessen beide Werte getrennt bezeichnen.
+- Ab `C:\R4OS\Media\` gilt Mixed Case; der uebrige Systembaum bleibt
+  uppercase. Pfadauflosung im Terminal und Containerlesen sind
+  case-insensitiv. Externe Icons liegen unter `C:\R4OS\Media\Icons\`;
+  Programmicons und programmeigene Medien gehoeren in den R4M0-Container.
+- Dokumentation und Projekttexte (`*.md`, `*.txt`, `*.R4S`) sind UTF-8 mit
+  BOM. Code und Skripte (`*.zig`, `*.S`, `*.ld`, `*.bat`, `*.ps1`) sowie
+  `module.R4MF` sind UTF-8 ohne BOM. PowerShell-Schreiboperationen verwenden
+  immer eine ausdrueckliche Kodierung.
+- `TERMINAL.R4X` ist der produktive Shellpfad. Neue Shell- und Consolelogik
+  gehoert nach `Repositories/Apps/Terminal`, nicht in den Kernel.
+  Console-Anwendungen schreiben ueber Console-/STDIO-APIs. COM1 ist
+  Kernel-Log oder Test-Mirror und kein stdout-Ersatz.
+- `SERVMAN.R4X` besitzt `SERVICES.R4S`, Autostart und sichtbare
+  Service-Policy. Der Kernel-Service-Core besitzt Registry, Endpoints und
+  Queues, schreibt aber keine Konfiguration.
+- Ein Dienst darf sich nicht selbst stoppen oder neu starten. Stammt der
+  Aufrufer aus dem Dienst oder dessen Console-Nachfahren, liefern STOP und
+  RESTART `service_api_result_self_restart` (-19). Die Kernelpruefung darf
+  nicht durch STOP plus START umgangen werden.
+- R4CODE, R4BUILD, R4PACK und R4CC bilden den Self-Hosting-Pfad. Builds
+  innerhalb von R4OS fallen nicht still auf Hostskripte, Hostcompiler,
+  R4CodePad oder vorgebaute Artefakte zurueck.
+
+
+Treiber- und Buildfallen
+------------------------
+
+- Der RTL8168-Kaltbind bleibt reset-frei. Kein `CmdReset` und keine
+  indirekten Registerzugriffe im Bind. Eine Wiedereinfuehrung einzelner
+  Referenzpfade benoetigt Feature fuer Feature einen realen
+  Mehrboot-Kaltstartnachweis. Details:
+  `Docs/Drivers/Rtl8168ReferenzVergleich05916.txt`.
+- Build- und Artefaktfehler stehen in `Agents/Build.txt`; Watchdog,
+  Poweroff-Marker und Datenplattenverhalten in `Agents/Test.txt`. Diese
+  Fehlerbilder zuerst nach den dortigen Gegenproben untersuchen, bevor Code
+  als Ursache geaendert wird.
+
+API-/ABI-Regeln stehen in `Agents/API-ABI.txt`; Modul-, Relocation- und
+Manifestregeln in `Agents/R4M0-Container.txt`.
