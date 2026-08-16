@@ -1,0 +1,163 @@
+﻿Drittmaterial-Inventar 0.64.20
+================================
+
+Stand: 16.08.2026
+
+Gepruefter Umfang
+-----------------
+- 141 kanonische Git-Repositories: Projekt, DevKit und 139 Quell-Repositories.
+- Versionierte Quellen, Binaerfixtures, Fonts, Zertifikate, Images, Setup-Downloads, Kommentare und vorhandene Herkunftsmetadaten.
+- Ignorierte installierte DevKit-Inhalte wurden nur zur Lizenzverifikation der fest gepinnten Downloads herangezogen.
+
+Repositoryspezifische Ausnahmen
+--------------------------------
+- DevKit: Zig 0.16.0, Limine 12.0.1, QEMU 11.0.0 und temporaeres 7-Zip 26.02 werden heruntergeladen, aber nicht versioniert.
+- SDK: mit Microsoft Windows erzeugte NTFS-Testfixtures; keine Microsoft-Binaries oder -Quellen enthalten.
+- Libraries: stb_image 2.30, FreeType 2.14.3, Brotli 1.2.0, zlib 1.3.1 sowie einzeln dokumentierte WPT-Bild- und WPT-/MIT-Fontfixtures.
+- Kernel: Limine-Protokollintegration, aber kein Limine-Binary und kein Upstream-Quellbaum im Repository.
+- Distribution: Limine-Binaries, Library-Fremdmaterial, RTL8168-GPL-Tabellen und oeffentliche Root-Zertifikate werden im Image sichtbar dokumentiert.
+- Apps/Klickifax: deterministisch erzeugte R4OS-WOFF-Testfixtures unter separater BSD-3-Clause.
+- Drivers/RTL8168: firmware_tables.zig wurde mechanisch aus GPL-2.0-only-Vendormaterial erzeugt; GPL-Text und klare Binaergrenze sind erforderlich.
+
+Repositorys ohne identifiziertes Drittmaterial
+----------------------------------------------
+- Apps/AppDefaults
+- Apps/Appearance
+- Apps/Beep
+- Apps/BootInfo
+- Apps/Calculator
+- Apps/Clock
+- Apps/Desktop
+- Apps/DeviceManager
+- Apps/Dhcp
+- Apps/DnsLookup
+- Apps/Example
+- Apps/Explorer
+- Apps/Fonts
+- Apps/Help
+- Apps/HttpGet
+- Apps/IpConfig
+- Apps/LogCenter
+- Apps/MemView
+- Apps/NetCat
+- Apps/NetConfig
+- Apps/Notepad
+- Apps/Paint
+- Apps/Ping
+- Apps/R4Build
+- Apps/R4CC
+- Apps/R4Code
+- Apps/R4Pack
+- Apps/R4Synth
+- Apps/Recv
+- Apps/RegEdit
+- Apps/RegistryTool
+- Apps/Send
+- Apps/ServiceManager
+- Apps/Services
+- Apps/SysInfo
+- Apps/SysUpdate
+- Apps/TcpEcho
+- Apps/Terminal
+- Apps/TimeSettings
+- Apps/UpdateCenter
+- Contract
+- Diagnostics/AppHeapDiag
+- Diagnostics/AsyncIoDiag
+- Diagnostics/AudioDiag
+- Diagnostics/BootCoreDiag
+- Diagnostics/CleanupDiag
+- Diagnostics/ClipboardDiag
+- Diagnostics/CStartSmoke
+- Diagnostics/DisplayDiag
+- Diagnostics/DriverDiag
+- Diagnostics/FsDiag
+- Diagnostics/HardwareDiag
+- Diagnostics/InputDiag
+- Diagnostics/KlickifaxLive
+- Diagnostics/LoaderDiag
+- Diagnostics/LogServiceDiag
+- Diagnostics/MemorySuite
+- Diagnostics/NetDiag
+- Diagnostics/NetIoDiag
+- Diagnostics/NetR4pDiag
+- Diagnostics/NetSvcDiag
+- Diagnostics/NetworkFacadeCDiag
+- Diagnostics/NtfsDiag
+- Diagnostics/PerformanceDiag
+- Diagnostics/R4CfgDiag
+- Diagnostics/R4XStartSmoke
+- Diagnostics/RemoteFrameDiag
+- Diagnostics/ResourceDiag
+- Diagnostics/SerialLinkDiag
+- Diagnostics/ServiceClassDiag
+- Diagnostics/SimdDiag
+- Diagnostics/StackDiag
+- Diagnostics/StdDiag
+- Diagnostics/StorageDiag
+- Diagnostics/SynthDiag
+- Diagnostics/ThreadDiag
+- Diagnostics/UsbDiag
+- Drivers/AC97
+- Drivers/AHCI
+- Drivers/ATAPIO
+- Drivers/AudioFail
+- Drivers/Example
+- Drivers/HDA
+- Drivers/MIDI
+- Drivers/NVME
+- Drivers/OPL3
+- Drivers/RTL8139
+- Drivers/SID
+- Drivers/USBMSC
+- Drivers/VirtioNet
+- Drivers/XHCI
+- Protocols/AudioMidi
+- Protocols/AudioOpl3
+- Protocols/AudioSid
+- Protocols/BadDep
+- Protocols/Conformance
+- Protocols/Example
+- Protocols/JSON
+- Protocols/NetArp
+- Protocols/NetDhcp
+- Protocols/NetDns
+- Protocols/NetEthernet
+- Protocols/NetIcmp
+- Protocols/NetIpv4
+- Protocols/NetSerialLink
+- Protocols/NetTcp
+- Protocols/NetUdp
+- Protocols/R4Auth
+- Protocols/R4Css
+- Protocols/R4Html
+- Protocols/R4Http
+- Protocols/R4Js
+- Protocols/R4Tls
+- Protocols/Smoke
+- Protocols/UsbHidBoot
+- Protocols/UsbHidReport
+- Protocols/UsbMscBot
+- Protocols/UsbScsiBlock
+- Services/AudioService
+- Services/ClipboardService
+- Services/DhcpService
+- Services/DnsService
+- Services/ExampleService
+- Services/FtpService
+- Services/LogService
+- Services/RdpService
+- Services/SerialLinkService
+- Services/SshService
+- Services/TcpService
+- Services/TimeService
+- Services/UdpService
+- Services/UpdateService
+- Services/WindowService
+
+Auslieferungsvertrag
+---------------------
+- Jedes Repository besitzt THIRD_PARTY_NOTICES.md.
+- Alle 139 Quellpakete liefern README.md, DOCUMENTATION.de.txt und THIRD_PARTY_NOTICES.md ueber build.zig.zon aus.
+- Jedes Image enthaelt /R4OS/LICENSES mit Apache-Lizenz, NOTICE, Gesamtuebersicht und allen benoetigten Fremdlizenztexten.
+- Distribution stageiert dieselbe Rechtsdokumentation neben disk.img fuer Binaer-Releases.

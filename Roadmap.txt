@@ -1196,11 +1196,6 @@ Titel: Lizenzen, Repositoryhygiene und kanonischen Wechsel abschliessen
 Status: In Arbeit
 
 Offene Punkte:
-- Drittanbieterinhalte repositorybezogen inventarisieren und ihre jeweiligen
-  Lizenz-/Herkunftshinweise vervollstaendigen.
-- Apache-Lizenz und erforderliche Hinweise in spaetere Binaer-Releases und
-  Distributionsimages aufnehmen.
-- README, Sichtbarkeit, Releases und öffentliche Repositoryhygiene pruefen.
 - Erst nach gruenem Mehrrepo-Gesamtlauf den neuen Workspace zur einzigen
   aktiven Quellwahrheit erklaeren.
 - Altprojekt als unveraenderte historische Referenz kennzeichnen.
@@ -1217,6 +1212,26 @@ Erledigt:
 - Projekt- und Agentendokumentation halten die Lizenzgrenze fest. Das DevKit
   stellt klar, dass nur seine eigenen Skripte Apache-2.0 sind; die lokal
   heruntergeladenen Werkzeuge Zig, Limine und QEMU behalten ihre Lizenzen.
+- Alle 141 Repositories besitzen eine englische README.md und
+  repositorybezogene THIRD_PARTY_NOTICES.md. Die ausfuehrlichen deutschen
+  Root-Informationen bleiben als DOCUMENTATION.de.txt erhalten; insgesamt
+  wurden 172 README-Dateien auf englischen Inhalt geprueft.
+- Das vollstaendige Drittmaterial-Inventar steht in
+  Agents/ThirdPartyInventory06420.txt. Dokumentiert sind insbesondere
+  DevKit-Downloads, NTFS-Fixtures, stb_image, FreeType, Brotli, zlib,
+  WPT-Fixtures, Limine, Root-Zertifikate und die RTL8168-Herkunft.
+- Die mechanisch aus dem GPL-2.0-only-Realtek-Treiber erzeugten
+  RTL8168-Firmwaretabellen besitzen nun eine ausdrueckliche GPL-Lizenzgrenze.
+  Repository, Binaerhinweise und Distribution liefern den vollstaendigen
+  GPL-v2-Text mit.
+- Repositories/Distribution/Injection/R4OS/LICENSES enthaelt neun
+  versionierte Rechtsdateien. Sie werden in jedes Image unter
+  /R4OS/LICENSES aufgenommen und bytegleich als Legal-Sidecar neben disk.img
+  stageiert. Build und Verify pruefen Quelle, Plan und Sidecar.
+- Der Repositoryhygiene-Audit steht unter
+  Agents/RepositoryHygiene06420.txt: Alle 141 GitHub-Repositories nutzen
+  main, sind nicht archiviert und bleiben absichtlich privat. Es wurden
+  weder Sichtbarkeit noch Release-Tags oder GitHub-Releases veraendert.
 
 Abnahme:
 - Kein normaler Build und kein Test benoetigt den alten Monorepo-Pfad.
@@ -1226,3 +1241,11 @@ Abnahme:
   Dateien genau einmal in `.paths`.
 - Workspace-Zentralbuild, Einzelbuild von `Apps/Clock` sowie der
   Distribution-Test mit Imageplan- und QEMU-Markerauswertung sind gruen.
+- Der vollstaendige Mehrrepo-Build aus Contract, SDK, Libraries, Kernel und
+  allen 134 Komponenten ist gruen.
+- Der reale Test-Imageplan enthaelt alle neun Rechtsdateien; Imageerzeugung,
+  Release-Sidecar und NTFSVERIFY sind gruen.
+- Der 240-Sekunden-Headless-Erstlauf traf die dokumentierte Hostlast-Falle
+  nach vorhandenem Limine-Bootmarker. Die unveraenderte Wiederholung mit
+  QEMU_TEST_TIMEOUT_SECONDS=600 bestand alle API-/Diagnosemarker und den
+  Poweroff fehlerfrei.
