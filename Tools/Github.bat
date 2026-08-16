@@ -273,29 +273,21 @@ set "R4OS_DEFAULT_COMMIT_MESSAGE=%R4OS_COMPONENT_NAME%-Stand sichern"
 exit /b 0
 
 :pull
-call :load_credentials
-if errorlevel 1 goto failure
-
 call :ensure_local_repository
 if errorlevel 1 goto failure
 
 call :verify_main_branch
 if errorlevel 1 goto failure
 
-call :github_repository_exists
-if errorlevel 1 (
-    echo FEHLER: %R4OS_GITHUB_ORGANIZATION%/%R4OS_REPOSITORY_NAME% ist auf GitHub nicht erreichbar.
-    goto failure
-)
-
 call :ensure_local_remote
 if errorlevel 1 goto failure
 
-set "GIT_ASKPASS=%~f0"
-set "R4OS_GITHUB_ASKPASS=1"
+set "GIT_ASKPASS="
+set "SSH_ASKPASS="
 set "GIT_TERMINAL_PROMPT=0"
+set "GCM_INTERACTIVE=Never"
 
-git -C "%R4OS_REPOSITORY_ROOT%" pull --ff-only origin main
+git -c credential.helper= -C "%R4OS_REPOSITORY_ROOT%" pull --ff-only origin main
 if errorlevel 1 (
     echo FEHLER: %R4OS_REPOSITORY_LABEL% konnte nicht von GitHub gepullt werden.
     goto failure

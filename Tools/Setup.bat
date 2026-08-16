@@ -103,6 +103,8 @@ if not exist "%R4OS_CREDENTIAL_FILE%" (
     >"%R4OS_CREDENTIAL_FILE%" (
         echo @echo off
         echo rem Lokale GitHub-Zugangsdaten fuer die R4OS-Werkzeuge.
+        echo rem Nur Push und Repository-Verwaltung benoetigen diese Datei.
+        echo rem Oeffentliche Pulls und Setups laufen ohne GitHub-Token.
         echo rem Diese Datei darf niemals in Git eingecheckt werden.
         echo.
         echo set "R4OS_GITHUB_USER=DEIN_GITHUB_BENUTZERNAME"
@@ -115,8 +117,9 @@ if not exist "%R4OS_CREDENTIAL_FILE%" (
         endlocal & exit /b 1
     )
     echo Angelegt: Tools\Credentials\Github.bat
-    echo Bitte Benutzername und Token in der Datei eintragen.
+    echo Optional: Fuer Pushes Benutzername und Token in der Datei eintragen.
 )
 
+echo Oeffentliche GitHub-Pulls funktionieren ohne ausgefuellte Credentials.
 echo Setup abgeschlossen.
 endlocal & exit /b 0
