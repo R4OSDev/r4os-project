@@ -13,7 +13,11 @@ den Einstieg für Push und Pull.
 Grundregeln
 -----------
 
-- Für Push und Pull ausschließlich D:\R4OS\Tools\Github.bat verwenden.
+- Für Project, DevKit, Docs, Contract, SDK, Libraries, Kernel, Distribution
+  und Module ausschließlich D:\R4OS\Tools\Github.bat verwenden.
+- Der private Package-Server ist die einzige Ausnahme. Er wird ausschließlich
+  mit D:\R4OS\Server\Push.bat und D:\R4OS\Server\Pull.bat verwaltet und
+  besitzt bewusst kein Ziel im globalen Github.bat.
 - Keine direkten Aufrufe von git push oder git pull verwenden.
 - Read-only-Aufrufe wie git status, git diff, git log und git rev-parse sind
   zur Prüfung erlaubt.
@@ -46,8 +50,8 @@ Branch: main
 
 Project, DevKit, Docs, Contract, SDK, Libraries, Kernel, Distribution sowie
 Apps, Services, Diagnostics, Drivers und Protocols werden bei einem fehlenden
-Remote-Repository oeffentlich angelegt. Der Package-Server ist die bewusste
-private Ausnahme. Sein Ziel setzt `R4OS_REPOSITORY_PRIVATE=true`.
+Remote-Repository oeffentlich angelegt. Der Package-Server ist die private
+Ausnahme, wird aber nicht vom globalen Script angelegt oder verwaltet.
 Bereits vorhandene Repositories werden durch Push oder Pull nicht in ihrer
 Sichtbarkeit veraendert.
 
@@ -97,8 +101,7 @@ Ohne Argumente startet das Script ein Menü:
 
 Das Menü fragt zuerst Push oder Pull und danach das Repository ab. Bei Apps,
 Services, Diagnostics, Drivers und Protocols wird zusätzlich der lokale
-Komponentenname abgefragt. Server waehlt das gemeinsame private
-Package-Server-Repository.
+Komponentenname abgefragt. Der Package-Server ist nicht Teil dieses Menüs.
 
 Ein interaktiver Push fragt nicht nach einer Commit-Beschreibung. Ohne direkt
 übergebenen Text verwendet das Script die hinterlegte Standardbeschreibung des
@@ -123,14 +126,12 @@ ZIEL ist eines von:
     -libraries
     -kernel
     -distribution
-    -server
 
 Beispiele:
 
     D:\R4OS\Tools\Github.bat -push -project "Agent-Anleitung aktualisieren"
     D:\R4OS\Tools\Github.bat -pull -contract
     D:\R4OS\Tools\Github.bat -push -docs "Dokumentation aktualisieren"
-    D:\R4OS\Tools\Github.bat -push -server "Serverstand aktualisieren"
 
 Für eigenständige Komponenten steht der Komponentenname vor der optionalen
 Commit-Beschreibung:
@@ -196,12 +197,14 @@ Docs
     Inhalt: projektübergreifende Dokumentation und Inventare.
 
 Server
-    Ziel: -server
+    Kein Ziel im globalen Github.bat
     Lokal: D:\R4OS\Server
     GitHub: R4OSDev/r4os-package-server
     Sichtbarkeit: privat
     Inhalt: Website, Update- und Paketdienst, Deployment, Betriebsreferenz
-    sowie die gemeinsamen lokalen Push-/Pull-Starter.
+    sowie die eigenen lokalen Push-/Pull-Starter.
+    Push: D:\R4OS\Server\Push.bat "Commit-Beschreibung"
+    Pull: D:\R4OS\Server\Pull.bat
 
 Contract
     Ziel: -contract
@@ -284,9 +287,10 @@ späteren Ignore-Eintrag allein jedoch nicht automatisch ungetrackt. Wenn keine
 neuen Änderungen vorhanden sind, wird kein leerer Commit erzeugt; ein noch
 nicht veröffentlichter vorhandener main-Stand wird trotzdem gepusht.
 
-Die Sichtbarkeit ist pro Ziel festgelegt. Der Package-Server wird privat, die
-anderen derzeit unterstützten Ziele werden öffentlich angelegt. Eine spätere
-Änderung der Sichtbarkeit ist ein eigener administrativer Vorgang.
+Alle vom globalen Script unterstützten Ziele werden öffentlich angelegt. Das
+private Package-Server-Repository wird von seinen eigenen Scripts nur
+synchronisiert und niemals automatisch angelegt. Eine spätere Änderung der
+Sichtbarkeit ist ein eigener administrativer Vorgang.
 
 
 Was ein Pull ausführt
@@ -361,8 +365,8 @@ Checkout unter D:\R4OS existiert:
 3. DevKit mit Github.bat -pull -devkit beziehen.
 4. Docs, Contract, SDK, Libraries, Kernel und Distribution mit ihren jeweiligen
    Pull-Zielen beziehen.
-5. Den privaten Package-Server bei Bedarf mit Github.bat -pull -server
-   beziehen.
+5. Den privaten Package-Server bei Bedarf separat klonen und danach mit
+   D:\R4OS\Server\Pull.bat aktualisieren.
 6. Benötigte Apps, Services, Diagnostics, Drivers und Protocols einzeln mit
    Rollenflag und Komponentenname beziehen.
 7. Die DevKit-Abhängigkeiten anschließend über dessen Setup installieren.
@@ -429,4 +433,5 @@ Grenzen des Scripts
   Credentials.
 - Neue zentrale Repositoryarten benötigen eine ausdrückliche Zuordnung in
   Tools\Github.bat. Apps, Services, Diagnostics, Drivers und Protocols werden
-  bereits generisch über Rollenflag und Komponentenname unterstützt.
+  bereits generisch über Rollenflag und Komponentenname unterstützt. Der
+  Package-Server bleibt bewusst außerhalb dieses globalen Scripts.

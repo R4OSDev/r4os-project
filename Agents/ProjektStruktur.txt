@@ -190,8 +190,8 @@ Server/
 
 `Server/` ist das private Repository `R4OSDev/r4os-package-server`. Es fasst
 Website, Update- und Paketdienst, Deploymentskripte und die nicht öffentliche
-Betriebsreferenz zusammen. Lokaler Push und Pull laufen über
-`Tools/Github.bat -server` beziehungsweise die relativen Starter
+Betriebsreferenz zusammen. Das globale `Tools/Github.bat` verwaltet dieses
+Repository bewusst nicht. Lokaler Push und Pull laufen ausschließlich über
 `Server/Push.bat` und `Server/Pull.bat`.
 
 Laufzeitdaten, veröffentlichte Pakete, Datenbanken, Umgebungsdateien und

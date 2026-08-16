@@ -43,15 +43,17 @@ Sandboxmodell.
   Erlaubnis fragen.
 
 ## GitHub
-- Push und Pull ausschliesslich mit `Tools/Github.bat` fuer das jeweils
-  zustaendige Repository ausfuehren. Zielzuordnung, Aufrufe, Credentials und
+- Push und Pull fuer Project, DevKit, Docs und Quell-Repositories
+  ausschliesslich mit `Tools/Github.bat` ausfuehren. Der private Package-
+  Server ist die einzige Ausnahme und wird mit `Server/Push.bat` sowie
+  `Server/Pull.bat` verwaltet. Zielzuordnung, Aufrufe, Credentials und
   Pruefablauf stehen in `Agents/Github.txt`.
 - Wird nach Roadmap gearbeitet, nach Abschluss einer Unterversion alle davon
   betroffenen Repositories einzeln pushen. Ohne Roadmap nach Abschluss einer
   Arbeit pushen; zusaetzliche Pushes sind sinnvoll, wenn ein in sich
   abgeschlossener und gepruefter Zwischenstand vorliegt.
-- Neu erstellte R4OS-Repositories sind oeffentlich. Kuenftige
-  Server-Repositories bilden die private Ausnahme.
+- Neu erstellte R4OS-Quellrepositories sind oeffentlich. Der Package-Server
+  und kuenftige Server-Repositories bilden die private Ausnahme.
 
 ## Build und Tests
 - Mehrrepository-Builds ueber `Tools/Build.bat` starten; ohne Argumente zeigt
