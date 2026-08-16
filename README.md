@@ -14,6 +14,8 @@ After a fresh clone, run `Tools/Setup.bat`. Fill in the generated local
 credentials template, pull the DevKit with
 `Tools/Github.bat -pull -devkit`, and run
 `DevKit/Setup/Setup_Windows.bat`.
+The setup also creates the ignored local files `QuickNotes.txt` and
+`Roadmap.txt` when missing, without overwriting existing content.
 
 Use `Tools/Build.bat` as the multi-repository Windows build entry point.
 Run it without arguments for the interactive menu.

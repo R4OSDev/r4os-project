@@ -5,6 +5,17 @@ for %%I in ("%~dp0..") do set "R4OS_PROJECT_ROOT=%%~fI"
 set "R4OS_CREDENTIAL_DIR=%~dp0Credentials"
 set "R4OS_CREDENTIAL_FILE=%~dp0Credentials\Github.bat"
 
+for %%F in (QuickNotes.txt Roadmap.txt) do (
+    if not exist "%R4OS_PROJECT_ROOT%\%%F" (
+        type nul >"%R4OS_PROJECT_ROOT%\%%F"
+        if errorlevel 1 (
+            echo FEHLER: %%F konnte nicht angelegt werden.
+            endlocal & exit /b 1
+        )
+        echo Angelegt: %%F
+    )
+)
+
 if not exist "%R4OS_PROJECT_ROOT%\Artifacts\" (
     mkdir "%R4OS_PROJECT_ROOT%\Artifacts"
     if errorlevel 1 (
