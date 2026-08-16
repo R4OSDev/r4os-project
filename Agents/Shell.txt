@@ -1,0 +1,49 @@
+﻿R4OS Shell und Befehlsausfuehrung - Agent-Referenz
+==================================================
+
+Zweck: Verlaessliche Aufrufe zwischen PowerShell, Batch und den R4OS-
+Werkzeugen unter Windows.
+
+
+Grundregeln
+-----------
+
+- Der normale Workspace-Einstieg laeuft ueber PowerShell und ruft teilweise
+  Batchdateien auf. Bash ist nur bei einem ausdruecklichen `Build.sh`-Aufruf
+  beteiligt und darf nicht still vorausgesetzt werden.
+- Fuer Dateipfade in PowerShell `-LiteralPath` verwenden und den Arbeitsordner
+  bewusst setzen. Keine Pfade durch unkontrollierte Stringverkettung bauen.
+- Komplexe Texte mit Backslashes, Backticks, regulaeren Ausdruecken,
+  Zeilenumbruechen oder verschachtelten Anfuehrungszeichen gehoeren in eine
+  Datei beziehungsweise in einen gezielten Patch, nicht in eine mehrfach
+  interpretierte Kommandozeile.
+- Lokale Dateiaenderungen mit dem Patch-Werkzeug ausfuehren. Mechanische
+  Formatierung darf danach mit einem dafuer bestimmten Werkzeug erfolgen.
+- Erfolg am Exitcode messen. PowerShell 5.1 kann stderr nativer Programme als
+  `NativeCommandError` darstellen, obwohl deren Exitcode 0 ist.
+
+
+Batch und Commit-Beschreibungen
+-------------------------------
+
+Commit-Beschreibungen zuerst in eine PowerShell-Variable legen und ohne
+eingebettete doppelte Anfuehrungszeichen an `Tools/Github.bat` uebergeben.
+Wo Zitate im Text noetig sind, einfache Anfuehrungszeichen verwenden.
+
+Ein Batchstarter muss bis zu seinem Exitcode laufen. Ausgabe wie `ERFOLG` oder
+`FAILED` ersetzt nie die Auswertung von `$LASTEXITCODE` beziehungsweise
+`%ERRORLEVEL%`.
+
+
+PowerShell-Skripte und Gates
+----------------------------
+
+Eigenstaendige PowerShell-Pruefungen mit `powershell -File <Script>` oder dem
+gleichwertigen vollstaendigen `-File`-Aufruf starten. Ein Aufruf ueber den
+PowerShell-Aufrufoperator kann in `$LASTEXITCODE` nur den letzten nativen
+Unterprozess hinterlassen und damit das Ergebnis des eigentlichen Skripts
+verschleiern.
+
+Vor einem schreibenden Mehrrepository-Aufruf immer bestimmen, welchem
+Repository die betroffenen Dateien gehoeren. GitHub-Push und -Pull erfolgen
+ausschliesslich nach `Agents/Github.txt`.

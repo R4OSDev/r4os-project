@@ -1,0 +1,21 @@
+﻿Lizenzierung
+============
+
+- Originales R4OS-Material steht in allen kanonischen Repositories unter der
+  Apache License 2.0.
+- Jedes Repository besitzt im Root die bytegleiche `LICENSE` und ein kurzes
+  `NOTICE` mit `Copyright 2026 R4` sowie der Nennung von R4 als
+  ursprünglichem Autor.
+- Material Dritter wird nicht umlizenziert. Dessen Lizenz- und
+  Herkunftshinweise bleiben erhalten und werden repositorybezogen in
+  `THIRD_PARTY_NOTICES.md` dokumentiert.
+- Distributionsimages enthalten unter `R4OS/LICENSES` die Apache-Lizenz, das
+  NOTICE, eine Gesamtübersicht und die vollständigen erforderlichen
+  Fremdlizenztexte. `Repositories/Distribution/Build.bat image <Profil>`
+  stageiert dieselbe Rechtsdokumentation neben `disk.img` unter `Legal`.
+- Die mechanisch aus dem GPL-2.0-only-Realtek-Vendortreiber erzeugten
+  Firmwaretabellen unter `Repositories/Drivers/RTL8168` sowie Binärartefakte,
+  die sie enthalten, werden als GPL-2.0-only dokumentiert.
+- Repository-Einstiege und sonstige `README*`-Dateien sind Englisch.
+  Ausführliche deutschsprachige Repository-Dokumentation liegt, sofern
+  vorhanden, in `DOCUMENTATION.de.txt`.

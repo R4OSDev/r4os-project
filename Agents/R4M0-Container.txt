@@ -148,6 +148,13 @@ module.R4MF
 module.R4MF ist UTF-8 ohne BOM. Es beschreibt genau ein Ausgabemodul. Die
 case-insensitive Identitaet ist das Paar KIND und NAME.
 
+`.R4CP` ist kein normaler Buildvertrag. Historische Projekte werden nur mit
+dem ausdruecklichen Einmalkonverter von ModuleCatalog beziehungsweise R4BUILD
+nach `module.R4MF` uebernommen.
+
+ModuleCatalog, SDK, R4CODE und R4BUILD verwenden denselben R4MF-v2-Parser.
+Keiner dieser Verbraucher pflegt eine eigene abweichende Manifestdeutung.
+
 Vollstaendiges R4X-Beispiel:
 
     R4OS_MODULE_MANIFEST=2
@@ -227,6 +234,10 @@ Wichtige Manifestregeln
 - Quell- und Ressourcenpfade sind kanonische, vorwaertsgerichtete Pfade
   relativ zum Manifest und bleiben innerhalb des Projekts.
 - build.zig wiederholt weder Name, Ziel, Imports noch Ressourcen.
+- Ein wiederkehrendes ABI- oder Buildmuster wird im SDK ergaenzt und nicht in
+  mehreren Modulprojekten kopiert.
+- Testfixtures gelangen ueber eigene versionierte Zusatzmanifeste in den
+  Imageplan und nicht ueber feste Listen in einem Buildscript.
 - Eine kompilierte Runtime-R4L besitzt ihren Contract, Baseline, generierte
   Bindings, Conformance-Dateien und API-Referenz in derselben Library-Einheit.
 

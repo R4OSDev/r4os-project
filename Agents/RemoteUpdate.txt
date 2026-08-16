@@ -114,60 +114,29 @@ Titel und Beschreibung sind begrenzter UTF-8-Plain-Text. Dateiname:
 Vor dem Upload Groesse und SHA-256 des fertigen Pakets festhalten.
 
 
-Update-Server
--------------
+Veroeffentlichung
+-----------------
 
-Server-Inbox:
-
-    /root/R4OS/UpdateServer/Runtime/incoming/
-
-Ein Paket wird zuerst mit der Endung .part uebertragen und danach auf dem
-Server atomar auf den finalen .R4U-Namen umbenannt:
-
-    scp -i D:/Storage/SSH/id_ed25519 -P 22 <PAKET>.R4U root@10.0.0.5:/root/R4OS/UpdateServer/Runtime/incoming/<PAKET>.R4U.part
-
-    ssh -i D:/Storage/SSH/id_ed25519 -p 22 root@10.0.0.5 "test ! -e /root/R4OS/UpdateServer/Runtime/incoming/<PAKET>.R4U && mv /root/R4OS/UpdateServer/Runtime/incoming/<PAKET>.R4U.part /root/R4OS/UpdateServer/Runtime/incoming/<PAKET>.R4U"
-
-Im ControlCenter werden Paket-ID, Paketversion, Release, Titel,
-Beschreibung, Komponenten, Aktivierung, Prioritaet, Groesse, SHA-256 und
-Validierungsstatus geprueft.
-
-Freigabereihenfolge:
-
-1. Alle R4U-Pakete des Releases validieren und publizieren.
-2. Das dazu passende Releasemanifest
-   R4OS-RELEASE-<RELEASE>.JSON validieren.
-3. Das Releasemanifest als letzten Freigabeschritt publizieren.
-
-Publish verschiebt eine validierte Datei atomar von incoming nach releases.
-Direkte Schreibzugriffe auf releases sind nicht Teil des Workflows.
-
-Der sichtbare Katalog entsteht aus validierten R4U-Dateien und dem
-zugehoerigen Releasemanifest. Profilabweichungen, doppelte Komponenten,
-unaufloesbare Anforderungen und Abhaengigkeitszyklen sperren die
-Katalogausgabe.
-
-Serverbetrieb und ControlCenter stehen in Agents/Server.txt.
+Upload, serverseitige Validierung, Freigabereihenfolge, Katalog,
+ControlCenter und Betrieb stehen ausschliesslich in
+`Server/Agents/Server.txt`. Diese Serverinformationen werden hier nicht
+doppelt gepflegt.
 
 
 Clientsuche und Download
 ------------------------
 
-Der Client verwendet fuer Authentifizierung und Download den oeffentlichen
-Hostnamen:
-
-    r4os.r4server.eu
+UPDSVC bezieht den freigegebenen Katalog und die Pakete ueber den in der
+Serverreferenz beschriebenen Updatekanal.
 
 Ablauf:
 
-1. UPDSVC registriert die Quell-IP auf Port 1338.
-2. UPDSVC liest Katalog v2 ueber HTTPS auf Port 1339.
-3. Die Suche vergleicht den Katalog komponentenweise mit dem lokalen
+1. Die Suche vergleicht den Katalog komponentenweise mit dem lokalen
    C:\R4OS\CONFIG\MODULES.JSON und dessen Profil.
-4. Pakete werden mit Range-Resume in eine private deterministische
+2. Pakete werden mit Range-Resume in eine private deterministische
    Stagedatei geladen.
-5. Groesse, Katalog-SHA-256 und R4U-Vertrag werden geprueft.
-6. Erst ein vollstaendiges Paket wird atomar unter seinem sichtbaren
+3. Groesse, Katalog-SHA-256 und R4U-Vertrag werden geprueft.
+4. Erst ein vollstaendiges Paket wird atomar unter seinem sichtbaren
    .R4U-Namen bereitgestellt.
 
 UPDATE.R4X steuert Suche, Paketansicht und Update All ueber UPDSVC. Update
@@ -269,7 +238,7 @@ Weiterfuehrend
 --------------
 
     Agents/Build.txt
-    Agents/Server.txt
+    Server/Agents/Server.txt
     Docs/Deployment/R4UComponentContract.txt
     Docs/Deployment/SystemUpdater05914.txt
     Docs/SupportedHardware.txt

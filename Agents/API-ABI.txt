@@ -1,0 +1,100 @@
+﻿R4OS API und ABI - Agent-Referenz
+================================
+
+Zweck: Wahrheiten, Generierung und Kompatibilitaetsregeln der zentralen
+Plattform-API sowie der unabhaengigen Runtime-Libraries.
+
+
+Besitz und Wahrheiten
+---------------------
+
+Die zentrale Plattform-API und -ABI gehoert dem Contract-Repository:
+
+    Repositories/Contract/API/ApiContract.json
+
+Die erzeugten Zig- und C-Bindings, Kernelseite, Contractlayouts,
+Conformance-Fixtures, API-Dokumente und das API-Inventar liegen unter
+`Repositories/Contract/Generated/`. Erzeugte Dateien und erzeugte Bereiche in
+`Docs/API/` werden nicht von Hand editiert.
+
+Das maschinenlesbare Funktionsinventar ist:
+
+    Repositories/Contract/Generated/Inventory/API.json
+
+R4STD, R4IMG und R4FONT sind keine Gruppen des zentralen Contracts. Jede
+dieser Runtime-R4Ls besitzt Implementierung, Contract, Baseline, Bindings,
+Conformance und Tests in ihrer Einheit unter `Repositories/Libraries/`.
+Eine normale Library-Aenderung erfordert keine Aenderung an Kernel, zentralem
+Contract oder Kern-SDK.
+
+
+Generierung und Baseline
+------------------------
+
+`ApiContractGen` materialisiert alle zentral erzeugten Artefakte aus
+`ApiContract.json`. Der normale Contract-Build prueft mit `--check`
+bytegenau, dass Schema und erzeugte Dateien zusammenpassen; er schreibt keine
+Produktdateien um.
+
+Nach einer beabsichtigten Schemaaenderung erzeugt der Contract-Step `write`
+die Artefakte neu. Eine Baseline wird nur bei einer ausdruecklich
+kontrollierten Aenderung mit der Kombination `--write --baseline`
+fortgeschrieben. Eine erfolgreiche Generierung ist kein Ersatz fuer einen
+bewussten Kompatibilitaetsentscheid.
+
+
+Zentrale Gruppen und R4X-Startvertrag
+-------------------------------------
+
+Die zentralen Plattformgruppen sind:
+
+    R4SYS  R4DESK  R4DRAW  R4NET  R4AUDIO  R4DEV
+
+Ein normales R4X exportiert `R4XStart:1` und importiert `R4SYS:Query:1`.
+Jede weitere Gruppe steht ausschliesslich als geordnete `IMPORT=`-Zeile in
+`module.R4MF`. Die vollstaendigen Container- und Manifestregeln stehen in
+`Agents/R4M0-Container.txt`.
+
+Optionale Tabellenfelder werden mit `hasFn` geprueft. Nicht erreichbare
+Gruppen beziehungsweise Funktionen melden `err_no_group` (-9001) oder
+`err_no_fn` (-9002); fachliche Rueckgabecodes bleiben davon getrennt.
+
+
+Unabhaengige Runtime-R4Ls
+-------------------------
+
+Eine Runtime-R4L exportiert eine eigene versionierte Funktionstabelle.
+Verbraucher binden ausschliesslich den Contract und die Bindings der
+betroffenen Library ein.
+
+R4STD exportiert getrennte Tabellen fuer:
+
+    TEXT_V1  SETTINGS_V1  DATE_V1  TIME_V1  CONFIG_V1
+
+Verbraucher importieren nur ihren Bedarf aus
+`Repositories/Libraries/R4STD/Bindings/`. Es gibt keine zentrale R4STD-Gruppe,
+keine `App.standard`-Fassade und keine R4STD-Implementierung im Kern-SDK.
+
+
+Kompatibilitaet und Fassaden
+----------------------------
+
+- `extensible`-Typen wachsen ausschliesslich am Ende nach ihrem Versions- und
+  Groessenvertrag. `fixed_layout`-Typen werden nie in-place erweitert.
+- Bestehende Slots, Namen, Layouts und Fehlercodes bleiben binaer stabil.
+  Neue Zahlen werden nicht in Agent-Dateien wiederholt, sondern aus Contract
+  und generierten Dateien gelesen.
+- SDK-Fassaden fuer Storage, GUI, Ressourcen, Services/Netz, Audio und
+  Geraete bleiben der einzige normale Verbraucherpfad; ihre dauerhaften
+  Conformance-Tests werden nicht entfernt. Keine zweite Netzimplementierung,
+  keinen direkten Audio-Kernelpfad und keine erfundenen Handles fuer
+  pfadbasierte Dateioperationen einfuehren.
+- Produktiver Quellpfad ist current-only. Historische API-Begriffe duerfen nur
+  in Changelogs und ausdruecklichen Abschlussberichten stehen.
+
+Vor Aenderungen am Programm- und Taskinventar zusaetzlich
+`Docs/Core/ProgramLifecycle.txt`, `Docs/Core/ProgramInstanceStorage.txt`,
+`Docs/Core/DynamicProgramRegistry.txt` und
+`Docs/Core/DynamicTaskRegistry.txt` lesen. Die Operations- und
+Payloadvertraege stehen unter `Docs/API/` und in den erzeugten
+Contractdokumenten.
