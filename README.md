@@ -21,8 +21,10 @@ The setup also creates the ignored local files `QuickNotes.txt` and
 Use `Tools/Build.bat` as the multi-repository Windows build entry point.
 Run it without arguments for the interactive menu.
 
-Use `Tools/Clean.bat` or `Tools/Clean.bat -artifacts` to remove all local
-build and test outputs while keeping the empty `Artifacts` directory.
+Use `Tools/Clean.bat` to empty `Artifacts` and remove every R4OS-local
+`.zig-cache` directory. Use `-artifacts` or `-zig` for only one of those
+operations. Installed toolchains, global Zig caches, and `zig-out` directories
+remain untouched.
 
 Push and pull operations are performed exclusively through
 `Tools/Github.bat`. Documentation, source repositories, installed tools,
