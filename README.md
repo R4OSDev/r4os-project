@@ -18,6 +18,9 @@ credentials template, pull the DevKit with
 Use `Tools/Build.bat` as the multi-repository Windows build entry point.
 Run it without arguments for the interactive menu.
 
+Use `Tools/Clean.bat` or `Tools/Clean.bat -artifacts` to remove all local
+build and test outputs while keeping the empty `Artifacts` directory.
+
 Push and pull operations are performed exclusively through
 `Tools/Github.bat`. Source repositories, installed tools, artifacts, and
 credentials are ignored and are not stored in this project repository.
