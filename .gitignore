@@ -1,5 +1,7 @@
 # Ausgeschlossene Dateien
 Test.txt
+/QuickNotes.txt
+/Roadmap.txt
 
 # Ausschlossene Verzeichnisse
 /Artifacts/
