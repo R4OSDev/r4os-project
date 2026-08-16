@@ -44,14 +44,12 @@ Remote-Protokoll: HTTPS
 Remote-Name: origin
 Branch: main
 
-Alle derzeit von `Github.bat` unterstuetzten R4OS-Repositories werden bei
-fehlendem Remote-Repository oeffentlich angelegt. Das gilt fuer Project,
-DevKit, Docs, Contract, SDK, Libraries, Kernel, Distribution sowie Apps,
-Services, Diagnostics, Drivers und Protocols. Bereits vorhandene
-Repositories werden dadurch nicht in ihrer Sichtbarkeit veraendert.
-
-Kuenftige Server-Repositories sind die private Ausnahme. Ein spaeter dafuer
-ergaenztes Ziel muss `R4OS_REPOSITORY_PRIVATE=true` ausdruecklich setzen.
+Project, DevKit, Docs, Contract, SDK, Libraries, Kernel, Distribution sowie
+Apps, Services, Diagnostics, Drivers und Protocols werden bei einem fehlenden
+Remote-Repository oeffentlich angelegt. Der Package-Server ist die bewusste
+private Ausnahme. Sein Ziel setzt `R4OS_REPOSITORY_PRIVATE=true`.
+Bereits vorhandene Repositories werden durch Push oder Pull nicht in ihrer
+Sichtbarkeit veraendert.
 
 Github.bat akzeptiert ausschließlich ein origin, dessen URL exakt zum
 ausgewählten R4OSDev-Repository gehört. Ein abweichendes origin führt zum
@@ -99,7 +97,8 @@ Ohne Argumente startet das Script ein Menü:
 
 Das Menü fragt zuerst Push oder Pull und danach das Repository ab. Bei Apps,
 Services, Diagnostics, Drivers und Protocols wird zusätzlich der lokale
-Komponentenname abgefragt.
+Komponentenname abgefragt. Server waehlt das gemeinsame private
+Package-Server-Repository.
 
 Ein interaktiver Push fragt nicht nach einer Commit-Beschreibung. Ohne direkt
 übergebenen Text verwendet das Script die hinterlegte Standardbeschreibung des
@@ -124,12 +123,14 @@ ZIEL ist eines von:
     -libraries
     -kernel
     -distribution
+    -server
 
 Beispiele:
 
     D:\R4OS\Tools\Github.bat -push -project "Agent-Anleitung aktualisieren"
     D:\R4OS\Tools\Github.bat -pull -contract
     D:\R4OS\Tools\Github.bat -push -docs "Dokumentation aktualisieren"
+    D:\R4OS\Tools\Github.bat -push -server "Serverstand aktualisieren"
 
 Für eigenständige Komponenten steht der Komponentenname vor der optionalen
 Commit-Beschreibung:
@@ -193,6 +194,14 @@ Docs
     Lokal: D:\R4OS\Docs
     GitHub: R4OSDev/r4os-docs
     Inhalt: projektübergreifende Dokumentation und Inventare.
+
+Server
+    Ziel: -server
+    Lokal: D:\R4OS\Server
+    GitHub: R4OSDev/r4os-package-server
+    Sichtbarkeit: privat
+    Inhalt: Website, Update- und Paketdienst, Deployment, Betriebsreferenz
+    sowie die gemeinsamen lokalen Push-/Pull-Starter.
 
 Contract
     Ziel: -contract
@@ -275,8 +284,9 @@ späteren Ignore-Eintrag allein jedoch nicht automatisch ungetrackt. Wenn keine
 neuen Änderungen vorhanden sind, wird kein leerer Commit erzeugt; ein noch
 nicht veröffentlichter vorhandener main-Stand wird trotzdem gepusht.
 
-Alle automatisch erstellten GitHub-Repositories sind privat. Eine spätere
-Veröffentlichung ist ein eigener administrativer Vorgang.
+Die Sichtbarkeit ist pro Ziel festgelegt. Der Package-Server wird privat, die
+anderen derzeit unterstützten Ziele werden öffentlich angelegt. Eine spätere
+Änderung der Sichtbarkeit ist ein eigener administrativer Vorgang.
 
 
 Was ein Pull ausführt
@@ -351,9 +361,11 @@ Checkout unter D:\R4OS existiert:
 3. DevKit mit Github.bat -pull -devkit beziehen.
 4. Docs, Contract, SDK, Libraries, Kernel und Distribution mit ihren jeweiligen
    Pull-Zielen beziehen.
-5. Benötigte Apps, Services, Diagnostics, Drivers und Protocols einzeln mit
+5. Den privaten Package-Server bei Bedarf mit Github.bat -pull -server
+   beziehen.
+6. Benötigte Apps, Services, Diagnostics, Drivers und Protocols einzeln mit
    Rollenflag und Komponentenname beziehen.
-6. Die DevKit-Abhängigkeiten anschließend über dessen Setup installieren.
+7. Die DevKit-Abhängigkeiten anschließend über dessen Setup installieren.
 
 Der DevKit-Checkout ist nicht mit den dort installierten Quellkopien zu
 verwechseln. Kanonische Quellen werden unter D:\R4OS\Repositories bearbeitet;
