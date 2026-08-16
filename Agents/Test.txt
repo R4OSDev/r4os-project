@@ -1,0 +1,264 @@
+﻿R4OS Test - Agent-Referenz
+==========================
+
+Zweck: Welche Testschichten der R4OS-Workspace besitzt,
+welcher Lauf was belegt und wie ein roter Headless-Lauf untersucht wird.
+
+Wahrheit fuer den Gesamtweg sind `Tools/Build.bat`,
+`Tools/BuildWorkspace.ps1` und
+`Repositories/Distribution/Build.bat`. Der verbindliche Markervertrag
+steht in
+`Repositories/Distribution/Tests/Test-QemuApiMarkers.ps1`.
+
+
+Zwei getrennte Ebenen
+---------------------
+
+1. Repositoryeigene Tests pruefen den Besitzer einer Aenderung auf dem Host.
+2. Der Workspace-Test prueft Bau, Image und laufendes Gesamtsystem.
+
+Beide Ebenen sind notwendig. Ein gruener Headless-Lauf ersetzt keine
+Contract-, SDK-, Kernel-, Library- oder Komponententests.
+
+
+Repositoryeigene Tests
+----------------------
+
+Die wichtigsten Aufrufe unter Windows:
+
+    cd Repositories\Contract
+    ..\..\DevKit\Toolchains\Zig\zig.exe build test
+
+    Repositories\SDK\Build.bat test
+    Repositories\Libraries\Build.bat test
+    Repositories\Libraries\Build.bat R4STD test
+    Repositories\Libraries\Build.bat R4IMG test
+    Repositories\Libraries\Build.bat R4FONT test
+    Repositories\Kernel\Build.bat test
+    Repositories\Distribution\Build.bat test
+
+Bei einer einzelnen App, einem Dienst, Diagnoseprogramm, Treiber oder
+Protokoll:
+
+    Repositories\<Rolle>\<Projekt>\Build.bat test
+
+Das funktioniert nur, wenn das Projekt einen Zig-`test`-Step besitzt. Sonst
+den normalen `Build.bat` ausfuehren und die fuer das Projekt im
+`Docs/Inventory/Tests.json` genannten Tests gezielt verwenden.
+
+Die Starter lesen `Settings.R4S` und binden die aktuellen lokalen
+Contract-, SDK- und gegebenenfalls Library-Checkouts ein. So wird immer
+gegen den tatsaechlichen Workspace-Stand getestet.
+
+Linux- und macOS-Starter stellen die hostneutralen Repositorytests bereit.
+Gesamtbuild, Imagebau und QEMU-Abnahme werden ueber den Windows-Workspace-
+Einstieg ausgefuehrt.
+
+
+Die Gesamt-Abnahme
+------------------
+
+    Tools\Build.bat -test
+
+Der Lauf besteht aus:
+
+1. Distribution-Hosttools in ReleaseSafe bauen und deren Zig-Tests fahren.
+2. Rechtsdokumentation, deterministische Slim-/Full-/Test-Plaene und den
+   QEMU-Markerauswerter im Selbsttest pruefen.
+3. Contract, SDK, Runtime-Libraries, Kernel und alle Modul-Repositories
+   regulär bauen.
+4. Testprofil planen und
+   `Artifacts/Distribution/Generated/MODULES.JSON` erzeugen.
+5. Testimage unter
+   `Artifacts/Distribution/Profiles/Test/disk.img` bauen.
+6. Image, NTFS-Struktur und gestagte Rechtsdokumentation verifizieren.
+7. Test-Datenplatte frisch erzeugen, QEMU unsichtbar starten und den
+   seriellen Log auswerten.
+
+Wichtig: Schritt 3 verwendet die normalen Buildsteps der Repositories.
+`Tools\Build.bat -test` ruft nicht pauschal jeden repositoryeigenen
+`test`-Step auf. Tests des konkret geaenderten Besitzers deshalb vorher
+oder danach separat ausfuehren.
+
+
+Teilaufgaben
+------------
+
+    Tools\Build.bat -testimage
+        gesamten Workspace fuer Test bauen und Testimage erzeugen,
+        aber weder Verify noch QEMU
+
+    Tools\Build.bat -testimageonly
+        Testplan und Testimage aus vorhandenen Artefakten neu erzeugen
+
+    Tools\Build.bat -testonly
+    Tools\Build.bat -headless
+        vorhandenes Testimage headless pruefen
+
+    Tools\Build.bat -verify Test
+        vorhandenes Testimage strukturell pruefen
+
+`-testimageonly` benoetigt alle bereits gebauten Komponenten, weil der
+Workspace-Plan neu entsteht. `-testonly` kompiliert und packt nichts neu.
+
+
+Testprofil und Overlay
+----------------------
+
+Das Testprofil wird durch
+`Repositories/Distribution/Profiles/Test.R4S` definiert. Es verwendet:
+
+    Repositories/Distribution/Injection/
+    Repositories/Distribution/TestInjection/
+    Artifacts/Distribution/PrivateInjection/   optional und lokal
+
+`TestInjection/` liegt im Image ueber dem normalen Overlay und darf dessen
+Dateien fuer die Abnahme ersetzen. Der Standardlauf benoetigt einen
+Konsolenboot und ein `AUTOEXEC.BAT`, das am Ende `POWEROFF` ausfuehrt.
+Bootet das Testprofil stattdessen in eine dauerhafte Desktop-Sitzung, fehlt
+der Poweroff-Marker und der Watchdog beendet den Lauf als Fehler.
+
+Testfixtures werden entweder ueber das Testoverlay oder als versionierte
+modulnahe Zusatzmanifeste in den gemeinsamen Imageplan aufgenommen. Es gibt
+keine zweite, handgepflegte Modulliste im Testscript.
+
+
+Headless-QEMU
+-------------
+
+Der Headless-Lauf verwendet:
+
+    DevKit/Emulation/QEMU/qemu-system-x86_64.exe
+    Repositories/Distribution/QEMU/standard.conf
+    Repositories/Distribution/Tests/Invoke-QemuHeadless.ps1
+
+QEMU startet ohne sichtbares Fenster, mit einer Haswell-CPU, 1 GiB RAM,
+einem vCPU, deaktiviertem Netzwerk und COM1-Ausgabe in eine Datei.
+
+Ausgaben:
+
+    Artifacts/Distribution/Logs/qemu-test-standard.log
+    Artifacts/Distribution/Logs/qemu-test-standard.err
+
+Beide Dateien werden vor jedem Lauf geloescht. Einen wichtigen roten Log
+deshalb vor dem naechsten Lauf kopieren.
+
+
+Watchdog
+--------
+
+`Invoke-QemuHeadless.ps1` setzt eine harte Wall-Clock-Frist von 240
+Sekunden. Sie kann fuer einen Gegencheck erhoeht werden:
+
+    $env:QEMU_TEST_TIMEOUT_SECONDS = '600'
+    Tools\Build.bat -testonly
+
+Exitcode 124 bedeutet Timeout, 125 eine fehlende oder ungueltige
+Runnerkonfiguration. Unter starker Hostlast kann 240 Sekunden knapp sein.
+Ein fehlender Poweroff ohne Panic-, Fatal- oder CPU-Marker ist deshalb
+einmal mit hoeherem Timeout gegenzupruefen, nicht einfach als Flake
+abzulegen.
+
+
+Die Test-Datenplatte
+--------------------
+
+Vor jedem Headless-Lauf wird
+`Artifacts/Distribution/Profiles/Test/data.img` geloescht und mit der im
+Testprofil festgelegten Groesse neu erzeugt. Ein automatischer Test erbt
+damit keinen Zustand aus einem vorherigen Lauf.
+
+Sichtbare QEMU-Sitzungen behalten die Datenplatte ihres Profils dagegen
+absichtlich. Wird eine GUI-Sitzung hart beendet, kann ihre `data.img`
+inkonsistent sein. Bei ungewoehnlichem Verhalten einer manuellen Sitzung die
+betroffene Profilausgabe bewusst neu erzeugen.
+
+
+Markervertrag
+-------------
+
+`Test-QemuApiMarkers.ps1` entscheidet ueber Erfolg. Der Lauf ist rot, wenn:
+
+- QEMU einen von 0 verschiedenen Exitcode liefert;
+- ein Pflichtmarker fehlt;
+- ein verbotener Fehler-, Panic- oder FAILED-Marker vorkommt;
+- die Zig-/C-Paritaetszeilen fehlen, doppelt sind oder unterschiedliche
+  Ergebnisse enthalten;
+- QEMU-stderr einen relevanten Konfigurations- oder Laufzeitfehler meldet.
+
+Zu den Pflichtmarkern gehoeren Boot und Poweroff, `dirs=ok`, Loader- und
+Ressourcendiagnose, Explorer-, Appearance-, Klickifax- und Notepad-
+Selbsttests, Zig-/C-App-Entry sowie R4CC, R4PACK und R4BUILD. Die vollstaendige
+Liste steht nur im Script, damit sie nicht doppelt gepflegt wird.
+
+Verboten sind insbesondere `PANIC`, `FATAL`, CPU Exceptions, Page/General
+Protection Faults, `dirs=missing`, sichtbare NTFS-Metadateien wie `$MFT`
+und die zu den Pflichtproben gehoerenden FAILED-Marker.
+
+Wer einen neuen Gast-Selbsttest in `AUTOEXEC.BAT` aufnimmt, ergaenzt im
+selben Schritt dessen OK-Marker und den passenden Fehlerfall im
+Markerauswerter. Der Selbsttest des Auswerters muss danach weiterhin gruen
+sein:
+
+    Repositories\Distribution\Build.bat test
+
+
+Wenn der Headless-Lauf rot ist
+------------------------------
+
+1. Log und stderr sichern, bevor ein Wiederholungslauf sie ersetzt.
+2. Exitcode und konkrete Meldung des Markerauswerters lesen.
+3. Im seriellen Log die erste fehlende oder verbotene Bedingung suchen.
+4. Bei Panic oder CPU Exception die letzten Zeilen vor dem Abbruch
+   untersuchen.
+5. Bei Timeout ohne Crashmarker einmal mit 600 Sekunden gegenpruefen.
+6. Bei fehlenden Dateien den Testplan, `image-adds.txt` und
+   `MODULES.JSON` desselben Testbuilds kontrollieren.
+7. Bei moeglichen Altartefakten `Tools\Clean.bat -artifacts` ausfuehren
+   und den benoetigten Build vollstaendig wiederholen.
+
+Ein gruener Wiederholungslauf widerlegt einen sporadischen Fehler nicht.
+
+
+Sichttests
+----------
+
+    Tools\Build.bat -gui
+        Full-Workspace bauen, Full-Image erzeugen und sichtbar starten
+
+    Tools\Build.bat -qemu Full
+        vorhandenes Full-Image sichtbar starten
+
+Diese Wege sind manuelle Sichttests und keine automatische Abnahme. Der
+aktuelle GUI-Starter schreibt keinen eigenen seriellen Abnahmelog und besitzt
+keinen Markervertrag. Ein sichtbares QEMU-Fenster niemals ungefragt
+schliessen.
+
+
+Bestand und Pflege
+------------------
+
+Der handgepflegte vorhandene Testbestand steht in
+`Docs/Inventory/Tests.json`. Tests liegen beim
+jeweiligen Besitzer, zum Beispiel:
+
+    Repositories/SDK/Tests/
+    Repositories/Kernel/Tests/
+    Repositories/Distribution/Tests/
+    Repositories/Libraries/<Library>/Tests/
+    Repositories/<Rolle>/<Projekt>/Tests/
+    Repositories/<Rolle>/<Projekt>/src/    fuer Inline-Tests
+
+Wer einen Test anlegt, entfernt, verschiebt oder in seiner Bedeutung aendert,
+pflegt `Tests.json` mit. Die gueltigen Kategorien und Ablageprinzipien
+stehen in `Agents/TestCategories.txt`.
+
+
+Weiterfuehrend
+--------------
+
+    Agents/Build.txt
+    Agents/TestCategories.txt
+    Docs/Inventory/Tests.json
+    Repositories/Distribution/README.md
+    Repositories/Distribution/Tests/Test-QemuApiMarkers.ps1

@@ -26,16 +26,29 @@ Sandboxmodell.
   Englisch. Ausfuehrliche uebernommene deutsche Root-Dokumentation bleibt als
   `DOCUMENTATION.de.txt` erhalten.
 
-# Umbau
-Aktuell strukturieren wir alles um.
-Das neue und aktuelle R4OS Projekt-Verzeichnis ist D:\R4OS\
-Das alte ist: D:\AI\Projects\Claude Code\R4OS
+# Workspace und Agent-Referenzen
+- Das R4OS-Projektverzeichnis ist `D:\R4OS`.
+- Struktur und Repositorygrenzen: `Agents/ProjektStruktur.txt`
+- Workspace- und Einzelbuilds: `Agents/Build.txt`
+- Kernelstruktur: `Agents/KernelStruktur.txt`
+- Modulcontainer und Manifest: `Agents/R4M0-Container.txt`
+- Dateitypen: `Agents/DateiTypen.txt`
+- Tests und Kategorien: `Agents/Test.txt` und
+  `Agents/TestCategories.txt`
+- Remote-Update und Serverbetrieb: `Agents/RemoteUpdate.txt` und
+  `Agents/Server.txt`
+- Jede Quellkomponente wird in ihrem eigenen Repository bearbeitet. Das
+  jeweilige Repository ist die fachliche Wahrheit seines Inhalts.
 
-- Der eingefrorene fachliche Referenzstand ist Altprojekt-Commit `259cbfac`;
-  der archivierte Abschluss-Head ist `2c0ca047`.
-- Eine Komponente wird erst nach eigenstaendigem Build und ihren Tests im
-  neuen Repository kanonisch. Bis dahin bleibt ihr Teilbaum aus `259cbfac`
-  die einzige fachliche Wahrheit.
+# Inventare
+- `D:\R4OS\Docs\Inventory\AllModules.json` ist die manuell gepflegte
+  Gesamtuebersicht aller kanonischen Module.
+- `D:\R4OS\Docs\Inventory\Tests.json` und `Docs.json` werden manuell
+  gepflegt.
+- `D:\R4OS\Artifacts\Distribution\Generated\MODULES.JSON` wird beim
+  Imageplan erzeugt und beschreibt den konkreten Profilumfang.
+- `Agents/`, `Docs/Inventory/` und Changelogs gehoeren nicht in
+  `Docs.json`.
 
 # GitHub
 - Das private GitHub-Projektverzeichnis `D:\R4OS` wird als
@@ -72,15 +85,11 @@ Das alte ist: D:\AI\Projects\Claude Code\R4OS
 - Eigenstaendige Komponenten liegen nach ihrer fachlichen Rolle unter
   `D:\R4OS\Repositories\Apps`, `Services`, `Diagnostics`, `Drivers`
   oder `Protocols`.
-  Die ersten Piloten sind `Apps\Clock` als `R4OSDev/r4os-app-clock`,
-  `Drivers\MIDI` als `R4OSDev/r4os-driver-midi` und `Protocols\JSON` als
-  `R4OSDev/r4os-protocol-json`. Der erste Diagnosepilot ist
-  `Diagnostics\FsDiag` als `R4OSDev/r4os-diagnostic-fsdiag`.
-  Diese Komponentenrepositories bleiben vorerst privat. Eine spaetere
-  Veroeffentlichung ist eine separate Entscheidung.
+  Jedes direkte Komponentenverzeichnis ist ein eigenes privates
+  GitHub-Repository unter `R4OSDev`.
   Jedes Modul besitzt eigene Settings und Buildstarter; relative Settings
   beginnen am jeweiligen Modulrepository und duerfen durch absolute Pfade
-  ersetzt werden. Fertige Pilotartefakte landen standardmaessig unter
+  ersetzt werden. Fertige Artefakte landen standardmaessig unter
   `D:\R4OS\Artifacts\Modules\<Name>`.
 - Jeder Modul-Buildstarter bindet die in seiner `Settings.R4S` gemappten
   aktuellen lokalen Checkouts von SDK, Contract und den tatsaechlich
@@ -110,14 +119,13 @@ Das alte ist: D:\AI\Projects\Claude Code\R4OS
   `Build.bat` erzeugt `zig-out\bin\r4os.elf`; `Build.bat test` baut den
   Kernel und fuehrt die kernel-eigenen Host- und Negativtests aus. Der Build
   konsumiert nur den gemappten Contract und bleibt fest auf ReleaseSafe ohne
-  SIMD. `Build.sh` ist der hostneutrale Starter; Linux-/macOS-Laufzeittests
-  sind fuer den 0.64-Umbau kein Gate. `VERSION.R4S` nur erhoehen, wenn sich
-  das Kernelartefakt tatsaechlich aendert.
+  SIMD. `Build.sh` ist der hostneutrale Starter. `VERSION.R4S` nur
+  erhoehen, wenn sich das Kernelartefakt tatsaechlich aendert.
 - Library-Pfade stehen in `D:\R4OS\Repositories\Libraries\Settings.R4S`.
   `Build.bat test` prueft alle Libraries; mit `Build.bat R4STD test`,
   `Build.bat R4IMG test` oder `Build.bat R4FONT test` wird genau eine Einheit
   gebaut und getestet. Relative und absolute SDK-/Contract-Pfade sind
-  erlaubt. Linux-/macOS-Laufzeittests sind fuer den 0.64-Umbau kein Gate.
+  erlaubt.
 
 # Workspace-Build
 - Der verbindliche Mehrrepo-Einstieg unter Windows ist

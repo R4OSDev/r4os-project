@@ -1,0 +1,275 @@
+﻿R4OS Remote-Update auf echter Hardware - Agent-Referenz
+=======================================================
+
+Zweck: R4OS-Komponenten als R4U-Paket bereitstellen, veroeffentlichen und
+auf einem laufenden System atomar installieren.
+
+Vertragswahrheiten:
+
+    Docs/Deployment/R4UComponentContract.txt
+    Docs/Deployment/SystemUpdater05914.txt
+    Docs/Deployment/UpdateService06316.txt
+    Docs/Deployment/UpdateSearch06317.txt
+    Docs/Deployment/UpdateDownload06318.txt
+    Docs/Deployment/UpdateCenter06319.txt
+    Docs/Deployment/UpdateAll06320.txt
+
+
+Gesamtweg
+---------
+
+    Artefakte bauen
+      -> R4U packen
+      -> Update-Server pruefen und publizieren
+      -> Client sucht und laedt
+      -> SYSUPD verifiziert und stageiert
+      -> Live-Aktivierung oder Neustartbatch
+      -> Post-Boot-Pruefung und Releaseabschluss
+
+SFTP, SCP und HTTPS transportieren Dateien. Systemziele werden
+ausschliesslich durch SYSUPD veraendert.
+
+
+Komponenten und Versionen
+-------------------------
+
+Ein R4U enthaelt nur die fuer das Paket vorgesehenen Payloads.
+R4X, R4L, R4D, R4P und Kernel tragen ihre eigene eingebettete
+Komponentenversion.
+
+    VERSION.R4S    sichtbarer Systemrelease
+    MODULES.JSON   installierte Komponenten und Imageprofil
+
+Diese beiden Dateien werden nicht als normale R4U-Payload verteilt. SYSUPD
+pflegt die installierte Modulsicht aus verifizierten Artefaktmetadaten. Der
+Releaseabschluss verwendet das publizierte Releasemanifest.
+
+Ein Kernelpayload erzwingt einen Foundation-Neustart. Ein nicht laufendes
+R4X ohne aktive Abhaengigkeit kann live abgeschlossen werden. Treiber,
+Protokolle, Libraries, laufende Programme und weitere Foundation-Payloads
+werden in einem Neustartbatch aktiviert.
+
+
+R4UPack bauen
+-------------
+
+    Repositories\Distribution\Build.bat tools
+
+Das Hosttool liegt danach unter:
+
+    Artifacts\Distribution\HostTools\bin\r4upack.exe
+
+
+Paket bauen
+-----------
+
+Beispiel fuer einen Dienst:
+
+    Artifacts\Distribution\HostTools\bin\r4upack.exe ^
+      --output Artifacts\Distribution\Packages\RDP-<PAKETVERSION>-<RELEASE>.R4U ^
+      --package RDP --version <PAKETVERSION> --release <RELEASE> ^
+      --title "RDP service update" ^
+      --description-file Artifacts\Distribution\Packages\RDP-DESCRIPTION.TXT ^
+      --payload "Artifacts\Modules\RdpService\RDPSVC.R4X|C:\R4OS\SERVICES\RDPSVC.R4X|service" ^
+      --require "R4L|R4SYS|/R4OS/LIBS/R4SYS.R4L|0.1.1|installed"
+
+Das Ausgabe- und Beschreibungsverzeichnis muss lokal vorhanden sein.
+
+Payloadsyntax:
+
+    QUELLE|ZIEL|ART
+
+Gueltige Arten:
+
+    auto
+    boot-kernel
+    system-library
+    driver
+    protocol
+    service
+    software
+    font
+    config
+    data
+    sdk
+
+auto leitet die Art aus dem Zielpfad ab. Zielpfade im Paket sind
+DOS-Pfade wie C:\R4OS\..., waehrend module.R4MF Imagepfade mit
+Vorwaertsschragen verwendet.
+
+Anforderungssyntax:
+
+    KIND|NAME|TARGET|MIN_VERSION|installed|active
+
+Paketversion und Releaseversion besitzen getrennte Bedeutungen.
+Kompatibilitaet wird durch konkrete Anforderungen an Komponenten bestimmt.
+R4UPack liest Identitaet und Version aus R4M0 beziehungsweise Kernel-ELF,
+leitet Aktivierungs- und Prioritaetsklasse ab und weist widerspruechliche
+Angaben ab.
+
+Titel und Beschreibung sind begrenzter UTF-8-Plain-Text. Dateiname:
+
+    <PACKAGE>-<PACKAGE_VERSION>-<RELEASE>.R4U
+
+Vor dem Upload Groesse und SHA-256 des fertigen Pakets festhalten.
+
+
+Update-Server
+-------------
+
+Server-Inbox:
+
+    /root/R4OS/UpdateServer/Runtime/incoming/
+
+Ein Paket wird zuerst mit der Endung .part uebertragen und danach auf dem
+Server atomar auf den finalen .R4U-Namen umbenannt:
+
+    scp -i D:/Storage/SSH/id_ed25519 -P 22 <PAKET>.R4U root@10.0.0.5:/root/R4OS/UpdateServer/Runtime/incoming/<PAKET>.R4U.part
+
+    ssh -i D:/Storage/SSH/id_ed25519 -p 22 root@10.0.0.5 "test ! -e /root/R4OS/UpdateServer/Runtime/incoming/<PAKET>.R4U && mv /root/R4OS/UpdateServer/Runtime/incoming/<PAKET>.R4U.part /root/R4OS/UpdateServer/Runtime/incoming/<PAKET>.R4U"
+
+Im ControlCenter werden Paket-ID, Paketversion, Release, Titel,
+Beschreibung, Komponenten, Aktivierung, Prioritaet, Groesse, SHA-256 und
+Validierungsstatus geprueft.
+
+Freigabereihenfolge:
+
+1. Alle R4U-Pakete des Releases validieren und publizieren.
+2. Das dazu passende Releasemanifest
+   R4OS-RELEASE-<RELEASE>.JSON validieren.
+3. Das Releasemanifest als letzten Freigabeschritt publizieren.
+
+Publish verschiebt eine validierte Datei atomar von incoming nach releases.
+Direkte Schreibzugriffe auf releases sind nicht Teil des Workflows.
+
+Der sichtbare Katalog entsteht aus validierten R4U-Dateien und dem
+zugehoerigen Releasemanifest. Profilabweichungen, doppelte Komponenten,
+unaufloesbare Anforderungen und Abhaengigkeitszyklen sperren die
+Katalogausgabe.
+
+Serverbetrieb und ControlCenter stehen in Agents/Server.txt.
+
+
+Clientsuche und Download
+------------------------
+
+Der Client verwendet fuer Authentifizierung und Download den oeffentlichen
+Hostnamen:
+
+    r4os.r4server.eu
+
+Ablauf:
+
+1. UPDSVC registriert die Quell-IP auf Port 1338.
+2. UPDSVC liest Katalog v2 ueber HTTPS auf Port 1339.
+3. Die Suche vergleicht den Katalog komponentenweise mit dem lokalen
+   C:\R4OS\CONFIG\MODULES.JSON und dessen Profil.
+4. Pakete werden mit Range-Resume in eine private deterministische
+   Stagedatei geladen.
+5. Groesse, Katalog-SHA-256 und R4U-Vertrag werden geprueft.
+6. Erst ein vollstaendiges Paket wird atomar unter seinem sichtbaren
+   .R4U-Namen bereitgestellt.
+
+UPDATE.R4X steuert Suche, Paketansicht und Update All ueber UPDSVC. Update
+All bindet seine Queue an einen Suchsnapshot, laedt und verifiziert alle
+Pakete und bereitet erforderliche Neustartpakete als gemeinsamen Batch vor.
+
+
+Administrative Inbox
+---------------------
+
+Auf dem R4OS-Ziel liegt die Inbox unter:
+
+    C:\R4OS\UPDATE\INBOX\
+
+Ein administrativ per SFTP uebertragenes Paket wird ausschliesslich dort
+abgelegt. Nach dem Transfer Groesse und SHA-256 gegen den Hostwert pruefen.
+Ein Rueckdownload mit erneutem SHA-256-Vergleich ist die vollstaendige
+Transportabnahme.
+
+Systemdateien, Kernel, Treiber, Protokolle, Libraries und Dienste werden
+nicht direkt per SFTP oder SCP ueberschrieben.
+
+
+VERIFY
+------
+
+Vor dem Stage in dieser Reihenfolge:
+
+    TYPE C:\R4OS\CONFIG\VERSION.R4S
+    TYPE C:\R4OS\CONFIG\MODULES.JSON
+    SYSUPD STATUS
+    SYSUPD VERIFY C:\R4OS\UPDATE\INBOX\<PAKET>.R4U
+
+Nur bei VERIFY result: OK fortfahren. Release, Paket, Komponenten,
+Aktivierung und Prioritaet muessen der geplanten Aenderung entsprechen.
+
+STATUS zeigt im Bereitschaftszustand idle sowie Inbox, Stagingwurzel und
+dirs=ok. VERIFY ist read-only und akzeptiert nur ein vollstaendig sichtbares
+Paket in der Inbox.
+
+
+STAGE und COMMIT
+----------------
+
+    SYSUPD STAGE C:\R4OS\UPDATE\INBOX\<PAKET>.R4U
+
+Ein live-fähiges R4X-Paket kann unmittelbar installiert werden. Alle anderen
+Pakete werden im dualen Batchjournal an Pfad, Laenge und Digests gebunden.
+Weitere Pakete desselben Zielrelease koennen demselben Batch hinzugefuegt
+werden.
+
+Vor einem Neustartbatch:
+
+    SYSUPD STATUS
+    SYSUPD COMMIT
+
+COMMIT verifiziert alle Pakete erneut, ordnet konkrete Abhaengigkeiten
+topologisch und nimmt danach den Update-Lock. Artefakte und das abgeleitete
+MODULES.JSON werden als eine Transaktion angewendet. Nur ein vollstaendiger
+Commit loest den Neustart aus.
+
+Transiente Paketinformationen, Reads und identitaetsgebundene Aborts werden
+begrenzt wiederholt. Format-, Checksum- und Konfliktfehler bleiben sichtbar.
+Ein vorbereitbarer Zustand erscheint als prepare-retry.
+
+Ein bereits geladenes Paket kann fuer einen Suchsnapshot verwendet werden,
+wenn sein vollstaendiger Katalogfingerprint uebereinstimmt.
+
+
+Post-Boot und Recovery
+----------------------
+
+Nach einem Neustart:
+
+    SYSUPD RESUME-BATCH
+
+SYSUPD prueft laufenden Kernel, installierte Artefakte und MODULES.JSON gegen
+das Journal. Nach erfolgreicher Pruefung wird VERSION.R4S auf den
+Zielrelease gesetzt und Installed gemeldet.
+
+Die Boot-Recovery laeuft nach dem Einhaengen von C: und vor IRQ-,
+Treiberpolicy-, Service- und Shellstart:
+
+- Eine unvollstaendige einzelne Transaktion wird in umgekehrter
+  Payloadreihenfolge zurueckgerollt.
+- Ein vollstaendig gestagter Batch wird bis post_boot fortgesetzt.
+- Ein beweisbarer Konflikt rollt den gesamten Batch zurueck.
+- Zwei ungueltige Journalslots fuehren zu einem fail-closed Boot.
+
+SYSUPD RESUME setzt eine einzelne laufende Transaktion fort.
+SYSUPD RESUME-BATCH setzt den gebundenen Neustartbatch fort.
+
+Fuer eine fachlich unerwuenschte, technisch erfolgreich installierte
+Aenderung wird ein bekannt-gutes Rueckrollpaket erstellt und ueber denselben
+Workflow installiert.
+
+
+Weiterfuehrend
+--------------
+
+    Agents/Build.txt
+    Agents/Server.txt
+    Docs/Deployment/R4UComponentContract.txt
+    Docs/Deployment/SystemUpdater05914.txt
+    Docs/SupportedHardware.txt

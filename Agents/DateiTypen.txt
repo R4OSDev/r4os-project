@@ -1,0 +1,168 @@
+﻿R4OS Dateitypen - Agent-Referenz
+================================
+
+Zweck: Welche Dateiendungen im aktuellen R4OS-Workspace und im laufenden
+System verwendet werden.
+
+Binaere R4OS-Formate sind Little Endian. Die jeweilige Contract- oder
+Formatdatei ist verbindlicher als diese Uebersicht.
+
+
+Module und Projekte
+-------------------
+
+Vier Endungen verwenden den gemeinsamen R4M0-Container:
+
+    .R4X    Programm oder Dienst
+            Exportiert R4XStart:1 und importiert R4SYS:Query:1.
+            APP_CLASS ist console, gui oder service.
+            Ziele liegen unter C:\R4OS\SOFTWARE\ oder
+            C:\R4OS\SERVICES\.
+
+    .R4L    Library
+            Exportiert Query:1. Plattform-Bridges stellen R4SYS, R4DESK,
+            R4DRAW, R4NET, R4AUDIO und R4DEV bereit. Runtime-Libraries wie
+            R4STD, R4IMG und R4FONT exportieren eigene versionierte Tabellen.
+            Ziel: C:\R4OS\LIBS\.
+
+    .R4D    Treiber
+            Verwendet den Driver-Entryvertrag.
+            Ziel: C:\R4OS\DRIVERS\.
+
+    .R4P    Protokollmodul
+            Verwendet den Protocol-Entryvertrag und wird ueber seine Rolle
+            adressiert.
+            Ziel: C:\R4OS\PROTOCOLS\.
+
+Der Host erzeugt die Container mit R4XBuilder. Der Self-Hosting-Pfad in R4OS
+verwendet R4PACK.
+
+    .R4MF   Modulmanifest in UTF-8 ohne BOM. Erste fachliche Zeile:
+            R4OS_MODULE_MANIFEST=2. Ein Manifest beschreibt genau ein Modul
+            und ist dessen Projekt-, Build- und Imagewahrheit.
+
+Details:
+
+    Agents/R4M0-Container.txt
+    Repositories/Contract/ABI/R4M0.txt
+    Repositories/Contract/Module/R4MFv2.txt
+
+
+Konfiguration und Text
+----------------------
+
+    .R4S    R4OS-Konfigurations- und Settingsdatei. Der konkrete Besitzer
+            definiert die erlaubten Schluessel. Laufzeitkonfigurationen
+            koennen R4S_FORMAT und SCHEMA tragen; Workspace-Settings und
+            Versionsdateien verwenden einen klar begrenzten KEY=VALUE-
+            Vertrag. Kodierung und Pflichtfelder stehen im jeweiligen
+            Schema oder Buildstarter.
+
+            Wichtige Dateien:
+
+                CONFIG.R4S      Boot und Shell
+                VERSION.R4S     sichtbare Release- oder Kernelversion
+                SERVICES.R4S    Dienste und Autostart
+                ASSOC.R4S       Dateizuordnungen
+                DESKTOP.R4S     Desktopkonfiguration
+                INPUT.R4S       Tastaturlayout und Eingabe
+                TIME.R4S        Zeitzone und Zeitquelle
+                Settings.R4S    lokale Buildpfade eines Repositorys
+
+    .LNK    Desktopverknuepfung im R4S-Schema R4LNK. Felder sind unter
+            anderem TARGET, TITLE, ICON, POLICY und ARGS.
+
+    .BAT    Batchdatei des R4OS-Terminals oder Windows-Buildskript, bestimmt
+            durch den Ablageort. AUTOEXEC.BAT im Image wird nach dem
+            Konsolenboot ausgefuehrt.
+
+    .TXT    Textdatei fuer Dokumentation, Help, Beschreibung oder Nutzdaten.
+
+    .INI    SDK-Template- und Buildprofilkonfiguration.
+
+    .JSON   Maschinenlesbare Vertraege und Inventare. Beispiele:
+
+                Repositories/Contract/API/ApiContract.json
+                Repositories/Contract/Generated/Inventory/API.json
+                Docs/Inventory/AllModules.json
+                Docs/Inventory/Docs.json
+                Docs/Inventory/Tests.json
+                Artifacts/Distribution/Generated/MODULES.JSON
+
+
+Systemartefakte
+---------------
+
+    .R4R    Registry-Hive mit Magic R4R1. Das Systemimage enthaelt
+            C:\R4OS\REGISTRY\SYSTEM.R4R. Der Workspace erzeugt die
+            Default-Registry unter
+            Artifacts/Distribution/Generated/RegistryDefaults/.
+
+    .R4I    Preload-Image mit Magic R4I0. Es buendelt die Module, die vor
+            dem vollstaendigen Dateisystempfad benoetigt werden. Der
+            Workspace erzeugt PRELOAD.R4I unter
+            Artifacts/Distribution/Generated/.
+
+    .R4F    Systemfont. Die Fontgeneratoren liegen unter
+            Repositories/Distribution/Assets/SystemFonts/. Gebaute Fonts
+            landen unter
+            Artifacts/Distribution/HostTools/share/r4os/fonts/ und im Image
+            unter C:\R4OS\FONTS\.
+
+    .R4B    Bootscreen-Bild mit Magic R4B0. Es wird als Kernelasset erzeugt
+            und in r4os.elf eingebettet.
+
+    .R4U    Systemupdatepaket mit Magic R4U2. Es enthaelt Paket-,
+            Release- und Komponentendaten, Anforderungen, Anzeigetexte und
+            atomar gebundene Payloads. Erzeuger ist R4UPack, Verbraucher ist
+            SYSUPD.
+
+    .JRN    Updatejournal des Systemupdaters. Die Slots SYSUPD0.JRN und
+            SYSUPD1.JRN liegen unter C:\R4OS\UPDATE\STAGED und binden eine
+            laufende Transaktion dauerhaft.
+
+
+Medien und Fremdformate
+-----------------------
+
+    .ICO    Klassischer Windows-ICO-Container. R4OS akzeptiert fuer
+            Modulicons mindestens einen 32x32-Eintrag in 32 bpp BGRA oder
+            8 bpp Palette und keinen PNG-komprimierten Eintrag.
+
+    .BMP    Bitmap-Bildquelle fuer Anwendungen, Ressourcen und den
+            Bootscreen-Bau.
+
+    .WAV    PCM-Audiodatei.
+
+    .SID    C64-SID-Musikdatei fuer R4Synth und den SID-Treiberpfad.
+
+    .MID    MIDI-Datei fuer den MIDI-Protokoll- und Treiberpfad.
+
+    .FON    Windows-Fontcontainer. FONTS.R4X kann unterstuetzte
+            Bitmap-FNT-Ressourcen als R4F importieren.
+
+    .SYS    Fremdformat des Bootloaders, beispielsweise
+            limine-bios.sys auf der Bootpartition.
+
+
+Begriffe ohne Dateiendung
+-------------------------
+
+    R4M0    Name des gemeinsamen Modulcontainerformats
+    R4MF    Name der Manifestsprache
+    R4S     Name der Konfigurationsfamilie
+
+Ein Modulname bezeichnet die logische Identitaet. Die zugehoerige Datei
+enthaelt zusaetzlich die Modulart, beispielsweise R4SYS.R4L.
+
+
+Weiterfuehrend
+--------------
+
+    Agents/R4M0-Container.txt
+    Agents/RemoteUpdate.txt
+    Docs/Drivers/R4DFormat.txt
+    Docs/Protocols/R4PFormat.txt
+    Docs/Fonts/R4FFormat.txt
+    Docs/Core/RegistryFormat046.txt
+    Docs/Desktop/IconFormat.txt

@@ -1,5 +1,5 @@
 # Ausgeschlossene Dateien
-Test.txt
+/Test.txt
 /QuickNotes.txt
 /Roadmap.txt
 
@@ -10,8 +10,16 @@ Test.txt
 /DevKit/*
 /Docs/
 /Docs/*
+/ExFiles/
+/ExFiles/*
+/Reports/
+/Reports/*
 /Repositories/
 /Repositories/*
+/Server/
+/Server/*
+/Temp/
+/Temp/*
 /Tools/Credentials/
 /Tools/Credentials/*
 

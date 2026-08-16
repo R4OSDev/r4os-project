@@ -1,0 +1,139 @@
+﻿R4OS Testkategorien - Agent-Referenz
+====================================
+
+Zweck: Einheitliche Bedeutung der `type`-Werte in
+`Docs/Inventory/Tests.json` und die dazugehoerige Ablage.
+
+Tests liegen beim Repository und Bauteil, das sie besitzt. Es gibt zehn
+Kategorien.
+
+
+Inline
+------
+
+Pfad: direkt in der geprueften `*.zig`-Produktivquelle.
+
+Ein Inline-Test prueft eine einzelne Quelle von innen. Seine `test`-Bloecke
+werden mit `zig test` ausgefuehrt und nicht in das ausgelieferte Artefakt
+aufgenommen. Test und Quelle leben im selben Repository.
+
+
+Component
+---------
+
+Pfad: bei der Komponente unter `src/` oder `Tests/`.
+
+Ein Component-Test prueft ein abgegrenztes produktives Bauteil auf dem Host,
+einschliesslich seiner echten Datenstrukturen und Zustandsuebergaenge. Er
+bleibt dem besitzenden Repository zugeordnet und benoetigt kein vollstaendiges
+R4OS-Image.
+
+
+Integration
+-----------
+
+Pfad: `Repositories/<Besitzer>/Tests/`.
+
+Ein Integrationstest prueft das Zusammenspiel mehrerer Teile desselben
+Besitzers, beispielsweise Library-Provider, Bindings und Laufzeitverbraucher.
+Er verwendet echte Implementierungen und wird ueber den Teststep des
+Repositories ausgefuehrt.
+
+
+Conformance
+-----------
+
+Pfad: `Generated/Conformance/`, `Tests/Conformance/` oder
+`<Library>/Tests/Generated/`.
+
+Ein Conformance-Test prueft, dass zwei Seiten desselben Vertrags
+uebereinstimmen: deklarierte gegen generierte ABI, Zig gegen C oder Provider
+gegen Bindings. Er gehoert zum Repository, das den Vertrag oder die
+Library-Schnittstelle besitzt.
+
+
+Simulation
+----------
+
+Pfad: `Repositories/<Besitzer>/Tests/Simulation/` oder eine eindeutig
+benannte Hostmodellquelle beim Bauteil.
+
+Eine Simulation fuehrt produktive Logik oder ein explizites Hostmodell gegen
+eine deterministische simulierte Umgebung aus. Sie benoetigt weder QEMU noch
+echte Hardware und dokumentiert klar, welches Verhalten sie belegt.
+
+
+Diagnostics
+-----------
+
+Pfad: `Repositories/Diagnostics/<Projekt>/`.
+
+Ein Diagnostic ist ein eigenstaendiges R4X-Programm, das im laufenden R4OS
+Systemzustand prueft oder gezielt Last erzeugt. Es meldet sein Ergebnis
+maschinenlesbar und kann vom Headless-Test gesteuert werden. Das Programm ist
+ein auslieferbares Modul und besitzt deshalb ein eigenes Repository.
+
+
+Selftest
+--------
+
+Pfad: direkt im produktiven Kernel- oder Anwendungsmodul.
+
+Ein Selftest ist in das auslieferbare Bauteil eingebaut und wird im Zielsystem
+ueber einen definierten Laufzeitpfad ausgeloest. Er eignet sich fuer
+Zustaende, die ein externer Hosttest nicht direkt erreichen kann. Aktivierung
+und Ergebnis muessen eindeutig begrenzt und maschinenlesbar sein.
+
+
+Fixture
+-------
+
+Pfad: `Repositories/<Besitzer>/Tests/Fixture/`,
+`Tests/Fixtures/`, ein Testoverlay oder ein eindeutig benanntes
+Fixture-Projekt.
+
+Eine Fixture ist eine versionierte Eingabe oder Referenz: Beispieldatei,
+absichtlich fehlerhaftes Manifest, erwarteter Plan, Testzertifikat oder
+kompiliertes Testmodul. Sie enthaelt keine eigenstaendig bewertende
+Testlogik.
+
+
+Tool
+----
+
+Pfad: `Repositories/<Besitzer>/Tests/` oder `Tools/`.
+
+Ein Testtool stellt Infrastruktur fuer Pruefungen bereit, beispielsweise
+Timeoutsteuerung, Logauswertung oder strukturelle Imageanalyse. Es ist selbst
+keine Zusicherung ueber das Produkt; die aufrufende Abnahme liefert das
+Ergebnis.
+
+
+Generator
+---------
+
+Pfad: `Repositories/<Besitzer>/Tools/` oder `Generator/`.
+
+Ein Generator erzeugt deterministisch versionierte Vertragsartefakte,
+Fixtures oder Quelltabellen. Eingaben und erzeugte Ausgaben bleiben beim
+besitzenden Repository. Ein Check-Modus prueft erzeugte Dateien bytegenau,
+wenn der jeweilige Vertrag das vorsieht.
+
+
+Pflege
+------
+
+Jeder Eintrag in `Docs/Inventory/Tests.json` besitzt genau eine dieser
+Kategorien. Bei einer neuen, verschobenen, geloeschten oder fachlich
+geaenderten Pruefung wird das Inventar im selben Arbeitsschritt angepasst.
+
+Der systemweite Headless-Lauf ist ein Workflow aus Distribution, QEMU,
+Diagnoseprogrammen, Selftests und Markerauswertung. Seine einzelnen
+Bestandteile werden nach ihrer konkreten Rolle kategorisiert.
+
+
+Weiterfuehrend
+--------------
+
+    Agents/Test.txt
+    Docs/Inventory/Tests.json
