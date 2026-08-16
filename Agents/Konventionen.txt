@@ -72,10 +72,9 @@ Vertraege.
 
 Vor solchen Arbeiten vollstaendig lesen:
 
-    Docs/Core/ProgramInstanceStorage.txt
-    Docs/Core/DynamicProgramRegistry.txt
     Docs/Core/ProgramLifecycle.txt
-    Docs/Core/DynamicTaskRegistry.txt
+    Docs/Core/Speicherverwaltung.txt
+    Agents/KernelStruktur.txt
 
 
 Systempfade und Laufzeitverhalten
@@ -116,8 +115,8 @@ Treiber- und Buildfallen
 - Der RTL8168-Kaltbind bleibt reset-frei. Kein `CmdReset` und keine
   indirekten Registerzugriffe im Bind. Eine Wiedereinfuehrung einzelner
   Referenzpfade benoetigt Feature fuer Feature einen realen
-  Mehrboot-Kaltstartnachweis. Details:
-  `Docs/Drivers/Rtl8168ReferenzVergleich05916.txt`.
+  Mehrboot-Kaltstartnachweis. Verbindlich sind der aktuelle Treibercode und
+  seine Tests im RTL8168-Repository.
 - Build- und Artefaktfehler stehen in `Agents/Build.txt`; Watchdog,
   Poweroff-Marker und Datenplattenverhalten in `Agents/Test.txt`. Diese
   Fehlerbilder zuerst nach den dortigen Gegenproben untersuchen, bevor Code

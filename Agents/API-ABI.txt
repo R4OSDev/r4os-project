@@ -50,6 +50,13 @@ Die zentralen Plattformgruppen sind:
 
     R4SYS  R4DESK  R4DRAW  R4NET  R4AUDIO  R4DEV
 
+Der Kernel registriert diese sechs Platform APIs beim Aufbau der
+Modulregistry als eingebaute Provider, noch vor dem R4D-/R4P-Preload. Sie
+besitzen keine `.R4L`-Datei, kein Imageziel und keinen unabhängigen
+Updatepfad. Ihre Implementierungsversion folgt dem Kernelartefakt; Namen,
+Gruppen-IDs, Query-Revision und Tabellenlayouts folgen dem zentralen
+Contract.
+
 Ein normales R4X exportiert `R4XStart:1` und importiert `R4SYS:Query:1`.
 Jede weitere Gruppe steht ausschliesslich als geordnete `IMPORT=`-Zeile in
 `module.R4MF`. Die vollstaendigen Container- und Manifestregeln stehen in
@@ -93,8 +100,6 @@ Kompatibilitaet und Fassaden
   in Changelogs und ausdruecklichen Abschlussberichten stehen.
 
 Vor Aenderungen am Programm- und Taskinventar zusaetzlich
-`Docs/Core/ProgramLifecycle.txt`, `Docs/Core/ProgramInstanceStorage.txt`,
-`Docs/Core/DynamicProgramRegistry.txt` und
-`Docs/Core/DynamicTaskRegistry.txt` lesen. Die Operations- und
-Payloadvertraege stehen unter `Docs/API/` und in den erzeugten
-Contractdokumenten.
+`Docs/Core/ProgramLifecycle.txt`, `Docs/Core/Speicherverwaltung.txt` und den
+aktuellen Kernelcode lesen. Die Operations- und Payloadvertraege stehen unter
+`Docs/API/` und in den erzeugten Contractdokumenten.

@@ -91,9 +91,12 @@ Sandboxmodell.
   dokumentiert. (Nicht öffentlich)
 
 # Module und API/ABI
-- Anwendungen, Dienste und Diagnosen (`.R4X`), Treiber (`.R4D`),
-  Runtime-Libraries und SDK-Plattform-Bridges (`.R4L`) sowie Protokolle
-  (`.R4P`) verwenden den gemeinsamen R4M0-Container.
+- Anwendungen, Dienste und Diagnosen (`.R4X`), Runtime-Libraries (`.R4L`),
+  Treiber (`.R4D`) und Protokolle (`.R4P`) verwenden den gemeinsamen
+  R4M0-Dateicontainer.
+- R4SYS, R4DESK, R4DRAW, R4NET, R4AUDIO und R4DEV sind eingebaute Platform
+  APIs des Kernels. Sie behalten ihre `Query:1`-Importnamen, besitzen aber
+  kein eigenes `.R4L`-Dateimodul und keine getrennte Modulversion.
 - Build-, Versions-, Ziel- und Abhaengigkeitswahrheit jedes Moduls ist dessen
   `module.R4MF`. Container und Modulprojekt stehen in
   `Agents/R4M0-Container.txt`.
