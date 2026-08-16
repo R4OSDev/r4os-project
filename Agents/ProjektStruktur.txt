@@ -17,7 +17,7 @@ Workspace-Ueberblick
     DevKit/         installierte Toolchains und Arbeitskopien
     Docs/           eigenes Repository fuer projektweite Dokumentation
     Repositories/   kanonische Quell-Repositories
-    Server/         lokale, getrennte Serverprojekte
+    Server/         privates Package-Server-Repository
     Tools/          Setup, Workspace-Build, Clean und GitHub-Verwaltung
     AGENTS.md       zentrale Arbeitsanweisung
     QuickNotes.txt  lokale Notizen, nicht versioniert
@@ -183,6 +183,19 @@ Das erste wird aus dem Contract erzeugt. Das zweite beschreibt genau den
 zuletzt geplanten Imageumfang und wird in das Image als
 `C:\R4OS\CONFIG\MODULES.JSON` projiziert. Es ersetzt nicht die manuelle
 Gesamtuebersicht `AllModules.json`.
+
+
+Server/
+-------
+
+`Server/` ist das private Repository `R4OSDev/r4os-package-server`. Es fasst
+Website, Update- und Paketdienst, Deploymentskripte und die nicht öffentliche
+Betriebsreferenz zusammen. Lokaler Push und Pull laufen über
+`Tools/Github.bat -server` beziehungsweise die relativen Starter
+`Server/Push.bat` und `Server/Pull.bat`.
+
+Laufzeitdaten, veröffentlichte Pakete, Datenbanken, Umgebungsdateien und
+Zugangsdaten bleiben durch `Server/.gitignore` vollständig lokal.
 
 
 Was lokal bleibt

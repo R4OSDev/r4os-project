@@ -50,8 +50,10 @@ echo   [A] Protokoll
 echo   [B] Dienst
 echo   [C] Diagnose
 echo   [D] Docs
-choice /C 123456789ABCD /N /M "Auswahl"
-if errorlevel 13 set "R4OS_INTERACTIVE_TARGET=-docs"
+echo   [E] Server
+choice /C 123456789ABCDE /N /M "Auswahl"
+if errorlevel 14 set "R4OS_INTERACTIVE_TARGET=-server"
+if errorlevel 13 if not defined R4OS_INTERACTIVE_TARGET set "R4OS_INTERACTIVE_TARGET=-docs"
 if errorlevel 12 if not defined R4OS_INTERACTIVE_TARGET set "R4OS_INTERACTIVE_TARGET=-diagnostic"
 if errorlevel 11 if not defined R4OS_INTERACTIVE_TARGET set "R4OS_INTERACTIVE_TARGET=-service"
 if errorlevel 10 if not defined R4OS_INTERACTIVE_TARGET set "R4OS_INTERACTIVE_TARGET=-protocol"
@@ -95,6 +97,7 @@ if /I "%~1"=="-libraries" goto select_libraries
 if /I "%~1"=="-kernel" goto select_kernel
 if /I "%~1"=="-distribution" goto select_distribution
 if /I "%~1"=="-docs" goto select_docs
+if /I "%~1"=="-server" goto select_server
 if /I "%~1"=="-app" goto select_app
 if /I "%~1"=="-service" goto select_service
 if /I "%~1"=="-diagnostic" goto select_diagnostic
@@ -196,6 +199,18 @@ set "R4OS_REPOSITORY_DESCRIPTION=R4OS project documentation and inventories."
 set "R4OS_REPOSITORY_PRIVATE=false"
 set "R4OS_REPOSITORY_ALLOW_INIT=1"
 set "R4OS_DEFAULT_COMMIT_MESSAGE=Dokumentationsstand sichern"
+exit /b 0
+
+:select_server
+set "R4OS_REPOSITORY_KEY=server"
+set "R4OS_REPOSITORY_LABEL=Server"
+set "R4OS_REPOSITORY_ROOT=%R4OS_PROJECT_ROOT%\Server"
+set "R4OS_REPOSITORY_NAME=r4os-package-server"
+set "R4OS_REPOSITORY_REMOTE=https://github.com/%R4OS_GITHUB_ORGANIZATION%/r4os-package-server.git"
+set "R4OS_REPOSITORY_DESCRIPTION=Private package distribution infrastructure for R4OS updates and applications."
+set "R4OS_REPOSITORY_PRIVATE=true"
+set "R4OS_REPOSITORY_ALLOW_INIT=1"
+set "R4OS_DEFAULT_COMMIT_MESSAGE=Serverstand sichern"
 exit /b 0
 
 :select_app
@@ -490,6 +505,8 @@ echo   Github.bat -push -distribution ["Commit-Beschreibung"]
 echo   Github.bat -pull -distribution
 echo   Github.bat -push -docs ["Commit-Beschreibung"]
 echo   Github.bat -pull -docs
+echo   Github.bat -push -server ["Commit-Beschreibung"]
+echo   Github.bat -pull -server
 echo   Github.bat -push -app NAME ["Commit-Beschreibung"]
 echo   Github.bat -pull -app NAME
 echo   Github.bat -push -service NAME ["Commit-Beschreibung"]
