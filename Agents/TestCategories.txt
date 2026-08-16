@@ -4,7 +4,7 @@
 Zweck: Einheitliche Bedeutung der `type`-Werte in
 `Docs/Inventory/Tests.json` und die dazugehoerige Ablage.
 
-Tests liegen beim Repository und Bauteil, das sie besitzt. Es gibt zehn
+Tests liegen beim Repository und Bauteil, das sie besitzt. Es gibt elf
 Kategorien.
 
 
@@ -118,6 +118,19 @@ Ein Generator erzeugt deterministisch versionierte Vertragsartefakte,
 Fixtures oder Quelltabellen. Eingaben und erzeugte Ausgaben bleiben beim
 besitzenden Repository. Ein Check-Modus prueft erzeugte Dateien bytegenau,
 wenn der jeweilige Vertrag das vorsieht.
+
+
+Acceptance
+----------
+
+Pfad: beim Besitzer des vollstaendigen Abnahmewegs, beispielsweise
+`Tools/Build.bat` oder `Repositories/Distribution/Build.bat`.
+
+Eine Acceptance-Pruefung verbindet mehrere bereits einzeln pruefbare Teile
+zu einem sichtbaren Gesamturteil. Dazu gehoeren insbesondere Workspace-Bau,
+Imageplanung, Imagepruefung und Headless-QEMU samt Markervertrag. Sie ersetzt
+keinen engeren Repositorytest und wird ueber ihren kanonischen Einstieg statt
+ueber einzelne interne Hilfsskripte inventarisiert.
 
 
 Pflege
