@@ -52,6 +52,15 @@ if not exist "%R4OS_PROJECT_ROOT%\Artifacts\Modules\" (
     echo Angelegt: Artifacts\Modules
 )
 
+if not exist "%R4OS_PROJECT_ROOT%\Docs\" (
+    mkdir "%R4OS_PROJECT_ROOT%\Docs"
+    if errorlevel 1 (
+        echo FEHLER: Docs konnte nicht erstellt werden.
+        endlocal & exit /b 1
+    )
+    echo Angelegt: Docs
+)
+
 if not exist "%R4OS_PROJECT_ROOT%\DevKit\" (
     mkdir "%R4OS_PROJECT_ROOT%\DevKit"
     if errorlevel 1 (
