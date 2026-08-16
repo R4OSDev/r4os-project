@@ -345,6 +345,10 @@ verwalteten Ziele erneut. Exitcode 0 wird nur geliefert, wenn kein Fehler und
 keine pushbare Änderung beziehungsweise kein unveröffentlichter Commit übrig
 ist.
 
+Da jeder verwaltete Arbeitsbaum vor und nach der Verarbeitung geprüft wird,
+kann auch ein Lauf ohne Änderungen einige zehn Sekunden dauern. Nicht vor der
+Abschlussliste und dem endgültigen Exitcode abbrechen.
+
 
 Was ein Einzel-Push ausführt
 ----------------------------
