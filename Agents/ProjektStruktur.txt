@@ -5,8 +5,9 @@ Zweck: Wo im R4OS-Workspace was liegt und welcher Ort die
 jeweilige Wahrheit besitzt.
 
 Der Workspace steht standardmaessig unter `D:\R4OS`. Das Root-Repository
-koordiniert die Arbeit. Contract, SDK, Kernel, Libraries, Distribution und
-jedes einzelne Modul besitzen eigene Git-Repositories.
+koordiniert die Arbeit. Contract, SDK, Kernel, Libraries, Distribution, das
+GitHub-Organisationsprofil und jedes einzelne Modul besitzen eigene
+Git-Repositories.
 
 
 Workspace-Ueberblick
@@ -59,6 +60,7 @@ Zentrale Repositories:
 
     Kernel/         Kernel, Limine-Konfiguration und kernel-eigene Tests
     Distribution/   Imageprofile, Overlays, Hosttools, QEMU und Systemtests
+    Organization/   oeffentliches GitHub-Organisationsprofil (Remote: .github)
 
 Komponentenrollen:
 

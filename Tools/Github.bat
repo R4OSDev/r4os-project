@@ -50,8 +50,10 @@ echo   [A] Protokoll
 echo   [B] Dienst
 echo   [C] Diagnose
 echo   [D] Docs
-choice /C 123456789ABCD /N /M "Auswahl"
-if errorlevel 13 set "R4OS_INTERACTIVE_TARGET=-docs"
+echo   [E] Organisationsprofil
+choice /C 123456789ABCDE /N /M "Auswahl"
+if errorlevel 14 set "R4OS_INTERACTIVE_TARGET=-organization"
+if errorlevel 13 if not defined R4OS_INTERACTIVE_TARGET set "R4OS_INTERACTIVE_TARGET=-docs"
 if errorlevel 12 if not defined R4OS_INTERACTIVE_TARGET set "R4OS_INTERACTIVE_TARGET=-diagnostic"
 if errorlevel 11 if not defined R4OS_INTERACTIVE_TARGET set "R4OS_INTERACTIVE_TARGET=-service"
 if errorlevel 10 if not defined R4OS_INTERACTIVE_TARGET set "R4OS_INTERACTIVE_TARGET=-protocol"
@@ -95,6 +97,7 @@ if /I "%~1"=="-libraries" goto select_libraries
 if /I "%~1"=="-kernel" goto select_kernel
 if /I "%~1"=="-distribution" goto select_distribution
 if /I "%~1"=="-docs" goto select_docs
+if /I "%~1"=="-organization" goto select_organization
 if /I "%~1"=="-app" goto select_app
 if /I "%~1"=="-service" goto select_service
 if /I "%~1"=="-diagnostic" goto select_diagnostic
@@ -196,6 +199,18 @@ set "R4OS_REPOSITORY_DESCRIPTION=R4OS project documentation and inventories."
 set "R4OS_REPOSITORY_PRIVATE=false"
 set "R4OS_REPOSITORY_ALLOW_INIT=1"
 set "R4OS_DEFAULT_COMMIT_MESSAGE=Dokumentationsstand sichern"
+exit /b 0
+
+:select_organization
+set "R4OS_REPOSITORY_KEY=organization"
+set "R4OS_REPOSITORY_LABEL=Organisationsprofil"
+set "R4OS_REPOSITORY_ROOT=%R4OS_PROJECT_ROOT%\Repositories\Organization"
+set "R4OS_REPOSITORY_NAME=.github"
+set "R4OS_REPOSITORY_REMOTE=https://github.com/%R4OS_GITHUB_ORGANIZATION%/.github.git"
+set "R4OS_REPOSITORY_DESCRIPTION=Public R4OS organization profile and community metadata."
+set "R4OS_REPOSITORY_PRIVATE=false"
+set "R4OS_REPOSITORY_ALLOW_INIT=1"
+set "R4OS_DEFAULT_COMMIT_MESSAGE=Organisationsprofil aktualisieren"
 exit /b 0
 
 :select_app
@@ -490,6 +505,8 @@ echo   Github.bat -push -distribution ["Commit-Beschreibung"]
 echo   Github.bat -pull -distribution
 echo   Github.bat -push -docs ["Commit-Beschreibung"]
 echo   Github.bat -pull -docs
+echo   Github.bat -push -organization ["Commit-Beschreibung"]
+echo   Github.bat -pull -organization
 echo   Github.bat -push -app NAME ["Commit-Beschreibung"]
 echo   Github.bat -pull -app NAME
 echo   Github.bat -push -service NAME ["Commit-Beschreibung"]
