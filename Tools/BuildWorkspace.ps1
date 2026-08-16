@@ -142,8 +142,9 @@ function Get-RepositoryManifests([string]$GitRoot, [string]$ScopeRoot = $GitRoot
     $scopePrefix = $scope + [IO.Path]::DirectorySeparatorChar
     $result = foreach ($relativePath in $relativePaths) {
         $fullPath = [IO.Path]::GetFullPath((Join-Path $GitRoot $relativePath))
-        if ($fullPath.Equals($scope, [StringComparison]::OrdinalIgnoreCase) -or
-            $fullPath.StartsWith($scopePrefix, [StringComparison]::OrdinalIgnoreCase)) {
+        if ((Test-Path -LiteralPath $fullPath -PathType Leaf) -and
+            ($fullPath.Equals($scope, [StringComparison]::OrdinalIgnoreCase) -or
+            $fullPath.StartsWith($scopePrefix, [StringComparison]::OrdinalIgnoreCase))) {
             $fullPath
         }
     }
@@ -375,7 +376,6 @@ function Prepare-DistributionCommonArtifacts {
     $preloadPath = Join-Path $distributionGeneratedRoot 'PRELOAD.R4I'
     Invoke-External $preloadTool @(
         '--output', $preloadPath,
-        '--add', 'r4l', 'R4DEV.R4L', 'R4DEV', (Get-WorkspaceArtifact 'R4DEV' 'R4L'),
         '--add', 'r4p', 'HIDREPORT.R4P', 'usb.hid_report', (Get-WorkspaceArtifact 'HIDREPORT' 'R4P'),
         '--add', 'r4p', 'USBHID.R4P', 'usb.hid_boot', (Get-WorkspaceArtifact 'USBHID' 'R4P'),
         '--add', 'r4p', 'USBBOT.R4P', 'usb.msc_bot', (Get-WorkspaceArtifact 'USBBOT' 'R4P'),
@@ -416,7 +416,6 @@ function Write-CommonPlan([string]$SelectedProfile) {
     $commonEntries.Add((Convert-ToPlanPath $kernelArtifact) + ':/boot/r4os.elf')
     $commonEntries.Add((Convert-ToPlanPath $limineArtifact) + ':/boot/limine-bios.sys')
     $commonEntries.Add((Convert-ToPlanPath $preloadArtifact) + ':/boot/preload.r4i')
-    $commonEntries.Add((Convert-ToPlanPath (Get-WorkspaceArtifact 'R4DEV' 'R4L')) + ':/boot/preload/r4dev.r4l')
     $commonEntries.Add((Convert-ToPlanPath (Get-WorkspaceArtifact 'HIDREPORT' 'R4P')) + ':/boot/preload/hidreport.r4p')
     $commonEntries.Add((Convert-ToPlanPath (Get-WorkspaceArtifact 'USBHID' 'R4P')) + ':/boot/preload/usbhid.r4p')
     $commonEntries.Add((Convert-ToPlanPath (Get-WorkspaceArtifact 'USBBOT' 'R4P')) + ':/boot/preload/usbbot.r4p')
