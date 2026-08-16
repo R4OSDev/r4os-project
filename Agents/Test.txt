@@ -251,6 +251,14 @@ jeweiligen Besitzer, zum Beispiel:
     Repositories/<Rolle>/<Projekt>/Tests/
     Repositories/<Rolle>/<Projekt>/src/    fuer Inline-Tests
 
+Das Inventar umfasst auch aktive Laufzeit-Selbsttests in Produktivquellen,
+beispielsweise `/SELFTEST`- und `/TEST`-Einstiege, Protokolloperationen fuer
+Selbsttests sowie gezielte Desktop-Smoke-Modi. Solche Tests werden nicht von
+einer Suche nach Zig-`test`-Bloecken gefunden und muessen beim Anlegen,
+Verschieben oder Entfernen ausdruecklich mitgepflegt werden. Der globale
+Workspace-Test wird ueber `Tools/Build.bat` als Acceptance-Einstieg erfasst;
+interne Helfer desselben Ablaufs werden nicht doppelt inventarisiert.
+
 Wer einen Test anlegt, entfernt, verschiebt oder in seiner Bedeutung aendert,
 pflegt `Tests.json` mit. Die gueltigen Kategorien und Ablageprinzipien
 stehen in `Agents/TestCategories.txt`.
