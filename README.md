@@ -40,7 +40,9 @@ directories remain untouched.
 
 Push and pull operations are performed exclusively through
 `Tools/Github.bat`. Public pulls are anonymous and explicitly ignore local
-Git credential helpers; pushes continue to use the ignored local token file.
+Git credential helpers. The normal multi-repository completion command is
+`Tools/Github.bat -push -changed "Commit description"`; pushes continue to
+use the ignored local token file.
 Documentation, source repositories, installed tools, artifacts, and
 credentials are ignored and are not stored in this project repository.
 
