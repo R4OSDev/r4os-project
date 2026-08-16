@@ -122,6 +122,9 @@ Das alte ist: D:\AI\Projects\Claude Code\R4OS
 # Workspace-Build
 - Der verbindliche Mehrrepo-Einstieg unter Windows ist
   `D:\R4OS\Tools\Build.bat`. Ohne Argumente zeigt er ein interaktives Menue.
+- `D:\R4OS\Tools\Clean.bat` beziehungsweise `Clean.bat -artifacts` leert
+  ausschliesslich den lokalen `Artifacts`-Baum und legt dessen Root leer neu
+  an. Reparse-Links werden als Links entfernt und niemals verfolgt.
 - `Build.bat -central`, `-kernel`, `-modules`, `-module Rolle\Name`,
   `-plan Profil`, `-image Profil`, `-verify Profil`, `-qemu Profil`,
   `-all Profil`, `-slim`, `-gui`, `-test`, `-testimage`, `-testimageonly`,
