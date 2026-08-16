@@ -1,38 +1,28 @@
-﻿# R4OS Project
+﻿# R4OS Project Workspace
 
-Privater Workspace fuer die Entwicklung und Aufteilung von R4OS.
+This private repository defines the lightweight Windows workspace used to
+coordinate the independent R4OS repositories.
 
-    DevKit\        Installierte SDK- und Hostwerkzeuge
-    Repositories\  Eigenstaendige R4OS-Quell-Repositories
-      Apps\         Anwendungen
-      Services\     Dienste
-      Diagnostics\  Diagnoseprogramme
-      Drivers\      Treiber
-      Protocols\    Protokolle
-    Artifacts\     Lokale Build- und Testergebnisse
-    Tools\         Workspace-Setup und GitHub-Verwaltung
+    DevKit/        Installed SDK and host tools
+    Repositories/  Independent R4OS source repositories
+    Artifacts/     Local build and test outputs
+    Tools/         Workspace setup, build, and GitHub management
 
-Nach einem frischen Clone zuerst `Tools\Setup.bat` ausfuehren und danach die
-lokale Credentials-Vorlage ausfuellen. Anschliessend mit
-`Tools\Github.bat -pull -devkit` das DevKit beziehen und dort
-`Setup\Setup_Windows.bat` starten. Push und Pull erfolgen ausschliesslich ueber
-`Tools\Github.bat`.
+## Setup
 
-Der gemeinsame Windows-Build startet mit `Tools\Build.bat`; ohne Argumente
-erscheint das Menue. `Tools\Build.bat -all` baut den gesamten Workspace und
-das Full-Image, `-gui` startet danach QEMU sichtbar und `-qemu` startet nur ein
-bereits vorhandenes Image. `-test` baut das Testprofil und nimmt es headless
-ab; `-testonly` beziehungsweise `-headless` prueft ein vorhandenes Test-Image.
-Image-Erzeugung und QEMU-Aufruf bleiben Eigentum von
-`Repositories\Distribution\Build.bat`. Die QEMU-Binaries liegen dabei nur
-unter `DevKit\Emulation\QEMU`; die Distribution besitzt lediglich die
-R4OS-Konfiguration und Testlogik.
+After a fresh clone, run `Tools/Setup.bat`. Fill in the generated local
+credentials template, pull the DevKit with
+`Tools/Github.bat -pull -devkit`, and run
+`DevKit/Setup/Setup_Windows.bat`.
 
-Komponentenquellen, installierte Werkzeuge, Buildartefakte und Zugangsdaten
-werden nicht in diesem Repository gespeichert.
+Use `Tools/Build.bat` as the multi-repository Windows build entry point.
+Run it without arguments for the interactive menu.
 
-## Lizenz
+Push and pull operations are performed exclusively through
+`Tools/Github.bat`. Source repositories, installed tools, artifacts, and
+credentials are ignored and are not stored in this project repository.
 
-Originales R4OS-Material steht unter der Apache License 2.0. Der vollstaendige
-Lizenztext liegt in `LICENSE`; `NOTICE` nennt R4 als urspruenglichen Autor.
-Material Dritter behaelt stets seine jeweilige eigene Lizenz.
+## License
+
+Original R4OS workspace material is licensed under Apache License 2.0. See
+`LICENSE`, `NOTICE`, and `THIRD_PARTY_NOTICES.md`.

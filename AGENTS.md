@@ -13,8 +13,18 @@ Sandboxmodell.
   `NOTICE` mit `Copyright 2026 R4` sowie der Nennung von R4 als
   urspruenglichem Autor.
 - Material Dritter wird dadurch nicht umlizenziert. Dessen Lizenz- und
-  Herkunftshinweise bleiben erhalten und werden vor einer Veroeffentlichung
-  beziehungsweise Auslieferung repositorybezogen dokumentiert.
+  Herkunftshinweise bleiben erhalten und werden repositorybezogen in
+  `THIRD_PARTY_NOTICES.md` dokumentiert.
+- Distributionsimages enthalten unter `R4OS/LICENSES` Apache-Lizenz, NOTICE,
+  Gesamtuebersicht und die vollstaendigen erforderlichen Fremdlizenztexte.
+  `Repositories/Distribution/Build.bat image <Profil>` stageiert dieselbe
+  Rechtsdokumentation neben `disk.img` unter `Legal`.
+- Besondere Lizenzgrenze: Die mechanisch aus dem GPL-2.0-only-Realtek-
+  Vendortreiber erzeugten Firmwaretabellen in `Drivers/RTL8168` sowie
+  Binaerartefakte, die sie enthalten, werden als GPL-2.0-only dokumentiert.
+- Oeffentliche Repository-Einstiege und sonstige `README*`-Dateien sind
+  Englisch. Ausfuehrliche uebernommene deutsche Root-Dokumentation bleibt als
+  `DOCUMENTATION.de.txt` erhalten.
 
 # Umbau
 Aktuell strukturieren wir alles um.
@@ -30,9 +40,9 @@ Das alte ist: D:\AI\Projects\Claude Code\R4OS
   die einzige fachliche Wahrheit.
 
 # GitHub
-- Das private GitHub-Projektverzeichnis `D:\R4OS\` wird als
+- Das private GitHub-Projektverzeichnis `D:\R4OS` wird als
   `R4OSDev/r4os-project` auf dem Branch `main` gesichert.
-- Das oeffentliche DevKit-Repository liegt unter `D:\R4OS\DevKit\` und wird
+- Das oeffentliche DevKit-Repository liegt unter `D:\R4OS\DevKit` und wird
   als `R4OSDev/r4os-devkit` auf dem Branch `main` verwaltet. Installierte
   Inhalte werden durch dessen eigene `.gitignore` ausgeschlossen.
 - `D:\R4OS\DevKit\Setup\Setup_Windows.bat` installiert Zig, Limine und QEMU,
@@ -43,9 +53,9 @@ Das alte ist: D:\AI\Projects\Claude Code\R4OS
   erlaubt; lokale Aenderungen in den Installationskopien fuehren zum Abbruch.
   Diese Kopien sind keine fachlichen Quellwahrheiten und werden nicht editiert.
 - Der kanonische API-/ABI-Vertrag liegt unter
-  `D:\R4OS\Repositories\Contract\` und wird als `R4OSDev/r4os-contract` auf
+  `D:\R4OS\Repositories\Contract` und wird als `R4OSDev/r4os-contract` auf
   dem Branch `main` verwaltet.
-- Das hostneutrale SDK liegt unter `D:\R4OS\Repositories\SDK\` und wird als
+- Das hostneutrale SDK liegt unter `D:\R4OS\Repositories\SDK` und wird als
   `R4OSDev/r4os-sdk` auf dem Branch `main` verwaltet.
 - Die SDK-Pfade stehen in `D:\R4OS\Repositories\SDK\Settings.R4S`.
   Relative Komponentenpfade beginnen am dort gemappten Repositories-Ordner;
@@ -53,15 +63,15 @@ Das alte ist: D:\AI\Projects\Claude Code\R4OS
   `Build.bat`, unter Linux/macOS mit `Build.sh` gestartet, damit die Mappings
   bereits vor der Zig-Paketaufloesung gelten.
 - Die offiziellen unabhaengigen Runtime-Libraries liegen unter
-  `D:\R4OS\Repositories\Libraries\` und werden als
+  `D:\R4OS\Repositories\Libraries` und werden als
   `R4OSDev/r4os-libraries` auf dem Branch `main` verwaltet.
-- Der Kernel liegt unter `D:\R4OS\Repositories\Kernel\` und wird als
+- Der Kernel liegt unter `D:\R4OS\Repositories\Kernel` und wird als
   `R4OSDev/r4os-kernel` auf dem Branch `main` verwaltet.
-- Die Distribution liegt unter `D:\R4OS\Repositories\Distribution\` und wird
+- Die Distribution liegt unter `D:\R4OS\Repositories\Distribution` und wird
   als `R4OSDev/r4os-distribution` auf dem Branch `main` verwaltet.
 - Eigenstaendige Komponenten liegen nach ihrer fachlichen Rolle unter
-  `D:\R4OS\Repositories\Apps\`, `Services\`, `Diagnostics\`, `Drivers\`
-  oder `Protocols\`.
+  `D:\R4OS\Repositories\Apps`, `Services`, `Diagnostics`, `Drivers`
+  oder `Protocols`.
   Die ersten Piloten sind `Apps\Clock` als `R4OSDev/r4os-app-clock`,
   `Drivers\MIDI` als `R4OSDev/r4os-driver-midi` und `Protocols\JSON` als
   `R4OSDev/r4os-protocol-json`. Der erste Diagnosepilot ist
@@ -71,7 +81,7 @@ Das alte ist: D:\AI\Projects\Claude Code\R4OS
   Jedes Modul besitzt eigene Settings und Buildstarter; relative Settings
   beginnen am jeweiligen Modulrepository und duerfen durch absolute Pfade
   ersetzt werden. Fertige Pilotartefakte landen standardmaessig unter
-  `D:\R4OS\Artifacts\Modules\<Name>\`.
+  `D:\R4OS\Artifacts\Modules\<Name>`.
 - Jeder Modul-Buildstarter bindet die in seiner `Settings.R4S` gemappten
   aktuellen lokalen Checkouts von SDK, Contract und den tatsaechlich
   benoetigten Librarybindings mit Zig `--fork` ein. Eine inkompatible lokale
