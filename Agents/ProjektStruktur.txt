@@ -130,6 +130,7 @@ Das Distribution-Repository besitzt:
     TestInjection/       zusaetzliches Overlay fuer das Testprofil
     Profiles/            Slim.R4S, Full.R4S und Test.R4S
     QEMU/                R4OS-spezifische QEMU-Konfiguration
+    Release.bat          Releasepakete vorbereiten und auf GitHub publizieren
     Tools/               ImageCreator, ImagePlan, NtfsVerify, R4UPack usw.
     Tests/               Plan-, Tool- und Headless-Auswertung
 
@@ -151,6 +152,8 @@ werden. Wichtige erzeugte Orte sind:
     Distribution/HostTools/share/      erzeugte Systemfonts
     Distribution/Profiles/<Profil>/    disk.img, data.img, image-adds.txt,
                                        Legal/
+    Distribution/Releases/<Version>/   ZIP-Pakete, Quellenmanifest,
+                                       SHA256SUMS.txt, Release-Notes
     Distribution/Logs/                 Headless-QEMU-Logs
     Distribution/PrivateInjection/     lokales optionales Imageoverlay
 

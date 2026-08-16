@@ -202,6 +202,10 @@ Artefakte und Inventare
     Artifacts/Distribution/Profiles/<Profil>/Legal/
         fertiges Profil
 
+    Artifacts/Distribution/Releases/<Version>/
+        gepruefte und komprimierte Releasepakete, Quellenmanifest,
+        SHA256SUMS.txt und lokale Release-Notes
+
 `MODULES.JSON` wird bei jedem Planlauf neu erzeugt und als
 `/R4OS/CONFIG/MODULES.JSON` in das Image aufgenommen. Es enthaelt nur die
 Komponenten des konkret geplanten Profils. Die manuelle Gesamtuebersicht
@@ -211,6 +215,31 @@ aller kanonischen Module ist dagegen
 Das zentrale API-Inventar liegt unter
 `Repositories/Contract/Generated/Inventory/API.json` und wird aus dem
 Contract erzeugt.
+
+
+Releases
+--------
+
+GitHub Releases gehoeren dem Repository `r4os-distribution`. Vor der
+Vorbereitung muessen die gewuenschten Images bereits gebaut sein.
+
+    Repositories\Distribution\Release.bat selftest
+    Repositories\Distribution\Release.bat prepare Standard
+    Repositories\Distribution\Release.bat publish Standard
+    Repositories\Distribution\Release.bat publish Standard -prerelease
+
+`Standard` umfasst Slim und Full, `All` zusaetzlich Test. `prepare` prueft
+die Images, komprimiert je Profil ein Paket, erzeugt SHA-256-Pruefsummen und
+ein Quellenmanifest mit den genauen Repository-Commits. `publish` legt den
+GitHub Release erst als Draft an und veroeffentlicht ihn erst, nachdem alle
+Assets erfolgreich hochgeladen wurden.
+
+Das normale Build-Datenimage liegt unter
+`Artifacts/Distribution/Profiles/<Profil>/data.img`. Beim GUI-Betrieb bleibt
+es absichtlich persistent; nur der Headless-Test erzeugt sein Test-Datenimage
+vor jedem Lauf neu. Der Release-Ablauf uebernimmt dieses lokale Datenimage
+nie, sondern erzeugt fuer jedes Paket ein frisches leeres `data.img` in der
+im Profil festgelegten Groesse.
 
 
 Test- und GUI-Lauf
