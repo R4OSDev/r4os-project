@@ -49,10 +49,11 @@ Sandboxmodell.
   Server ist die einzige Ausnahme und wird mit `Server/Push.bat` sowie
   `Server/Pull.bat` verwaltet. Zielzuordnung, Aufrufe, Credentials und
   Pruefablauf stehen in `Agents/Github.txt`.
-- Wird nach Roadmap gearbeitet, nach Abschluss einer Unterversion alle davon
-  betroffenen Repositories einzeln pushen. Ohne Roadmap nach Abschluss einer
-  Arbeit pushen; zusaetzliche Pushes sind sinnvoll, wenn ein in sich
-  abgeschlossener und gepruefter Zwischenstand vorliegt.
+- Nach Abschluss einer Unterversion oder sonstigen Arbeit den verbindlichen
+  Sammel-Push `Tools/Github.bat -push -changed "Commit-Beschreibung"`
+  verwenden. Er erkennt und veroeffentlicht alle geaenderten verwalteten
+  Repositories; gezielte Einzel-Pushes bleiben Reparatur- und Sonderfaellen
+  vorbehalten. Pulls erfolgen weiterhin gezielt pro Repository.
 - Neu erstellte R4OS-Quellrepositories sind oeffentlich. Der Package-Server
   und kuenftige Server-Repositories bilden die private Ausnahme.
 
