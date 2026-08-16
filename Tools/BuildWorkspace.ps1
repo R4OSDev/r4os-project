@@ -20,6 +20,7 @@ $sdkRoot = Join-Path $repositoriesRoot 'SDK'
 $librariesRoot = Join-Path $repositoriesRoot 'Libraries'
 $kernelRoot = Join-Path $repositoriesRoot 'Kernel'
 $distributionRoot = Join-Path $repositoriesRoot 'Distribution'
+$docsInventoryTool = Join-Path $workspaceRoot 'Docs/Inventory/DocsInventory.bat'
 $zigExe = Join-Path $devKitRoot 'Toolchains/Zig/zig.exe'
 $moduleCatalogExe = Join-Path $sdkRoot 'zig-out/bin/module-catalog.exe'
 $distributionInputRoot = Join-Path $artifactsRoot 'Distribution/Inputs'
@@ -120,6 +121,15 @@ function Show-WorkspaceState {
     Get-GitDescription $librariesRoot 'Libraries'
     Get-GitDescription $kernelRoot 'Kernel'
     Get-GitDescription $distributionRoot 'Distribution'
+}
+
+function Update-DocsInventory {
+    Write-Section 'Dokumentinventar aktualisieren'
+    Assert-File $docsInventoryTool 'Docs-Inventarwerkzeug'
+    Invoke-External $docsInventoryTool @('-Update') $workspaceRoot
+
+    Write-Section 'Dokumentinventar-Gate'
+    Invoke-External $docsInventoryTool @('-Check') $workspaceRoot
 }
 
 function Get-RepositoryManifests([string]$GitRoot, [string]$ScopeRoot = $GitRoot) {
@@ -471,6 +481,7 @@ function Build-All([string]$SelectedProfile) {
 
 Assert-Directory $repositoriesRoot 'Repositories'
 Assert-Directory $devKitRoot 'DevKit'
+Update-DocsInventory
 Show-WorkspaceState
 
 switch ($Action) {

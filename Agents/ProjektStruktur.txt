@@ -171,12 +171,15 @@ Inventare
 
 Projektweite Inventare liegen im Docs-Repository:
 
-    Docs/Inventory/Docs.json        manuell gepflegte Dokumentationsliste
+    Docs/Inventory/Docs.json        Dateibestand automatisch, Inhalt manuell
     Docs/Inventory/Tests.json       manuell gepflegter vorhandener Testbestand
     Docs/Inventory/AllModules.json  manuelle Gesamtuebersicht aller Module
     Docs/Inventory/Browser.json     manuelle Browser-Funktionsuebersicht
 
-`Agents/`, `Docs/Inventory/` selbst und Changelogs werden nicht in
+`Tools/Build.bat` ergänzt und entfernt die Dateieinträge in `Docs.json`
+automatisch. `Description`, der letzte inhaltliche Prüfstand in `Status` und
+optionale `Notes` bleiben manuell gepflegt. `Agents/`, `Docs/Inventory/`
+selbst, Changelogs und die Grunddateien des Docs-Repositories werden nicht in
 `Docs.json` aufgenommen.
 
 Technisch erzeugte Inventare liegen beim Besitzer beziehungsweise bei den

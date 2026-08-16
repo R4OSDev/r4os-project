@@ -80,28 +80,31 @@ Ablauf eines Gesamtbuilds
 
 `Tools\Build.bat -all <Profil>` arbeitet in dieser Reihenfolge:
 
-1. Contract mit dem Zig aus dem DevKit bauen. Der normale Install-Step prueft
+1. Den Dateibestand in `Docs/Inventory/Docs.json` inkrementell abgleichen und
+   anschließend mit dem schreibfreien Dokumentinventar-Gate prüfen. Dieser
+   Schritt läuft vor jeder globalen Buildaktion, nicht nur vor `-all`.
+2. Contract mit dem Zig aus dem DevKit bauen. Der normale Install-Step prueft
    die generierten Contractartefakte.
-2. SDK ueber dessen `Build.bat` mit dem lokal gemappten Contract bauen.
-3. R4STD, R4IMG und R4FONT ueber `Repositories/Libraries/Build.bat` bauen.
-4. Kernel ueber `Repositories/Kernel/Build.bat` bauen.
-5. Alle direkten Repositoryprojekte unter Apps, Services, Diagnostics,
+3. SDK ueber dessen `Build.bat` mit dem lokal gemappten Contract bauen.
+4. R4STD, R4IMG und R4FONT ueber `Repositories/Libraries/Build.bat` bauen.
+5. Kernel ueber `Repositories/Kernel/Build.bat` bauen.
+6. Alle direkten Repositoryprojekte unter Apps, Services, Diagnostics,
    Drivers und Protocols dynamisch entdecken und deren eigenes `Build.bat`
    aufrufen.
-6. Aus allen versionierten und nicht ignorierten `module.R4MF` sowie den
+7. Aus allen versionierten und nicht ignorierten `module.R4MF` sowie den
    zugehoerigen Artefakten `WorkspaceModules.map` erzeugen. Dazu gehoeren
    auch SDK-Plattform-Bridges, Runtime-Libraries und modulnahe, versionierte
    Zusatzmanifeste.
-7. Distribution-Hosttools und Systemfonts bei Bedarf bauen, danach
+8. Distribution-Hosttools und Systemfonts bei Bedarf bauen, danach
    `PRELOAD.R4I` und die Default-Registry erzeugen.
-8. Mit ModuleCatalog den Komponentenplan des Profils und das dazu passende
+9. Mit ModuleCatalog den Komponentenplan des Profils und das dazu passende
    `MODULES.JSON` erzeugen. Der Kernel wird mit seiner eingebetteten
    Version als eigene Komponente aufgenommen.
-9. Den Common-Plan fuer Kernel, Limine, Preload, Registry, Fonts und
-   `MODULES.JSON` schreiben.
-10. Den eigentlichen Imageplan im Distribution-Repository erzeugen und mit
+10. Den Common-Plan fuer Kernel, Limine, Preload, Registry, Fonts und
+    `MODULES.JSON` schreiben.
+11. Den eigentlichen Imageplan im Distribution-Repository erzeugen und mit
     ImageCreator `disk.img` sowie bei Bedarf `data.img` bauen.
-11. Limine in das Systemimage installieren und die Rechtsdokumentation neben
+12. Limine in das Systemimage installieren und die Rechtsdokumentation neben
     dem Image stageieren.
 
 Der Root baut kein Image selbst. Er bereitet nur explizite Plaene vor und
@@ -165,6 +168,15 @@ repositoryeigenen Tests nicht; Details stehen in `Agents/Test.txt`.
 
 Artefakte und Inventare
 -----------------------
+
+    Docs/Inventory/DocsInventory.bat -Initial
+        einmaliger, ausdrücklich aufzurufender Neuaufbau von Docs.json
+
+    Docs/Inventory/DocsInventory.bat -Update
+        inkrementeller Dateiabgleich; bestehende manuelle Felder bleiben
+
+    Docs/Inventory/DocsInventory.bat -Check
+        schreibfreies Gate fuer Struktur, Eindeutigkeit und Dateibestand
 
     Repositories/Kernel/zig-out/bin/r4os.elf
         gebauter Kernel
