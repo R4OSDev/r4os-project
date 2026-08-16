@@ -23,8 +23,9 @@ Run it without arguments for the interactive menu.
 
 Use `Tools/Clean.bat` to empty `Artifacts` and remove every R4OS-local
 `.zig-cache` directory. Use `-artifacts` or `-zig` for only one of those
-operations. Installed toolchains, global Zig caches, and `zig-out` directories
-remain untouched.
+operations. The Zig cleanup also covers the dedicated DevKit and Distribution
+cache trees. Installed toolchains, system-global Zig caches, and `zig-out`
+directories remain untouched.
 
 Push and pull operations are performed exclusively through
 `Tools/Github.bat`. Documentation, source repositories, installed tools,

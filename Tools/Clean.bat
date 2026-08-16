@@ -81,6 +81,10 @@ set "R4OS_CLEAN_ZIG_FAILED=0"
 
 call :clean_zig_cache "%R4OS_PROJECT_ROOT%\.zig-cache"
 if errorlevel 1 set "R4OS_CLEAN_ZIG_FAILED=1"
+call :clean_explicit_zig_cache "%R4OS_PROJECT_ROOT%\DevKit\.Cache\Zig"
+if errorlevel 1 set "R4OS_CLEAN_ZIG_FAILED=1"
+call :clean_explicit_zig_cache "%R4OS_PROJECT_ROOT%\Artifacts\Distribution\.Cache"
+if errorlevel 1 set "R4OS_CLEAN_ZIG_FAILED=1"
 call :scan_zig_cache_root "%R4OS_PROJECT_ROOT%\Repositories"
 if errorlevel 1 set "R4OS_CLEAN_ZIG_FAILED=1"
 call :scan_zig_cache_root "%R4OS_PROJECT_ROOT%\Artifacts"
@@ -112,7 +116,19 @@ for %%I in ("%R4OS_CLEAN_ZIG_TARGET%") do (
     set "R4OS_CLEAN_ZIG_ATTRIBUTES=%%~aI"
 )
 if /I not "%R4OS_CLEAN_ZIG_NAME%"==".zig-cache" goto unsafe_zig_cache
+goto clean_zig_cache_target
 
+:clean_explicit_zig_cache
+if not exist "%~f1\" exit /b 0
+set "R4OS_CLEAN_ZIG_TARGET=%~f1"
+if /I "%R4OS_CLEAN_ZIG_TARGET%"=="%R4OS_PROJECT_ROOT%\DevKit\.Cache\Zig" goto explicit_zig_cache_valid
+if /I "%R4OS_CLEAN_ZIG_TARGET%"=="%R4OS_PROJECT_ROOT%\Artifacts\Distribution\.Cache" goto explicit_zig_cache_valid
+goto unsafe_zig_cache
+
+:explicit_zig_cache_valid
+for %%I in ("%R4OS_CLEAN_ZIG_TARGET%") do set "R4OS_CLEAN_ZIG_ATTRIBUTES=%%~aI"
+
+:clean_zig_cache_target
 call :validate_cache_parent_chain "%R4OS_CLEAN_ZIG_TARGET%"
 if errorlevel 1 goto unsafe_zig_cache
 
