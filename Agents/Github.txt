@@ -13,8 +13,9 @@ den Einstieg für Push und Pull.
 Grundregeln
 -----------
 
-- Für Project, DevKit, Docs, Contract, SDK, Libraries, Kernel, Distribution
-  und Module ausschließlich D:\R4OS\Tools\Github.bat verwenden.
+- Für Project, DevKit, Docs, Organisationsprofil, Contract, SDK, Libraries,
+  Kernel, Distribution und Module ausschließlich
+  D:\R4OS\Tools\Github.bat verwenden.
 - Der private Package-Server ist die einzige Ausnahme. Er wird ausschließlich
   mit D:\R4OS\Server\Push.bat und D:\R4OS\Server\Pull.bat verwaltet und
   besitzt bewusst kein Ziel im globalen Github.bat.
@@ -48,10 +49,11 @@ Remote-Protokoll: HTTPS
 Remote-Name: origin
 Branch: main
 
-Project, DevKit, Docs, Contract, SDK, Libraries, Kernel, Distribution sowie
-Apps, Services, Diagnostics, Drivers und Protocols werden bei einem fehlenden
-Remote-Repository oeffentlich angelegt. Der Package-Server ist die private
-Ausnahme, wird aber nicht vom globalen Script angelegt oder verwaltet.
+Project, DevKit, Docs, Organisationsprofil, Contract, SDK, Libraries, Kernel,
+Distribution sowie Apps, Services, Diagnostics, Drivers und Protocols werden
+bei einem fehlenden Remote-Repository oeffentlich angelegt. Der Package-Server
+ist die private Ausnahme, wird aber nicht vom globalen Script angelegt oder
+verwaltet.
 Bereits vorhandene Repositories werden durch Push oder Pull nicht in ihrer
 Sichtbarkeit veraendert.
 
@@ -126,12 +128,14 @@ ZIEL ist eines von:
     -libraries
     -kernel
     -distribution
+    -organization
 
 Beispiele:
 
     D:\R4OS\Tools\Github.bat -push -project "Agent-Anleitung aktualisieren"
     D:\R4OS\Tools\Github.bat -pull -contract
     D:\R4OS\Tools\Github.bat -push -docs "Dokumentation aktualisieren"
+    D:\R4OS\Tools\Github.bat -push -organization "Organisationsprofil aktualisieren"
 
 Für eigenständige Komponenten steht der Komponentenname vor der optionalen
 Commit-Beschreibung:
@@ -230,6 +234,14 @@ Distribution
     Ziel: -distribution
     Lokal: D:\R4OS\Repositories\Distribution
     GitHub: R4OSDev/r4os-distribution
+
+Organisationsprofil
+    Ziel: -organization
+    Lokal: D:\R4OS\Repositories\Organization
+    GitHub: R4OSDev/.github
+    Sichtbarkeit: öffentlich
+    Inhalt: Öffentliche GitHub-Organisationsseite unter profile/README.md und
+    organisationsweite Community-Metadaten.
 
 Apps
     Ziel: -app NAME
@@ -363,8 +375,8 @@ Checkout unter D:\R4OS existiert:
 2. Benutzername und Token durch den Benutzer in der erzeugten lokalen
    Credentials-Datei eintragen lassen.
 3. DevKit mit Github.bat -pull -devkit beziehen.
-4. Docs, Contract, SDK, Libraries, Kernel und Distribution mit ihren jeweiligen
-   Pull-Zielen beziehen.
+4. Docs, Contract, SDK, Libraries, Kernel, Distribution und bei Bedarf das
+   Organisationsprofil mit ihren jeweiligen Pull-Zielen beziehen.
 5. Den privaten Package-Server bei Bedarf separat klonen und danach mit
    D:\R4OS\Server\Pull.bat aktualisieren.
 6. Benötigte Apps, Services, Diagnostics, Drivers und Protocols einzeln mit
