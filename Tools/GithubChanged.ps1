@@ -360,6 +360,7 @@ function Write-ResultList {
         [string]$Title,
 
         [Parameter(Mandatory = $true)]
+        [AllowEmptyCollection()]
         [object[]]$Items
     )
 
