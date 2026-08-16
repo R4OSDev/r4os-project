@@ -1,0 +1,266 @@
+﻿R4OS Build - Agent-Referenz
+===========================
+
+Zweck: Wie im R4OS-Workspace gebaut wird, welcher Einstieg
+was ausfuehrt und wo die Ergebnisse landen.
+
+Wahrheit fuer die Orchestrierung sind `Tools/Build.bat` und
+`Tools/BuildWorkspace.ps1`. Imagebau und QEMU gehoeren
+`Repositories/Distribution/Build.bat`. Jeder Quellbestand bleibt dabei im
+Repository seines Besitzers.
+
+
+Voraussetzungen
+---------------
+
+Nach einem frischen Root-Clone:
+
+    Tools\Setup.bat
+    Tools\Github.bat -pull -docs
+    Tools\Github.bat -pull -devkit
+    DevKit\Setup\Setup_Windows.bat
+
+Danach die benoetigten Quell-Repositories mit `Tools/Github.bat` beziehen.
+Der Workspace-Build aktualisiert Git-Repositories niemals automatisch. Er
+zeigt zu Beginn die verwendeten lokalen Commitstaende von Contract, SDK,
+Libraries, Kernel und Distribution an.
+
+Erwartete zentrale Pfade:
+
+    DevKit/Toolchains/Zig/zig.exe
+    DevKit/Boot/Limine/
+    DevKit/Emulation/QEMU/
+    Repositories/Contract/
+    Repositories/SDK/
+    Repositories/Libraries/
+    Repositories/Kernel/
+    Repositories/Distribution/
+
+
+Der Workspace-Einstieg
+----------------------
+
+    Tools\Build.bat <Modus>
+
+Ohne Argument erscheint ein interaktives Menue. Fuer automatisierte Arbeit
+immer einen Modus angeben und den Exitcode auswerten.
+
+| Modus | Wirkung |
+| --- | --- |
+| `-central` | Contract, SDK und alle Runtime-Libraries bauen |
+| `-kernel` | nur den Kernel bauen |
+| `-modules`, `-apps` | alle direkten Projekte der fuenf Modulrollen bauen |
+| `-module NAME` | genau ein Modul nach Projekt- oder Manifestname bauen |
+| `-module Rolle\Name` | genau ein eindeutig adressiertes Modul bauen |
+| `-plan [Profil]` | Workspace-Map, gemeinsame Artefakte, Profilplan und MODULES.JSON erzeugen |
+| `-image [Profil]` | Plan neu erzeugen und daraus ein Image bauen |
+| `-verify [Profil]` | vorhandenes Image und dessen Rechtsdokumentation pruefen |
+| `-qemu [Profil]` | vorhandenes Image sichtbar in QEMU starten |
+| `-all [Profil]`, `-norun [Profil]` | zentrale Repos, Kernel und Module bauen, danach Image erzeugen |
+| `-slim` | Kurzform fuer `-all Slim` |
+| `-gui` | kompletter Full-Build, Full-Image und sichtbares QEMU |
+| `-test` | Distributionstests, kompletter Test-Build, Verify und Headless-Abnahme |
+| `-testimage` | kompletter Test-Build und Test-Image ohne QEMU |
+| `-testimageonly` | Testplan und Test-Image aus vorhandenen Artefakten neu erzeugen |
+| `-testonly`, `-headless` | vorhandenes Test-Image headless pruefen |
+
+Gueltige Profile sind `Slim`, `Full` und `Test`. Fehlt das Profil bei
+`-plan`, `-image`, `-verify`, `-qemu` oder `-all`, wird `Full`
+verwendet.
+
+`-image` und `-testimageonly` kompilieren Kernel und Module nicht neu.
+Sie erzeugen jedoch die Workspace- und Imageplaene erneut und verlangen
+deshalb alle benoetigten fertigen Artefakte. `-verify`, `-qemu` und
+`-testonly` arbeiten dagegen ausschliesslich mit bereits vorhandenen
+Profilausgaben.
+
+
+Ablauf eines Gesamtbuilds
+-------------------------
+
+`Tools\Build.bat -all <Profil>` arbeitet in dieser Reihenfolge:
+
+1. Contract mit dem Zig aus dem DevKit bauen. Der normale Install-Step prueft
+   die generierten Contractartefakte.
+2. SDK ueber dessen `Build.bat` mit dem lokal gemappten Contract bauen.
+3. R4STD, R4IMG und R4FONT ueber `Repositories/Libraries/Build.bat` bauen.
+4. Kernel ueber `Repositories/Kernel/Build.bat` bauen.
+5. Alle direkten Repositoryprojekte unter Apps, Services, Diagnostics,
+   Drivers und Protocols dynamisch entdecken und deren eigenes `Build.bat`
+   aufrufen.
+6. Aus allen versionierten und nicht ignorierten `module.R4MF` sowie den
+   zugehoerigen Artefakten `WorkspaceModules.map` erzeugen. Dazu gehoeren
+   auch SDK-Plattform-Bridges, Runtime-Libraries und modulnahe, versionierte
+   Zusatzmanifeste.
+7. Distribution-Hosttools und Systemfonts bei Bedarf bauen, danach
+   `PRELOAD.R4I` und die Default-Registry erzeugen.
+8. Mit ModuleCatalog den Komponentenplan des Profils und das dazu passende
+   `MODULES.JSON` erzeugen. Der Kernel wird mit seiner eingebetteten
+   Version als eigene Komponente aufgenommen.
+9. Den Common-Plan fuer Kernel, Limine, Preload, Registry, Fonts und
+   `MODULES.JSON` schreiben.
+10. Den eigentlichen Imageplan im Distribution-Repository erzeugen und mit
+    ImageCreator `disk.img` sowie bei Bedarf `data.img` bauen.
+11. Limine in das Systemimage installieren und die Rechtsdokumentation neben
+    dem Image stageieren.
+
+Der Root baut kein Image selbst. Er bereitet nur explizite Plaene vor und
+delegiert den Imagebau an das Distribution-Repository.
+
+
+Profile und Imageumfang
+-----------------------
+
+`IMAGE_SCOPE` im jeweiligen `module.R4MF` entscheidet ueber die
+Profilzuordnung:
+
+    Slim    slim
+    Full    slim + full
+    Test    slim + test sowie die expliziten Test-Includes des Orchestrators
+    none    in keinem normalen Image
+
+Das Testprofil verwendet zusaetzlich
+`Repositories/Distribution/TestInjection/` ueber dem normalen
+`Injection/`-Overlay. Unbekannte Scopes, doppelte Ziele, fehlende Artefakte
+und unaufloesbare Providerabhaengigkeiten sind harte Planfehler.
+
+
+Einzelne Repositories bauen
+---------------------------
+
+Jede Komponente unter Apps, Services, Diagnostics, Drivers und Protocols
+besitzt eigene Starter:
+
+    Repositories\Apps\Clock\Build.bat
+    Repositories\<Rolle>\<Projekt>\Build.bat test
+
+`Settings.R4S` mappt SDK, Contract, optional Libraries, DevKit, Zig und den
+Artefaktordner. Relative Werte beginnen am Modulrepository; absolute Werte
+sind ebenfalls erlaubt. Der Buildstarter uebergibt die aktuellen lokalen
+Checkouts mit Zig `--fork` und schreibt das Ergebnis in den gemappten
+`ARTIFACTS_ROOT`, standardmaessig unter
+`Artifacts/Modules/<Projekt>/`.
+
+`build.zig.zon` enthaelt bei den Komponenten einen zuletzt
+geprueften URL-/Commitstand. Das ist kein Workspace-Lock. Der verbindliche
+`Build.bat`-Aufruf ueberschreibt diese Pakete mit den lokalen Mappings.
+Ein nacktes `zig build` ohne diese Forks kann deshalb einen anderen,
+gepinnten Stand verwenden oder an einem privaten Remote scheitern.
+
+Zentrale repositoryeigene Tests:
+
+    cd Repositories\Contract
+    ..\..\DevKit\Toolchains\Zig\zig.exe build test
+
+    Repositories\SDK\Build.bat test
+    Repositories\Libraries\Build.bat test
+    Repositories\Libraries\Build.bat R4STD test
+    Repositories\Kernel\Build.bat test
+    Repositories\Distribution\Build.bat test
+
+Ein Modul kann `Build.bat test` verwenden, wenn sein Zig-Build einen
+`test`-Step definiert. Der globale `-test`-Lauf ersetzt diese
+repositoryeigenen Tests nicht; Details stehen in `Agents/Test.txt`.
+
+
+Artefakte und Inventare
+-----------------------
+
+    Repositories/Kernel/zig-out/bin/r4os.elf
+        gebauter Kernel
+
+    Repositories/SDK/zig-out/
+        SDK-Hosttools und Plattform-Bridges
+
+    Repositories/Libraries/<Library>/zig-out/
+        Runtime-R4L-Artefakte
+
+    Artifacts/Modules/<Projekt>/
+        R4X-, R4D- und R4P-Artefakte einzelner Komponenten
+
+    Artifacts/Distribution/Inputs/WorkspaceModules.map
+        Manifest-zu-Artefakt-Abbildung des aktuellen Workspace
+
+    Artifacts/Distribution/Inputs/Common.plan
+    Artifacts/Distribution/Inputs/<Profil>.plan
+        explizite Eingaben fuer Distribution
+
+    Artifacts/Distribution/Generated/MODULES.JSON
+        profilgebundenes technisches Modulinventar
+
+    Artifacts/Distribution/Generated/PRELOAD.R4I
+    Artifacts/Distribution/Generated/RegistryDefaults/SYSTEM.R4R
+        gemeinsame Systemartefakte
+
+    Artifacts/Distribution/HostTools/bin/
+    Artifacts/Distribution/HostTools/share/r4os/fonts/
+        gebaute Hosttools und Systemfonts
+
+    Artifacts/Distribution/Profiles/<Profil>/disk.img
+    Artifacts/Distribution/Profiles/<Profil>/data.img
+    Artifacts/Distribution/Profiles/<Profil>/image-adds.txt
+    Artifacts/Distribution/Profiles/<Profil>/Legal/
+        fertiges Profil
+
+`MODULES.JSON` wird bei jedem Planlauf neu erzeugt und als
+`/R4OS/CONFIG/MODULES.JSON` in das Image aufgenommen. Es enthaelt nur die
+Komponenten des konkret geplanten Profils. Die manuelle Gesamtuebersicht
+aller kanonischen Module ist dagegen
+`Docs/Inventory/AllModules.json`.
+
+Das zentrale API-Inventar liegt unter
+`Repositories/Contract/Generated/Inventory/API.json` und wird aus dem
+Contract erzeugt.
+
+
+Test- und GUI-Lauf
+------------------
+
+`Tools\Build.bat -test` fuehrt zuerst
+`Repositories/Distribution/Build.bat test` aus. Danach baut es den gesamten
+Workspace fuer das Testprofil, erzeugt und verifiziert das Image und startet
+die Headless-Abnahme.
+
+`Tools\Build.bat -gui` baut den gesamten Full-Workspace, erzeugt das
+Full-Image und startet QEMU sichtbar. `-qemu Full` startet nur ein
+vorhandenes Full-Image. GUI-Lauf und Headless-Lauf benutzen beide QEMU aus
+`DevKit/Emulation/QEMU`; im Distribution-Repository liegt nur die
+R4OS-spezifische Konfiguration.
+
+
+Aufraeumen und Fehlersuche
+--------------------------
+
+    Tools\Clean.bat
+        leert Artifacts und entfernt alle R4OS-lokalen Zig-Caches
+
+    Tools\Clean.bat -artifacts
+        leert nur Artifacts
+
+    Tools\Clean.bat -zig
+        entfernt nur lokale Zig-Caches
+
+`zig-out`, installierte Toolchains und der systemglobale Zig-Cache bleiben
+bewusst erhalten.
+
+Bei einem Fehler:
+
+- Exitcode und letzte `=== ... ===`-Stufe lesen.
+- Den zuerst fehlgeschlagenen Repository-Build direkt mit dessen
+  `Build.bat` wiederholen.
+- Pfadmappings in dessen `Settings.R4S` pruefen.
+- Bei Planfehlern zuerst fehlende Artefakte, doppelte Ziele,
+  `IMAGE_SCOPE` und Providerabhaengigkeiten pruefen.
+- Bei einem scheinbar veralteten Artefakt `Tools\Clean.bat -artifacts`
+  verwenden und den benoetigten Build erneut fahren.
+- Der Kernel bleibt auf `ReleaseSafe` und ohne SIMD.
+
+
+Weiterfuehrend
+--------------
+
+    Agents/ProjektStruktur.txt        Besitz- und Verzeichnisgrenzen
+    Agents/R4M0-Container.txt        Manifest und Modulprojekt
+    Agents/Test.txt                  Testschichten und Headless-Abnahme
+    Repositories/Distribution/README.md
+    Docs/Inventory/AllModules.json

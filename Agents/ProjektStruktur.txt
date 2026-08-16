@@ -1,0 +1,208 @@
+﻿R4OS Projektstruktur - Agent-Referenz
+=====================================
+
+Zweck: Wo im R4OS-Workspace was liegt und welcher Ort die
+jeweilige Wahrheit besitzt.
+
+Der Workspace steht standardmaessig unter `D:\R4OS`. Das Root-Repository
+koordiniert die Arbeit. Contract, SDK, Kernel, Libraries, Distribution und
+jedes einzelne Modul besitzen eigene Git-Repositories.
+
+
+Workspace-Ueberblick
+--------------------
+
+    Agents/         kompakte Arbeitsreferenzen fuer Agents
+    Artifacts/      lokale Build-, Image- und Testausgaben
+    DevKit/         installierte Toolchains und Arbeitskopien
+    Docs/           eigenes Repository fuer projektweite Dokumentation
+    Repositories/   kanonische Quell-Repositories
+    Server/         lokale, getrennte Serverprojekte
+    Tools/          Setup, Workspace-Build, Clean und GitHub-Verwaltung
+    AGENTS.md       zentrale Arbeitsanweisung
+    QuickNotes.txt  lokale Notizen, nicht versioniert
+    Roadmap.txt     lokaler Planungsstand, nicht versioniert
+
+`Tools/Setup.bat` erzeugt nach einem frischen Clone die ignorierten
+Grundordner und die beiden lokalen Textdateien, ohne vorhandenen Inhalt zu
+ueberschreiben. GitHub-Push und -Pull laufen ausschliesslich ueber
+`Tools/Github.bat`.
+
+
+Repositories/
+-------------
+
+Zentrale Repositories:
+
+    Contract/       kanonische Plattform-API und -ABI
+      ABI/          Layout- und Aufrufvertraege
+      API/          zentrale API-Gruppen
+      Generated/    erzeugte Bindings, Kernelteile, Doku und API-Inventar
+      Module/       Modul- und Manifestvertraege
+      Tools/        ApiContractGen
+
+    SDK/            hostneutrales SDK und Modul-Baugrundlage
+      BuildProfiles/  R4X/R4D/R4P/R4L- und C-Bauprofile
+      Hosts/          Hostanpassungen fuer Windows, Linux und R4OS
+      PlatformBridges/ R4SYS, R4DESK, R4DRAW, R4NET, R4AUDIO, R4DEV
+      r4os/           Zig-Fassaden und Linkerunterstuetzung
+      Shared/         gemeinsame Zig-/C-Bindings und Startup-Quellen
+      Templates/      Projektvorlagen
+      Toolchains/     Toolchainteile fuer das installierte R4OS-SDK
+      Tools/          ModuleCatalog, R4LContractGen und R4XBuilder
+      Tests/, Smoke/  SDK-eigene Tests und Fixtures
+
+    Libraries/      unabhaengige Runtime-R4Ls
+      R4STD/          Standard-, Text-, Datum-, Zeit- und Konfigurations-API
+      R4IMG/          Bilddecoder
+      R4FONT/         Fontdecoder und Font-API
+
+    Kernel/         Kernel, Limine-Konfiguration und kernel-eigene Tests
+    Distribution/   Imageprofile, Overlays, Hosttools, QEMU und Systemtests
+
+Komponentenrollen:
+
+    Apps/<Projekt>/
+    Services/<Projekt>/
+    Diagnostics/<Projekt>/
+    Drivers/<Projekt>/
+    Protocols/<Projekt>/
+
+Jedes direkte Projekt unter diesen Rollen ist ein eigenes Git-Repository.
+Der normale Aufbau lautet:
+
+    Build.bat        Windows-Buildstarter mit lokalen Pfad-Forks
+    Build.sh         hostneutraler Buildstarter
+    Settings.R4S     austauschbare relative oder absolute Pfadmappings
+    module.R4MF      Projekt-, Build- und Imagewahrheit
+    build.zig        duenne SDK-Anbindung
+    build.zig.zon    zuletzt gepruefter Standalone-Referenzstand
+    src/             Produktivquellen
+    Assets/          modulgebundene Ressourcen, falls vorhanden
+    Tests/           modulgebundene Tests und Fixtures, falls vorhanden
+
+Die Rollenordner selbst sind keine gemeinsamen Komponenten-Repositories.
+Ein Modul wird in seinem eigenen Repository geaendert und mit dessen
+`Build.bat` gebaut. `Tools/Build.bat` entdeckt die direkten Projekte
+dynamisch und orchestriert sie nur.
+
+
+Contract, SDK und Libraries
+---------------------------
+
+Der Contract definiert die zentrale Plattform-API und -ABI. Er enthaelt
+keine Implementierung optionaler Runtime-Libraries.
+
+Das SDK baut auf dem Contract auf. Die sechs Plattform-Bridges liegen im
+SDK, weil sie den kernelnahen zentralen Plattformvertrag transportieren.
+
+R4STD, R4IMG und R4FONT liegen als unabhaengige Einheiten im Libraries-
+Repository. Jede besitzt Implementierung, eigenen Contract, Baseline,
+Bindings und Tests. Eine Aenderung an einer solchen Library soll weder den
+Kernel noch den zentralen Contract oder das Kern-SDK benoetigen.
+
+
+DevKit/
+-------
+
+    Setup/              hostspezifische Installationsskripte
+    Toolchains/Zig/     installierte Zig-Toolchain
+    Boot/Limine/        installierter Bootloader und Hosttool
+    Emulation/QEMU/     installierter Emulator
+    SDK/Core/           installierte SDK-Arbeitskopie
+    SDK/Contract/       installierte Contract-Arbeitskopie
+    HostTools/bin/      installierte R4OS-Hosttools
+    HostTools/Source/   installierte Quellkopien fuer Hosttools
+
+Diese Inhalte werden von `DevKit/Setup/Setup_Windows.bat` beschafft. Die
+installierten Contract-, SDK- und Distribution-Kopien sind Verbraucher und
+keine fachlichen Quellwahrheiten. Sie werden nicht fuer Produktentwicklung
+editiert; Aenderungen gehoeren nach `Repositories/`.
+
+
+Distribution/
+-------------
+
+Das Distribution-Repository besitzt:
+
+    Assets/SystemFonts/  Fontgeneratoren und Fontquellen
+    Injection/           versioniertes Overlay fuer normale Images
+    TestInjection/       zusaetzliches Overlay fuer das Testprofil
+    Profiles/            Slim.R4S, Full.R4S und Test.R4S
+    QEMU/                R4OS-spezifische QEMU-Konfiguration
+    Tools/               ImageCreator, ImagePlan, NtfsVerify, R4UPack usw.
+    Tests/               Plan-, Tool- und Headless-Auswertung
+
+QEMU, Limine und Zig selbst liegen nur im DevKit. Distribution enthaelt die
+R4OS-spezifischen Profile, Overlays und Aufrufe, aber keine zweite
+Installation dieser Fremdwerkzeuge.
+
+
+Artifacts/
+----------
+
+`Artifacts/` ist vollstaendig lokal und kann mit `Tools/Clean.bat` geleert
+werden. Wichtige erzeugte Orte sind:
+
+    Modules/<Projekt>/                 Artefakte einzelner Modul-Repositories
+    Distribution/Inputs/               WorkspaceModules.map und Imageplaene
+    Distribution/Generated/            MODULES.JSON, PRELOAD.R4I, Registry
+    Distribution/HostTools/bin/        gebaute Distribution-Hosttools
+    Distribution/HostTools/share/      erzeugte Systemfonts
+    Distribution/Profiles/<Profil>/    disk.img, data.img, image-adds.txt,
+                                       Legal/
+    Distribution/Logs/                 Headless-QEMU-Logs
+    Distribution/PrivateInjection/     lokales optionales Imageoverlay
+
+Der Kernel schreibt sein Artefakt weiterhin repositorylokal nach
+`Repositories/Kernel/zig-out/bin/r4os.elf`. SDK-Plattform-Bridges und
+Runtime-Libraries besitzen ebenfalls repositorylokale `zig-out`-Ausgaben.
+Diese `zig-out`-Verzeichnisse sind erzeugt und nicht versioniert.
+
+
+Inventare
+---------
+
+Projektweite Inventare liegen im Docs-Repository:
+
+    Docs/Inventory/Docs.json        manuell gepflegte Dokumentationsliste
+    Docs/Inventory/Tests.json       manuell gepflegter vorhandener Testbestand
+    Docs/Inventory/AllModules.json  manuelle Gesamtuebersicht aller Module
+    Docs/Inventory/Browser.json     manuelle Browser-Funktionsuebersicht
+
+`Agents/`, `Docs/Inventory/` selbst und Changelogs werden nicht in
+`Docs.json` aufgenommen.
+
+Technisch erzeugte Inventare liegen beim Besitzer beziehungsweise bei den
+Artefakten:
+
+    Repositories/Contract/Generated/Inventory/API.json
+    Artifacts/Distribution/Generated/MODULES.JSON
+
+Das erste wird aus dem Contract erzeugt. Das zweite beschreibt genau den
+zuletzt geplanten Imageumfang und wird in das Image als
+`C:\R4OS\CONFIG\MODULES.JSON` projiziert. Es ersetzt nicht die manuelle
+Gesamtuebersicht `AllModules.json`.
+
+
+Was lokal bleibt
+----------------
+
+Das Root-Repository ignoriert unter anderem `Artifacts/`, `DevKit/`,
+`Docs/`, `Repositories/`, `Server/`, `ExFiles/`, `Reports/`, `Temp/`, die
+Credentials sowie `QuickNotes.txt` und `Roadmap.txt`. Diese Orte besitzen
+entweder eigene Repositories oder ausschliesslich lokalen Inhalt.
+
+Nie aus der Tatsache, dass ein Verzeichnis unter `D:\R4OS` liegt, auf seine
+Git-Zugehoerigkeit schliessen. Vor einem Commit immer das zustaendige
+Unterrepository bestimmen.
+
+
+Weiterfuehrend
+--------------
+
+    Agents/Build.txt                 Workspace- und Einzelbuilds
+    Agents/R4M0-Container.txt        Aufbau eines Modulprojekts
+    Agents/Test.txt                  Tests und Headless-Abnahme
+    Agents/TestCategories.txt        Testarten und Ablage
+    Docs/Inventory/AllModules.json   manuelle Gesamtuebersicht

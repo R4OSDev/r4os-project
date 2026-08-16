@@ -1,0 +1,274 @@
+﻿R4OS Kernel-Struktur - Agent-Referenz
+=====================================
+
+Zweck: Wo im Kernelbaum welche Zustaendigkeit sitzt. Alle relativen Pfade in
+dieser Datei beginnen unter `Repositories/Kernel/`.
+
+Versionswahrheit
+----------------
+
+`VERSION.R4S` enthaelt die eigenstaendige Kernelversion. `kernel/version.zig`
+validiert sie beim Kompilieren und bettet sie in `.r4os.kernel.meta` von
+`r4os.elf` ein. Sie ist nicht die fortlaufende R4OS-Releaseversion; Details
+stehen in `Docs/Core/Versionierung.txt`.
+
+Diese Liste ist kuratiert und nennt die tragenden Dateien je Bereich. Fuer
+den vollstaendigen Bestand gilt der Kernelbaum selbst.
+
+
+Einstieg und Bootreihenfolge
+----------------------------
+
+`main.zig` exportiert `kmain`, initialisiert die Grundlagen in fester
+Reihenfolge und uebergibt danach an `kernel/runtime_boot.zig`, das Services
+und Shell startet.
+
+Die Reihenfolge ist Vertrag, nicht Zufall - jede Stufe setzt die vorige
+voraus:
+
+    com_debug_boot               COM1-Debugpfad
+    boot_info, boot_display      Limine-Informationen und fruehe Anzeige
+    cpu_boot                     GDT, IDT und PIC
+    timer_boot                   PIT
+    driver_boot                  Treiberregistry
+    input_boot                   PS/2-Keyboard und -Mouse
+    boot_intro                   fruehe Bootdarstellung
+    memory_boot.initCore         Map, Blocks, PMM, Paging, Page Tables,
+                                 Virtual Ranges und Heap
+    storage_boot.initFoundation  Drive- und Blockgrundlage
+    module_boot                  Modulregistry
+    platform_boot                ACPI, PCIe, Device-Mappings und CR3
+    usb_protocol_preload_boot    USB-Protokolle vor dem Hostcontroller
+    service_boot                 Registry, Endpoints und Queues
+    storage_boot.initControllers Controller, Blockdevice-Scan, MBR und Mounts
+    loader_boot                  Systemlibraries, R4D-Discovery und BOOT.R4S
+    system_update_recovery_boot  SYSUPD-Journale, siehe RemoteUpdate.txt
+    upload_claim_boot            offene Uploadtransaktionen
+    platform_irq_boot            APIC, IOAPIC, HPET und Timer-Handoff
+    audio_boot                   Audio-Core und Geraeteauswahl
+    network_boot                 Adapter und Netzgrundlage
+    usb_hid_boot                 USB-HID-Eingabe
+    runtime_boot.initTaskRuntime Task-Runtime
+    driver_policy_boot           Treiberpolicy aus BOOT.R4S
+    Hintergrundaufgaben          Netzwerk, DHCP, HID und Selbsttests
+    runtime_boot.start           Services und Shell
+
+Storage besitzt getrennte Foundation- und Controllerphasen. Die
+Task-Runtime wird vor Treiberpolicy und Hintergrundaufgaben initialisiert.
+
+Die `*_boot.zig`-Dateien orchestrieren NUR die Reihenfolge; die Fachlogik
+bleibt in den Modulen ihres Bereichs.
+
+
+arch/x86_64/
+------------
+
+    gdt.zig           Global Descriptor Table und TSS-Descriptor
+    idt.zig           Interrupt Descriptor Table, Exception-/IRQ-Dispatch
+    tss.zig           Task State Segment, IST-Stacks
+    pic.zig           8259 PIC remap/mask/EOI
+    pit.zig           PIT Timer IRQ0 und Tick-Zaehler
+    ioapic.zig        IOAPIC redirection/routing
+    lapic.zig         Local APIC und LAPIC-Timer (xAPIC MMIO)
+    hpet.zig          HPET, Legacy-Replacement-Timer
+    fpu.zig           FPU/SSE/XSAVE-Init, State-Save/Restore pro Task
+    rtc.zig, msr.zig, io.zig, interrupts.zig, power.zig, reset.zig
+
+
+bootloader/ und display/
+------------------------
+
+    bootloader/limine.zig     Request-Marker und Bootloader-Antworten
+    bootloader/boot_info.zig  bootloader-neutrale BootInfo-Sicht
+
+    display/boot_display.zig  fruehe Ausgabe auf dem Limine-Framebuffer
+    display/console.zig       fruehe Kernel-Console mit RAM-Zellscroll
+    display/console_scroll_buffer.zig  readbackfreier Scroll
+    display/surface.zig       generisches XRGB32-Surface-Modell
+    display/presenter.zig     Present-Vertrag Surface gegen DisplayManager
+    display/display.zig       DisplayManager, Backend, Present-/Blit-Pfad
+    display/framebuffer.zig   Framebuffer-Primitiven, ueberlappungssicherer
+                              Rect-Move
+    display/surface_pipeline.zig  Frame-/Present-Fassade des DisplayManagers
+
+
+kernel/
+-------
+
+Der Sammelort fuer Kerndienste und Bootschnitte.
+
+    log.zig           Logging, optionaler Serial-Sink
+    boot_status.zig   dauerhafte COM1-/Bootlog-Umleitung; sichtbare Console
+                      nur vor Redirect und im Crashpfad
+    bootlog.zig       Bootlog-/DMESG-Ringpuffer
+    fatal.zig         Fatalpfad und Bootphasen
+    crash.zig, crash_screen.zig, diag_screen.zig   sichtbare Fehlerbilder
+    deadman.zig       kooperativer Deadman; kann einen harten Spin mit
+                      gesperrten Interrupts NICHT praemptieren
+    driver_api.zig    DriverApi-Tabelle fuer R4D: PCI-Inventar und -Config,
+                      DMA, IRQ inklusive MSI, Net-/Storage-/USB-Backends,
+                      Owner-Cleanup
+    driver_work.zig   Workqueue und Completion fuer Treiber
+    driver_plan.zig   Treiberplan aus BOOT.R4S
+    irq_router.zig    IRQ-Routen-Registry: shared INTx, Level/Edge,
+                      MSI-Fenster 24..31
+    timer.zig         Timer-Core: PIT-Start, HPET-/LAPIC-Umschaltung
+    modules.zig, module_file.zig, module_r4m.zig   Modulregistry und
+                      gemeinsamer Modul-Dateizugriff
+    services.zig, service_core.zig, service_ipc.zig   Service-Registry,
+                      Endpoints, Queues und Kanal-IPC
+    protocol_api.zig  Protokollzugriff fuer Kernelverbraucher
+    shell_launcher.zig  Start der konfigurierten Shell
+    desktop_events.zig  gemeinsames Desktop-Aktivitaets-Event
+    font.zig          Kernel-Fallback-Font, R4F1-Loader, Renderer-Helfer
+    bootscreen*.zig   Bootscreen und R4B-Format
+    boot_config.zig   BOOT.R4S-Konfiguration
+    *_boot.zig        die Bootschnitte aus der Reihenfolge oben
+
+
+memory/
+-------
+
+    layout.zig        Konstanten des Adressraums und Page-Flags
+    map.zig           normalisierte physische Memory Map
+    blocks.zig        MemoryBlock-Tabelle aus der BootInfo-Map
+    phys.zig          Physical Memory Manager, Frame-Allokator
+    paging.zig        Paging-/CR3-Grundzustand
+    page_tables.zig   eigene PML4, Dry-Run, Device-Mappings, CR3-Switch
+    virt.zig          virtuelle Kernelfenster und Virtual Ranges
+    heap.zig          Kernel-Heap
+    backing_store.zig, reclaim.zig   Auslagerung und globaler Reclaim
+
+Details: `Docs/Core/MemoryManagement.txt` und
+`Docs/Core/AdressraumLayout.txt`.
+
+
+program/
+--------
+
+Die Programm- und ABI-Ebene.
+
+    r4x.zig           produktiver R4M0-/R4X-Loader, R4XStart-Runtime,
+                      dynamische ProgramInstance-Chunkregistry,
+                      generationensicherer Lifecycle mit Deferred-Reaper,
+                      paginiertes Program-/Task-/Thread-Inventar
+    r4d.zig, r4p.zig  Lade- und Aktivierungspfad fuer Treiber und
+                      Protokollmodule
+    r4x_start.zig     R4XStart-Kontext und Startvertrag
+    r4x_api.zig       zyklusfreie Fassade auf das als
+                      r4os_kernel_contract importierte Contractmodul
+    r4api.zig         zentraler Export der API-Gruppenmodule
+    r4sys.zig         R4SYS-Systembasis
+    r4desk.zig, r4draw.zig, r4net.zig, r4audio.zig, r4dev.zig
+                      die uebrigen Gruppentabellen
+
+Die generierte Kernelseite des Plattformvertrags liegt unter
+`Repositories/Contract/Generated/Kernel/Zig/r4x_api_generated.zig` und
+wird vom Kernelbuild als `r4os_kernel_contract` eingebunden.
+
+
+sched/
+------
+
+    scheduler.zig     kooperativer Round-Robin plus Praeemption
+    task.zig          dynamische stabile Task-Registry, guarded Stacks,
+                      optionale FPU-States, Critical-Reserve
+    task_context.zig  Current-Task-Bindung und UnwindToken als
+                      Kill-Schutzzaehler - kein Lock
+    wait_node.zig     task-owned intrusive Waiter-Verkettung
+    sync.zig          generationssichere Mutex/UnwindGuard, Event,
+                      Semaphore, dynamische WaitQueue
+    task_registry_selftest.zig   gebundene QEMU-Laufzeitprobe
+
+Details: `Docs/Core/DynamicTaskRegistry.txt`.
+
+
+fs/ und storage/
+----------------
+
+    fs/vfs.zig        FS-neutrale Dispatchschicht: Volume-Tabelle je
+                      Laufwerk, NodeRef-/Entry-Vokabular, plus interner
+                      Bootvolume-Slot fuer die buchstabenlose Bootpartition
+    fs/ntfs/ntfs.zig  NTFS-3.1-Kerneladapter, duenne Fassade ueber den
+                      geteilten Kern ntfs_volume
+    fs/fat/fat32.zig  FAT32-Backend
+    fs/page_cache.zig page-organisierter Sektor-Cache mit Writeback
+    fs/request.zig    FS-Request-Schicht
+    fs/drive.zig      Laufwerksverwaltung
+    fs/glob.zig       Glob-Matching
+    fs/system_update_atomic.zig, fs/upload_claim_store.zig
+                      Transaktionen fuer Update und Upload
+
+    storage/block.zig Blockdevice-Registry, Request-Queue, Worker
+    storage/mbr.zig   MBR-Scan mit FS-neutraler Systemvolume-Erkennung
+
+Details: `Docs/FileSystem/DateisystemUndStorage.txt`.
+
+
+driver/
+-------
+
+    com.zig           16550-UART: COM1 Debug, COM2 Link-Basis
+    registry.zig      Treiber-Registry fuer Built-ins und R4D
+    input/            PS/2-Keyboard und -Mouse, Layouts unter key_layouts/
+    storage/          Boot-Probing in ahci.zig und nvme.zig; produktiver
+                      Storage ueber NVME.R4D, AHCI.R4D und ATAPIO.R4D
+    driver/usb/xhci.zig   XHCI-Host-Backend mit der Kernel-Logik; XHCI.R4D ist
+                      das duenne Aktivierungsmodul des USB-Hostpfads
+    driver/usb/host_controller.zig   Owner-Abstraktion und Backendregistry
+    driver/usb/core.zig      USB-Core- und Device-Modell
+    driver/usb/hid.zig       USB-HID-Boot ueber R4P-Decode
+    driver/usb/msc.zig       USB-Mass-Storage, BOT/SCSI-Blockpfad
+    driver/usb/xhci_*.zig    Event-Router, Ringzyklus, Endpointkontext und
+                      -Recovery, Bulk-Completion
+    driver/usb/usb_*.zig     Bootzeitverhalten, Waits und MSC-Retrypolicy
+
+Die Klassentreiber `driver/usb/hid.zig` und `driver/usb/msc.zig`
+verwenden das XHCI-Backend direkt.
+
+
+net/, audio/, platform/, protocol/
+----------------------------------
+
+    net/core.zig      Adapter, RX/TX, UDP-Sockets, ARP-Cache, Demux
+    net/tcp.zig       TCP-State-Machine
+    net/ethernet.zig, arp.zig, ipv4.zig, icmp.zig, udp.zig, dhcp.zig,
+    net/dns.zig       Kernelpfade fuer die Netzgrundlage
+    net/ipc_services.zig  Netz-IPC-Service-Bruecke
+    net/timing.zig    Timeout- und Deadline-Helfer
+    net/r4p_contract.zig  R4P-Netzvertraege
+    net/serial_link.zig, config.zig, config_writer.zig
+
+    audio/core.zig    Audio-Core und PCM; SID, OPL3 und MIDI ueber R4D/R4P
+    audio/pcm.zig     PCM-Format und Puffer
+
+    platform/         acpi.zig, pcie.zig, pci.zig, cpu.zig, irq.zig,
+                      time.zig, device_inventory.zig
+    protocol/registry.zig   Protocol-Registry fuer Builtins und R4P
+
+    linker.ld         minimal: OUTPUT_FORMAT und ENTRY
+
+
+Regeln fuer den Kernelbaum
+--------------------------
+
+- In den Kernel kommt nur, was dort technisch zwingend hingehoert. Alles
+  andere wird zuerst einer externen Struktur zugeordnet - Anwendung,
+  Service, Library, Treiber oder Protokollmodul.
+- Boot, C:, fruehe Ausgabe, Speicher, Interrupts und Timer sind
+  kernelkritische Built-ins. Nicht bootkritische Geraete- und
+  Protokollfunktionen gehoeren in R4D beziehungsweise R4P.
+- Der Kernel baut ohne SIMD (soft_float); R4X-, R4D-, R4P- und R4L-Module
+  duerfen SIMD nutzen.
+- `kernel/font.zig` ist Kernelcode und bleibt von den Font-Hosttools
+  getrennt; es gibt bewusst keine gemeinsame Glyphquelle.
+
+
+Weiterfuehrend
+--------------
+
+    Docs/Core/Architektur.txt          Systemmodell und Besitzgrenzen
+    Docs/Core/Modulsystem.txt          R4M0, Manifest, Loader
+    Docs/Core/DynamicTaskRegistry.txt  Tasks, Waiter, Threads
+    Docs/Core/ProgramLifecycle.txt     Programmlebenszyklus
+    Agents/ProjektStruktur.txt         der Baum ausserhalb des Kernels

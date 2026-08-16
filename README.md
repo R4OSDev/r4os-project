@@ -3,6 +3,7 @@
 This private repository defines the lightweight Windows workspace used to
 coordinate the independent R4OS repositories.
 
+    Agents/        Compact agent-facing project references
     DevKit/        Installed SDK and host tools
     Docs/          Cross-project documentation and inventories
     Repositories/  Independent R4OS source repositories

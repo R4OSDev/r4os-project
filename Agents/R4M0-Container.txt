@@ -1,0 +1,338 @@
+﻿R4M0-Container und Modulprojekt - Agent-Referenz
+================================================
+
+Zweck: Kompaktreferenz fuer Aufbau, Manifest, Build und Ressourcen eines
+R4OS-Moduls.
+
+Vertragswahrheiten:
+
+    Repositories/Contract/ABI/R4M0.txt
+    Repositories/Contract/Module/R4MFv2.txt
+
+Bei einem Widerspruch gelten diese beiden Dateien.
+
+
+Container in Kuerze
+-------------------
+
+R4M0 ist der gemeinsame Little-Endian-Container fuer:
+
+    1 = R4X  Programm oder Dienst
+    2 = R4L  Library
+    3 = R4D  Treiber
+    4 = R4P  Protokollmodul
+    5 = KernelProvider
+    6 = reserviertes Kernelmodul
+
+Architektur 1 bezeichnet x86_64. Die sichtbare Dateiendung entspricht der
+Modulart: .R4X, .R4L, .R4D oder .R4P.
+
+Der Header ist 64 Byte gross und adressiert Sections, Imports, Exports,
+Relocations, Entry sowie den Meta-/Stringbereich ausschliesslich ueber
+Offset und Anzahl.
+
+Recordgroessen:
+
+    Section     32 Byte
+    Entry       16 Byte
+    Import      16 Byte
+    Export      16 Byte
+    Relocation  24 Byte
+
+Sections tragen Name, Flags, Dateioffset, Datei- und Speichergroesse sowie
+Alignment. Die Flags sind alloc, exec, write und bss. BSS besitzt keine
+Dateinutzdaten und wird vom Loader genullt.
+
+Die Relocationtabelle ist die einzige Patchwahrheit. Der Loader veraendert
+nur die dort angegebenen Patchbereiche. Gewoehnliche Werte in .rodata und
+.data bleiben bytegenau erhalten.
+
+
+Imports, Exports und Entry
+--------------------------
+
+Ein Import nennt Modul, Symbol und Mindestversion:
+
+    R4SYS:Query:1
+    ACMECODEC:API_V1:2
+
+Ein Export nennt oeffentlichen Namen, Section, Sectionoffset und Revision.
+Namen und Revisionen muessen innerhalb des Moduls case-insensitiv eindeutig
+sein.
+
+Ein normales R4X exportiert R4XStart:1 und importiert R4SYS:Query:1. Weitere
+Anforderungen stehen als geordnete IMPORT=-Zeilen im Manifest.
+
+Eine Runtime-R4L exportiert Query:1 und mindestens eine fachliche,
+versionierte Tabelle. Der Manifestwert
+
+    EXPORT=<oeffentlicher Name>:<globales ELF-Symbol>:<Revision>
+
+bindet den oeffentlichen R4M0-Namen an das Symbol der Implementierung.
+
+R4D und R4P verwenden die Entry-, Import- und Exportregeln ihrer jeweiligen
+Contract-Dokumente.
+
+
+Ressourcenbereich
+-----------------
+
+Ein Modul kann genau eine nicht allokierte Section .rsrc mit Alignment 16
+enthalten. Entry, Exports und Relocations duerfen nicht auf diese Section
+zeigen. Der Loader nimmt sie nicht in das Programmimage auf; Ressourcen
+werden bei Bedarf aus der Moduldatei gelesen.
+
+Eintraege:
+
+    Typ 1  icon
+    Typ 2  help
+    Typ 3  file
+
+Es sind hoechstens 64 Eintraege erlaubt. Die Reihenfolge ist: Icons nach
+Index, Help, danach benannte Dateien in Manifestreihenfolge. Datenblobs sind
+16-Byte-aligned.
+
+- Icon 0 ist das Desktopicon.
+- Icons sind klassische Windows-ICO-Container ohne PNG-Eintrag und besitzen
+  mindestens ein 32x32-Bild in 32 bpp BGRA oder 8 bpp Palette.
+- Help ist UTF-8-Text. Ein fuehrendes BOM der Quelldatei wird beim Einbetten
+  entfernt.
+- Resource-Namen bestehen aus 1 bis 63 druckbaren ASCII-Bytes, enthalten
+  weder Pfadtrenner noch Doppelpunkt und sind case-insensitiv eindeutig.
+
+Die Manifestfelder sind:
+
+    ICON=Assets/Desktop.ico
+    HELP=Assets/Help.txt
+    RESOURCE=TOOLBAR.BMP:Assets/Toolbar.bmp
+
+R4L-Manifeste enthalten keine Ressourcenfelder.
+
+
+Besitz eines Modulprojekts
+--------------------------
+
+Ein eigenstaendiges Modulrepository liegt unter genau einer Rolle:
+
+    Repositories/Apps/<Projekt>/
+    Repositories/Services/<Projekt>/
+    Repositories/Diagnostics/<Projekt>/
+    Repositories/Drivers/<Projekt>/
+    Repositories/Protocols/<Projekt>/
+
+Typischer Aufbau:
+
+    <Projekt>/
+      Build.bat
+      Build.sh
+      Settings.R4S
+      module.R4MF
+      build.zig
+      build.zig.zon
+      src/
+        main.zig oder main.c
+      Assets/       optional
+      Tests/        optional
+      README.md
+      LICENSE
+      NOTICE
+
+Das Verzeichnis ist ein eigenes Git-Repository. Manifest, Quellen,
+Ressourcen, Tests und projektspezifische Dokumentation werden gemeinsam
+versioniert.
+
+
+module.R4MF
+-----------
+
+module.R4MF ist UTF-8 ohne BOM. Es beschreibt genau ein Ausgabemodul. Die
+case-insensitive Identitaet ist das Paar KIND und NAME.
+
+Vollstaendiges R4X-Beispiel:
+
+    R4OS_MODULE_MANIFEST=2
+    KIND=R4X
+    NAME=NOTEPAD
+    VERSION=0.1.0
+    LANGUAGE=Zig
+    SOURCE=src/main.zig
+    ENTRY_MODE=app
+    APP_CLASS=gui
+    TARGET=/R4OS/SOFTWARE/DESKTOP/NOTEPAD.R4X
+    IMAGE_SCOPE=full
+    IMPORT=R4SYS:Query:1
+    IMPORT=R4DESK:Query:1
+    IMPORT=R4DRAW:Query:1
+    META=desktop.launch=hosted
+    ICON=Assets/Desktop.ico
+    HELP=Assets/Help.txt
+    RESOURCE=TOOLBAR.BMP:Assets/Toolbar.bmp
+
+Kanonische Feldreihenfolge:
+
+    R4OS_MODULE_MANIFEST
+    KIND
+    NAME
+    VERSION
+    LANGUAGE
+    SOURCE
+    ENTRY_MODE
+    APP_CLASS
+    TARGET
+    IMAGE_SCOPE
+    OPTIMIZE
+    PACKAGE
+    ZIG_MODULE
+    C_INCLUDE
+    C_DEFINE
+    C_FLAG
+    IMPORT
+    EXPORT
+    CONTRACT
+    CONTRACT_BASELINE
+    IMPLEMENTATION_ZIG
+    BINDING_ZIG
+    BINDING_C
+    CONFORMANCE_ZIG
+    CONFORMANCE_C
+    API_REFERENCE
+    META
+    ICON
+    HELP
+    RESOURCE
+
+Welche Felder fuer welche Modulart erlaubt oder verpflichtend sind, steht
+vollstaendig in Repositories/Contract/Module/R4MFv2.txt.
+
+
+Wichtige Manifestregeln
+-----------------------
+
+- VERSION ist die Modulversion im Format MAJOR.MINOR.PATCH. Sie wird erhoeht,
+  wenn sich das ausgelieferte Modulartefakt aendert.
+- TARGET ist der absolute Zielpfad im Image und endet in der zur Modulart
+  passenden Endung.
+- IMAGE_SCOPE ist fuer jede Modulart Pflicht:
+
+      slim    Bestandteil jedes Images
+      full    zusaetzlicher Bestandteil des Full-Images
+      test    Bestandteil des Test-Images
+      none    keine automatische Aufnahme in ein Image
+
+  Die Mengen sind exakt: Slim = slim, Full = slim + full, Test =
+  slim + test plus ausdrueckliche Test-Includes des Orchestrators.
+- IMPORT ist die einzige Importwahrheit und behaelt seine Reihenfolge.
+- Ein normales R4X mit ENTRY_MODE=app implementiert
+  pub fn r4_app_main(app: *r4os.App) i32.
+- Quell- und Ressourcenpfade sind kanonische, vorwaertsgerichtete Pfade
+  relativ zum Manifest und bleiben innerhalb des Projekts.
+- build.zig wiederholt weder Name, Ziel, Imports noch Ressourcen.
+- Eine kompilierte Runtime-R4L besitzt ihren Contract, Baseline, generierte
+  Bindings, Conformance-Dateien und API-Referenz in derselben Library-Einheit.
+
+
+build.zig
+---------
+
+Ein einfaches R4X, R4D oder R4P verwendet:
+
+    const std = @import("std");
+
+    pub fn build(b: *std.Build) void {
+        const sdk_build = b.lazyImport(@This(), "r4os_sdk") orelse return;
+        const sdk_dep = b.dependencyFromBuildZig(sdk_build, .{});
+        const sdk = sdk_build.sdk(b, sdk_dep, .{});
+        _ = sdk.addR4MF(b.path("module.R4MF"));
+    }
+
+Benoetigt ein Projekt Library-Bindings, uebergibt es diese ueber
+addR4MFWithOptions. Namen und ZIG_MODULE-Zuordnung bleiben im Manifest;
+build.zig liefert nur die konkreten Paketpfade.
+
+Runtime-Libraries besitzen einen eigenen Build, der zusaetzlich Contract-,
+Provider-, Binding-, Conformance- und Laufzeittests verdrahtet.
+
+
+build.zig.zon und lokale Mappings
+--------------------------------
+
+build.zig.zon benennt das Zig-Paket, die Mindestversion und die
+Standalone-Abhaengigkeiten. Eine Abhaengigkeit kann als lokaler .path-Eintrag
+oder als gepruefte .url-/.hash-Kombination deklariert sein.
+
+Der Workspace-Aufruf verwendet immer den repositoryeigenen Buildstarter.
+Dieser liest Settings.R4S und ueberschreibt die Paketaufloesung mit --fork
+auf die aktuellen lokalen Checkouts.
+
+Beispiel fuer eine Komponente:
+
+    SDK_ROOT=../../SDK
+    CONTRACT_ROOT=../../Contract
+    LIBRARIES_ROOT=../../Libraries
+    DEVKIT_ROOT=../../../DevKit
+    ARTIFACTS_ROOT=../../../Artifacts/Modules/MeinProjekt
+    ZIG_ROOT=Toolchains/Zig
+
+Relative Werte beginnen am Modulrepository; ZIG_ROOT beginnt am DevKit.
+LIBRARIES_ROOT ist nur fuer Projekte mit Library-Paketabhaengigkeit noetig.
+Jeder Wert darf absolut gemappt werden. Anfuehrungszeichen gehoeren nicht
+in die Settingsdatei.
+
+
+Bauen und entdecken
+-------------------
+
+Im Modulrepository:
+
+    Build.bat
+    Build.bat test     falls das Projekt einen test-Step definiert
+
+Vom Workspace aus:
+
+    Tools\Build.bat -module Apps\MeinProjekt
+
+Der Workspace entdeckt alle direkten Projekte der fuenf Rollen anhand von
+module.R4MF, Build.bat und Settings.R4S. Der Buildstarter schreibt das
+Artefakt standardmaessig nach
+Artifacts/Modules/<Projekt>/<NAME>.<KIND>.
+
+Vorlagen liegen unter Repositories/SDK/Templates/. Ein neues Projekt erhaelt
+ein eigenes Repository, ein Manifest, beide Buildstarter, Settings und die
+ueblichen Repository-Grunddateien.
+
+Die manuelle Gesamtuebersicht Docs/Inventory/AllModules.json wird beim
+Hinzufuegen, Verschieben oder Entfernen eines kanonischen Moduls angepasst.
+Testaenderungen werden in Docs/Inventory/Tests.json gepflegt.
+
+
+Image und Laufzeit
+------------------
+
+Der Workspace-Plan verbindet jedes Manifest mit genau einem gebauten
+Artefakt. ModuleCatalog prueft Identitaeten, Ziele, Scopes und bekannte
+Providerabhaengigkeiten. Das profilgebundene Ergebnis steht unter:
+
+    Artifacts/Distribution/Generated/MODULES.JSON
+
+Distribution projiziert diese Datei nach:
+
+    C:\R4OS\CONFIG\MODULES.JSON
+
+Ressourcen werden zur Laufzeit ueber die R4SYS-Ressourcen-API gelesen.
+Programmicons und programmeigene Medien gehoeren in den Container. Externe
+Systemicons liegen unter C:\R4OS\Media\Icons\.
+
+Terminal kann das eingebettete Helpfile mit NAME /? anzeigen. Desktop und
+Explorer lesen Containericons und benannte Ressourcen direkt aus der
+Moduldatei.
+
+
+Weiterfuehrend
+--------------
+
+    Repositories/Contract/ABI/R4M0.txt
+    Repositories/Contract/Module/R4MFv2.txt
+    Docs/SDK/ModuleManifestV2.md
+    Docs/API/AppEntry.md
+    Docs/Applications/Anwendungsstruktur.md
+    Agents/Build.txt
