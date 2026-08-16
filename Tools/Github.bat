@@ -8,6 +8,7 @@ if defined R4OS_GITHUB_ASKPASS goto askpass
 
 if /I "%~1"=="-push" set "R4OS_ACTION=PUSH"
 if /I "%~1"=="-pull" set "R4OS_ACTION=PULL"
+if /I "%~1"=="-query" set "R4OS_ACTION=QUERY"
 
 set "R4OS_COMPONENT_NAME=%~3"
 set "R4OS_COMMIT_MESSAGE=%~3"
@@ -20,9 +21,12 @@ if /I "%~2"=="-protocol" set "R4OS_COMMIT_MESSAGE=%~4"
 if not defined R4OS_ACTION if "%~1"=="" goto interactive
 if not defined R4OS_ACTION goto usage
 
+if /I "%R4OS_ACTION%"=="PUSH" if /I "%~2"=="-changed" goto upload_changed
+
 call :select_repository "%~2"
 if errorlevel 1 goto usage
 
+if /I "%R4OS_ACTION%"=="QUERY" goto query_repository
 if /I "%R4OS_ACTION%"=="PUSH" goto upload
 goto pull
 
@@ -35,6 +39,20 @@ choice /C 12 /N /M "Auswahl"
 if errorlevel 2 set "R4OS_INTERACTIVE_ACTION=-pull"
 if errorlevel 1 if not defined R4OS_INTERACTIVE_ACTION set "R4OS_INTERACTIVE_ACTION=-push"
 
+if /I "%R4OS_INTERACTIVE_ACTION%"=="-pull" goto interactive_repository
+
+echo.
+echo Push-Modus auswaehlen:
+echo   [1] Alle geaenderten Repositories ^(empfohlen^)
+echo   [2] Einzelnes Repository
+choice /C 12 /N /M "Auswahl"
+if errorlevel 2 goto interactive_repository
+
+call "%~f0" -push -changed
+set "R4OS_INTERACTIVE_EXIT=%ERRORLEVEL%"
+endlocal & exit /b %R4OS_INTERACTIVE_EXIT%
+
+:interactive_repository
 echo.
 echo Repository auswaehlen:
 echo   [1] Project
@@ -272,6 +290,24 @@ set "R4OS_REPOSITORY_ALLOW_INIT=1"
 set "R4OS_DEFAULT_COMMIT_MESSAGE=%R4OS_COMPONENT_NAME%-Stand sichern"
 exit /b 0
 
+:query_repository
+echo %R4OS_REPOSITORY_KEY%^|%R4OS_REPOSITORY_LABEL%^|%R4OS_REPOSITORY_ROOT%^|%R4OS_REPOSITORY_NAME%^|%R4OS_REPOSITORY_REMOTE%^|%R4OS_REPOSITORY_ALLOW_INIT%
+endlocal & exit /b 0
+
+:upload_changed
+if not exist "%~dp0GithubChanged.ps1" (
+    echo FEHLER: Tools\GithubChanged.ps1 fehlt.
+    goto failure
+)
+
+if "%R4OS_COMMIT_MESSAGE%"=="" (
+    powershell.exe -NoLogo -NoProfile -ExecutionPolicy Bypass -File "%~dp0GithubChanged.ps1"
+) else (
+    powershell.exe -NoLogo -NoProfile -ExecutionPolicy Bypass -File "%~dp0GithubChanged.ps1" -CommitMessage "%R4OS_COMMIT_MESSAGE%"
+)
+set "R4OS_CHANGED_EXIT=%ERRORLEVEL%"
+endlocal & exit /b %R4OS_CHANGED_EXIT%
+
 :pull
 call :ensure_local_repository
 if errorlevel 1 goto failure
@@ -481,6 +517,7 @@ endlocal & exit /b 0
 :usage
 echo Verwendung:
 echo   Github.bat
+echo   Github.bat -push -changed ["Commit-Beschreibung"]
 echo   Github.bat -push -project ["Commit-Beschreibung"]
 echo   Github.bat -pull -project
 echo   Github.bat -push -devkit ["Commit-Beschreibung"]

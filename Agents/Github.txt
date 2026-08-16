@@ -27,8 +27,9 @@ Grundregeln
 - Keine direkten Aufrufe von git push oder git pull verwenden.
 - Read-only-Aufrufe wie git status, git diff, git log und git rev-parse sind
   zur Prüfung erlaubt.
-- Jedes R4OS-Repository ist unabhängig. Immer genau das Repository auswählen,
-  dem die geänderten Dateien gehören.
+- Jedes R4OS-Repository ist unabhängig. Dateien werden weiterhin nur im
+  Repository ihres fachlichen Besitzers bearbeitet; beim normalen Abschluss
+  ermittelt der Sammel-Push die betroffenen Repositories selbst.
 - Ein Project-Push synchronisiert keine Repositories unter Repositories,
   DevKit oder Docs. Diese Verzeichnisse sind eigenständige Repositories und
   im Project-Repository ausgeschlossen.
@@ -37,9 +38,14 @@ Grundregeln
   Rebases aus. Es arbeitet direkt mit main.
 - Zugangsdaten niemals lesen, anzeigen, protokollieren, kopieren oder in einen
   Commit aufnehmen.
-- Vor jedem Push den vollständigen Status des gewählten Repositories prüfen.
-  Github.bat staged sämtliche nicht ignorierten Änderungen dieses
-  Repositories, nicht nur die Dateien der aktuellen Aufgabe.
+- Der normale Abschluss erfolgt mit `Github.bat -push -changed`. Vor dem
+  ersten Einzel-Push zeigt dieser alle verwalteten Repositoryzustaende und
+  die erkannten Pushziele an. Gezielte Einzel-Pushes sind nur fuer Reparatur-
+  und Sonderfaelle vorgesehen.
+- Github.bat staged in jedem erkannten Ziel sämtliche nicht ignorierten
+  Änderungen dieses Repositories, nicht nur die Dateien der aktuellen
+  Aufgabe. Deshalb vorhandene Änderungen vor dem Sammel-Push vollständig
+  prüfen.
 - Vorhandene fremde oder noch nicht abgeschlossene Änderungen niemals
   verwerfen, zurücksetzen oder überschreiben. Wenn sie nicht mit committed
   werden dürfen, den Push auslassen und die Situation klären.
@@ -109,9 +115,12 @@ Ohne Argumente startet das Script ein Menü:
 
     D:\R4OS\Tools\Github.bat
 
-Das Menü fragt zuerst Push oder Pull und danach das Repository ab. Bei Apps,
-Services, Diagnostics, Drivers und Protocols wird zusätzlich der lokale
-Komponentenname abgefragt. Der Package-Server ist nicht Teil dieses Menüs.
+Das Menü fragt zuerst Push oder Pull. Bei Push ist der Sammel-Push aller
+geänderten Repositories die empfohlene erste Auswahl; alternativ kann ein
+einzelnes Repository gewählt werden. Pull fragt weiterhin immer nach genau
+einem Repository. Bei Apps, Services, Diagnostics, Drivers und Protocols wird
+für den Einzelweg zusätzlich der lokale Komponentenname abgefragt. Der
+Package-Server ist nicht Teil dieses Menüs.
 
 Ein interaktiver Push fragt nicht nach einer Commit-Beschreibung. Ohne direkt
 übergebenen Text verwendet das Script die hinterlegte Standardbeschreibung des
@@ -121,7 +130,17 @@ Repositories.
 Direkte Aufrufe
 ---------------
 
-Für zentrale Repositories gilt:
+Der verbindliche normale Push-Aufruf lautet:
+
+    Github.bat -push -changed "Commit-Beschreibung"
+
+Die Beschreibung ist optional. Ist sie vorhanden, verwendet jedes tatsächlich
+geänderte Repository denselben Text. Ohne Beschreibung greift für jedes Ziel
+dessen vorhandene Standardbeschreibung. Unveränderte Repositories werden
+nicht committed und nicht gepusht.
+
+Gezielte Einzel-Pushes bleiben für Reparatur- und Sonderfälle erhalten. Für
+zentrale Repositories gilt:
 
     Github.bat -push -ZIEL "Commit-Beschreibung"
     Github.bat -pull -ZIEL
@@ -140,6 +159,7 @@ ZIEL ist eines von:
 
 Beispiele:
 
+    D:\R4OS\Tools\Github.bat -push -changed "Arbeitsstand abschliessen"
     D:\R4OS\Tools\Github.bat -push -project "Agent-Anleitung aktualisieren"
     D:\R4OS\Tools\Github.bat -pull -contract
     D:\R4OS\Tools\Github.bat -push -docs "Dokumentation aktualisieren"
@@ -176,11 +196,11 @@ eine passende Standardbeschreibung. Für explizite Beschreibungen einen kurzen,
 einzeiligen deutschen Text als genau ein Argument übergeben. Eingebettete
 doppelte Anführungszeichen und Shell-Sonderzeichen vermeiden.
 
-Sicherer PowerShell-Aufruf für Agents:
+Sicherer normaler PowerShell-Aufruf für Agents:
 
-    $commitMessage = 'GitHub-Anleitung aktualisieren'
+    $commitMessage = 'Arbeitsstand abschliessen'
     $githubScript = (Get-Item -LiteralPath 'D:\R4OS\Tools\Github.bat').FullName
-    & $githubScript -push -project $commitMessage
+    & $githubScript -push -changed $commitMessage
     exit $LASTEXITCODE
 
 
@@ -277,13 +297,57 @@ Protocols
     GitHub: R4OSDev/r4os-protocol-<name-klein>
 
 Agents gehört zum Project-Repository. Änderungen unter Docs gehören dagegen
-zum Docs-Repository. Betrifft eine Aufgabe mehrere Repositorygrenzen, wird
-jedes betroffene Repository separat geprüft und separat gepusht. Github.bat
-besitzt keinen globalen Alles-Push und keinen globalen Alles-Pull.
+zum Docs-Repository. Diese Besitzgrenzen bleiben beim Bearbeiten verbindlich;
+der Sammel-Push erkennt die geänderten Repositorywurzeln anschließend ohne
+manuelle Zielauswahl. Einen Sammel-Pull gibt es bewusst nicht.
 
 
-Was ein Push ausführt
----------------------
+Was der Sammel-Push ausführt
+----------------------------
+
+`Github.bat -push -changed` verwendet intern `Tools/GithubChanged.ps1`, aber
+jeder schreibende Schritt wird weiterhin durch den vorhandenen Einzel-Push von
+Github.bat ausgeführt. Credentials, Repository-Erstellung, Staging, Commit,
+Remoteprüfung und Pushlogik werden dadurch nicht dupliziert.
+
+Die Erkennung besitzt keinen separaten Repository-Index. Sie verwendet diese
+feste Workspace-Struktur:
+
+1. Contract, SDK, Libraries und Kernel.
+2. Direkte Projektverzeichnisse unter Apps, Services, Diagnostics, Drivers
+   und Protocols, innerhalb jeder Rolle alphabetisch.
+3. Distribution, Docs, DevKit, Organisationsprofil und zuletzt Project.
+
+Server ist vollständig ausgeschlossen. Unterrepositories und installierte
+Fremdquellen in DevKit, insbesondere QEMU, Limine und Zig, werden nicht
+rekursiv gesucht und können deshalb kein Sammel-Pushziel werden. Ein neues
+gültiges Komponentenverzeichnis mit `module.R4MF` in einer der fünf Rollen
+wird ohne zusätzlichen Indexeintrag erkannt.
+
+Vor dem ersten Push prüft und zeigt das Script für jedes erkannte Ziel:
+
+- Repository und lokaler Pfad,
+- Arbeitsbaumstatus einschließlich neuer und gelöschter Dateien,
+- aktuellen Branch,
+- Zuordnung von origin zum erwarteten R4OSDev-Remote,
+- Anzahl lokal noch nicht auf origin/main vorhandener Commits.
+
+Ein Ziel wird verarbeitet, wenn sein Arbeitsbaum Änderungen enthält oder
+lokale Commits noch nicht veröffentlicht sind. Fehlende origin-Einträge und
+noch nicht initialisierte gültige Komponenten darf der vorhandene Einzelweg
+anlegen. Ein abweichendes origin oder ein Branch ungleich main wird nicht
+korrigiert, sondern als Fehler für genau dieses Repository gemeldet.
+
+Fehler eines Ziels verhindern nicht die Verarbeitung der übrigen erkannten
+Änderungen. Am Ende werden gepushte, unverändert übersprungene und
+fehlgeschlagene Repositories getrennt aufgelistet. Danach prüft das Script alle
+verwalteten Ziele erneut. Exitcode 0 wird nur geliefert, wenn kein Fehler und
+keine pushbare Änderung beziehungsweise kein unveröffentlichter Commit übrig
+ist.
+
+
+Was ein Einzel-Push ausführt
+----------------------------
 
 Github.bat führt für das gewählte Repository in dieser Reihenfolge aus:
 
@@ -340,7 +404,9 @@ müssen deshalb jeweils ausdrücklich aktualisiert werden.
 Arbeitsablauf für Änderungen
 ----------------------------
 
-1. Eigentümer der zu ändernden Dateien und damit das Zielrepository bestimmen.
+1. Eigentümer der zu ändernden Dateien bestimmen und die fachlichen
+   Repositorygrenzen beim Bearbeiten einhalten. Die spätere manuelle Auswahl
+   eines Pushziels entfällt.
 2. Vorhandenen Zustand lesen:
 
        git -C "D:\R4OS\<Repository-Pfad>" status --short
@@ -349,26 +415,33 @@ Arbeitsablauf für Änderungen
 3. Vorhandene Benutzeränderungen erhalten und nur die beauftragten Dateien
    bearbeiten.
 4. Relevante Builds, Tests und Dokumentationsprüfungen ausführen.
-5. Vor dem Push erneut den gesamten Status, den Diff und gegebenenfalls
-   Whitespace prüfen:
+5. Vor dem Abschluss die Status- und Diffausgaben aller berührten
+   Repositories sowie gegebenenfalls Whitespace prüfen:
 
        git -C "D:\R4OS\<Repository-Pfad>" status --short
        git -C "D:\R4OS\<Repository-Pfad>" diff --check
 
-6. Github.bat mit exakt passendem Ziel und einer klaren Commit-Beschreibung
-   aufrufen.
-7. Exitcode prüfen.
-8. Nach erfolgreichem Push prüfen, dass der Arbeitsbaum den erwarteten Zustand
-   besitzt und HEAD mit origin/main übereinstimmt:
+6. Den Sammel-Push mit einer klaren gemeinsamen Commit-Beschreibung aufrufen:
+
+       D:\R4OS\Tools\Github.bat -push -changed "Arbeitsstand abschliessen"
+
+7. Seine Vorprüfung und Abschlusslisten vollständig lesen und den Exitcode
+   prüfen.
+8. Bei Exitcode ungleich 0 die genannten Repositories gezielt untersuchen und
+   erst nach der Korrektur den Sammel-Push erneut ausführen. Gezielte
+   Einzel-Pushes nur verwenden, wenn die Reparatur sie ausdrücklich verlangt.
+9. Nach erfolgreichem Push meldet die eingebaute Abschlussprüfung keine
+   verbleibenden Änderungen oder unveröffentlichten Commits. Bei Bedarf kann
+   zusätzlich gezielt geprüft werden:
 
        git -C "D:\R4OS\<Repository-Pfad>" status --short
        git -C "D:\R4OS\<Repository-Pfad>" rev-parse HEAD
        git -C "D:\R4OS\<Repository-Pfad>" rev-parse origin/main
 
-Bei Änderungen über mehrere Repositories werden diese einzeln abgeschlossen.
-Abhängige Wahrheiten werden sinnvoll geordnet veröffentlicht: zuerst der
-geänderte Contract oder die geänderte Library, anschließend SDK beziehungsweise
-Verbraucher und zuletzt übergreifende Dokumentation oder Workspace-Steuerung.
+Die feste Sammelreihenfolge veröffentlicht abhängige Wahrheiten vor ihren
+Verbrauchern und die Workspace-Steuerung zuletzt. Ein Fehlschlag macht den
+Vorgang nicht atomar rückgängig; bereits erfolgreiche Repositories bleiben
+veröffentlicht und werden beim nächsten Lauf als unverändert übersprungen.
 
 
 Erstaufbau eines Workspace
@@ -443,11 +516,18 @@ Push meldet keine neuen Dateien
     ob das richtige Zielrepository gewählt wurde und ob die Dateien ignoriert
     oder Teil eines anderen Einzelrepositories sind.
 
+Sammel-Push endet mit Fehler
+    Die getrennten Listen und die abschließende Restprüfung lesen. Erfolgreich
+    gepushte Repositories nicht zurücksetzen. Nur die konkret fehlgeschlagenen
+    Branch-, Remote-, Credential-, Commit- oder Pushprobleme beheben und den
+    Sammel-Push erneut ausführen.
+
 
 Grenzen des Scripts
 -------------------
 
-- Kein Alles-Push und kein Alles-Pull.
+- Kein Sammel-Pull; Pulls bleiben gezielt und verwenden ausschließlich
+  Fast-Forward.
 - Keine Pull Requests, Reviews oder Freigaben im Browser.
 - Keine Arbeit auf Feature-Branches.
 - Kein Merge, Rebase, Reset, Clean oder Stash.
@@ -456,6 +536,7 @@ Grenzen des Scripts
 - Keine Veröffentlichung ignorierter Buildartefakte, Toolinstallationen oder
   Credentials.
 - Neue zentrale Repositoryarten benötigen eine ausdrückliche Zuordnung in
-  Tools\Github.bat. Apps, Services, Diagnostics, Drivers und Protocols werden
-  bereits generisch über Rollenflag und Komponentenname unterstützt. Der
-  Package-Server bleibt bewusst außerhalb dieses globalen Scripts.
+  Tools\Github.bat und in der festen Sammelreihenfolge. Apps, Services,
+  Diagnostics, Drivers und Protocols werden bereits generisch über
+  Rollenverzeichnis und Komponentenname erkannt. Der Package-Server bleibt
+  bewusst außerhalb dieses globalen Scripts.
