@@ -32,11 +32,12 @@ organization.
 Use `Tools/Build.bat` as the multi-repository Windows build entry point.
 Run it without arguments for the interactive menu.
 
-Use `Tools/Clean.bat` to empty `Artifacts` and remove every R4OS-local
-`.zig-cache` directory. Use `-artifacts` or `-zig` for only one of those
-operations. The Zig cleanup also covers the dedicated DevKit and Distribution
-cache trees. Installed toolchains, system-global Zig caches, and `zig-out`
-directories remain untouched.
+Use `Tools/Clean.bat` to empty every `Artifacts` subtree except the preserved
+`Artifacts/Distribution` tree and to remove R4OS-local `.zig-cache`
+directories outside that tree. Use `-artifacts` or `-zig` for only one of
+those operations. The Zig cleanup also covers the dedicated DevKit cache.
+Installed toolchains, system-global Zig caches, `zig-out` directories, and
+all Distribution outputs and private injection files remain untouched.
 
 Push and pull operations are performed exclusively through
 `Tools/Github.bat`. Public pulls are anonymous and explicitly ignore local
@@ -45,6 +46,12 @@ Git credential helpers. The normal multi-repository completion command is
 use the ignored local token file.
 Documentation, source repositories, installed tools, artifacts, and
 credentials are ignored and are not stored in this project repository.
+
+Independent applications, services, diagnostics, drivers, protocols, and
+subsystem hosts live below their matching `Repositories` role. Subsystem
+repositories use `Repositories/Subsystems/<Project>` and the public
+`r4os-subsystem-*` naming convention. Installed hosts and guest formats are
+resolved in userland from the profile-specific `MODULES.JSON` inventory.
 
 ## License
 

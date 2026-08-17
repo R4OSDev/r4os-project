@@ -37,8 +37,8 @@ Die wichtigsten Aufrufe unter Windows:
     Repositories\Kernel\Build.bat test
     Repositories\Distribution\Build.bat test
 
-Bei einer einzelnen App, einem Dienst, Diagnoseprogramm, Treiber oder
-Protokoll:
+Bei einer einzelnen App, einem Dienst, Diagnoseprogramm, Treiber, Protokoll
+oder Subsystem:
 
     Repositories\<Rolle>\<Projekt>\Build.bat test
 
@@ -216,10 +216,91 @@ Wenn der Headless-Lauf rot ist
 5. Bei Timeout ohne Crashmarker einmal mit 600 Sekunden gegenpruefen.
 6. Bei fehlenden Dateien den Testplan, `image-adds.txt` und
    `MODULES.JSON` desselben Testbuilds kontrollieren.
-7. Bei moeglichen Altartefakten `Tools\Clean.bat -artifacts` ausfuehren
-   und den benoetigten Build vollstaendig wiederholen.
+7. Bei moeglichen Altartefakten ausserhalb von `Artifacts/Distribution`
+   `Tools\Clean.bat -artifacts` ausfuehren und den benoetigten Build
+   vollstaendig wiederholen. Distribution-Ausgaben bleiben dabei bewusst
+   erhalten und werden ueber ihren zustaendigen Buildpfad erneuert.
 
 Ein gruener Wiederholungslauf widerlegt einen sporadischen Fehler nicht.
+
+
+Subsystemkatalog und Resolver
+-----------------------------
+
+Das permanente SDK-Gate prueft die Schema-2/3-Migration auf Schema 4, fehlende
+Hosts, manipulierte und abgeschnittene Inventare sowie stabile Kandidaten. Die
+Dateifixtures unter `Repositories/SDK/Tests/Fixture/SubsystemResolver/`
+decken BASIC-aehnlichen Text, DOS-MZ, ROM-Signatur und eine nur als EXE
+getarnte Textdatei ab. Ein Resolverergebnis ist erst nach der spaeteren
+Hostvalidierung ausfuehrbar; Tests duerfen einen Probe-Treffer nicht als
+vollstaendige Gastdateivalidierung behandeln.
+
+Seit 0.66.2 prueft der Explorer-Selbsttest zusaetzlich die vollstaendige
+Dateihandlerkette. Das Testprofil enthaelt
+`C:\TEMP\SUBSYSTEM-A.BAS`, `C:\TEMP\SUBSYSTEM-B.BAS` und den normalen
+GUI-R4X-Host `test.basic`. Der Test laedt den installierten Katalog, probt
+beide Dateien, prueft dieselbe stabile Subsystem-ID bei zwei verschiedenen
+laengencodierten Gastpfaden, validiert den Host und erwartet in `Open With`
+gleichzeitig App- und Subsystemhandler. Das Fixture bleibt anschliessend im
+normalen Gastfall im Ereignisloop; ein manueller Sichttest kann daher zwei
+unabhaengige Fenster oeffnen und Fokus, Move, Minimize, Maximize, Restore,
+Resize und Close ueber die normale Desktop-Chrome pruefen. Die beiden
+testprofilspezifischen Gastpfade aktivieren dagegen die endliche Runtime-
+Abnahme des Fixtures.
+
+
+Subsystem-Fensterhost und Gastlaufzeit
+--------------------------------------
+
+Die Inline-Tests in `Repositories/SDK/r4os/subsystem_host.zig` pruefen
+Viewport und Letterboxing, ganzzahlige und fraktionale
+Naechste-Nachbar-Skalierung, 128x128-Tiling, Indexed8 und XRGB32,
+Palettenwechsel, Voll-/Damage-Frames, Damage-Verdichtung, ausbleibende Frames
+ohne Aenderung sowie die Uebersetzung von Resize, Fokus, Tastatur, Text und
+Maus.
+
+Die Inline-Tests in `Repositories/SDK/r4os/subsystem_runtime.zig` pruefen
+monotone und pausenbereinigte Gastzeit, driftarmes Pacing, die caller-eigene
+PCM-Ringqueue, begrenzte Gast-Scheiben, Pause/Fortsetzen/Reset/Close,
+Gastabschluss und kontrollierte Fehler, Stille bei Unterlauf, Mute, fehlendes
+Audio, partiellen Audiofehler sowie zwei isolierte Runtime-Instanzen. Der
+direkte Testlauf umfasst zusammen mit dem importierten Zeitvertrag zehn
+Tests.
+
+Das Testprofil startet R4DESK mit dem ausschliesslich im Testoverlay gesetzten
+Shellargument `/HEADLESS-SUBSYSTEM`. AUDSVC wird dafuer als ausdruecklicher
+Test-Include aufgenommen; seine normale Full-Zuordnung bleibt unveraendert.
+R4DESK wartet auf den Service, laedt den installierten Subsystemkatalog und
+loest `C:\TEMP\SUBSYSTEM-A.BAS` sowie `C:\TEMP\SUBSYSTEM-B.BAS` ueber den
+gemeinsamen R4STD-Dateihandler zu zwei `R4SUBSYS1`-Starts desselben Hosts auf.
+Damit durchlaeuft die Abnahme Katalog, Probe, Zuordnung, Startvertrag,
+getrennte Fensterhandles, Video, Eingabe, Zeit und Audio.
+
+Beide Instanzen laufen gleichzeitig unter echter Ereignis- und
+Kompositionsverarbeitung. Der Desktop prueft Fokus sowie
+Maximize/Restore; jedes Fixture prueft die Videomodi, Startup-Resize/Fokus,
+24 kontrollierte Vollframes und danach die kooperative Runtime. Deren Gast
+verwendet ein festes Operationsbudget, 30-Hz-Pacing und gepuffertes
+48-kHz-Stereo-S16LE ueber App-Audio und AUDSVC. Pause, Fortsetzen, Reset und
+Mute/Unmute werden zwischen Scheiben ausgefuehrt. Instanz A endet als Gast,
+Instanz B ueber Close. Nur die beiden urspruenglichen Handles mit Exitcode 0
+erzeugen `C:\TEMP\SUBSYS.OK`; Fehler schreiben einen konkreten Marker.
+
+AUTOEXEC uebernimmt die Datei mit `TYPE` in den seriellen Log und fuehrt
+danach die bestehende Suite bis zum Poweroff aus. Erfolg verlangt beide
+exakten Marker:
+
+`SUBSYSTEM host selftest: OK modes=640x350+320x200+256x224 formats=indexed8+xrgb32 tiles=bounded input=translated idle=no-frame fps>=20`
+
+`SUBSYSTEM runtime selftest: OK instances=2 slices=bounded time=monotonic audio=s16le-buffered lifecycle=pause+resume+reset+complete+close errors=isolated resources=closed`
+
+Host-, Runtime- und Bootstrap-FAILED-Marker sind verboten.
+
+Im interaktiven, ueber Explorer geoeffneten Fixture wechseln `1`, `2` und `3`
+die Videomodi, Leertaste schaltet die Animation, `P` aendert die Palette und
+Escape schliesst das Fenster. Fokus, Text und auf den Gastbildschirm
+abgebildete Mauspositionen reagieren sichtbar. Fuer andere als die beiden
+Testgastpfade bleibt dieser interaktive Modus aktiv.
 
 
 Sichttests

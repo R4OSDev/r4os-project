@@ -45,7 +45,7 @@ echo R4OS Workspace Build-Menue
 echo ==========================
 echo 1  Contract, SDK und Libraries bauen
 echo 2  Kernel bauen
-echo 3  Alle Apps, Dienste, Diagnosen, Treiber und Protokolle bauen
+echo 3  Alle Apps, Dienste, Diagnosen, Treiber, Protokolle und Subsysteme bauen
 echo 4  Bestimmtes Modul bauen
 echo 5  Gesamtbuild und Full-Image erzeugen
 echo 6  Vorhandenes Full-Image in QEMU mit GUI starten

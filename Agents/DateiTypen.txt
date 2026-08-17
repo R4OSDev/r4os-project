@@ -64,7 +64,9 @@ Konfiguration und Text
                 CONFIG.R4S      Boot und Shell
                 VERSION.R4S     sichtbare Release- oder Kernelversion
                 SERVICES.R4S    Dienste und Autostart
-                ASSOC.R4S       Dateizuordnungen
+                ASSOC.R4S       Dateizuordnungen; Handler APP, SUBSYSTEM oder
+                                NONE. Subsystemeintraege speichern nur stabile
+                                ID und Gastformat, nie Hostpfad oder Anzeigename.
                 DESKTOP.R4S     Desktopkonfiguration
                 INPUT.R4S       Tastaturlayout und Eingabe
                 TIME.R4S        Zeitzone und Zeitquelle

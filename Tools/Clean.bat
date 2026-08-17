@@ -59,19 +59,53 @@ if not errorlevel 1 (
     endlocal & exit /b 1
 )
 
-echo Leere: %R4OS_CLEAN_TARGET%
-call :remove_reparse_points "%R4OS_CLEAN_TARGET%"
+echo Bereinige: %R4OS_CLEAN_TARGET%
+echo Behalte: %R4OS_CLEAN_TARGET%\Distribution
+for /F "eol=| delims=" %%I in ('dir /A:D /B "%R4OS_CLEAN_TARGET%\*" 2^>nul') do if /I not "%%I"=="Distribution" (
+    call :clean_artifact_directory "%R4OS_CLEAN_TARGET%\%%I"
+    if errorlevel 1 goto clean_failed
+)
+for /F "eol=| delims=" %%I in ('dir /A:-D /B "%R4OS_CLEAN_TARGET%\*" 2^>nul') do (
+    call :clean_artifact_file "%R4OS_CLEAN_TARGET%\%%I"
+    if errorlevel 1 goto clean_failed
+)
+call :verify_artifacts_clean
 if errorlevel 1 goto clean_failed
 
-rd /S /Q "%R4OS_CLEAN_TARGET%" >nul 2>&1
-if exist "%R4OS_CLEAN_TARGET%\" goto clean_failed
-
-mkdir "%R4OS_CLEAN_TARGET%"
-if errorlevel 1 goto create_failed
-
-echo Artifacts wurde vollstaendig geleert.
+echo Artifacts wurde ausserhalb von Distribution vollstaendig geleert.
 if defined R4OS_CLEAN_ZIG_AFTER_ARTIFACTS goto clean_zig_caches
 endlocal & exit /b 0
+
+:clean_artifact_directory
+set "R4OS_CLEAN_ENTRY=%~f1"
+for %%I in ("%R4OS_CLEAN_ENTRY%\..") do set "R4OS_CLEAN_ENTRY_PARENT=%%~fI"
+if /I not "%R4OS_CLEAN_ENTRY_PARENT%"=="%R4OS_CLEAN_TARGET%" exit /b 1
+if /I "%R4OS_CLEAN_ENTRY%"=="%R4OS_CLEAN_TARGET%\Distribution" exit /b 0
+for %%I in ("%R4OS_CLEAN_ENTRY%") do set "R4OS_CLEAN_ENTRY_ATTRIBUTES=%%~aI"
+if not "%R4OS_CLEAN_ENTRY_ATTRIBUTES:l=%"=="%R4OS_CLEAN_ENTRY_ATTRIBUTES%" goto clean_artifact_directory_link
+fsutil reparsepoint query "%R4OS_CLEAN_ENTRY%" >nul 2>&1
+if not errorlevel 1 goto clean_artifact_directory_link
+call :remove_reparse_points "%R4OS_CLEAN_ENTRY%"
+if errorlevel 1 exit /b 1
+rd /S /Q "%R4OS_CLEAN_ENTRY%" >nul 2>&1
+if exist "%R4OS_CLEAN_ENTRY%\" exit /b 1
+exit /b 0
+
+:clean_artifact_directory_link
+call :remove_reparse_point "%R4OS_CLEAN_ENTRY%"
+exit /b %ERRORLEVEL%
+
+:clean_artifact_file
+set "R4OS_CLEAN_ENTRY=%~f1"
+for %%I in ("%R4OS_CLEAN_ENTRY%\..") do set "R4OS_CLEAN_ENTRY_PARENT=%%~fI"
+if /I not "%R4OS_CLEAN_ENTRY_PARENT%"=="%R4OS_CLEAN_TARGET%" exit /b 1
+call :remove_reparse_point "%R4OS_CLEAN_ENTRY%"
+exit /b %ERRORLEVEL%
+
+:verify_artifacts_clean
+for /F "eol=| delims=" %%I in ('dir /A:D /B "%R4OS_CLEAN_TARGET%\*" 2^>nul') do if /I not "%%I"=="Distribution" exit /b 1
+for /F "eol=| delims=" %%I in ('dir /A:-D /B "%R4OS_CLEAN_TARGET%\*" 2^>nul') do exit /b 1
+exit /b 0
 
 :clean_zig_caches
 if not exist "%R4OS_PROJECT_ROOT%\.gitignore" goto unsafe_target
@@ -83,11 +117,9 @@ call :clean_zig_cache "%R4OS_PROJECT_ROOT%\.zig-cache"
 if errorlevel 1 set "R4OS_CLEAN_ZIG_FAILED=1"
 call :clean_explicit_zig_cache "%R4OS_PROJECT_ROOT%\DevKit\.Cache\Zig"
 if errorlevel 1 set "R4OS_CLEAN_ZIG_FAILED=1"
-call :clean_explicit_zig_cache "%R4OS_PROJECT_ROOT%\Artifacts\Distribution\.Cache"
-if errorlevel 1 set "R4OS_CLEAN_ZIG_FAILED=1"
 call :scan_zig_cache_root "%R4OS_PROJECT_ROOT%\Repositories"
 if errorlevel 1 set "R4OS_CLEAN_ZIG_FAILED=1"
-call :scan_zig_cache_root "%R4OS_PROJECT_ROOT%\Artifacts"
+call :scan_artifacts_zig_caches
 if errorlevel 1 set "R4OS_CLEAN_ZIG_FAILED=1"
 call :scan_zig_cache_root "%R4OS_PROJECT_ROOT%\DevKit\SDK"
 if errorlevel 1 set "R4OS_CLEAN_ZIG_FAILED=1"
@@ -97,6 +129,16 @@ if errorlevel 1 set "R4OS_CLEAN_ZIG_FAILED=1"
 if "%R4OS_CLEAN_ZIG_FAILED%"=="1" goto zig_clean_failed
 echo Zig-Caches entfernt: %R4OS_CLEAN_ZIG_COUNT%
 endlocal & exit /b 0
+
+:scan_artifacts_zig_caches
+if not exist "%R4OS_PROJECT_ROOT%\Artifacts\" exit /b 0
+call :clean_zig_cache "%R4OS_PROJECT_ROOT%\Artifacts\.zig-cache"
+if errorlevel 1 exit /b 1
+for /F "eol=| delims=" %%I in ('dir /A:D /B "%R4OS_PROJECT_ROOT%\Artifacts\*" 2^>nul') do if /I not "%%I"=="Distribution" (
+    call :scan_zig_cache_root "%R4OS_PROJECT_ROOT%\Artifacts\%%I"
+    if errorlevel 1 exit /b 1
+)
+exit /b 0
 
 :scan_zig_cache_root
 if not exist "%~f1\" exit /b 0
@@ -122,7 +164,6 @@ goto clean_zig_cache_target
 if not exist "%~f1\" exit /b 0
 set "R4OS_CLEAN_ZIG_TARGET=%~f1"
 if /I "%R4OS_CLEAN_ZIG_TARGET%"=="%R4OS_PROJECT_ROOT%\DevKit\.Cache\Zig" goto explicit_zig_cache_valid
-if /I "%R4OS_CLEAN_ZIG_TARGET%"=="%R4OS_PROJECT_ROOT%\Artifacts\Distribution\.Cache" goto explicit_zig_cache_valid
 goto unsafe_zig_cache
 
 :explicit_zig_cache_valid
@@ -205,9 +246,10 @@ echo FEHLER: Das berechnete Clean-Ziel liegt nicht sicher im Projektworkspace.
 endlocal & exit /b 1
 
 :clean_failed
-echo FEHLER: Artifacts konnte nicht vollstaendig geleert werden.
-echo Verbliebene Eintraege:
-dir /A /B "%R4OS_CLEAN_TARGET%" 2>nul
+echo FEHLER: Artifacts konnte ausserhalb von Distribution nicht vollstaendig geleert werden.
+echo Verbliebene Eintraege ausserhalb von Distribution:
+for /F "eol=| delims=" %%I in ('dir /A:D /B "%R4OS_CLEAN_TARGET%\*" 2^>nul') do if /I not "%%I"=="Distribution" echo %%I
+for /F "eol=| delims=" %%I in ('dir /A:-D /B "%R4OS_CLEAN_TARGET%\*" 2^>nul') do echo %%I
 endlocal & exit /b 1
 
 :unsafe_zig_cache
