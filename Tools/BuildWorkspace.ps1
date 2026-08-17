@@ -61,6 +61,7 @@ $testImageIncludes = @(
     '/R4OS/SOFTWARE/TERMINAL/HELP.R4X',
     '/R4OS/SERVICES/EXSVC.R4X',
     '/R4OS/SERVICES/RDPSVC.R4X',
+    '/R4OS/SERVICES/AUDSVC.R4X',
     '/R4OS/SOFTWARE/TERMINAL/REG.R4X',
     '/R4OS/SOFTWARE/TERMINAL/SYSINFO.R4X',
     '/R4OS/SOFTWARE/TERMINAL/BOOTINFO.R4X'
@@ -183,7 +184,7 @@ function Get-ManifestValue([string]$ManifestPath, [string]$Name) {
 
 function Get-ModuleRepositories {
     $result = [Collections.Generic.List[object]]::new()
-    foreach ($role in @('Apps', 'Services', 'Diagnostics', 'Drivers', 'Protocols')) {
+    foreach ($role in @('Apps', 'Services', 'Diagnostics', 'Drivers', 'Protocols', 'Subsystems')) {
         $roleRoot = Join-Path $repositoriesRoot $role
         Assert-Directory $roleRoot ('Repositoryrolle ' + $role)
         foreach ($directory in Get-ChildItem -LiteralPath $roleRoot -Directory | Sort-Object Name) {

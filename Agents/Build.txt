@@ -49,7 +49,7 @@ immer einen Modus angeben und den Exitcode auswerten.
 | --- | --- |
 | `-central` | Contract, SDK und alle Runtime-Libraries bauen |
 | `-kernel` | nur den Kernel bauen |
-| `-modules`, `-apps` | alle direkten Projekte der fuenf Modulrollen bauen |
+| `-modules`, `-apps` | alle direkten Projekte der sechs Modulrollen bauen |
 | `-module NAME` | genau ein Modul nach Projekt- oder Manifestname bauen |
 | `-module Rolle\Name` | genau ein eindeutig adressiertes Modul bauen |
 | `-plan [Profil]` | Workspace-Map, gemeinsame Artefakte, Profilplan und MODULES.JSON erzeugen |
@@ -90,7 +90,7 @@ Ablauf eines Gesamtbuilds
 5. Kernel ueber `Repositories/Kernel/Build.bat` bauen. Die sechs Platform
    APIs sind Teil dieses Kernelartefakts und keine getrennten Modulbuilds.
 6. Alle direkten Repositoryprojekte unter Apps, Services, Diagnostics,
-   Drivers und Protocols dynamisch entdecken und deren eigenes `Build.bat`
+   Drivers, Protocols und Subsystems dynamisch entdecken und deren eigenes `Build.bat`
    aufrufen.
 7. Aus allen versionierten und nicht ignorierten `module.R4MF` sowie den
    zugehoerigen Artefakten `WorkspaceModules.map` erzeugen. Dazu gehoeren
@@ -128,12 +128,17 @@ Das Testprofil verwendet zusaetzlich
 `Repositories/Distribution/TestInjection/` ueber dem normalen
 `Injection/`-Overlay. Unbekannte Scopes, doppelte Ziele, fehlende Artefakte
 und unaufloesbare Providerabhaengigkeiten sind harte Planfehler.
+Produktive Full-Module, die nur eine Testkette benoetigt, koennen als
+ausdrueckliche Test-Includes des Orchestrators aufgenommen werden. Fuer die
+Subsystem-Runtime-Abnahme gilt dies fuer AUDSVC; dessen normale
+`IMAGE_SCOPE=full`-Zuordnung und damit Slim und Full bleiben unveraendert.
 
 
 Einzelne Repositories bauen
 ---------------------------
 
-Jede Komponente unter Apps, Services, Diagnostics, Drivers und Protocols
+Jede Komponente unter Apps, Services, Diagnostics, Drivers, Protocols und
+Subsystems
 besitzt eigene Starter:
 
     Repositories\Apps\Clock\Build.bat
@@ -226,6 +231,13 @@ Komponenten des konkret geplanten Profils. Die manuelle Gesamtuebersicht
 aller kanonischen Module ist dagegen
 `Docs/Inventory/AllModules.json`.
 
+Schema 4 enthaelt fuer installierte Subsystem-R4X zusaetzlich Anzeigename,
+Gastformate, Endungshinweise und versionierte Probe-Merkmale. Daraus erzeugt
+das SDK zur Laufzeit den sortierten installierten Subsystemkatalog. Dieser ist
+eine validierte Projektion derselben Datei und keine zweite persistente Liste;
+dadurch folgen Installation, Update und Entfernung automatisch dem
+Modulinventar. Schema 2 und 3 bleiben fuer die Updatemigration lesbar.
+
 Das zentrale API-Inventar liegt unter
 `Repositories/Contract/Generated/Inventory/API.json` und wird aus dem
 Contract erzeugt.
@@ -275,16 +287,19 @@ Aufraeumen und Fehlersuche
 --------------------------
 
     Tools\Clean.bat
-        leert Artifacts und entfernt alle R4OS-lokalen Zig-Caches
+        leert Artifacts ausser Distribution und entfernt alle anderen
+        R4OS-lokalen Zig-Caches
 
     Tools\Clean.bat -artifacts
-        leert nur Artifacts
+        leert nur Artifacts ausser Distribution
 
     Tools\Clean.bat -zig
-        entfernt nur lokale Zig-Caches
+        entfernt nur lokale Zig-Caches ausserhalb von Artifacts/Distribution
 
-`zig-out`, installierte Toolchains und der systemglobale Zig-Cache bleiben
-bewusst erhalten.
+`Artifacts/Distribution` bleibt mit allen Profilimages, Logs, Releases,
+Hosttools, erzeugten Plaenen und `PrivateInjection` bei jedem Clean-Modus
+vollstaendig erhalten. Ebenso bleiben `zig-out`, installierte Toolchains und
+der systemglobale Zig-Cache bewusst erhalten.
 
 Bei einem Fehler:
 
@@ -298,8 +313,11 @@ Bei einem Fehler:
 - Pfadmappings in dessen `Settings.R4S` pruefen.
 - Bei Planfehlern zuerst fehlende Artefakte, doppelte Ziele,
   `IMAGE_SCOPE` und Providerabhaengigkeiten pruefen.
-- Bei einem scheinbar veralteten Artefakt `Tools\Clean.bat -artifacts`
-  verwenden und den benoetigten Build erneut fahren.
+- Bei einem scheinbar veralteten Modul- oder sonstigen Artefakt ausserhalb
+  von `Artifacts/Distribution` `Tools\Clean.bat -artifacts` verwenden und
+  den benoetigten Build erneut fahren. Distribution-Ausgaben werden vom
+  Clean bewusst nicht entfernt und durch den zustaendigen Image-, Tool- oder
+  Releasebuild gezielt erneuert.
 - Der Kernel bleibt auf `ReleaseSafe` und ohne SIMD.
 
 

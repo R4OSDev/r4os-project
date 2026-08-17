@@ -124,6 +124,7 @@ Ein eigenstaendiges Modulrepository liegt unter genau einer Rolle:
     Repositories/Diagnostics/<Projekt>/
     Repositories/Drivers/<Projekt>/
     Repositories/Protocols/<Projekt>/
+    Repositories/Subsystems/<Projekt>/
 
 Typischer Aufbau:
 
@@ -190,6 +191,11 @@ Kanonische Feldreihenfolge:
     SOURCE
     ENTRY_MODE
     APP_CLASS
+    MODULE_ROLE
+    SUBSYSTEM_ID
+    GUEST_FORMAT
+    GUEST_EXTENSION
+    GUEST_FEATURE
     TARGET
     IMAGE_SCOPE
     OPTIMIZE
@@ -307,7 +313,7 @@ Vom Workspace aus:
 
     Tools\Build.bat -module Apps\MeinProjekt
 
-Der Workspace entdeckt alle direkten Projekte der fuenf Rollen anhand von
+Der Workspace entdeckt alle direkten Projekte der sechs Rollen anhand von
 module.R4MF, Build.bat und Settings.R4S. Der Buildstarter schreibt das
 Artefakt standardmaessig nach
 Artifacts/Modules/<Projekt>/<NAME>.<KIND>.
@@ -335,6 +341,12 @@ profilgebundene Ergebnis steht unter:
 Distribution projiziert diese Datei nach:
 
     C:\R4OS\CONFIG\MODULES.JSON
+
+Subsystem-R4X bleiben normale Container. Ihr Anzeigename sowie ihre Format-,
+Endungs- und Probeangaben stehen in abgeleiteten `subsystem.*`-Metadaten und
+im Schema-4-Inventar. Der gemeinsame Userland-Resolver projiziert daraus
+Kandidaten; weder der Containerloader noch der Kernel entscheiden ueber ein
+Gastformat.
 
 Ressourcen werden zur Laufzeit ueber die R4SYS-Ressourcen-API gelesen.
 Programmicons und programmeigene Medien gehoeren in den Container. Externe

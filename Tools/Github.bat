@@ -17,6 +17,7 @@ if /I "%~2"=="-service" set "R4OS_COMMIT_MESSAGE=%~4"
 if /I "%~2"=="-diagnostic" set "R4OS_COMMIT_MESSAGE=%~4"
 if /I "%~2"=="-driver" set "R4OS_COMMIT_MESSAGE=%~4"
 if /I "%~2"=="-protocol" set "R4OS_COMMIT_MESSAGE=%~4"
+if /I "%~2"=="-subsystem" set "R4OS_COMMIT_MESSAGE=%~4"
 
 if not defined R4OS_ACTION if "%~1"=="" goto interactive
 if not defined R4OS_ACTION goto usage
@@ -69,8 +70,10 @@ echo   [B] Dienst
 echo   [C] Diagnose
 echo   [D] Docs
 echo   [E] Organisationsprofil
-choice /C 123456789ABCDE /N /M "Auswahl"
-if errorlevel 14 set "R4OS_INTERACTIVE_TARGET=-organization"
+echo   [F] Subsystem
+choice /C 123456789ABCDEF /N /M "Auswahl"
+if errorlevel 15 set "R4OS_INTERACTIVE_TARGET=-subsystem"
+if errorlevel 14 if not defined R4OS_INTERACTIVE_TARGET set "R4OS_INTERACTIVE_TARGET=-organization"
 if errorlevel 13 if not defined R4OS_INTERACTIVE_TARGET set "R4OS_INTERACTIVE_TARGET=-docs"
 if errorlevel 12 if not defined R4OS_INTERACTIVE_TARGET set "R4OS_INTERACTIVE_TARGET=-diagnostic"
 if errorlevel 11 if not defined R4OS_INTERACTIVE_TARGET set "R4OS_INTERACTIVE_TARGET=-service"
@@ -90,6 +93,7 @@ if /I "%R4OS_INTERACTIVE_TARGET%"=="-service" goto interactive_component
 if /I "%R4OS_INTERACTIVE_TARGET%"=="-diagnostic" goto interactive_component
 if /I "%R4OS_INTERACTIVE_TARGET%"=="-driver" goto interactive_component
 if /I "%R4OS_INTERACTIVE_TARGET%"=="-protocol" goto interactive_component
+if /I "%R4OS_INTERACTIVE_TARGET%"=="-subsystem" goto interactive_component
 
 call "%~f0" %R4OS_INTERACTIVE_ACTION% %R4OS_INTERACTIVE_TARGET%
 set "R4OS_INTERACTIVE_EXIT=%ERRORLEVEL%"
@@ -121,6 +125,7 @@ if /I "%~1"=="-service" goto select_service
 if /I "%~1"=="-diagnostic" goto select_diagnostic
 if /I "%~1"=="-driver" goto select_driver
 if /I "%~1"=="-protocol" goto select_protocol
+if /I "%~1"=="-subsystem" goto select_subsystem
 exit /b 1
 
 :select_project
@@ -264,6 +269,13 @@ set "R4OS_COMPONENT_KIND=protocol"
 set "R4OS_COMPONENT_LABEL=Protokoll"
 set "R4OS_COMPONENT_DESCRIPTION=Independent R4OS protocol module"
 set "R4OS_COMPONENT_DIRECTORY=Protocols"
+goto select_component
+
+:select_subsystem
+set "R4OS_COMPONENT_KIND=subsystem"
+set "R4OS_COMPONENT_LABEL=Subsystem"
+set "R4OS_COMPONENT_DESCRIPTION=Independent R4OS subsystem host"
+set "R4OS_COMPONENT_DIRECTORY=Subsystems"
 goto select_component
 
 :select_component
@@ -546,6 +558,8 @@ echo   Github.bat -push -driver NAME ["Commit-Beschreibung"]
 echo   Github.bat -pull -driver NAME
 echo   Github.bat -push -protocol NAME ["Commit-Beschreibung"]
 echo   Github.bat -pull -protocol NAME
+echo   Github.bat -push -subsystem NAME ["Commit-Beschreibung"]
+echo   Github.bat -pull -subsystem NAME
 endlocal & exit /b 1
 
 :failure

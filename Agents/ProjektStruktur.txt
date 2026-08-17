@@ -69,6 +69,7 @@ Komponentenrollen:
     Diagnostics/<Projekt>/
     Drivers/<Projekt>/
     Protocols/<Projekt>/
+    Subsystems/<Projekt>/
 
 Jedes direkte Projekt unter diesen Rollen ist ein eigenes Git-Repository.
 Der normale Aufbau lautet:
@@ -87,6 +88,18 @@ Die Rollenordner selbst sind keine gemeinsamen Komponenten-Repositories.
 Ein Modul wird in seinem eigenen Repository geaendert und mit dessen
 `Build.bat` gebaut. `Tools/Build.bat` entdeckt die direkten Projekte
 dynamisch und orchestriert sie nur.
+
+Subsystems sind eigenstaendige GUI-R4X-Hosts fuer fremde
+Ausfuehrungsumgebungen. Ihre Repositoryrolle aendert den R4M0-Kind nicht;
+`MODULE_ROLE=subsystem`, die stabile `SUBSYSTEM_ID` und Gastformate stehen im
+R4MF-v2-Manifest; `SUBSYSTEM_DISPLAY_NAME` ist der davon getrennte sichtbare
+Name. Der kanonische Imagepfad lautet `C:\R4OS\SUBSYSTEMS\<ID>\`.
+
+Der installierte Subsystemkatalog wird im Userland aus den Subsystemeintraegen
+von `C:\R4OS\CONFIG\MODULES.JSON` projiziert. Der SDK-Resolver verwendet
+Benutzerzuordnung, bestaetigte Probe, Endungsstandard und stabile
+Kandidatenliste in dieser Reihenfolge; die verbindliche Dateivalidierung
+bleibt Eigentum des gestarteten Hosts.
 
 
 Contract, SDK und Libraries
@@ -149,8 +162,11 @@ Installation dieser Fremdwerkzeuge.
 Artifacts/
 ----------
 
-`Artifacts/` ist vollstaendig lokal und kann mit `Tools/Clean.bat` geleert
-werden. Wichtige erzeugte Orte sind:
+`Artifacts/` ist vollstaendig lokal. `Tools/Clean.bat` leert alle direkten
+und darunterliegenden Artefaktbereiche mit Ausnahme des vollstaendig
+erhaltenen Baums `Artifacts/Distribution/`. Dadurch bleiben insbesondere
+Profile, Logs, Releases und das private Injection-Overlay ueber alle
+Clean-Modi hinweg bestehen. Wichtige Orte sind:
 
     Modules/<Projekt>/                 Artefakte einzelner Modul-Repositories
     Distribution/Inputs/               WorkspaceModules.map und Imageplaene
@@ -197,7 +213,8 @@ Artefakten:
 Das erste wird aus dem Contract erzeugt. Das zweite beschreibt genau den
 zuletzt geplanten Imageumfang und wird in das Image als
 `C:\R4OS\CONFIG\MODULES.JSON` projiziert. Es ersetzt nicht die manuelle
-Gesamtuebersicht `AllModules.json`.
+Gesamtuebersicht `AllModules.json`. Seine Schema-4-Subsystemeintraege sind
+zugleich die einzige persistente Quelle des installierten Laufzeitkatalogs.
 
 
 Server/

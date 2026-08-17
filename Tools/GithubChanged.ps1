@@ -383,6 +383,7 @@ try {
     Add-ComponentTargets -Targets $targets -Flag '-diagnostic' -Directory 'Diagnostics'
     Add-ComponentTargets -Targets $targets -Flag '-driver' -Directory 'Drivers'
     Add-ComponentTargets -Targets $targets -Flag '-protocol' -Directory 'Protocols'
+    Add-ComponentTargets -Targets $targets -Flag '-subsystem' -Directory 'Subsystems'
     Add-CentralTargets -Targets $targets -Flags @('-distribution', '-docs', '-devkit', '-organization', '-project')
 
     $states = New-Object System.Collections.Generic.List[object]
@@ -392,7 +393,7 @@ try {
 
     Write-Host
     Write-Host '=== Sammel-Push: Vorpruefung ==='
-    Write-Host 'Reihenfolge: Contract, SDK, Libraries, Kernel, Apps, Services, Diagnostics, Drivers, Protocols, Distribution, Docs, DevKit, Organisation, Project.'
+    Write-Host 'Reihenfolge: Contract, SDK, Libraries, Kernel, Apps, Services, Diagnostics, Drivers, Protocols, Subsystems, Distribution, Docs, DevKit, Organisation, Project.'
     Write-Host 'Ausgeschlossen: Server sowie alle verschachtelten DevKit- und Third-Party-Repositories.'
     Write-Host
     foreach ($state in $states) {

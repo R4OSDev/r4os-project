@@ -61,7 +61,8 @@ Remote-Name: origin
 Branch: main
 
 Project, DevKit, Docs, Organisationsprofil, Contract, SDK, Libraries, Kernel,
-Distribution sowie Apps, Services, Diagnostics, Drivers und Protocols werden
+Distribution sowie Apps, Services, Diagnostics, Drivers, Protocols und
+Subsystems werden
 bei einem fehlenden Remote-Repository oeffentlich angelegt. Der Package-Server
 ist die private Ausnahme, wird aber nicht vom globalen Script angelegt oder
 verwaltet.
@@ -118,7 +119,8 @@ Ohne Argumente startet das Script ein Menü:
 Das Menü fragt zuerst Push oder Pull. Bei Push ist der Sammel-Push aller
 geänderten Repositories die empfohlene erste Auswahl; alternativ kann ein
 einzelnes Repository gewählt werden. Pull fragt weiterhin immer nach genau
-einem Repository. Bei Apps, Services, Diagnostics, Drivers und Protocols wird
+einem Repository. Bei Apps, Services, Diagnostics, Drivers, Protocols und
+Subsystems wird
 für den Einzelweg zusätzlich der lokale Komponentenname abgefragt. Der
 Package-Server ist nicht Teil dieses Menüs.
 
@@ -178,6 +180,8 @@ Commit-Beschreibung:
     Github.bat -pull -driver NAME
     Github.bat -push -protocol NAME "Commit-Beschreibung"
     Github.bat -pull -protocol NAME
+    Github.bat -push -subsystem NAME "Commit-Beschreibung"
+    Github.bat -pull -subsystem NAME
 
 NAME muss dem lokalen Verzeichnisnamen entsprechen. Er darf nur Buchstaben,
 Ziffern und Bindestriche enthalten und muss mit einem Buchstaben oder einer
@@ -190,6 +194,7 @@ Beispiele:
     D:\R4OS\Tools\Github.bat -push -diagnostic FsDiag "FsDiag korrigieren"
     D:\R4OS\Tools\Github.bat -pull -driver MIDI
     D:\R4OS\Tools\Github.bat -push -protocol JSON "JSON aktualisieren"
+    D:\R4OS\Tools\Github.bat -pull -subsystem QBasic
 
 Die Commit-Beschreibung ist optional. Ohne Beschreibung verwendet das Script
 eine passende Standardbeschreibung. Für explizite Beschreibungen einen kurzen,
@@ -296,6 +301,11 @@ Protocols
     Lokal: D:\R4OS\Repositories\Protocols\NAME
     GitHub: R4OSDev/r4os-protocol-<name-klein>
 
+Subsystems
+    Ziel: -subsystem NAME
+    Lokal: D:\R4OS\Repositories\Subsystems\NAME
+    GitHub: R4OSDev/r4os-subsystem-<name-klein>
+
 Agents gehört zum Project-Repository. Änderungen unter Docs gehören dagegen
 zum Docs-Repository. Diese Besitzgrenzen bleiben beim Bearbeiten verbindlich;
 der Sammel-Push erkennt die geänderten Repositorywurzeln anschließend ohne
@@ -314,14 +324,14 @@ Die Erkennung besitzt keinen separaten Repository-Index. Sie verwendet diese
 feste Workspace-Struktur:
 
 1. Contract, SDK, Libraries und Kernel.
-2. Direkte Projektverzeichnisse unter Apps, Services, Diagnostics, Drivers
-   und Protocols, innerhalb jeder Rolle alphabetisch.
+2. Direkte Projektverzeichnisse unter Apps, Services, Diagnostics, Drivers,
+   Protocols und Subsystems, innerhalb jeder Rolle alphabetisch.
 3. Distribution, Docs, DevKit, Organisationsprofil und zuletzt Project.
 
 Server ist vollständig ausgeschlossen. Unterrepositories und installierte
 Fremdquellen in DevKit, insbesondere QEMU, Limine und Zig, werden nicht
 rekursiv gesucht und können deshalb kein Sammel-Pushziel werden. Ein neues
-gültiges Komponentenverzeichnis mit `module.R4MF` in einer der fünf Rollen
+gültiges Komponentenverzeichnis mit `module.R4MF` in einer der sechs Rollen
 wird ohne zusätzlichen Indexeintrag erkannt.
 
 Vor dem ersten Push prüft und zeigt das Script für jedes erkannte Ziel:
@@ -463,7 +473,7 @@ Checkout unter D:\R4OS existiert:
    Organisationsprofil mit ihren jeweiligen Pull-Zielen beziehen.
 5. Den privaten Package-Server bei Bedarf separat klonen und danach mit
    D:\R4OS\Server\Pull.bat aktualisieren.
-6. Benötigte Apps, Services, Diagnostics, Drivers und Protocols einzeln mit
+6. Benötigte Apps, Services, Diagnostics, Drivers, Protocols und Subsystems einzeln mit
    Rollenflag und Komponentenname beziehen.
 7. Die DevKit-Abhängigkeiten anschließend über dessen Setup installieren; die
    dortigen öffentlichen Quellkopien werden ebenfalls anonym bezogen.
@@ -541,6 +551,6 @@ Grenzen des Scripts
   Credentials.
 - Neue zentrale Repositoryarten benötigen eine ausdrückliche Zuordnung in
   Tools\Github.bat und in der festen Sammelreihenfolge. Apps, Services,
-  Diagnostics, Drivers und Protocols werden bereits generisch über
+  Diagnostics, Drivers, Protocols und Subsystems werden bereits generisch über
   Rollenverzeichnis und Komponentenname erkannt. Der Package-Server bleibt
   bewusst außerhalb dieses globalen Scripts.

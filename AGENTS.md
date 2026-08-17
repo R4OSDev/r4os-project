@@ -11,7 +11,7 @@ Sandboxmodell.
   Arbeit; jede Quellkomponente wird im Repository ihres fachlichen Besitzers
   bearbeitet.
 - Neue Funktionen zuerst einer externen Rolle zuordnen: App, Service,
-  Diagnose, Library, Treiber oder Protokoll. In den Kernel kommt nur, was dort
+  Diagnose, Library, Treiber, Protokoll oder Subsystem. In den Kernel kommt nur, was dort
   technisch zwingend hingehoert.
 - Lokal arbeiten. Es duerfen keine Subagents gestartet oder verwendet werden.
 - Aenderungen vor dem Abschluss in einem ihrem Risiko angemessenen Umfang
@@ -24,7 +24,7 @@ Sandboxmodell.
   letzter Pruefstand in `Status` und optionale `Notes` werden bei der
   inhaltlichen Dokumentarbeit manuell gepflegt.
 - Fuer jedes neue kanonische Projekt unter Apps, Services, Diagnostics,
-  Drivers oder Protocols ein eigenes oeffentliches Repository in der
+  Drivers, Protocols oder Subsystems ein eigenes oeffentliches Repository in der
   GitHub-Organisation `R4OSDev` anlegen. Benennung und Zielzuordnung stehen in
   `Agents/Github.txt`.
 - Ist eine Unterversion abgeschlossen, `RELEASE_VERSION` in
@@ -65,14 +65,115 @@ Sandboxmodell.
   Fehlersuche stehen in `Agents/Build.txt`. Testschichten und Inventarpflege
   stehen in `Agents/Test.txt` und `Agents/TestCategories.txt`.
 
-## Roadmap
-- `Roadmap.txt` im Workspace-Root ist der lokale, nicht versionierte
-  Arbeitsstand. Aufbau, Unterversionen und der Auftrag `Roadmap aufraeumen`
-  stehen in `Agents/Roadmap.txt`.
-
 ## Shell und Befehlsausfuehrung
 - Fuer PowerShell-, Batch- und Quotingregeln vor nichttrivialen Shellaufrufen
   `Agents/Shell.txt` lesen. Erfolg wird am Exitcode gemessen.
+  
+# Arbeiten mit der Roadmap
+
+Wir strukturieren unsere Arbeit mit Hilfe einer Roadmap.
+Die API liefert und empfängt überwiegend JSON. Der Markdown-Export liefert `text/markdown`.
+„Ergänzen“ fügt einem Wert einen Zeilenumbruch und danach den gesendeten Text hinzu.
+
+`{subversion_id}` ist innerhalb der aktuellen Hauptversion lokal und beginnt bei `1`.
+`{task_id}` ist innerhalb seiner Unterversion lokal und beginnt bei `1`.
+
+Neue Unterversionen werden ohne `sortierung` automatisch am Ende eingeordnet. Eine explizite `sortierung` ist weiterhin möglich.
+
+## Roadmap lesen und bearbeiten
+
+- Gesamte aktuelle Version erhalten: `GET http://10.0.0.2:4011/roadmaps/1/current`
+- Gesamte aktuelle Version überschreiben (Gefährlich): `PUT http://10.0.0.2:4011/roadmaps/1/current`
+
+- Leitbild der aktuellen Version erhalten: `GET http://10.0.0.2:4011/roadmaps/1/current/vision`
+- Leitbild der aktuellen Version überschreiben: `PUT http://10.0.0.2:4011/roadmaps/1/current/vision`
+-- `{"vision":"Neues Leitbild"}`
+
+- Allgemeine Notizen der aktuellen Version erhalten: `GET http://10.0.0.2:4011/roadmaps/1/current/notes`
+- Allgemeine Notizen der aktuellen Version überschreiben (Gefährlich): `PUT http://10.0.0.2:4011/roadmaps/1/current/notes`
+-- `{"notes":"Neue allgemeine Versionsnotizen"}`
+- Allgemeine Notizen der aktuellen Version ergänzen: `POST http://10.0.0.2:4011/roadmaps/1/current/notes/append`
+-- `{"notes":"Zusätzliche Notiz"}`
+
+- Nur alle Unterversionen erhalten: `GET http://10.0.0.2:4011/roadmaps/1/current/subversions`
+
+- Status der aktuellen Version ändern: `PATCH http://10.0.0.2:4011/roadmaps/1/current/status`
+-- `{"status":"Abgeschlossen"}`
+-- Mögliche Werte: `Offen`, `Abgeschlossen`, `Verworfen`
+
+## Unterversionen lesen und bearbeiten
+
+- Unterversion erhalten: `GET http://10.0.0.2:4011/roadmaps/1/current/subversion/{subversion_id}`
+- Unterversion vollständig überschreiben (Gefährlich): `PUT http://10.0.0.2:4011/roadmaps/1/current/subversion/{subversion_id}`
+-- `{"versionsnummer":"0.66.5","titel":"Neuer Schritt","status":"Offen","beschreibung":"","notizen":"","sortierung":5,"tasks":[{"beschreibung":"Aufgabe A","status":"Offen","notizen":"","sortierung":0}],"abnahmen":[{"beschreibung":"Abnahme A","status":"Offen","notizen":"","sortierung":0}]}`
+
+- Einzelne Felder einer Unterversion ändern: `PATCH http://10.0.0.2:4011/roadmaps/1/current/subversion/{subversion_id}`
+-- Beispiel für eine neue Reihenfolge: `{"sortierung":5}`
+
+- Neue Unterversion inklusive Aufgaben und Abnahmen erstellen: `POST http://10.0.0.2:4011/roadmaps/1/current/subversions`
+-- `{"versionsnummer":"0.66.5","titel":"Neuer Schritt","beschreibung":"","notizen":"","tasks":[{"beschreibung":"Aufgabe A","notizen":""}],"abnahmen":[{"beschreibung":"Abnahme A","notizen":""}]}`
+-- Neue Elemente erhalten standardmäßig den Status `Offen`.
+-- Ohne `sortierung` wird die Unterversion automatisch am Ende einsortiert.
+-- `sortierung` kann bei Bedarf explizit übermittelt werden.
+
+- Status einer Unterversion ändern: `PATCH http://10.0.0.2:4011/roadmaps/1/current/subversion/{subversion_id}/status`
+-- `{"status":"Abgeschlossen"}`
+-- Mögliche Werte: `Offen`, `Abgeschlossen`, `Verworfen`
+
+- Notizen einer Unterversion erhalten: `GET http://10.0.0.2:4011/roadmaps/1/current/subversion/{subversion_id}/notes`
+- Notizen einer Unterversion überschreiben (Gefährlich): `PUT http://10.0.0.2:4011/roadmaps/1/current/subversion/{subversion_id}/notes`
+-- `{"notes":"Neue Notizen"}`
+- Notizen einer Unterversion ergänzen: `POST http://10.0.0.2:4011/roadmaps/1/current/subversion/{subversion_id}/notes/append`
+-- `{"notes":"Zusätzliche Notiz"}`
+
+## Aufgaben
+
+- Aufgabe erhalten: `GET http://10.0.0.2:4011/roadmaps/1/current/subversion/{subversion_id}/task/{task_id}`
+- Aufgabe überschreiben: `PUT http://10.0.0.2:4011/roadmaps/1/current/subversion/{subversion_id}/task/{task_id}`
+-- `{"beschreibung":"Aufgabe","status":"Offen","notizen":"","sortierung":0}`
+
+- Neue Aufgabe erstellen: `POST http://10.0.0.2:4011/roadmaps/1/current/subversion/{subversion_id}/tasks`
+-- `{"beschreibung":"Neue Aufgabe","notizen":""}`
+
+- Status einer Aufgabe ändern: `PATCH http://10.0.0.2:4011/roadmaps/1/current/subversion/{subversion_id}/task/{task_id}/status`
+-- `{"status":"Erledigt"}`
+-- Mögliche Werte: `Offen`, `Erledigt`, `Verworfen`
+
+- Notizen einer Aufgabe erhalten: `GET http://10.0.0.2:4011/roadmaps/1/current/subversion/{subversion_id}/task/{task_id}/notes`
+- Notizen einer Aufgabe überschreiben: `PUT http://10.0.0.2:4011/roadmaps/1/current/subversion/{subversion_id}/task/{task_id}/notes`
+-- `{"notes":"Neue Notizen"}`
+- Notizen einer Aufgabe ergänzen: `POST http://10.0.0.2:4011/roadmaps/1/current/subversion/{subversion_id}/task/{task_id}/notes/append`
+-- `{"notes":"Zusätzliche Notiz"}`
+
+## Abnahmen
+
+- Abnahme erhalten: `GET http://10.0.0.2:4011/roadmaps/1/current/subversion/{subversion_id}/acceptance/{acceptance_id}`
+- Abnahme überschreiben: `PUT http://10.0.0.2:4011/roadmaps/1/current/subversion/{subversion_id}/acceptance/{acceptance_id}`
+-- `{"beschreibung":"Abnahme","status":"Offen","notizen":"","sortierung":0}`
+
+- Neue Abnahme erstellen: `POST http://10.0.0.2:4011/roadmaps/1/current/subversion/{subversion_id}/acceptances`
+-- `{"beschreibung":"Neue Abnahme","notizen":""}`
+
+- Status einer Abnahme ändern: `PATCH http://10.0.0.2:4011/roadmaps/1/current/subversion/{subversion_id}/acceptance/{acceptance_id}/status`
+-- `{"status":"Erledigt"}`
+-- Mögliche Werte: `Offen`, `Erledigt`, `Verworfen`
+
+- Notizen einer Abnahme erhalten: `GET http://10.0.0.2:4011/roadmaps/1/current/subversion/{subversion_id}/acceptance/{acceptance_id}/notes`
+- Notizen einer Abnahme überschreiben: `PUT http://10.0.0.2:4011/roadmaps/1/current/subversion/{subversion_id}/acceptance/{acceptance_id}/notes`
+-- `{"notes":"Neue Notizen"}`
+- Notizen einer Abnahme ergänzen: `POST http://10.0.0.2:4011/roadmaps/1/current/subversion/{subversion_id}/acceptance/{acceptance_id}/notes/append`
+-- `{"notes":"Zusätzliche Notiz"}`
+
+## Roadmap aufräumen
+
+Nur wenn der User das Aufräumen der Roadmap explizit verlangt:
+
+- Schau dir die Roadmap nochmal an und aktualisiere bei Bedarf unsere `Docs/`.
+- Hol dir die Roadmap komplett im Markdown-Format und lege sie unter `Docs/Changelogs/` ab, beispielsweise als `V0.20.X.txt`.
+-- `GET http://10.0.0.2:4011/roadmaps/1/current/markdown`
+- Setze den Status der aktuellen Version auf `Abgeschlossen`.
+- Erstelle eine neue leere Version der Roadmap: `POST http://10.0.0.2:4011/roadmaps/1/versions/next`
+-- Kein JSON-Body nötig. Die Version erhält automatisch die nächste Versionsnummer, den Titel `Neu` und den Status `Offen`.
 
 # Workspace, Dokumentation und Inventare
 - Besitzgrenzen, Repositoryrollen, DevKit, Distribution und Artefakte stehen
@@ -85,6 +186,8 @@ Sandboxmodell.
   der Dateibestand automatisch und werden die inhaltlichen Felder manuell
   gepflegt. Das profilspezifische technische Inventar
   `Artifacts/Distribution/Generated/MODULES.JSON` entsteht beim Imageplan.
+  Seine Schema-4-Subsystemeintraege sind die einzige persistente Quelle des
+  installierten Userland-Subsystemkatalogs; es gibt keine zweite Hostliste.
 - Die API-Uebersicht liegt unter
   `Repositories/Contract/Generated/Inventory/API.json`.
 - Serverarbeiten sind ausschliesslich in `Server/Agents/Server.txt`
@@ -111,3 +214,18 @@ Sandboxmodell.
 - Kernelstruktur: `Agents/KernelStruktur.txt`; Dateitypen:
   `Agents/DateiTypen.txt`; Remote-Updates: `Agents/RemoteUpdate.txt`;
   Lizenzierung und Fremdmaterial: `Agents/Lizenz.txt`.
+- `ASSOC.R4S` speichert fuer Subsystemhandler nur stabile Subsystem- und
+  Gastformat-IDs. Hostpfad, Anzeigename, Formate und Probes kommen immer aus
+  dem installierten `MODULES.JSON`. Gaststarts verwenden den
+  `R4SUBSYS1`-Vertrag und erzeugen pro geoeffneter Datei eine neue R4X-Instanz.
+- Subsystem-Fensterhosts verwenden die einkompilierte SDK-Schicht
+  `r4os.subsystem_host`: Gastaufloesung und Fensterviewport bleiben getrennt,
+  Rasterbloecke sind hoechstens 128x128 Pixel gross, unveraenderte Bilder
+  erzeugen keinen Frame und Letterboxbereiche liefern keine Gastmausposition.
+  Scheduling, Gastzeit und Audio gehoeren nicht in diesen Video-/Eingabehost.
+- Kooperative Gastlaufzeiten verwenden `r4os.subsystem_runtime`: genau eine
+  begrenzte Gast-Scheibe pro Hostzyklus, monotone pausenbereinigte Gastzeit,
+  caller-eigene PCM-Puffer und Audio ausschliesslich ueber App-Audio/AUDSVC.
+  Audioausfall setzt den Teilpfad auf `degraded`, darf Gastzeit und Video aber
+  weder beschleunigen noch blockieren; Abschluss, Close und Fehler muessen
+  denselben idempotenten Ressourcenabbau erreichen.
