@@ -110,6 +110,7 @@ Das Testprofil wird durch
 
     Repositories/Distribution/Injection/
     Repositories/Distribution/TestInjection/
+    Artifacts/Distribution/Injection/          optional und lokal
     Artifacts/Distribution/PrivateInjection/   optional und lokal
 
 `TestInjection/` liegt im Image ueber dem normalen Overlay und darf dessen
@@ -270,6 +271,9 @@ Tests.
 Das Testprofil startet R4DESK mit dem ausschliesslich im Testoverlay gesetzten
 Shellargument `/HEADLESS-SUBSYSTEM`. AUDSVC wird dafuer als ausdruecklicher
 Test-Include aufgenommen; seine normale Full-Zuordnung bleibt unveraendert.
+`TestInjection\R4OS\CONFIG\ASSOC.R4S` ersetzt nur im Testprofil die
+produktive BAS-Vorgabe `r4os.basic` durch den dedizierten Fixture-Host
+`test.basic`; Full- und GUI-Images starten weiterhin R4BASIC.
 R4DESK wartet auf den Service, laedt den installierten Subsystemkatalog und
 loest `C:\TEMP\SUBSYSTEM-A.BAS` sowie `C:\TEMP\SUBSYSTEM-B.BAS` ueber den
 gemeinsamen R4STD-Dateihandler zu zwei `R4SUBSYS1`-Starts desselben Hosts auf.

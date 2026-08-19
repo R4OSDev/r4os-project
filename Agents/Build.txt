@@ -126,8 +126,11 @@ Profilzuordnung:
 
 Das Testprofil verwendet zusaetzlich
 `Repositories/Distribution/TestInjection/` ueber dem normalen
-`Injection/`-Overlay. Unbekannte Scopes, doppelte Ziele, fehlende Artefakte
-und unaufloesbare Providerabhaengigkeiten sind harte Planfehler.
+`Injection/`-Overlay. Alle Profile blenden danach optional
+`Artifacts/Distribution/Injection/` und zuletzt
+`Artifacts/Distribution/PrivateInjection/` ein. Unbekannte Scopes, doppelte
+Ziele, fehlende Artefakte und unaufloesbare Providerabhaengigkeiten sind harte
+Planfehler.
 Produktive Full-Module, die nur eine Testkette benoetigt, koennen als
 ausdrueckliche Test-Includes des Orchestrators aufgenommen werden. Fuer die
 Subsystem-Runtime-Abnahme gilt dies fuer AUDSVC; dessen normale
