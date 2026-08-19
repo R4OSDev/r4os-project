@@ -1,50 +1,84 @@
 ﻿R4OS Roadmap - Agent-Referenz
 ============================
 
-Zweck: Aufbau und Pflege des lokalen Planungsstands sowie der genaue Auftrag
-`Roadmap aufraeumen`.
+Zweck
+-----
+
+Diese Referenz beschreibt den aktiven API-basierten Planungsstand und den
+genauen Auftrag Roadmap aufraeumen. Die vollstaendige Liste der Lese- und
+Schreibendpunkte steht in AGENTS.md.
 
 
 Aktiver Planungsstand
 ---------------------
 
-`Roadmap.txt` liegt im Workspace-Root `D:\R4OS`, bleibt lokal und wird nicht
-versioniert. Sie beschreibt die aktuell bearbeitete Releasefamilie.
+Die Roadmap-API unter
 
-Die Datei beginnt optional mit einem Leitbild fuer die aktuelle Hauptlinie
-`0.*.X`. Danach folgen die Unterversionen `0.*.*` in Arbeitsreihenfolge.
+    http://10.0.0.2:4011/roadmaps/1
 
-Jede Unterversion verwendet diese Felder:
+ist die einzige aktive Roadmap-Wahrheit. Eine lokale Roadmap.txt wird nicht
+mehr verwendet. Der Endpunkt
 
-    Versionnummer: X.X.X
-    Titel: kurze Bezeichnung oder einzeilige Beschreibung
-    Status: Geplant, In Arbeit oder Erledigt
-    Offene Punkte: noch auszufuehrende Arbeiten
-    Erledigt: abgeschlossene Arbeiten
-    Abnahme: Builds, Tests und sonstige Nachweise
-    Notizen: Erkenntnisse und Entscheidungen waehrend der Umsetzung
+    GET /current
 
-Offene Punkte werden beim Abarbeiten verschoben oder konkret abgeschlossen;
-ein blosses Statuswort ersetzt keine nachvollziehbare Abnahme.
+liefert die aktuelle Releasefamilie mit Leitbild, allgemeinen Notizen,
+Unterversionen, Aufgaben und Abnahmen. Unterversions-IDs sind innerhalb der
+aktuellen Releasefamilie lokal und beginnen bei 1. Aufgaben-IDs sind innerhalb
+ihrer Unterversion lokal. Abnahme-IDs werden so verwendet, wie sie die API
+liefert.
+
+Neue Unterversionen werden mit
+
+    POST /current/subversions
+
+angelegt und koennen ihre Aufgaben und Abnahmen direkt im selben JSON-Body
+enthalten. Ohne ausdrueckliche Sortierung fuegt die API sie am Ende mit
+MAX(sortierung) + 1 ein.
+
+Fuer gezielte Aenderungen PATCH- und Append-Endpunkte verwenden. PUT ersetzt
+den jeweils bezeichneten Gesamtbestand und ist deshalb nur nach ausdruecklicher
+Pruefung des vollstaendigen Zielinhalts zulaessig. Nach schreibenden Aufrufen
+den betroffenen Stand erneut lesen und Status sowie offene Elemente pruefen.
 
 
 Roadmap aufraeumen
 ------------------
 
-Wenn der User ausdruecklich `Roadmap aufraeumen` verlangt:
+Wenn der User ausdruecklich Roadmap aufraeumen verlangt:
 
-1. Den vollstaendigen aktuellen Stand als Changelog nach
-   `Docs/Changelogs/V<Major>.<Minor>.txt` uebernehmen. Eine bereits vorhandene
-   Datei zuerst pruefen und nicht blind ueberschreiben.
-2. Projektweite Dokumentation an den erreichten Ist-Zustand anpassen.
-   Changelogs selbst werden nicht in `Docs/Inventory/Docs.json` aufgenommen.
-3. `AGENTS.md` und die Referenzen unter `Agents/` auf aktuelle Pfade,
-   Vertraege und Arbeitsablaeufe pruefen.
-4. Nur Test-Gates entfernen, die ausschliesslich fuer diese Releasefamilie
-   angelegt wurden und keinen dauerhaften Wert besitzen. Allgemeine Tests und
-   sinnvolle Dauergates bleiben erhalten.
-5. Erst nach diesen Schritten `Roadmap.txt` vollstaendig leeren, aber nicht
-   loeschen.
+1. Die aktuelle Version vollstaendig lesen. Alle vorgesehenen Unterversionen,
+   Aufgaben und Abnahmen muessen abgeschlossen oder bewusst verworfen sein.
+2. Projektweite Dokumentation, AGENTS.md und die Referenzen unter Agents/ auf
+   aktuelle Pfade, Vertraege und Arbeitsablaeufe pruefen. Changelogs selbst
+   werden nicht in Docs/Inventory/Docs.json aufgenommen.
+3. Nur Test-Gates entfernen, die ausschliesslich fuer diese Releasefamilie
+   angelegt wurden und keinen dauerhaften Wert besitzen. Allgemeine Tests,
+   Fixtures und sinnvolle Dauergates bleiben erhalten.
+4. Den vollstaendigen Markdownexport ueber
 
-Das Changelog gehoert zum Docs-Repository. Die geleerte `Roadmap.txt` bleibt
-weiterhin nur lokal.
+       GET /current/markdown
+
+   als Docs/Changelogs/V<Major>.<Minor>.txt sichern. Eine vorhandene Datei
+   zuerst pruefen und nicht blind ueberschreiben. Der gespeicherte Export muss
+   die erwartete Releasefamilie und alle Unterversionen enthalten.
+5. Den Status der aktuellen Version mit
+
+       PATCH /current/status
+
+   auf Abgeschlossen setzen und den finalen Markdownstand gegebenenfalls
+   erneut exportieren, damit das Changelog den Abschlussstatus traegt.
+6. Erst wenn Changelog und Dokumentation lokal gesichert und geprueft sind,
+   mit
+
+       POST /versions/next
+
+   eine neue leere Version erzeugen. Sie erhaelt automatisch die naechste
+   Versionsnummer, den Titel Neu und den Status Offen.
+7. Die neue aktuelle Version erneut lesen und sicherstellen, dass sie offen
+   ist und weder Unterversionen noch uebernommene Notizen enthaelt.
+8. Alle geaenderten verwalteten Repositories mit dem verbindlichen
+   Tools/Github.bat-Sammelpush veroeffentlichen und seine Restpruefung
+   abwarten.
+
+Das Changelog gehoert zum Docs-Repository. Roadmapstatus und neue leere
+Version verbleiben in der Roadmap-API.
