@@ -68,12 +68,29 @@ Sandboxmodell.
 ## Shell und Befehlsausfuehrung
 - Fuer PowerShell-, Batch- und Quotingregeln vor nichttrivialen Shellaufrufen
   `Agents/Shell.txt` lesen. Erfolg wird am Exitcode gemessen.
+- Fuer Laufzeit-Debugging auf QEMU oder echter Hardware SSH frueh vor
+  fehleranfaelliger GUI-Automation pruefen. Standardzugang ist `r4os` /
+  `rosebud`; Details stehen in `Docs/Network/NetworkServices.txt`.
+- Effizienter QEMU-Kurzweg: User-Networking um
+  `hostfwd=tcp:127.0.0.1:10022-:22` ergaenzen und nach dem Boot mit
+  `ssh -p 10022 -o Ciphers=chacha20-poly1305@openssh.com r4os@127.0.0.1`
+  verbinden. Zuerst mit `VER` Ziel und Version bestaetigen; danach Status-,
+  Start-, Stop- und Diagnosebefehle ueber dieselbe Verbindung ausfuehren.
+  Verwendet der Runner einen anderen Forwarding-Port, diesen statt `10022`
+  einsetzen.
+- Auf echter Hardware zuerst die tatsaechlich vergebene Adresse bestimmen
+  und denselben OpenSSH-Weg ohne `-p 10022` verwenden. Visuelle, Eingabe- und
+  Hoerabnahmen bleiben am lokalen QEMU-/Hardwarebild.
+- SSH- und andere R4OS-Serviceports niemals an das oeffentliche Internet oder
+  ein nicht vertrauenswuerdiges Netz weiterleiten.
   
 # Arbeiten mit der Roadmap
 
 Wir strukturieren unsere Arbeit mit Hilfe einer Roadmap.
 Die API liefert und empfängt überwiegend JSON. Der Markdown-Export liefert `text/markdown`.
 „Ergänzen“ fügt einem Wert einen Zeilenumbruch und danach den gesendeten Text hinzu.
+Abnahmen können optional erstellt werden. Neue Tests, Gates, etc, sollten nur angelegt werden wenn es nötig ist.
+Mit weiteren Tests müssen wir sparsam sein, da aktuell schon zu viele bestehen.
 
 `{subversion_id}` ist innerhalb der aktuellen Hauptversion lokal und beginnt bei `1`.
 `{task_id}` ist innerhalb seiner Unterversion lokal und beginnt bei `1`.
