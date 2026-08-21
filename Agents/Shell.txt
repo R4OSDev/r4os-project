@@ -1,12 +1,12 @@
-﻿R4OS Shell und Befehlsausfuehrung - Agent-Referenz
+R4OS Shell und Befehlsausfuehrung - Agent-Referenz
 ==================================================
 
-Zweck: Verlaessliche Aufrufe zwischen PowerShell, Batch und den R4OS-
-Werkzeugen unter Windows.
+Zweck: Verlaessliche Host-Aufrufe unter Windows und eine kompakte Referenz
+fuer die produktive R4OS-Terminal-Shell.
 
 
-Grundregeln
------------
+Host-Shell: Grundregeln
+-----------------------
 
 - Der normale Workspace-Einstieg laeuft ueber PowerShell und ruft teilweise
   Batchdateien auf. Bash ist nur bei einem ausdruecklichen `Build.sh`-Aufruf
@@ -19,8 +19,8 @@ Grundregeln
   interpretierte Kommandozeile.
 - Lokale Dateiaenderungen mit dem Patch-Werkzeug ausfuehren. Mechanische
   Formatierung darf danach mit einem dafuer bestimmten Werkzeug erfolgen.
-- Erfolg am Exitcode messen. PowerShell 5.1 kann stderr nativer Programme als
-  `NativeCommandError` darstellen, obwohl deren Exitcode 0 ist.
+- Erfolg wird am Exitcode gemessen. PowerShell 5.1 kann stderr nativer
+  Programme als `NativeCommandError` darstellen, obwohl deren Exitcode 0 ist.
 
 
 Batch und Commit-Beschreibungen
@@ -47,3 +47,146 @@ verschleiern.
 Vor einem schreibenden Mehrrepository-Aufruf immer bestimmen, welchem
 Repository die betroffenen Dateien gehoeren. GitHub-Push und -Pull erfolgen
 ausschliesslich nach `Agents/Github.txt`.
+
+
+SSH zum QEMU-Gast
+-----------------
+
+Bei eingerichteter QEMU-Portweiterleitung `127.0.0.1:10022 -> Gast:22`:
+
+    ssh -p 10022 -c chacha20-poly1305@openssh.com r4os@127.0.0.1
+
+Passwort: `rosebud`.
+
+Nach der Anmeldung zuerst `VER` ausfuehren und damit Ziel und Version
+bestaetigen. Die Weiterleitung bleibt auf `127.0.0.1`; SSH- oder andere
+R4OS-Serviceports niemals in ein oeffentliches oder nicht vertrauenswuerdiges
+Netz weiterleiten.
+
+
+R4OS-Terminal: Orientierung und Systemstatus
+---------------------------------------------
+
+    HELP                    Interne Terminalbefehle auflisten
+    HELP /S                 Terminalprogramme im aktuellen PATH auflisten
+    <PROGRAMM> /?           Programmspezifische Hilfe anzeigen
+    VER                     Release sowie aktive/installierte Kernelversion
+    SYSINFO                 System-, Hardware-, Speicher- und Netzuebersicht
+    BOOTINFO /SUMMARY       Kompakte Bootinformationen
+    BOOTINFO /FB            Framebuffer-Informationen
+    BOOTINFO /MAP           Speicherkarte ausgeben
+    DATE                    Datum anzeigen
+    TIME                    Uhrzeit anzeigen
+    VOL                     Informationen zum aktuellen Laufwerk anzeigen
+
+
+R4OS-Terminal: Dateien und Verzeichnisse
+-----------------------------------------
+
+    DIR [Pfad]              Verzeichnisinhalt anzeigen
+    CD [Pfad]               Arbeitsverzeichnis anzeigen oder wechseln
+    C: / D:                 Zu einem eingehangenen Laufwerk wechseln
+    TYPE <Datei>            Textdatei ausgeben
+    MORE <Datei>            Textdatei seitenweise ausgeben
+    SORT <Datei>            Textdatei sortiert ausgeben
+    COPY <Quelle> <Ziel>    Eine Datei kopieren
+    REN <Alt> <Neu>         Datei umbenennen
+    DEL <Datei>             Eine Datei loeschen
+    MD <Verzeichnis>        Verzeichnis erstellen
+    RD <Verzeichnis>        Leeres Verzeichnis entfernen
+
+`>` und `>>` funktionieren fuer eingebaute Terminalbefehle. Pipes, Eingabe-
+Redirection und Redirection externer R4X-Programme sind noch nicht verfuegbar.
+
+
+R4OS-Terminal: Sitzung
+----------------------
+
+    PATH                    Suchpfad der Sitzung anzeigen
+    PATH /P                 Persistenten System-PATH anzeigen
+    PATH /P <Wert>          Persistenten System-PATH setzen
+    SET                     Unterstuetzte Umgebungsvariablen anzeigen
+    PROMPT <Wert>           Prompt der Sitzung setzen
+    ECHO <Text>             Text ausgeben
+    CLS                     Terminal leeren
+    PAUSE                   Auf einen Tastendruck warten
+    SLEEP <Millisekunden>   Warten, hoechstens 600000 Millisekunden
+    EXIT                    Terminal- oder SSH-Sitzung sauber beenden
+
+
+R4OS-Terminal: Dienste
+----------------------
+
+    SERVMAN LIST                    Alle Dienste anzeigen
+    SERVMAN STATUS <Name>           Dienst- und Endpoint-Status anzeigen
+    SERVMAN DIAG                    Zusammenfassende Dienstdiagnose
+    SERVMAN START <Name>            Dienst starten
+    SERVMAN STOP <Name>             Dienst stoppen
+    SERVMAN RESTART <Name>          Dienst neu starten
+    SERVMAN ENABLE <Name>           Dienst aktivieren
+    SERVMAN DISABLE <Name>          Dienst deaktivieren
+
+Fuer die Fernwartung besonders nuetzlich:
+
+    SERVMAN STATUS SSHD
+    SERVMAN STATUS TCPSVC
+    SERVMAN DIAG
+
+
+R4OS-Terminal: Netzwerk
+-----------------------
+
+    IPCONFIG                        Aktuelle Netzwerkkonfiguration
+    IPCONFIG /ALL                   Ausfuehrliche Netzwerkdiagnose
+    IPCONFIG /RENEW                 DHCP-Lease erneuern
+    IPCONFIG /RELEASE               DHCP-Lease freigeben
+    DHCP STATUS                     DHCP-Status anzeigen
+    DHCP ACQUIRE                    Neue DHCP-Lease beziehen
+    DHCP RENEW                      DHCP-Lease erneuern
+    DHCP RELEASE                    DHCP-Lease freigeben
+    PING <Adresse|Hostname>         Erreichbarkeit pruefen
+    PING -t <Adresse|Hostname>      Fortlaufend pingen; Abbruch mit Strg+C
+    DNSLOOKUP <Hostname> [Server]   DNS-Aufloesung pruefen
+    HTTPGET <http-URL> [Datei]      HTTP-Ressource abrufen
+    NETCAT <Host> <Port> [Text]     TCP-Verbindung und Payload pruefen
+    NETCAT /INTERACTIVE <Host> <Port>
+                                    Interaktive TCP-Sitzung
+    NETCAT /LISTEN [Port] [Antwort] TCP-Listener fuer einen Test starten
+    TCPECHO [Host] [Port] [Text]    TCP-Echo-Test ausfuehren
+
+
+R4OS-Terminal: Registry und Updates
+-----------------------------------
+
+    REG ROOTS                       Registry-Wurzeln anzeigen
+    REG ENUM SYSTEM\<Pfad>           Werte eines Registry-Schluessels auflisten
+    REG QUERY SYSTEM\<Pfad> [Wert]   Registry-Wert lesen
+    SYSUPD STATUS                   Update- und Journalstatus anzeigen
+    SYSUPD VERIFY <Paket.R4U>       Paket vollstaendig pruefen
+
+Schreibende Registry-Befehle sowie `SYSUPD APPLY`, `SYSUPD STAGE`,
+`SYSUPD COMMIT` und `SYSUPD RESUME-BATCH` nur auf ausdruecklichen Auftrag
+ausfuehren.
+
+
+R4OS-Terminal: Systemsteuerung
+------------------------------
+
+    DESKTOP                 Im Terminal-Modus zum Desktop zurueckkehren
+    REBOOT                  System neu starten
+    POWEROFF / SHUTDOWN     System ausschalten
+    HALT                    System anhalten
+
+`DEL`, `RD`, schreibende `REG`-Befehle, Dienststeuerung und
+Systemsteuerungsbefehle veraendern den Gastzustand. Vor ihrer Verwendung Ziel
+und Auftrag pruefen.
+
+
+Empfohlene erste Remote-Diagnose
+--------------------------------
+
+    VER
+    SYSINFO
+    IPCONFIG /ALL
+    SERVMAN DIAG
+    SERVMAN STATUS SSHD

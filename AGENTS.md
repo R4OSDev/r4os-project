@@ -1,28 +1,18 @@
 ﻿# Einleitung
-R4OS ist ein in Zig entwickeltes Betriebssystem fuer x86_64. Es startet ueber
-Limine im Long Mode und verbindet eine an DOS und Windows 98 angelehnte
-Systemstruktur mit eigenstaendigen Anwendungen, Diensten, Libraries, Treibern
-und Protokollen. R4OS ist ein Single-User-System, gilt vollstaendig als
-vertrauenswuerdig und besitzt bewusst kein Benutzer-, Rechte- oder
-Sandboxmodell.
+R4OS ist ein in Zig entwickeltes Betriebssystem fuer x86_64.
+- Es startet ueber Limine im Long Mode.
+- Es verbindet eine an DOS und Windows 98 angelehnte Systemstruktur mit eigenstaendigen Modulen.
+- R4OS ist ein Single-User-System, gilt vollstaendig als vertrauenswuerdig und 
+  besitzt bewusst kein Benutzer-, Rechte- oder Sandboxmodell.
 
 # Verbindliche Arbeitsweise
-- Der lokale Workspace ist `D:\R4OS`. Das Root-Repository koordiniert die
-  Arbeit; jede Quellkomponente wird im Repository ihres fachlichen Besitzers
-  bearbeitet.
+- Lokaler Workspace: `D:\R4OS`. 
+- Das Root-Repository koordiniert die Arbeit.
+- Jede Quellkomponente wird im Repository ihres fachlichen Besitzers bearbeitet.
 - Neue Funktionen zuerst einer externen Rolle zuordnen: App, Service,
   Diagnose, Library, Treiber, Protokoll oder Subsystem. In den Kernel kommt nur, was dort
   technisch zwingend hingehoert.
-- Lokal arbeiten. Es duerfen keine Subagents gestartet oder verwendet werden.
-- Aenderungen vor dem Abschluss in einem ihrem Risiko angemessenen Umfang
-  bauen und testen.
-- Inventare sind Teil der jeweiligen Aenderung: Neue, verschobene oder
-  entfernte kanonische Module in `Docs/Inventory/AllModules.json` nachziehen.
-  Neue, geaenderte, verschobene oder entfernte Tests in
-  `Docs/Inventory/Tests.json` nachziehen. Der Workspace-Build gleicht den
-  Dateibestand von `Docs/Inventory/Docs.json` automatisch ab; Beschreibung,
-  letzter Pruefstand in `Status` und optionale `Notes` werden bei der
-  inhaltlichen Dokumentarbeit manuell gepflegt.
+- Es duerfen keine Subagents gestartet oder verwendet werden.
 - Fuer jedes neue kanonische Projekt unter Apps, Services, Diagnostics,
   Drivers, Protocols oder Subsystems ein eigenes oeffentliches Repository in der
   GitHub-Organisation `R4OSDev` anlegen. Benennung und Zielzuordnung stehen in
@@ -33,164 +23,96 @@ Sandboxmodell.
   Kernelartefakts erhoehen; die `VERSION` in `module.R4MF` nur bei einer
   Aenderung des jeweiligen Modulartefakts.
 - 1 MB entspricht nach R4OS-Sprechweise 1024 KB.
-- Produktiver Code und aktuelle Dokumentation sind current-only. Historische
-  Begriffe und Pfade gehoeren nur in Changelogs und ausdrueckliche
-  Abschlussberichte.
-- Temporäre Hilfs-Scripts und diverse Dateien sollen wenn möglich nach Temp/.
-  Das Temp/ Verzeichnis wird unregelmäßig geleert.
-- In `AGENTS.md` duerfen ohne Rueckfrage nur die Abschnitte
-  `Shell und Befehlsausfuehrung` und `Wichtige Konventionen` samt ihrer
-  Unterbereiche geaendert werden. Fuer andere Abschnitte vorher den User um
-  Erlaubnis fragen.
+- Temporäre Hilfsscripts und Dateien gehören nach Temp/
+- In der AGENTS.md dürfen ohne Rücksprache folgender Bereich geändert werden:
+  * Wichtige Konventionen
+  Passe diesen Bereich bei Bedarf an. Halte die Einträge effizient.
+- Alle anderen Bereiche der AGENTS.md dürfen nur mit Rücksprache des Users angepasst werden.
+  
+# Inventory
+- Inventare liegen unter Docs/Inventory/
+- AllModules.json: Module (Apps, Treiber, Services etc) sollen hier manuell gepflegt werden.
+  Wenn ein neues Modul entwickelt wird trage es hier ein. Wird ein Modul gelöscht dann trage es hier aus.
+- Docs.json: Eine Übersicht über alle Dokumentationen. Wird Semi-Automatisch gepflegt.
+  Lediglich das Status-Feld sollte bei Änderungen manuell aktualisiert werden.
+- Tests.json: Eine Übersicht aller bestehenden Gates und sonstiges Tests. Muss manuell gepflegt werden.
 
-## GitHub
-- Push und Pull fuer Project, DevKit, Docs und Quell-Repositories
-  ausschliesslich mit `Tools/Github.bat` ausfuehren. Der private Package-
-  Server ist die einzige Ausnahme und wird mit `Server/Push.bat` sowie
-  `Server/Pull.bat` verwaltet. Zielzuordnung, Aufrufe, Credentials und
-  Pruefablauf stehen in `Agents/Github.txt`.
-- Nach Abschluss einer Unterversion oder sonstigen Arbeit den verbindlichen
-  Sammel-Push `Tools/Github.bat -push -changed "Commit-Beschreibung"`
-  verwenden. Er erkennt und veroeffentlicht alle geaenderten verwalteten
-  Repositories; gezielte Einzel-Pushes bleiben Reparatur- und Sonderfaellen
-  vorbehalten. Pulls erfolgen weiterhin gezielt pro Repository.
-- Neu erstellte R4OS-Quellrepositories sind oeffentlich. Der Package-Server
-  und kuenftige Server-Repositories bilden die private Ausnahme.
+# GitHub
+- Um Änderungen zu Pushen oder Pullen wird Tools/Github.bat verwendet.
+- Nach Abschluss einer Unterversion ist mit `Tools/Github.bat -push -changed "Commit-Beschreibung"`
+  ein Sammelpush zu starten. Dieser pusht automatisch alle veränderten Repos.
+- Einzige Ausnahme ist der ignorierte Package-Server unter Server/
+  Für dieses einzige private Repo wird Server/Push.bat und Server/Pull.bat verwendet.
+- Weitere Infos findest du bei Bedarf unter Agents/Github.txt
 
-## Build und Tests
+# Build-Prozess
 - Mehrrepository-Builds ueber `Tools/Build.bat` starten; ohne Argumente zeigt
   der Starter sein interaktives Menue. Einzelbuilds ueber das `Build.bat` des
   zustaendigen Repositories ausfuehren.
 - Buildmodi, Profile, Reihenfolge, Artefakte, QEMU, Bereinigung und
   Fehlersuche stehen in `Agents/Build.txt`. Testschichten und Inventarpflege
   stehen in `Agents/Test.txt` und `Agents/TestCategories.txt`.
-
-## Shell und Befehlsausfuehrung
-- Fuer PowerShell-, Batch- und Quotingregeln vor nichttrivialen Shellaufrufen
-  `Agents/Shell.txt` lesen. Erfolg wird am Exitcode gemessen.
-- Fuer Laufzeit-Debugging auf QEMU oder echter Hardware SSH frueh vor
-  fehleranfaelliger GUI-Automation pruefen. Standardzugang ist `r4os` /
-  `rosebud`; Details stehen in `Docs/Network/NetworkServices.txt`.
-- Effizienter QEMU-Kurzweg: User-Networking um
-  `hostfwd=tcp:127.0.0.1:10022-:22` ergaenzen und nach dem Boot mit
-  `ssh -p 10022 -o Ciphers=chacha20-poly1305@openssh.com r4os@127.0.0.1`
-  verbinden. Zuerst mit `VER` Ziel und Version bestaetigen; danach Status-,
-  Start-, Stop- und Diagnosebefehle ueber dieselbe Verbindung ausfuehren.
-  Verwendet der Runner einen anderen Forwarding-Port, diesen statt `10022`
-  einsetzen.
-- Auf echter Hardware zuerst die tatsaechlich vergebene Adresse bestimmen
-  und denselben OpenSSH-Weg ohne `-p 10022` verwenden. Visuelle, Eingabe- und
-  Hoerabnahmen bleiben am lokalen QEMU-/Hardwarebild.
-- SSH- und andere R4OS-Serviceports niemals an das oeffentliche Internet oder
-  ein nicht vertrauenswuerdiges Netz weiterleiten.
   
-# Arbeiten mit der Roadmap
+# Debugging über SSH
+- Mit dem QEMU-Gast per SSH verbinden:
+  `ssh -p 10022 -c chacha20-poly1305@openssh.com r4os@127.0.0.1`
+  Passwort: `rosebud`.
+- Die R4OS Shell ist DOS-Artig. 
+- Die wichtigsten Befehle kannst du unter Agents/Shell.txt nachlesen.
+- Die beste kurze Diagnosefolge ist:
+  VER
+  SYSINFO
+  IPCONFIG /ALL
+  SERVMAN DIAG
+  SERVMAN STATUS SSHD
 
-Wir strukturieren unsere Arbeit mit Hilfe einer Roadmap.
-Die API liefert und empfängt überwiegend JSON. Der Markdown-Export liefert `text/markdown`.
-„Ergänzen“ fügt einem Wert einen Zeilenumbruch und danach den gesendeten Text hinzu.
-Abnahmen können optional erstellt werden. Neue Tests, Gates, etc, sollten nur angelegt werden wenn es nötig ist.
-Mit weiteren Tests müssen wir sparsam sein, da aktuell schon zu viele bestehen.
+# Debugging über AUTOEXEC.bat
+- AUTOEXEC-Debugging erfolgt ueber `C:\AUTOEXEC.BAT`, das beim normalen
+  Terminalstart vor dem ersten Prompt zeilenweise ausgefuehrt wird. SSH- und
+  Desktop-Terminals nutzen `/NOAUTOEXEC`; dort bei Bedarf `C:\AUTOEXEC.BAT`
+  manuell starten, aber niemals eine Datei mit `POWEROFF` unbedacht ausfuehren.
+- Fuer eine zeitlich begrenzte Diagnose im Testimage klare Marker und `SET`
+  nach jedem relevanten Schritt eintragen. `SET` zeigt den ERRORLEVEL des
+  vorherigen Befehls an:
+      @ECHO OFF
+      ECHO [DBG] vor SYSINFO
+      SYSINFO
+      SET
+      ECHO [DBG] nach SYSINFO
+      ECHO [DBG] vor Netzwerk
+      IPCONFIG /ALL
+      SET
+      ECHO [DBG] nach Netzwerk
+      ECHO [DBG] Ende erreicht
+- Bei sichtbarem QEMU kann `PAUSE` den letzten Zustand offenhalten. Im
+  headless Test keine Pause verwenden; stattdessen einen eindeutigen
+  Abschlussmarker ausgeben und regulär herunterfahren.
+- AUTOEXEC laeuft nach Fehlern weiter. Vorher-/Nachher-Marker grenzen daher
+  den fehlgeschlagenen Schritt ein. `IF`, `GOTO`, `CALL`, `FOR`, Pipes und
+  Eingabe-Redirection sind nicht verfuegbar; die Debugfolge muss linear
+  bleiben. Die Datei darf hoechstens 4096 Bytes haben.
+- Fuer temporäres Debugging ausschliesslich
+  `Repositories/Distribution/TestInjection/AUTOEXEC.BAT` anpassen. Das
+  Testprofil legt diese Datei nach der Basis-Injection ueber
+  `Repositories/Distribution/Injection/AUTOEXEC.BAT` und veraendert damit
+  weder Slim noch Full. Die Basis-AUTOEXEC nur fuer beabsichtigtes
+  Produktverhalten aendern.
+  
+# Remote-Updates
+- R4OS kann auf echter Hardware laufen
+- Updates (Alle Modularten) können über das Netzwerk eingespielt werden.
+- Informationen zum Remote-Update findest du unter Docs/Agents/RemoteUpdate.txt
 
-`{subversion_id}` ist innerhalb der aktuellen Hauptversion lokal und beginnt bei `1`.
-`{task_id}` ist innerhalb seiner Unterversion lokal und beginnt bei `1`.
-
-Neue Unterversionen werden ohne `sortierung` automatisch am Ende eingeordnet. Eine explizite `sortierung` ist weiterhin möglich.
-
-## Roadmap lesen und bearbeiten
-
-- Gesamte aktuelle Version erhalten: `GET http://10.0.0.2:4011/roadmaps/1/current`
-- Gesamte aktuelle Version überschreiben (Gefährlich): `PUT http://10.0.0.2:4011/roadmaps/1/current`
-
-- Leitbild der aktuellen Version erhalten: `GET http://10.0.0.2:4011/roadmaps/1/current/vision`
-- Leitbild der aktuellen Version überschreiben: `PUT http://10.0.0.2:4011/roadmaps/1/current/vision`
--- `{"vision":"Neues Leitbild"}`
-
-- Allgemeine Notizen der aktuellen Version erhalten: `GET http://10.0.0.2:4011/roadmaps/1/current/notes`
-- Allgemeine Notizen der aktuellen Version überschreiben (Gefährlich): `PUT http://10.0.0.2:4011/roadmaps/1/current/notes`
--- `{"notes":"Neue allgemeine Versionsnotizen"}`
-- Allgemeine Notizen der aktuellen Version ergänzen: `POST http://10.0.0.2:4011/roadmaps/1/current/notes/append`
--- `{"notes":"Zusätzliche Notiz"}`
-
-- Nur alle Unterversionen erhalten: `GET http://10.0.0.2:4011/roadmaps/1/current/subversions`
-
-- Status der aktuellen Version ändern: `PATCH http://10.0.0.2:4011/roadmaps/1/current/status`
--- `{"status":"Abgeschlossen"}`
--- Mögliche Werte: `Offen`, `Abgeschlossen`, `Verworfen`
-
-## Unterversionen lesen und bearbeiten
-
-- Unterversion erhalten: `GET http://10.0.0.2:4011/roadmaps/1/current/subversion/{subversion_id}`
-- Unterversion vollständig überschreiben (Gefährlich): `PUT http://10.0.0.2:4011/roadmaps/1/current/subversion/{subversion_id}`
--- `{"versionsnummer":"0.66.5","titel":"Neuer Schritt","status":"Offen","beschreibung":"","notizen":"","sortierung":5,"tasks":[{"beschreibung":"Aufgabe A","status":"Offen","notizen":"","sortierung":0}],"abnahmen":[{"beschreibung":"Abnahme A","status":"Offen","notizen":"","sortierung":0}]}`
-
-- Einzelne Felder einer Unterversion ändern: `PATCH http://10.0.0.2:4011/roadmaps/1/current/subversion/{subversion_id}`
--- Beispiel für eine neue Reihenfolge: `{"sortierung":5}`
-
-- Neue Unterversion inklusive Aufgaben und Abnahmen erstellen: `POST http://10.0.0.2:4011/roadmaps/1/current/subversions`
--- `{"versionsnummer":"0.66.5","titel":"Neuer Schritt","beschreibung":"","notizen":"","tasks":[{"beschreibung":"Aufgabe A","notizen":""}],"abnahmen":[{"beschreibung":"Abnahme A","notizen":""}]}`
--- Neue Elemente erhalten standardmäßig den Status `Offen`.
--- Ohne `sortierung` wird die Unterversion automatisch am Ende einsortiert.
--- `sortierung` kann bei Bedarf explizit übermittelt werden.
-
-- Status einer Unterversion ändern: `PATCH http://10.0.0.2:4011/roadmaps/1/current/subversion/{subversion_id}/status`
--- `{"status":"Abgeschlossen"}`
--- Mögliche Werte: `Offen`, `Abgeschlossen`, `Verworfen`
-
-- Notizen einer Unterversion erhalten: `GET http://10.0.0.2:4011/roadmaps/1/current/subversion/{subversion_id}/notes`
-- Notizen einer Unterversion überschreiben (Gefährlich): `PUT http://10.0.0.2:4011/roadmaps/1/current/subversion/{subversion_id}/notes`
--- `{"notes":"Neue Notizen"}`
-- Notizen einer Unterversion ergänzen: `POST http://10.0.0.2:4011/roadmaps/1/current/subversion/{subversion_id}/notes/append`
--- `{"notes":"Zusätzliche Notiz"}`
-
-## Aufgaben
-
-- Aufgabe erhalten: `GET http://10.0.0.2:4011/roadmaps/1/current/subversion/{subversion_id}/task/{task_id}`
-- Aufgabe überschreiben: `PUT http://10.0.0.2:4011/roadmaps/1/current/subversion/{subversion_id}/task/{task_id}`
--- `{"beschreibung":"Aufgabe","status":"Offen","notizen":"","sortierung":0}`
-
-- Neue Aufgabe erstellen: `POST http://10.0.0.2:4011/roadmaps/1/current/subversion/{subversion_id}/tasks`
--- `{"beschreibung":"Neue Aufgabe","notizen":""}`
-
-- Status einer Aufgabe ändern: `PATCH http://10.0.0.2:4011/roadmaps/1/current/subversion/{subversion_id}/task/{task_id}/status`
--- `{"status":"Erledigt"}`
--- Mögliche Werte: `Offen`, `Erledigt`, `Verworfen`
-
-- Notizen einer Aufgabe erhalten: `GET http://10.0.0.2:4011/roadmaps/1/current/subversion/{subversion_id}/task/{task_id}/notes`
-- Notizen einer Aufgabe überschreiben: `PUT http://10.0.0.2:4011/roadmaps/1/current/subversion/{subversion_id}/task/{task_id}/notes`
--- `{"notes":"Neue Notizen"}`
-- Notizen einer Aufgabe ergänzen: `POST http://10.0.0.2:4011/roadmaps/1/current/subversion/{subversion_id}/task/{task_id}/notes/append`
--- `{"notes":"Zusätzliche Notiz"}`
-
-## Abnahmen
-
-- Abnahme erhalten: `GET http://10.0.0.2:4011/roadmaps/1/current/subversion/{subversion_id}/acceptance/{acceptance_id}`
-- Abnahme überschreiben: `PUT http://10.0.0.2:4011/roadmaps/1/current/subversion/{subversion_id}/acceptance/{acceptance_id}`
--- `{"beschreibung":"Abnahme","status":"Offen","notizen":"","sortierung":0}`
-
-- Neue Abnahme erstellen: `POST http://10.0.0.2:4011/roadmaps/1/current/subversion/{subversion_id}/acceptances`
--- `{"beschreibung":"Neue Abnahme","notizen":""}`
-
-- Status einer Abnahme ändern: `PATCH http://10.0.0.2:4011/roadmaps/1/current/subversion/{subversion_id}/acceptance/{acceptance_id}/status`
--- `{"status":"Erledigt"}`
--- Mögliche Werte: `Offen`, `Erledigt`, `Verworfen`
-
-- Notizen einer Abnahme erhalten: `GET http://10.0.0.2:4011/roadmaps/1/current/subversion/{subversion_id}/acceptance/{acceptance_id}/notes`
-- Notizen einer Abnahme überschreiben: `PUT http://10.0.0.2:4011/roadmaps/1/current/subversion/{subversion_id}/acceptance/{acceptance_id}/notes`
--- `{"notes":"Neue Notizen"}`
-- Notizen einer Abnahme ergänzen: `POST http://10.0.0.2:4011/roadmaps/1/current/subversion/{subversion_id}/acceptance/{acceptance_id}/notes/append`
--- `{"notes":"Zusätzliche Notiz"}`
-
-## Roadmap aufräumen
-
-Nur wenn der User das Aufräumen der Roadmap explizit verlangt:
-
-- Schau dir die Roadmap nochmal an und aktualisiere bei Bedarf unsere `Docs/`.
-- Hol dir die Roadmap komplett im Markdown-Format und lege sie unter `Docs/Changelogs/` ab, beispielsweise als `V0.20.X.txt`.
--- `GET http://10.0.0.2:4011/roadmaps/1/current/markdown`
-- Setze den Status der aktuellen Version auf `Abgeschlossen`.
-- Erstelle eine neue leere Version der Roadmap: `POST http://10.0.0.2:4011/roadmaps/1/versions/next`
--- Kein JSON-Body nötig. Die Version erhält automatisch die nächste Versionsnummer, den Titel `Neu` und den Status `Offen`.
+# Die wichtigsten Anleitungen
+- Agents/API-ABI.txt
+- Agents/Build.txt
+- Agents/KernelStruktur.txt
+- Agents/Konventionen.txt
+- Agents/Projektstruktur.txt
+- Agents/R4M0-Container.txt
+- Agents/Test.txt
+- Agents/Powershell.txt: Informationen zur möglichst fehlerfreien Handhabung der Host-Powershell.
+- Server/Agents/Server.txt: Nur falls am Package-Server was geändert wird.
 
 # Workspace, Dokumentation und Inventare
 - Besitzgrenzen, Repositoryrollen, DevKit, Distribution und Artefakte stehen
@@ -246,3 +168,91 @@ Nur wenn der User das Aufräumen der Roadmap explizit verlangt:
   Audioausfall setzt den Teilpfad auf `degraded`, darf Gastzeit und Video aber
   weder beschleunigen noch blockieren; Abschluss, Close und Fehler muessen
   denselben idempotenten Ressourcenabbau erreichen.
+  
+# Arbeiten mit der Roadmap
+Wir strukturieren unsere Arbeit mit Hilfe einer Roadmap.
+Die API liefert und empfängt überwiegend JSON. Der Markdown-Export liefert `text/markdown`.
+„Ergänzen“ fügt einem Wert einen Zeilenumbruch und danach den gesendeten Text hinzu.
+Abnahmen können optional erstellt werden. Neue Tests, Gates, etc, sollten nur angelegt werden wenn es nötig ist.
+Mit weiteren Tests müssen wir sparsam sein, da aktuell schon zu viele bestehen.
+
+`{subversion_id}` ist innerhalb der aktuellen Hauptversion lokal und beginnt bei `1`.
+`{task_id}` ist innerhalb seiner Unterversion lokal und beginnt bei `1`.
+
+Neue Unterversionen werden ohne `sortierung` automatisch am Ende eingeordnet. Eine explizite `sortierung` ist weiterhin möglich.
+
+## Roadmap lesen und bearbeiten
+- Gesamte aktuelle Version erhalten: `GET http://10.0.0.2:4011/roadmaps/1/current`
+- Gesamte aktuelle Version überschreiben (Gefährlich): `PUT http://10.0.0.2:4011/roadmaps/1/current`
+- Leitbild der aktuellen Version erhalten: `GET http://10.0.0.2:4011/roadmaps/1/current/vision`
+- Leitbild der aktuellen Version überschreiben: `PUT http://10.0.0.2:4011/roadmaps/1/current/vision`
+-- `{"vision":"Neues Leitbild"}`
+- Allgemeine Notizen der aktuellen Version erhalten: `GET http://10.0.0.2:4011/roadmaps/1/current/notes`
+- Allgemeine Notizen der aktuellen Version überschreiben (Gefährlich): `PUT http://10.0.0.2:4011/roadmaps/1/current/notes`
+-- `{"notes":"Neue allgemeine Versionsnotizen"}`
+- Allgemeine Notizen der aktuellen Version ergänzen: `POST http://10.0.0.2:4011/roadmaps/1/current/notes/append`
+-- `{"notes":"Zusätzliche Notiz"}`
+- Nur alle Unterversionen erhalten: `GET http://10.0.0.2:4011/roadmaps/1/current/subversions`
+- Status der aktuellen Version ändern: `PATCH http://10.0.0.2:4011/roadmaps/1/current/status`
+-- `{"status":"Abgeschlossen"}`
+-- Mögliche Werte: `Offen`, `Abgeschlossen`, `Verworfen`
+
+## Unterversionen lesen und bearbeiten
+- Unterversion erhalten: `GET http://10.0.0.2:4011/roadmaps/1/current/subversion/{subversion_id}`
+- Unterversion vollständig überschreiben (Gefährlich): `PUT http://10.0.0.2:4011/roadmaps/1/current/subversion/{subversion_id}`
+-- `{"versionsnummer":"0.66.5","titel":"Neuer Schritt","status":"Offen","beschreibung":"","notizen":"","sortierung":5,"tasks":[{"beschreibung":"Aufgabe A","status":"Offen","notizen":"","sortierung":0}],"abnahmen":[{"beschreibung":"Abnahme A","status":"Offen","notizen":"","sortierung":0}]}`
+- Einzelne Felder einer Unterversion ändern: `PATCH http://10.0.0.2:4011/roadmaps/1/current/subversion/{subversion_id}`
+-- Beispiel für eine neue Reihenfolge: `{"sortierung":5}`
+- Neue Unterversion inklusive Aufgaben und Abnahmen erstellen: `POST http://10.0.0.2:4011/roadmaps/1/current/subversions`
+-- `{"versionsnummer":"0.66.5","titel":"Neuer Schritt","beschreibung":"","notizen":"","tasks":[{"beschreibung":"Aufgabe A","notizen":""}],"abnahmen":[{"beschreibung":"Abnahme A","notizen":""}]}`
+-- Neue Elemente erhalten standardmäßig den Status `Offen`.
+-- Ohne `sortierung` wird die Unterversion automatisch am Ende einsortiert.
+-- `sortierung` kann bei Bedarf explizit übermittelt werden.
+- Status einer Unterversion ändern: `PATCH http://10.0.0.2:4011/roadmaps/1/current/subversion/{subversion_id}/status`
+-- `{"status":"Abgeschlossen"}`
+-- Mögliche Werte: `Offen`, `Abgeschlossen`, `Verworfen`
+- Notizen einer Unterversion erhalten: `GET http://10.0.0.2:4011/roadmaps/1/current/subversion/{subversion_id}/notes`
+- Notizen einer Unterversion überschreiben (Gefährlich): `PUT http://10.0.0.2:4011/roadmaps/1/current/subversion/{subversion_id}/notes`
+-- `{"notes":"Neue Notizen"}`
+- Notizen einer Unterversion ergänzen: `POST http://10.0.0.2:4011/roadmaps/1/current/subversion/{subversion_id}/notes/append`
+-- `{"notes":"Zusätzliche Notiz"}`
+
+## Aufgaben
+- Aufgabe erhalten: `GET http://10.0.0.2:4011/roadmaps/1/current/subversion/{subversion_id}/task/{task_id}`
+- Aufgabe überschreiben: `PUT http://10.0.0.2:4011/roadmaps/1/current/subversion/{subversion_id}/task/{task_id}`
+-- `{"beschreibung":"Aufgabe","status":"Offen","notizen":"","sortierung":0}`
+- Neue Aufgabe erstellen: `POST http://10.0.0.2:4011/roadmaps/1/current/subversion/{subversion_id}/tasks`
+-- `{"beschreibung":"Neue Aufgabe","notizen":""}`
+- Status einer Aufgabe ändern: `PATCH http://10.0.0.2:4011/roadmaps/1/current/subversion/{subversion_id}/task/{task_id}/status`
+-- `{"status":"Erledigt"}`
+-- Mögliche Werte: `Offen`, `Erledigt`, `Verworfen`
+- Notizen einer Aufgabe erhalten: `GET http://10.0.0.2:4011/roadmaps/1/current/subversion/{subversion_id}/task/{task_id}/notes`
+- Notizen einer Aufgabe überschreiben: `PUT http://10.0.0.2:4011/roadmaps/1/current/subversion/{subversion_id}/task/{task_id}/notes`
+-- `{"notes":"Neue Notizen"}`
+- Notizen einer Aufgabe ergänzen: `POST http://10.0.0.2:4011/roadmaps/1/current/subversion/{subversion_id}/task/{task_id}/notes/append`
+-- `{"notes":"Zusätzliche Notiz"}`
+
+## Abnahmen
+- Abnahme erhalten: `GET http://10.0.0.2:4011/roadmaps/1/current/subversion/{subversion_id}/acceptance/{acceptance_id}`
+- Abnahme überschreiben: `PUT http://10.0.0.2:4011/roadmaps/1/current/subversion/{subversion_id}/acceptance/{acceptance_id}`
+-- `{"beschreibung":"Abnahme","status":"Offen","notizen":"","sortierung":0}`
+- Neue Abnahme erstellen: `POST http://10.0.0.2:4011/roadmaps/1/current/subversion/{subversion_id}/acceptances`
+-- `{"beschreibung":"Neue Abnahme","notizen":""}`
+- Status einer Abnahme ändern: `PATCH http://10.0.0.2:4011/roadmaps/1/current/subversion/{subversion_id}/acceptance/{acceptance_id}/status`
+-- `{"status":"Erledigt"}`
+-- Mögliche Werte: `Offen`, `Erledigt`, `Verworfen`
+- Notizen einer Abnahme erhalten: `GET http://10.0.0.2:4011/roadmaps/1/current/subversion/{subversion_id}/acceptance/{acceptance_id}/notes`
+- Notizen einer Abnahme überschreiben: `PUT http://10.0.0.2:4011/roadmaps/1/current/subversion/{subversion_id}/acceptance/{acceptance_id}/notes`
+-- `{"notes":"Neue Notizen"}`
+- Notizen einer Abnahme ergänzen: `POST http://10.0.0.2:4011/roadmaps/1/current/subversion/{subversion_id}/acceptance/{acceptance_id}/notes/append`
+-- `{"notes":"Zusätzliche Notiz"}`
+
+## Roadmap aufräumen
+Nur wenn der User das Aufräumen der Roadmap explizit verlangt:
+- Schau dir die Roadmap nochmal an und aktualisiere bei Bedarf unsere `Docs/`.
+- Hol dir die Roadmap komplett im Markdown-Format und lege sie unter `Docs/Changelogs/` ab, beispielsweise als `V0.20.X.txt`.
+-- `GET http://10.0.0.2:4011/roadmaps/1/current/markdown`
+- Setze den Status der aktuellen Version auf `Abgeschlossen`.
+- Erstelle eine neue leere Version der Roadmap: `POST http://10.0.0.2:4011/roadmaps/1/versions/next`
+-- Kein JSON-Body nötig. Die Version erhält automatisch die nächste Versionsnummer, den Titel `Neu` und den Status `Offen`.
+- Manuell zu pflegende Inventare bei Bedarf aktualisieren.
