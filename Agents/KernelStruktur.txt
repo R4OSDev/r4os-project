@@ -213,7 +213,8 @@ driver/
 
     com.zig           16550-UART: COM1 Debug, COM2 Link-Basis
     registry.zig      Treiber-Registry fuer Built-ins und R4D
-    input/            PS/2-Keyboard und -Mouse, Layouts unter key_layouts/
+    input/            PS/2-Keyboard und -Mouse, kanonische Codepointqueue,
+                      Layouts unter key_layouts/
     storage/          Built-in-Boot-Probing fuer AHCI; NVMe besitzt genau
                       einen Controllerpfad in NVME.R4D. Produktiver Storage
                       ueber NVME.R4D, AHCI.R4D und ATAPIO.R4D
@@ -223,8 +224,9 @@ driver/
     driver/usb/core.zig      USB-Core- und Device-Modell
     driver/usb/hid.zig       USB-HID-Boot ueber R4P-Decode
     driver/usb/msc.zig       USB-Mass-Storage, BOT/SCSI-Blockpfad
-    driver/usb/xhci_*.zig    Event-Router, Ringzyklus, Endpointkontext und
-                      -Recovery, Bulk-Completion
+    driver/usb/xhci_*.zig    Event-Router mit Port-Change-Pendingbesitz,
+                      Ringzyklus, Endpointkontext und -Recovery,
+                      Bulk-Completion
     driver/usb/usb_*.zig     Bootzeitverhalten, Waits und MSC-Retrypolicy
 
 Die Klassentreiber `driver/usb/hid.zig` und `driver/usb/msc.zig`
