@@ -214,8 +214,9 @@ driver/
     com.zig           16550-UART: COM1 Debug, COM2 Link-Basis
     registry.zig      Treiber-Registry fuer Built-ins und R4D
     input/            PS/2-Keyboard und -Mouse, Layouts unter key_layouts/
-    storage/          Boot-Probing in ahci.zig und nvme.zig; produktiver
-                      Storage ueber NVME.R4D, AHCI.R4D und ATAPIO.R4D
+    storage/          Built-in-Boot-Probing fuer AHCI; NVMe besitzt genau
+                      einen Controllerpfad in NVME.R4D. Produktiver Storage
+                      ueber NVME.R4D, AHCI.R4D und ATAPIO.R4D
     driver/usb/xhci.zig   XHCI-Host-Backend mit der Kernel-Logik; XHCI.R4D ist
                       das duenne Aktivierungsmodul des USB-Hostpfads
     driver/usb/host_controller.zig   Owner-Abstraktion und Backendregistry

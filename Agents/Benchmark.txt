@@ -14,10 +14,12 @@ kein Bestandteil des normalen Agentenworkflows und werden niemals vorsorglich
 oder automatisch durch Build, Test, Imagebau, Headless, GUI oder Modulbuild
 gestartet.
 
-Fuer die vorhandenen Roadmap-Unterversionen 0.69.17 bis 0.69.53 ist genau ein
-regulaerer Abschlussbenchmark ausdruecklich angeordnet. Weitere Laeufe sind
-nur bei einer konkret belegten methodischen oder technischen Notwendigkeit
-zulaessig; der Grund gehoert in die Roadmap, nicht in die Messhistorie.
+Wenn eine vorhandene Roadmap-Unterversion einen Abschlussbenchmark
+ausdruecklich anordnet, ist genau dieser eine regulaere Lauf auszufuehren.
+Weitere Laeufe sind nur bei einer konkret belegten methodischen oder
+technischen Notwendigkeit zulaessig; der Grund gehoert in die Roadmap, nicht
+in die Messhistorie. Versionsbereiche werden nicht in dieser Anleitung
+festgeschrieben, sondern ausschliesslich von der aktuellen Roadmap bestimmt.
 
 
 Kanonische Besitzer und Dateien
