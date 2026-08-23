@@ -137,10 +137,12 @@ DevKit/
     HostTools/bin/      installierte R4OS-Hosttools
     HostTools/Source/   installierte Quellkopien fuer Hosttools
 
-Diese Inhalte werden von `DevKit/Setup/Setup_Windows.bat` beschafft. Die
-installierten Contract-, SDK- und Distribution-Kopien sind Verbraucher und
-keine fachlichen Quellwahrheiten. Sie werden nicht fuer Produktentwicklung
-editiert; Aenderungen gehoeren nach `Repositories/`.
+Diese Inhalte werden unter Windows von `DevKit/Setup/Setup_Windows.bat` und
+unter Linux von `DevKit/Setup/Setup_Linux.sh` beschafft. Beide starten die
+gemeinsame `Setup.ps1`. Die installierten Contract-, SDK-, Libraries- und
+Distribution-Kopien sind Verbraucher und keine fachlichen Quellwahrheiten.
+Sie werden nicht fuer Produktentwicklung editiert; Aenderungen gehoeren nach
+`Repositories/`.
 
 
 Distribution/

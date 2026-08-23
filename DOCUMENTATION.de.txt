@@ -26,7 +26,11 @@ Repository-Verwaltung benoetigt.
 GitHub-Zugriffe erfolgen unter Windows ueber `Tools\Github.bat` und unter Linux
 ueber `./Tools/Github.sh`. Oeffentliche Pulls laufen auf beiden Hosts anonym.
 Das DevKit wird mit `-Pull -DevKit` bezogen; seine hostspezifische Einrichtung
-bleibt Eigentum des DevKit-Repositories.
+bleibt Eigentum des DevKit-Repositories. Danach wird es unter Windows mit
+`DevKit\Setup\Setup_Windows.bat` oder unter Linux mit
+`./DevKit/Setup/Setup_Linux.sh` eingerichtet. Beide Starter verwenden dieselbe
+PowerShell-Logik; unter Linux werden die festgelegten nativen Toolchains und
+Hosttools installiert beziehungsweise gebaut.
 
 Der gemeinsame Build startet unter Windows mit `Tools\Build.bat` und unter
 Linux mit `./Tools/Build.sh`. Beide rufen dieselbe PowerShell-Orchestrierung
@@ -34,7 +38,7 @@ auf. Repository-Buildstarter und Hosttools werden passend zum Host als
 `Build.bat`/`Build.sh` und mit beziehungsweise ohne `.exe` gewaehlt.
 Image-Erzeugung, Verifikation und QEMU bleiben Eigentum des
 Distribution-Repositories; Linux kann diese Aktionen erst ausfuehren, sobald
-Distribution und DevKit dort die entsprechende Hostfunktion bereitstellen.
+Distribution dort die entsprechende Hostfunktion bereitstellt.
 
 `Tools\Clean.bat` und `./Tools/Clean.sh` verwenden ebenfalls dieselbe
 PowerShell-Logik. `Artifacts/Distribution` und `zig-out` bleiben erhalten.

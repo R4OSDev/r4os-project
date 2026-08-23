@@ -24,9 +24,17 @@ Windows:
     DevKit\Setup\Setup_Windows.bat
 
 Unter Linux werden dieselben Project-Aktionen ueber `Tools/Setup.sh`,
-`Tools/Github.sh` und `Tools/Build.sh` gestartet. Das Linux-DevKit sowie
-Image-, Verify- und QEMU-Aktionen setzen die noch bereitzustellenden
-Linux-Pfade des DevKit- und Distribution-Besitzers voraus.
+`Tools/Github.sh` und `Tools/Build.sh` gestartet:
+
+    ./Tools/Setup.sh
+    ./Tools/Github.sh -pull -docs
+    ./Tools/Github.sh -pull -devkit
+    ./DevKit/Setup/Setup_Linux.sh
+
+Das Linux-DevKit installiert Zig, Limine und QEMU, bezieht seine
+Verbraucherkopien und baut die Hosttools nativ. Image-, Verify- und
+QEMU-Aktionen setzen zusaetzlich die Linux-Unterstuetzung des
+Distribution-Besitzers voraus.
 Fehlt `pwsh` unter Debian, installiert `Tools/Setup.sh` es zuvor mit root- oder
 sudo-Rechten aus der offiziellen Microsoft-Paketquelle.
 

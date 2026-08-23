@@ -38,6 +38,9 @@ Public source checkouts do not require a GitHub account or API token. Pull Docs
 and the DevKit on Windows with `Tools\Github.bat -Pull -Docs` and
 `Tools\Github.bat -Pull -DevKit`, or on Linux with
 `./Tools/Github.sh -Pull -Docs` and `./Tools/Github.sh -Pull -DevKit`.
+Initialize the checked-out DevKit with `DevKit\Setup\Setup_Windows.bat` or
+`./DevKit/Setup/Setup_Linux.sh`. Both launch its shared PowerShell setup; the
+Linux launcher installs the pinned native toolchain and host tools.
 The setup also creates the ignored local file `QuickNotes.txt` when missing,
 without overwriting existing content.
 
@@ -47,8 +50,8 @@ creating repositories in the R4OSDev organization.
 
 Use `Tools/Build.bat` on Windows or `./Tools/Build.sh` on Linux as the
 multi-repository build entry point. Linux image, verification, and QEMU actions
-also require matching support from the Distribution and DevKit repositories;
-the Project launcher does not emulate unavailable owner functionality.
+still require matching Linux support from the Distribution repository; the
+Project launcher does not emulate unavailable owner functionality.
 
 Use `Tools/Clean.bat` or `./Tools/Clean.sh` to empty every `Artifacts` subtree
 except the preserved `Artifacts/Distribution` tree and to remove R4OS-local
