@@ -5,22 +5,23 @@ Zweck
 -----
 
 Diese Datei beschreibt den vollständigen GitHub-Arbeitsablauf für den
-R4OS-Workspace unter D:\R4OS. Sie ist die verbindliche Anleitung für Agents
-und andere automatisierte Werkzeuge. Die Kurzfassung in AGENTS.md nennt nur
-den Einstieg für Push und Pull.
+R4OS-Workspace unter Windows und Linux. Sie ist die verbindliche Anleitung für
+Agents und andere automatisierte Werkzeuge. Die Kurzfassung in AGENTS.md nennt
+nur den Einstieg für Push und Pull.
 
 
 Grundregeln
 -----------
 
 - Für Project, DevKit, Docs, Organisationsprofil, Contract, SDK, Libraries,
-  Kernel, Distribution und Module ausschließlich
-  D:\R4OS\Tools\Github.bat verwenden.
+  Kernel, Distribution und Module ausschließlich `Tools\Github.bat` unter
+  Windows oder `./Tools/Github.sh` unter Linux verwenden. Beide starten die
+  gemeinsame PowerShell-7-Logik in `Tools/Github.ps1`.
 - Der private Package-Server ist die einzige Ausnahme. Er wird ausschließlich
-  mit D:\R4OS\Server\Push.bat und D:\R4OS\Server\Pull.bat verwaltet und
-  besitzt bewusst kein Ziel im globalen Github.bat.
+  mit seinen eigenen Startern unter `Server/` verwaltet und besitzt bewusst
+  kein Ziel im globalen GitHub-Starter.
 - Pulls aus allen vom globalen Script verwalteten öffentlichen Repositories
-  laufen anonym. Github.bat lädt dafür keine Credentials und deaktiviert
+  laufen anonym. Github.ps1 lädt dafür keine Credentials und deaktiviert
   interaktive Anmeldung sowie lokale Git-Credential-Helper.
 - Pushes und die automatische Repository-Erstellung bleiben
   tokenauthentifiziert.
@@ -34,15 +35,16 @@ Grundregeln
   DevKit oder Docs. Diese Verzeichnisse sind eigenständige Repositories und
   im Project-Repository ausgeschlossen.
 - Alle verwalteten Repositories verwenden origin und den Branch main.
-- Github.bat erstellt keine Pull Requests und führt keine Branch-Merges oder
+- Github.ps1 erstellt keine Pull Requests und führt keine Branch-Merges oder
   Rebases aus. Es arbeitet direkt mit main.
 - Zugangsdaten niemals lesen, anzeigen, protokollieren, kopieren oder in einen
   Commit aufnehmen.
-- Der normale Abschluss erfolgt mit `Github.bat -push -changed`. Vor dem
+- Der normale Abschluss erfolgt mit `Tools\Github.bat -Push -Changed` unter
+  Windows beziehungsweise `./Tools/Github.sh -Push -Changed` unter Linux. Vor dem
   ersten Einzel-Push zeigt dieser alle verwalteten Repositoryzustaende und
   die erkannten Pushziele an. Gezielte Einzel-Pushes sind nur fuer Reparatur-
   und Sonderfaelle vorgesehen.
-- Github.bat staged in jedem erkannten Ziel sämtliche nicht ignorierten
+- Github.ps1 staged in jedem erkannten Ziel sämtliche nicht ignorierten
   Änderungen dieses Repositories, nicht nur die Dateien der aktuellen
   Aufgabe. Deshalb vorhandene Änderungen vor dem Sammel-Push vollständig
   prüfen.
@@ -69,7 +71,7 @@ verwaltet.
 Bereits vorhandene Repositories werden durch Push oder Pull nicht in ihrer
 Sichtbarkeit veraendert.
 
-Github.bat akzeptiert ausschließlich ein origin, dessen URL exakt zum
+Github.ps1 akzeptiert ausschließlich ein origin, dessen URL exakt zum
 ausgewählten R4OSDev-Repository gehört. Ein abweichendes origin führt zum
 Abbruch und wird nicht automatisch überschrieben.
 
@@ -79,27 +81,30 @@ Credentials
 
 Die lokalen Zugangsdaten liegen ausschließlich hier:
 
-    D:\R4OS\Tools\Credentials\Github.bat
+    Tools/Credentials/Github.json
 
-Die Datei definiert intern R4OS_GITHUB_USER und R4OS_GITHUB_TOKEN. Agents
-dürfen die Datei nicht öffnen oder ihren Inhalt ausgeben. Github.bat lädt sie
-ausschließlich für Pushes und schreibende GitHub-API-Aufrufe. Dabei übergibt
-es die Daten über seinen AskPass-Pfad an Git und über einen
-Authorization-Header an die GitHub-API. Zugangsdaten werden nicht in der
-Remote-URL gespeichert.
+Die JSON-Datei enthält intern `user` und `token`. Agents dürfen die Datei nicht
+öffnen oder ihren Inhalt ausgeben. Github.ps1 lädt sie ausschließlich für
+Pushes und schreibende GitHub-API-Aufrufe. Git erhält die Authentisierung nur
+im Prozessumfeld; die GitHub-API erhält einen Authorization-Header.
+Zugangsdaten werden nicht in der Remote-URL gespeichert.
 
 Nach einem frischen Checkout wird ausgeführt:
 
-    D:\R4OS\Tools\Setup.bat
+    Tools\Setup.bat
 
-Setup.bat erzeugt den Credentials-Ordner und eine Platzhalterdatei, falls sie
+Unter Linux entsprechend:
+
+    ./Tools/Setup.sh
+
+Setup.ps1 erzeugt den Credentials-Ordner und eine Platzhalterdatei, falls sie
 noch nicht existieren. Eine vorhandene Credentials-Datei wird nicht
 überschrieben. Für einen rein lesenden Workspace-Aufbau bleibt der Platzhalter
 unverändert; erst vor einem Push trägt der Benutzer Benutzername und Token ein.
 
-Der Token benoetigt Schreibzugriff auf Repository-Inhalte fuer Push. Soll
-Github.bat ein fehlendes Repository automatisch anlegen, muss der Token
-ausserdem in der Organisation R4OSDev Repositories erstellen duerfen. Eine
+Der Token benoetigt Schreibzugriff auf Repository-Inhalte fuer Push. Soll der
+globale GitHub-Starter ein fehlendes Repository automatisch anlegen, muss der
+Token ausserdem in der Organisation R4OSDev Repositories erstellen duerfen. Eine
 Berechtigung fuer Pull Requests ist fuer diesen Arbeitsablauf nicht
 erforderlich. Pulls aus den öffentlichen R4OSDev-Repositories benötigen
 weder Token noch GitHub-Benutzerkonto.
@@ -114,7 +119,8 @@ Interaktiver Aufruf
 
 Ohne Argumente startet das Script ein Menü:
 
-    D:\R4OS\Tools\Github.bat
+    Tools\Github.bat       (Windows)
+    ./Tools/Github.sh      (Linux)
 
 Das Menü fragt zuerst Push oder Pull. Bei Push ist der Sammel-Push aller
 geänderten Repositories die empfohlene erste Auswahl; alternativ kann ein
@@ -132,9 +138,11 @@ Repositories.
 Direkte Aufrufe
 ---------------
 
-Der verbindliche normale Push-Aufruf lautet:
+In den folgenden Befehlsformen steht `<Github-Starter>` unter Windows fuer
+`Tools\Github.bat` und unter Linux fuer `./Tools/Github.sh`. Der verbindliche
+normale Push-Aufruf lautet:
 
-    Github.bat -push -changed "Commit-Beschreibung"
+    <Github-Starter> -push -changed "Commit-Beschreibung"
 
 Die Beschreibung ist optional. Ist sie vorhanden, verwendet jedes tatsächlich
 geänderte Repository denselben Text. Ohne Beschreibung greift für jedes Ziel
@@ -144,8 +152,8 @@ nicht committed und nicht gepusht.
 Gezielte Einzel-Pushes bleiben für Reparatur- und Sonderfälle erhalten. Für
 zentrale Repositories gilt:
 
-    Github.bat -push -ZIEL "Commit-Beschreibung"
-    Github.bat -pull -ZIEL
+    <Github-Starter> -push -ZIEL "Commit-Beschreibung"
+    <Github-Starter> -pull -ZIEL
 
 ZIEL ist eines von:
 
@@ -159,42 +167,42 @@ ZIEL ist eines von:
     -distribution
     -organization
 
-Beispiele:
+Beispiele fuer beide Hosts:
 
-    D:\R4OS\Tools\Github.bat -push -changed "Arbeitsstand abschliessen"
-    D:\R4OS\Tools\Github.bat -push -project "Agent-Anleitung aktualisieren"
-    D:\R4OS\Tools\Github.bat -pull -contract
-    D:\R4OS\Tools\Github.bat -push -docs "Dokumentation aktualisieren"
-    D:\R4OS\Tools\Github.bat -push -organization "Organisationsprofil aktualisieren"
+    Tools\Github.bat -push -changed "Arbeitsstand abschliessen"
+    Tools\Github.bat -pull -contract
+    ./Tools/Github.sh -push -project "Agent-Anleitung aktualisieren"
+    ./Tools/Github.sh -push -docs "Dokumentation aktualisieren"
+    ./Tools/Github.sh -push -organization "Organisationsprofil aktualisieren"
 
 Für eigenständige Komponenten steht der Komponentenname vor der optionalen
 Commit-Beschreibung:
 
-    Github.bat -push -app NAME "Commit-Beschreibung"
-    Github.bat -pull -app NAME
-    Github.bat -push -service NAME "Commit-Beschreibung"
-    Github.bat -pull -service NAME
-    Github.bat -push -diagnostic NAME "Commit-Beschreibung"
-    Github.bat -pull -diagnostic NAME
-    Github.bat -push -driver NAME "Commit-Beschreibung"
-    Github.bat -pull -driver NAME
-    Github.bat -push -protocol NAME "Commit-Beschreibung"
-    Github.bat -pull -protocol NAME
-    Github.bat -push -subsystem NAME "Commit-Beschreibung"
-    Github.bat -pull -subsystem NAME
+    <Github-Starter> -push -app NAME "Commit-Beschreibung"
+    <Github-Starter> -pull -app NAME
+    <Github-Starter> -push -service NAME "Commit-Beschreibung"
+    <Github-Starter> -pull -service NAME
+    <Github-Starter> -push -diagnostic NAME "Commit-Beschreibung"
+    <Github-Starter> -pull -diagnostic NAME
+    <Github-Starter> -push -driver NAME "Commit-Beschreibung"
+    <Github-Starter> -pull -driver NAME
+    <Github-Starter> -push -protocol NAME "Commit-Beschreibung"
+    <Github-Starter> -pull -protocol NAME
+    <Github-Starter> -push -subsystem NAME "Commit-Beschreibung"
+    <Github-Starter> -pull -subsystem NAME
 
 NAME muss dem lokalen Verzeichnisnamen entsprechen. Er darf nur Buchstaben,
 Ziffern und Bindestriche enthalten und muss mit einem Buchstaben oder einer
 Ziffer beginnen. Für den GitHub-Namen wird NAME kleingeschrieben.
 
-Beispiele:
+Beispiele fuer beide Hosts:
 
-    D:\R4OS\Tools\Github.bat -push -app Clock "Clock aktualisieren"
-    D:\R4OS\Tools\Github.bat -pull -service SSHD
-    D:\R4OS\Tools\Github.bat -push -diagnostic FsDiag "FsDiag korrigieren"
-    D:\R4OS\Tools\Github.bat -pull -driver MIDI
-    D:\R4OS\Tools\Github.bat -push -protocol JSON "JSON aktualisieren"
-    D:\R4OS\Tools\Github.bat -pull -subsystem QBasic
+    Tools\Github.bat -push -app Clock "Clock aktualisieren"
+    Tools\Github.bat -pull -service SSHD
+    Tools\Github.bat -push -diagnostic FsDiag "FsDiag korrigieren"
+    ./Tools/Github.sh -pull -driver MIDI
+    ./Tools/Github.sh -push -protocol JSON "JSON aktualisieren"
+    ./Tools/Github.sh -pull -subsystem QBasic
 
 Die Commit-Beschreibung ist optional. Ohne Beschreibung verwendet das Script
 eine passende Standardbeschreibung. Für explizite Beschreibungen einen kurzen,
@@ -204,24 +212,27 @@ doppelte Anführungszeichen und Shell-Sonderzeichen vermeiden.
 Sicherer normaler PowerShell-Aufruf für Agents:
 
     $commitMessage = 'Arbeitsstand abschliessen'
-    $githubScript = (Get-Item -LiteralPath 'D:\R4OS\Tools\Github.bat').FullName
-    & $githubScript -push -changed $commitMessage
+    $githubScript = (Get-Item -LiteralPath 'Tools/Github.ps1').FullName
+    & pwsh -NoLogo -NoProfile -File $githubScript -push -changed $commitMessage
     exit $LASTEXITCODE
 
 
 Repository-Zuordnung
 --------------------
 
+Alle lokalen Angaben sind relativ zum Workspace-Root. Der Punkt `.` bezeichnet
+das Project-Repository selbst.
+
 Project
     Ziel: -project
-    Lokal: D:\R4OS
+    Lokal: .
     GitHub: R4OSDev/r4os-project
     Inhalt: Workspace-Steuerung wie AGENTS.md, Agents, Tools und Root-Dateien.
     DevKit, Docs, Artifacts und Repositories werden nicht mit eingeschlossen.
 
 DevKit
     Ziel: -devkit
-    Lokal: D:\R4OS\DevKit
+    Lokal: DevKit/
     GitHub: R4OSDev/r4os-devkit
     Inhalt: Setup und DevKit-Struktur. Installierte Toolchains, QEMU, Limine,
     SDK-Kopien und Hosttool-Binaries sind durch die DevKit-.gitignore
@@ -229,48 +240,47 @@ DevKit
 
 Docs
     Ziel: -docs
-    Lokal: D:\R4OS\Docs
+    Lokal: Docs/
     GitHub: R4OSDev/r4os-docs
     Inhalt: projektübergreifende Dokumentation und Inventare.
 
 Server
-    Kein Ziel im globalen Github.bat
-    Lokal: D:\R4OS\Server
+    Kein Ziel im globalen GitHub-Starter
+    Lokal: Server/
     GitHub: R4OSDev/r4os-package-server
     Sichtbarkeit: privat
     Inhalt: Website, Update- und Paketdienst, Deployment, Betriebsreferenz
     sowie die eigenen lokalen Push-/Pull-Starter.
-    Push: D:\R4OS\Server\Push.bat "Commit-Beschreibung"
-    Pull: D:\R4OS\Server\Pull.bat
+    Push und Pull: eigene Starter des Server-Repositories verwenden
 
 Contract
     Ziel: -contract
-    Lokal: D:\R4OS\Repositories\Contract
+    Lokal: Repositories/Contract/
     GitHub: R4OSDev/r4os-contract
 
 SDK
     Ziel: -sdk
-    Lokal: D:\R4OS\Repositories\SDK
+    Lokal: Repositories/SDK/
     GitHub: R4OSDev/r4os-sdk
 
 Libraries
     Ziel: -libraries
-    Lokal: D:\R4OS\Repositories\Libraries
+    Lokal: Repositories/Libraries/
     GitHub: R4OSDev/r4os-libraries
 
 Kernel
     Ziel: -kernel
-    Lokal: D:\R4OS\Repositories\Kernel
+    Lokal: Repositories/Kernel/
     GitHub: R4OSDev/r4os-kernel
 
 Distribution
     Ziel: -distribution
-    Lokal: D:\R4OS\Repositories\Distribution
+    Lokal: Repositories/Distribution/
     GitHub: R4OSDev/r4os-distribution
 
 Organisationsprofil
     Ziel: -organization
-    Lokal: D:\R4OS\Repositories\Organization
+    Lokal: Repositories/Organization/
     GitHub: R4OSDev/.github
     Sichtbarkeit: öffentlich
     Inhalt: Öffentliche GitHub-Organisationsseite unter profile/README.md und
@@ -278,32 +288,32 @@ Organisationsprofil
 
 Apps
     Ziel: -app NAME
-    Lokal: D:\R4OS\Repositories\Apps\NAME
+    Lokal: Repositories/Apps/NAME/
     GitHub: R4OSDev/r4os-app-<name-klein>
 
 Services
     Ziel: -service NAME
-    Lokal: D:\R4OS\Repositories\Services\NAME
+    Lokal: Repositories/Services/NAME/
     GitHub: R4OSDev/r4os-service-<name-klein>
 
 Diagnostics
     Ziel: -diagnostic NAME
-    Lokal: D:\R4OS\Repositories\Diagnostics\NAME
+    Lokal: Repositories/Diagnostics/NAME/
     GitHub: R4OSDev/r4os-diagnostic-<name-klein>
 
 Drivers
     Ziel: -driver NAME
-    Lokal: D:\R4OS\Repositories\Drivers\NAME
+    Lokal: Repositories/Drivers/NAME/
     GitHub: R4OSDev/r4os-driver-<name-klein>
 
 Protocols
     Ziel: -protocol NAME
-    Lokal: D:\R4OS\Repositories\Protocols\NAME
+    Lokal: Repositories/Protocols/NAME/
     GitHub: R4OSDev/r4os-protocol-<name-klein>
 
 Subsystems
     Ziel: -subsystem NAME
-    Lokal: D:\R4OS\Repositories\Subsystems\NAME
+    Lokal: Repositories/Subsystems/NAME/
     GitHub: R4OSDev/r4os-subsystem-<name-klein>
 
 Agents gehört zum Project-Repository. Änderungen unter Docs gehören dagegen
@@ -315,9 +325,9 @@ manuelle Zielauswahl. Einen Sammel-Pull gibt es bewusst nicht.
 Was der Sammel-Push ausführt
 ----------------------------
 
-`Github.bat -push -changed` verwendet intern `Tools/GithubChanged.ps1`, aber
+`Github.ps1 -Push -Changed` verwendet intern `Tools/GithubChanged.ps1`, aber
 jeder schreibende Schritt wird weiterhin durch den vorhandenen Einzel-Push von
-Github.bat ausgeführt. Credentials, Repository-Erstellung, Staging, Commit,
+Github.ps1 ausgeführt. Credentials, Repository-Erstellung, Staging, Commit,
 Remoteprüfung und Pushlogik werden dadurch nicht dupliziert.
 
 Die Erkennung besitzt keinen separaten Repository-Index. Sie verwendet diese
@@ -363,7 +373,7 @@ Abschlussliste und dem endgültigen Exitcode abbrechen.
 Was ein Einzel-Push ausführt
 ----------------------------
 
-Github.bat führt für das gewählte Repository in dieser Reihenfolge aus:
+Github.ps1 führt für das gewählte Repository in dieser Reihenfolge aus:
 
 1. Credentials laden und Platzhalterwerte ablehnen.
 2. Lokales Repository prüfen oder, außer beim Project-Root, bei Bedarf mit
@@ -394,7 +404,7 @@ Sichtbarkeit ist ein eigener administrativer Vorgang.
 Was ein Pull ausführt
 ---------------------
 
-Github.bat führt für das gewählte Repository in dieser Reihenfolge aus:
+Github.ps1 führt für das gewählte Repository in dieser Reihenfolge aus:
 
 1. Lokales Repository prüfen oder, außer beim Project-Root, bei Bedarf mit
    main initialisieren.
@@ -423,8 +433,8 @@ Arbeitsablauf für Änderungen
    eines Pushziels entfällt.
 2. Vorhandenen Zustand lesen:
 
-       git -C "D:\R4OS\<Repository-Pfad>" status --short
-       git -C "D:\R4OS\<Repository-Pfad>" diff
+       git -C "<Repository-Pfad>" status --short
+       git -C "<Repository-Pfad>" diff
 
 3. Vorhandene Benutzeränderungen erhalten und nur die beauftragten Dateien
    bearbeiten.
@@ -432,12 +442,13 @@ Arbeitsablauf für Änderungen
 5. Vor dem Abschluss die Status- und Diffausgaben aller berührten
    Repositories sowie gegebenenfalls Whitespace prüfen:
 
-       git -C "D:\R4OS\<Repository-Pfad>" status --short
-       git -C "D:\R4OS\<Repository-Pfad>" diff --check
+       git -C "<Repository-Pfad>" status --short
+       git -C "<Repository-Pfad>" diff --check
 
 6. Den Sammel-Push mit einer klaren gemeinsamen Commit-Beschreibung aufrufen:
 
-       D:\R4OS\Tools\Github.bat -push -changed "Arbeitsstand abschliessen"
+       Tools\Github.bat -push -changed "Arbeitsstand abschliessen"   (Windows)
+       ./Tools/Github.sh -push -changed "Arbeitsstand abschliessen"  (Linux)
 
 7. Seine Vorprüfung und Abschlusslisten vollständig lesen und den Exitcode
    prüfen.
@@ -448,9 +459,9 @@ Arbeitsablauf für Änderungen
    verbleibenden Änderungen oder unveröffentlichten Commits. Bei Bedarf kann
    zusätzlich gezielt geprüft werden:
 
-       git -C "D:\R4OS\<Repository-Pfad>" status --short
-       git -C "D:\R4OS\<Repository-Pfad>" rev-parse HEAD
-       git -C "D:\R4OS\<Repository-Pfad>" rev-parse origin/main
+       git -C "<Repository-Pfad>" status --short
+       git -C "<Repository-Pfad>" rev-parse HEAD
+       git -C "<Repository-Pfad>" rev-parse origin/main
 
 Die feste Sammelreihenfolge veröffentlicht abhängige Wahrheiten vor ihren
 Verbrauchern und die Workspace-Steuerung zuletzt. Ein Fehlschlag macht den
@@ -461,18 +472,18 @@ veröffentlicht und werden beim nächsten Lauf als unverändert übersprungen.
 Erstaufbau eines Workspace
 --------------------------
 
-Github.bat kann den Project-Root nicht selbst initialisieren, weil das Script
+Github.ps1 kann den Project-Root nicht selbst initialisieren, weil das Script
 erst aus dem vorhandenen r4os-project-Checkout verfügbar ist. Sobald dieser
-Checkout unter D:\R4OS existiert:
+Checkout im frei gewaehlten Workspace-Root existiert:
 
 1. Das öffentliche Repository R4OSDev/r4os-project ohne Credentials nach
-   D:\R4OS klonen.
-2. D:\R4OS\Tools\Setup.bat ausführen.
-3. DevKit mit Github.bat -pull -devkit anonym beziehen.
+   `<Workspace-Root>` klonen und in dieses Verzeichnis wechseln.
+2. Unter Windows `Tools\Setup.bat`, unter Linux `./Tools/Setup.sh` ausfuehren.
+3. DevKit mit dem passenden GitHub-Starter und `-pull -devkit` anonym beziehen.
 4. Docs, Contract, SDK, Libraries, Kernel, Distribution und bei Bedarf das
    Organisationsprofil mit ihren jeweiligen Pull-Zielen beziehen.
 5. Den privaten Package-Server bei Bedarf separat klonen und danach mit
-   D:\R4OS\Server\Pull.bat aktualisieren.
+   dessen eigenem Pull-Starter aktualisieren.
 6. Benötigte Apps, Services, Diagnostics, Drivers, Protocols und Subsystems einzeln mit
    Rollenflag und Komponentenname beziehen.
 7. Die DevKit-Abhängigkeiten anschließend über dessen Setup installieren; die
@@ -481,7 +492,7 @@ Checkout unter D:\R4OS existiert:
    lokale Credentials-Datei eintragen.
 
 Der DevKit-Checkout ist nicht mit den dort installierten Quellkopien zu
-verwechseln. Kanonische Quellen werden unter D:\R4OS\Repositories bearbeitet;
+verwechseln. Kanonische Quellen werden unter `Repositories/` bearbeitet;
 installierte DevKit-Kopien sind kein Bearbeitungs- oder Pushziel.
 
 
@@ -489,14 +500,15 @@ Fehlerbehandlung
 ----------------
 
 Credentials fehlen oder enthalten Platzhalter
-    Nur Push und Repository-Erstellung sind betroffen. D:\R4OS\Tools\Setup.bat
-    ausführen und den Benutzer die lokale Datei vor dem Push ausfüllen lassen.
+    Nur Push und Repository-Erstellung sind betroffen. Unter Windows
+    `Tools\Setup.bat`, unter Linux `./Tools/Setup.sh` ausfuehren und den
+    Benutzer die lokale Datei vor dem Push ausfüllen lassen.
     Öffentliche Pulls und Setups funktionieren weiterhin anonym. Credentials
     nicht selbst auslesen oder ausgeben.
 
 Repository steht nicht auf main
     Status und Branches prüfen. Nicht automatisch wechseln, wenn dadurch
-    laufende Arbeit gefährdet wird. Github.bat arbeitet absichtlich nur auf
+    laufende Arbeit gefährdet wird. Github.ps1 arbeitet absichtlich nur auf
     main.
 
 origin zeigt auf eine andere URL
@@ -523,7 +535,7 @@ Komponentenname wird abgelehnt
 Push enthält unerwartete Dateien
     Nicht pushen. Status und .gitignore des ausgewählten Einzelrepositories
     prüfen. Keine fremden Dateien löschen oder zurücksetzen. Beachten, dass
-    Github.bat immer git add -A verwendet.
+    der globale GitHub-Starter immer git add -A verwendet.
 
 Push meldet keine neuen Dateien
     Dies ist kein Fehler. Das Script pusht anschließend trotzdem main. Prüfen,
@@ -550,7 +562,7 @@ Grenzen des Scripts
 - Keine Veröffentlichung ignorierter Buildartefakte, Toolinstallationen oder
   Credentials.
 - Neue zentrale Repositoryarten benötigen eine ausdrückliche Zuordnung in
-  Tools\Github.bat und in der festen Sammelreihenfolge. Apps, Services,
+  Tools/Github.ps1 und in der festen Sammelreihenfolge. Apps, Services,
   Diagnostics, Drivers, Protocols und Subsystems werden bereits generisch über
   Rollenverzeichnis und Komponentenname erkannt. Der Package-Server bleibt
   bewusst außerhalb dieses globalen Scripts.

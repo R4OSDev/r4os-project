@@ -4,21 +4,31 @@
 Zweck: Wie im R4OS-Workspace gebaut wird, welcher Einstieg
 was ausfuehrt und wo die Ergebnisse landen.
 
-Wahrheit fuer die Orchestrierung sind `Tools/Build.bat` und
-`Tools/BuildWorkspace.ps1`. Imagebau und QEMU gehoeren
-`Repositories/Distribution/Build.bat`. Jeder Quellbestand bleibt dabei im
-Repository seines Besitzers.
+Wahrheit fuer die Orchestrierung sind `Tools/Build.ps1` und
+`Tools/BuildWorkspace.ps1`. `Tools/Build.bat` und `Tools/Build.sh` sind duenne
+Hoststarter. Imagebau und QEMU gehoeren den jeweiligen Buildstartern des
+Distribution-Repositories. Jeder Quellbestand bleibt dabei im Repository
+seines Besitzers.
 
 
 Voraussetzungen
 ---------------
 
-Nach einem frischen Root-Clone:
+Git wird auf beiden Hosts vorausgesetzt. Unter Windows muss PowerShell 7
+(`pwsh`) bereits installiert sein. Nach einem frischen Root-Clone unter
+Windows:
 
     Tools\Setup.bat
     Tools\Github.bat -pull -docs
     Tools\Github.bat -pull -devkit
     DevKit\Setup\Setup_Windows.bat
+
+Unter Linux werden dieselben Project-Aktionen ueber `Tools/Setup.sh`,
+`Tools/Github.sh` und `Tools/Build.sh` gestartet. Das Linux-DevKit sowie
+Image-, Verify- und QEMU-Aktionen setzen die noch bereitzustellenden
+Linux-Pfade des DevKit- und Distribution-Besitzers voraus.
+Fehlt `pwsh` unter Debian, installiert `Tools/Setup.sh` es zuvor mit root- oder
+sudo-Rechten aus der offiziellen Microsoft-Paketquelle.
 
 Danach die benoetigten Quell-Repositories mit `Tools/Github.bat` beziehen.
 Der Workspace-Build aktualisiert Git-Repositories niemals automatisch. Er
@@ -27,7 +37,7 @@ Libraries, Kernel und Distribution an.
 
 Erwartete zentrale Pfade:
 
-    DevKit/Toolchains/Zig/zig.exe
+    DevKit/Toolchains/Zig/zig[.exe]
     DevKit/Boot/Limine/
     DevKit/Emulation/QEMU/
     Repositories/Contract/
@@ -40,7 +50,8 @@ Erwartete zentrale Pfade:
 Der Workspace-Einstieg
 ----------------------
 
-    Tools\Build.bat <Modus>
+    Tools\Build.bat <Modus>       (Windows)
+    ./Tools/Build.sh <Modus>      (Linux)
 
 Ohne Argument erscheint ein interaktives Menue. Fuer automatisierte Arbeit
 immer einen Modus angeben und den Exitcode auswerten.

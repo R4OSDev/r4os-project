@@ -30,9 +30,13 @@ $sdkRoot = Join-Path $repositoriesRoot 'SDK'
 $librariesRoot = Join-Path $repositoriesRoot 'Libraries'
 $kernelRoot = Join-Path $repositoriesRoot 'Kernel'
 $distributionRoot = Join-Path $repositoriesRoot 'Distribution'
-$docsInventoryTool = Join-Path $workspaceRoot 'Docs/Inventory/DocsInventory.bat'
-$zigExe = Join-Path $devKitRoot 'Toolchains/Zig/zig.exe'
-$moduleCatalogExe = Join-Path $sdkRoot 'zig-out/bin/module-catalog.exe'
+$pwshExecutable = (Get-Command pwsh -ErrorAction Stop).Source
+$repositoryBuildName = if ($IsWindows) { 'Build.bat' } else { 'Build.sh' }
+$executableSuffix = if ($IsWindows) { '.exe' } else { '' }
+$pathComparison = if ($IsWindows) { [StringComparison]::OrdinalIgnoreCase } else { [StringComparison]::Ordinal }
+$docsInventoryTool = Join-Path $workspaceRoot 'Docs/Inventory/DocsInventory.ps1'
+$zigExe = Join-Path $devKitRoot ('Toolchains/Zig/zig' + $executableSuffix)
+$moduleCatalogExe = Join-Path $sdkRoot ('zig-out/bin/module-catalog' + $executableSuffix)
 $distributionInputRoot = Join-Path $artifactsRoot 'Distribution/Inputs'
 $workspaceMapPath = Join-Path $distributionInputRoot 'WorkspaceModules.map'
 $distributionToolRoot = Join-Path $artifactsRoot 'Distribution/HostTools/bin'
@@ -140,10 +144,10 @@ function Show-WorkspaceState {
 function Update-DocsInventory {
     Write-Section 'Dokumentinventar aktualisieren'
     Assert-File $docsInventoryTool 'Docs-Inventarwerkzeug'
-    Invoke-External $docsInventoryTool @('-Update') $workspaceRoot
+    Invoke-External $pwshExecutable @('-NoLogo', '-NoProfile', '-File', $docsInventoryTool, '-Update') $workspaceRoot
 
     Write-Section 'Dokumentinventar-Gate'
-    Invoke-External $docsInventoryTool @('-Check') $workspaceRoot
+    Invoke-External $pwshExecutable @('-NoLogo', '-NoProfile', '-File', $docsInventoryTool, '-Check') $workspaceRoot
 }
 
 function Get-RepositoryManifests([string]$GitRoot, [string]$ScopeRoot = $GitRoot) {
@@ -157,8 +161,8 @@ function Get-RepositoryManifests([string]$GitRoot, [string]$ScopeRoot = $GitRoot
     $result = foreach ($relativePath in $relativePaths) {
         $fullPath = [IO.Path]::GetFullPath((Join-Path $GitRoot $relativePath))
         if ((Test-Path -LiteralPath $fullPath -PathType Leaf) -and
-            ($fullPath.Equals($scope, [StringComparison]::OrdinalIgnoreCase) -or
-            $fullPath.StartsWith($scopePrefix, [StringComparison]::OrdinalIgnoreCase))) {
+            ($fullPath.Equals($scope, $pathComparison) -or
+            $fullPath.StartsWith($scopePrefix, $pathComparison))) {
             $fullPath
         }
     }
@@ -202,7 +206,7 @@ function Get-ModuleRepositories {
         Assert-Directory $roleRoot ('Repositoryrolle ' + $role)
         foreach ($directory in Get-ChildItem -LiteralPath $roleRoot -Directory | Sort-Object Name) {
             $manifest = Join-Path $directory.FullName 'module.R4MF'
-            $build = Join-Path $directory.FullName 'Build.bat'
+            $build = Join-Path $directory.FullName $repositoryBuildName
             $settings = Join-Path $directory.FullName 'Settings.R4S'
             if (-not (Test-Path -LiteralPath $manifest -PathType Leaf)) { continue }
             Assert-File $build ('Buildstarter fuer ' + $role + '/' + $directory.Name)
@@ -224,7 +228,7 @@ function Get-ModuleRepositories {
 
 function Resolve-Module([string]$Selector) {
     if ([string]::IsNullOrWhiteSpace($Selector)) { throw 'Ein Modulname oder Rollenpfad ist erforderlich.' }
-    $normalized = $Selector.Replace([IO.Path]::AltDirectorySeparatorChar, [IO.Path]::DirectorySeparatorChar).Trim([IO.Path]::DirectorySeparatorChar)
+    $normalized = $Selector.Replace([char]92, [IO.Path]::DirectorySeparatorChar).Replace([char]47, [IO.Path]::DirectorySeparatorChar).Trim([IO.Path]::DirectorySeparatorChar)
     $modules = @(Get-ModuleRepositories)
     if ($normalized.Contains([IO.Path]::DirectorySeparatorChar)) {
         $parts = $normalized.Split([IO.Path]::DirectorySeparatorChar)
@@ -254,15 +258,15 @@ function Build-Central {
     Invoke-External $zigExe @('build') $contractRoot
 
     Write-Section 'SDK'
-    Invoke-External (Join-Path $sdkRoot 'Build.bat') @() $sdkRoot
+    Invoke-External (Join-Path $sdkRoot $repositoryBuildName) @() $sdkRoot
 
     Write-Section 'Libraries'
-    Invoke-External (Join-Path $librariesRoot 'Build.bat') @() $librariesRoot
+    Invoke-External (Join-Path $librariesRoot $repositoryBuildName) @() $librariesRoot
 }
 
 function Build-Kernel {
     Write-Section 'Kernel'
-    Invoke-External (Join-Path $kernelRoot 'Build.bat') @() $kernelRoot
+    Invoke-External (Join-Path $kernelRoot $repositoryBuildName) @() $kernelRoot
 }
 
 function Build-OneModule($Module, [int]$Index, [int]$Count) {
@@ -297,7 +301,7 @@ function Get-ManifestArtifact([string]$ManifestPath, [string]$ArtifactRoot, [str
 }
 
 function Convert-ToPlanPath([string]$Path) {
-    return [IO.Path]::GetFullPath($Path).Replace([IO.Path]::DirectorySeparatorChar, [IO.Path]::AltDirectorySeparatorChar)
+    return [IO.Path]::GetFullPath($Path).Replace([char]92, [char]47).Replace([IO.Path]::DirectorySeparatorChar, [char]47)
 }
 
 function Write-Utf8NoBomLines([string]$Path, [string[]]$Lines) {
@@ -310,7 +314,7 @@ function Write-Utf8NoBomLines([string]$Path, [string[]]$Lines) {
 function Ensure-ModuleCatalog {
     if (Test-Path -LiteralPath $moduleCatalogExe -PathType Leaf) { return }
     Write-Section 'SDK Hosttools fuer Imageplan'
-    Invoke-External (Join-Path $sdkRoot 'Build.bat') @() $sdkRoot
+    Invoke-External (Join-Path $sdkRoot $repositoryBuildName) @() $sdkRoot
     Assert-File $moduleCatalogExe 'ModuleCatalog'
 }
 
@@ -368,8 +372,8 @@ function Get-WorkspaceArtifact([string]$Name, [string]$Kind) {
 
 function Prepare-DistributionCommonArtifacts {
     Write-Section 'Gemeinsame Distributionsartefakte'
-    $preloadTool = Join-Path $distributionToolRoot 'preload-image.exe'
-    $registryTool = Join-Path $distributionToolRoot 'default-registry.exe'
+    $preloadTool = Join-Path $distributionToolRoot ('preload-image' + $executableSuffix)
+    $registryTool = Join-Path $distributionToolRoot ('default-registry' + $executableSuffix)
     $distributionToolsMissing =
         -not (Test-Path -LiteralPath $preloadTool -PathType Leaf) -or
         -not (Test-Path -LiteralPath $registryTool -PathType Leaf)
@@ -379,7 +383,7 @@ function Prepare-DistributionCommonArtifacts {
         }
     }
     if ($distributionToolsMissing) {
-        Invoke-External (Join-Path $distributionRoot 'Build.bat') @('tools') $distributionRoot
+        Invoke-External (Join-Path $distributionRoot $repositoryBuildName) @('tools') $distributionRoot
     }
     Assert-File $preloadTool 'Preload-Image-Tool'
     Assert-File $registryTool 'Default-Registry-Tool'
@@ -498,7 +502,7 @@ function New-ImagePlan([string]$SelectedProfile) {
 
 function Invoke-Distribution([string]$DistributionAction, [string]$SelectedProfile, [string[]]$AdditionalArguments = @()) {
     Write-Section ('Distribution ' + $DistributionAction + ' ' + $SelectedProfile)
-    Invoke-External (Join-Path $distributionRoot 'Build.bat') (@($DistributionAction, $SelectedProfile) + $AdditionalArguments) $distributionRoot
+    Invoke-External (Join-Path $distributionRoot $repositoryBuildName) (@($DistributionAction, $SelectedProfile) + $AdditionalArguments) $distributionRoot
 }
 
 function Build-All([string]$SelectedProfile) {

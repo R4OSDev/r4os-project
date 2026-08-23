@@ -10,12 +10,25 @@ param(
 Set-StrictMode -Version 2.0
 $ErrorActionPreference = 'Stop'
 
-$workspaceRoot = [IO.Path]::GetFullPath((Join-Path $PSScriptRoot '..'))
-$githubScript = Join-Path $PSScriptRoot 'Github.bat'
+$githubScript = Join-Path $PSScriptRoot 'Github.ps1'
+$pwshExecutable = (Get-Command pwsh -ErrorAction Stop).Source
 
 if (-not (Test-Path -LiteralPath $githubScript -PathType Leaf)) {
-    Write-Host 'FEHLER: Tools\Github.bat fehlt.'
+    Write-Host 'FEHLER: Tools/Github.ps1 fehlt.'
     exit 1
+}
+
+function Invoke-GithubScript {
+    param(
+        [Parameter(Mandatory = $true)]
+        [string[]]$Arguments
+    )
+
+    $output = @(& $pwshExecutable -NoLogo -NoProfile -File $githubScript @Arguments 2>&1)
+    return [pscustomobject]@{
+        ExitCode = $LASTEXITCODE
+        Output = @($output | ForEach-Object { [string]$_ })
+    }
 }
 
 function Invoke-GitRead {
@@ -39,97 +52,6 @@ function Invoke-GitRead {
     [pscustomobject]@{
         ExitCode = $exitCode
         Output = @($output | ForEach-Object { [string]$_ })
-    }
-}
-
-function Get-RepositoryMetadata {
-    param(
-        [Parameter(Mandatory = $true)]
-        [string]$Flag,
-
-        [string]$Component = ''
-    )
-
-    if ($Component -eq '') {
-        $output = @(& $githubScript -query $Flag 2>&1)
-    }
-    else {
-        $output = @(& $githubScript -query $Flag $Component 2>&1)
-    }
-    $exitCode = $LASTEXITCODE
-
-    if ($exitCode -ne 0) {
-        throw ('Repository-Zuordnung fehlgeschlagen: ' + $Flag + ' ' + $Component)
-    }
-
-    $line = @($output | ForEach-Object { [string]$_ } | Where-Object {
-        ([regex]::Matches($_, '\|')).Count -eq 5
-    } | Select-Object -Last 1)
-
-    if ($line.Count -ne 1) {
-        throw ('Ungueltige Repository-Zuordnung: ' + $Flag + ' ' + $Component)
-    }
-
-    $parts = @($line[0] -split '\|', 6)
-    if ($parts.Count -ne 6) {
-        throw ('Unvollstaendige Repository-Zuordnung: ' + $Flag + ' ' + $Component)
-    }
-
-    [pscustomobject]@{
-        Key = $parts[0]
-        Label = $parts[1]
-        Root = $parts[2]
-        Name = $parts[3]
-        Remote = $parts[4]
-        AllowInit = ($parts[5] -eq '1')
-        Flag = $Flag
-        Component = $Component
-    }
-}
-
-function Add-CentralTargets {
-    param(
-        [Parameter(Mandatory = $true)]
-        [AllowEmptyCollection()]
-        [System.Collections.Generic.List[object]]$Targets,
-
-        [Parameter(Mandatory = $true)]
-        [string[]]$Flags
-    )
-
-    foreach ($flag in $Flags) {
-        [void]$Targets.Add((Get-RepositoryMetadata -Flag $flag))
-    }
-}
-
-function Add-ComponentTargets {
-    param(
-        [Parameter(Mandatory = $true)]
-        [AllowEmptyCollection()]
-        [System.Collections.Generic.List[object]]$Targets,
-
-        [Parameter(Mandatory = $true)]
-        [string]$Flag,
-
-        [Parameter(Mandatory = $true)]
-        [string]$Directory
-    )
-
-    $categoryRoot = Join-Path (Join-Path $workspaceRoot 'Repositories') $Directory
-    if (-not (Test-Path -LiteralPath $categoryRoot -PathType Container)) {
-        return
-    }
-
-    $directories = @(Get-ChildItem -LiteralPath $categoryRoot -Directory | Sort-Object Name)
-    foreach ($componentDirectory in $directories) {
-        $manifest = Join-Path $componentDirectory.FullName 'module.R4MF'
-        $gitDirectory = Join-Path $componentDirectory.FullName '.git'
-        if (-not (Test-Path -LiteralPath $manifest -PathType Leaf) -and
-            -not (Test-Path -LiteralPath $gitDirectory)) {
-            continue
-        }
-
-        [void]$Targets.Add((Get-RepositoryMetadata -Flag $Flag -Component $componentDirectory.Name))
     }
 }
 
@@ -342,8 +264,9 @@ function Invoke-RepositoryPush {
     $previousErrorAction = $ErrorActionPreference
     $ErrorActionPreference = 'Continue'
     try {
-        $pushOutput = @(& $githubScript @($invokeArguments.ToArray()) 2>&1)
-        $pushExitCode = $LASTEXITCODE
+        $pushResult = Invoke-GithubScript -Arguments @($invokeArguments.ToArray())
+        $pushOutput = $pushResult.Output
+        $pushExitCode = $pushResult.ExitCode
     }
     finally {
         $ErrorActionPreference = $previousErrorAction
@@ -376,15 +299,28 @@ function Write-ResultList {
 
 try {
     $targets = New-Object System.Collections.Generic.List[object]
-
-    Add-CentralTargets -Targets $targets -Flags @('-contract', '-sdk', '-libraries', '-kernel')
-    Add-ComponentTargets -Targets $targets -Flag '-app' -Directory 'Apps'
-    Add-ComponentTargets -Targets $targets -Flag '-service' -Directory 'Services'
-    Add-ComponentTargets -Targets $targets -Flag '-diagnostic' -Directory 'Diagnostics'
-    Add-ComponentTargets -Targets $targets -Flag '-driver' -Directory 'Drivers'
-    Add-ComponentTargets -Targets $targets -Flag '-protocol' -Directory 'Protocols'
-    Add-ComponentTargets -Targets $targets -Flag '-subsystem' -Directory 'Subsystems'
-    Add-CentralTargets -Targets $targets -Flags @('-distribution', '-docs', '-devkit', '-organization', '-project')
+    $workspaceResult = Invoke-GithubScript -Arguments @('-Query', '-Workspace')
+    if ($workspaceResult.ExitCode -ne 0) {
+        throw 'Workspace-Repositoryzuordnung konnte nicht gelesen werden.'
+    }
+    foreach ($line in $workspaceResult.Output) {
+        if (([regex]::Matches($line, '\|')).Count -ne 7) { continue }
+        $parts = @($line -split '\|', 8)
+        if ($parts.Count -ne 8) { continue }
+        $targets.Add([pscustomobject]@{
+            Key = $parts[0]
+            Label = $parts[1]
+            Root = $parts[2]
+            Name = $parts[3]
+            Remote = $parts[4]
+            AllowInit = ($parts[5] -eq '1')
+            Flag = $parts[6]
+            Component = $parts[7]
+        })
+    }
+    if ($targets.Count -eq 0) {
+        throw 'Workspace-Repositoryzuordnung ist leer.'
+    }
 
     $states = New-Object System.Collections.Generic.List[object]
     foreach ($target in $targets) {

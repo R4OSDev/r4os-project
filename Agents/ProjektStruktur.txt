@@ -4,7 +4,8 @@
 Zweck: Wo im R4OS-Workspace was liegt und welcher Ort die
 jeweilige Wahrheit besitzt.
 
-Der Workspace steht standardmaessig unter `D:\R4OS`. Das Root-Repository
+Der Workspace steht unter Windows standardmaessig unter `D:\R4OS` und kann
+unter Linux an einem frei gewaehlten Pfad liegen. Das Root-Repository
 koordiniert die Arbeit. Contract, SDK, Kernel, Libraries, Distribution, das
 GitHub-Organisationsprofil und jedes einzelne Modul besitzen eigene
 Git-Repositories.
@@ -22,13 +23,15 @@ Workspace-Ueberblick
     Tools/          Setup, Workspace-Build, Clean und GitHub-Verwaltung
     AGENTS.md       zentrale Arbeitsanweisung
     QuickNotes.txt  lokale Notizen, nicht versioniert
-    Roadmap.txt     lokaler Planungsstand, nicht versioniert
 
-`Tools/Setup.bat` erzeugt nach einem frischen Clone die ignorierten
-Grundordner und die beiden lokalen Textdateien, ohne vorhandenen Inhalt zu
-ueberschreiben. GitHub-Push und -Pull laufen ausschliesslich ueber
-`Tools/Github.bat`. Oeffentliche Pulls laufen anonym; nur Push und
-Repository-Erstellung verwenden die lokale Credentials-Datei.
+`Tools/Setup.bat` unter Windows und `Tools/Setup.sh` unter Linux erzeugen nach
+einem frischen Clone die ignorierten Grundordner und `QuickNotes.txt`, ohne
+vorhandenen Inhalt zu ueberschreiben. GitHub-Push und -Pull laufen ueber die
+entsprechenden Github-Starter. Oeffentliche Pulls laufen anonym; nur Push und
+Repository-Erstellung verwenden `Tools/Credentials/Github.json`.
+Fehlt PowerShell 7 auf Debian, installiert `Tools/Setup.sh` es mit root- oder
+sudo-Rechten aus der offiziellen Microsoft-Paketquelle, bevor `Setup.ps1`
+gestartet wird.
 
 
 Repositories/
@@ -75,7 +78,7 @@ Jedes direkte Projekt unter diesen Rollen ist ein eigenes Git-Repository.
 Der normale Aufbau lautet:
 
     Build.bat        Windows-Buildstarter mit lokalen Pfad-Forks
-    Build.sh         hostneutraler Buildstarter
+    Build.sh         Linux-Buildstarter mit lokalen Pfad-Forks
     Settings.R4S     austauschbare relative oder absolute Pfadmappings
     module.R4MF      Projekt-, Build- und Imagewahrheit
     build.zig        duenne SDK-Anbindung
@@ -86,8 +89,8 @@ Der normale Aufbau lautet:
 
 Die Rollenordner selbst sind keine gemeinsamen Komponenten-Repositories.
 Ein Modul wird in seinem eigenen Repository geaendert und mit dessen
-`Build.bat` gebaut. `Tools/Build.bat` entdeckt die direkten Projekte
-dynamisch und orchestriert sie nur.
+hostspezifischen `Build.bat` oder `Build.sh` gebaut. Die Project-Orchestrierung
+entdeckt die direkten Projekte dynamisch und orchestriert sie nur.
 
 Subsystems sind eigenstaendige GUI-R4X-Hosts fuer fremde
 Ausfuehrungsumgebungen. Ihre Repositoryrolle aendert den R4M0-Kind nicht;
@@ -235,7 +238,7 @@ Was lokal bleibt
 
 Das Root-Repository ignoriert unter anderem `Artifacts/`, `DevKit/`,
 `Docs/`, `Repositories/`, `Server/`, `ExFiles/`, `Reports/`, `Temp/`, die
-Credentials sowie `QuickNotes.txt` und `Roadmap.txt`. Diese Orte besitzen
+Credentials sowie `QuickNotes.txt`. Diese Orte besitzen
 entweder eigene Repositories oder ausschliesslich lokalen Inhalt.
 
 Nie aus der Tatsache, dass ein Verzeichnis unter `D:\R4OS` liegt, auf seine

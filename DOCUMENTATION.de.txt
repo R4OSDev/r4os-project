@@ -12,21 +12,32 @@ Privater Workspace fuer die Entwicklung und Aufteilung von R4OS.
     Artifacts\     Lokale Build- und Testergebnisse
     Tools\         Workspace-Setup und GitHub-Verwaltung
 
-Nach einem frischen Clone zuerst `Tools\Setup.bat` ausfuehren und danach die
-lokale Credentials-Vorlage ausfuellen. Anschliessend mit
-`Tools\Github.bat -pull -devkit` das DevKit beziehen und dort
-`Setup\Setup_Windows.bat` starten. Push und Pull erfolgen ausschliesslich ueber
-`Tools\Github.bat`.
+Git wird auf beiden Hosts vorausgesetzt. Unter Windows muss PowerShell 7
+(`pwsh`) bereits installiert sein. Nach einem frischen Clone unter Windows
+`Tools\Setup.bat` oder unter Debian Linux `./Tools/Setup.sh` ausfuehren. Fehlt
+`pwsh` unter Debian, richtet der Linux-Starter mit root- oder sudo-Rechten die
+offizielle Microsoft-Paketquelle ein und installiert PowerShell vor dem Start
+von `Setup.ps1`. Batch und Shell sind ansonsten nur duenne Hoststarter; die
+gemeinsame Logik liegt in PowerShell-7-Skripten und bestimmt alle Pfade relativ
+zum jeweiligen Skript. Die gemeinsame Datei
+`Tools/Credentials/Github.json` wird nur fuer Pushes und
+Repository-Verwaltung benoetigt.
 
-Der gemeinsame Windows-Build startet mit `Tools\Build.bat`; ohne Argumente
-erscheint das Menue. `Tools\Build.bat -all` baut den gesamten Workspace und
-das Full-Image, `-gui` startet danach QEMU sichtbar und `-qemu` startet nur ein
-bereits vorhandenes Image. `-test` baut das Testprofil und nimmt es headless
-ab; `-testonly` beziehungsweise `-headless` prueft ein vorhandenes Test-Image.
-Image-Erzeugung und QEMU-Aufruf bleiben Eigentum von
-`Repositories\Distribution\Build.bat`. Die QEMU-Binaries liegen dabei nur
-unter `DevKit\Emulation\QEMU`; die Distribution besitzt lediglich die
-R4OS-Konfiguration und Testlogik.
+GitHub-Zugriffe erfolgen unter Windows ueber `Tools\Github.bat` und unter Linux
+ueber `./Tools/Github.sh`. Oeffentliche Pulls laufen auf beiden Hosts anonym.
+Das DevKit wird mit `-Pull -DevKit` bezogen; seine hostspezifische Einrichtung
+bleibt Eigentum des DevKit-Repositories.
+
+Der gemeinsame Build startet unter Windows mit `Tools\Build.bat` und unter
+Linux mit `./Tools/Build.sh`. Beide rufen dieselbe PowerShell-Orchestrierung
+auf. Repository-Buildstarter und Hosttools werden passend zum Host als
+`Build.bat`/`Build.sh` und mit beziehungsweise ohne `.exe` gewaehlt.
+Image-Erzeugung, Verifikation und QEMU bleiben Eigentum des
+Distribution-Repositories; Linux kann diese Aktionen erst ausfuehren, sobald
+Distribution und DevKit dort die entsprechende Hostfunktion bereitstellen.
+
+`Tools\Clean.bat` und `./Tools/Clean.sh` verwenden ebenfalls dieselbe
+PowerShell-Logik. `Artifacts/Distribution` und `zig-out` bleiben erhalten.
 
 Komponentenquellen, installierte Werkzeuge, Buildartefakte und Zugangsdaten
 werden nicht in diesem Repository gespeichert.
