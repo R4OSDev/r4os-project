@@ -323,6 +323,12 @@ genau einer Workload, verlangt einen vollstaendigen NDJSON-Maschinenblock und
 regulaeres Gast-Poweroff. Ein interaktiver Start des Benchmarkprofils ist
 Diagnose und kein gueltiger Benchmark.
 
+Import, JSONL-Schema, Metrikkatalog, richtungsbewusster Vergleich und die
+verbindliche Regel zur ausschliesslich ausdruecklichen Ausloesung stehen in
+`Agents/Benchmark.txt`. `ExFiles/Reports/Benchmarks.jsonl` ist die einzige
+fortzuschreibende Performancehistorie; `Diagnose.txt` wird nicht mehr
+verwendet. Der Imagebau importiert niemals selbststaendig ein Ergebnis.
+
 
 Aufraeumen und Fehlersuche
 --------------------------
@@ -365,6 +371,7 @@ Bei einem Fehler:
 Weiterfuehrend
 --------------
 
+    Agents/Benchmark.txt             Benchmarklauf, Historie und Vergleich
     Agents/ProjektStruktur.txt        Besitz- und Verzeichnisgrenzen
     Agents/R4M0-Container.txt        Manifest und Modulprojekt
     Agents/Test.txt                  Testschichten und Headless-Abnahme
