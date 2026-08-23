@@ -63,8 +63,10 @@ immer einen Modus angeben und den Exitcode auswerten.
 | `-testimage` | kompletter Test-Build und Test-Image ohne QEMU |
 | `-testimageonly` | Testplan und Test-Image aus vorhandenen Artefakten neu erzeugen |
 | `-testonly`, `-headless` | vorhandenes Test-Image headless pruefen |
+| `-benchmarkimage` | kompletter Build des Benchmark-Images ohne Benchmarklauf |
+| `-benchmark SUITE VERSION WARM|COLD WIEDERHOLUNGEN UMGEBUNGS-ID` | genau einen explizit angeforderten Benchmark in einem vorhandenen Benchmark-Image ausfuehren |
 
-Gueltige Profile sind `Slim`, `Full` und `Test`. Fehlt das Profil bei
+Gueltige Profile sind `Slim`, `Full`, `Test` und `Benchmark`. Fehlt das Profil bei
 `-plan`, `-image`, `-verify`, `-qemu` oder `-all`, wird `Full`
 verwendet.
 
@@ -122,11 +124,12 @@ Profilzuordnung:
     Slim    slim
     Full    slim + full
     Test    slim + test sowie die expliziten Test-Includes des Orchestrators
+    Benchmark slim + full sowie explizit benannte Diagnosemodule aus test
     none    in keinem normalen Image
 
 Das Testprofil verwendet zusaetzlich
 `Repositories/Distribution/TestInjection/` ueber dem normalen
-`Injection/`-Overlay. Alle Profile blenden danach optional
+`Injection/`-Overlay. Slim, Full und Test blenden danach optional
 `Artifacts/Distribution/Injection/` und zuletzt
 `Artifacts/Distribution/PrivateInjection/` ein. Unbekannte Scopes, doppelte
 Ziele, fehlende Artefakte und unaufloesbare Providerabhaengigkeiten sind harte
@@ -135,6 +138,12 @@ Produktive Full-Module, die nur eine Testkette benoetigt, koennen als
 ausdrueckliche Test-Includes des Orchestrators aufgenommen werden. Fuer die
 Subsystem-Runtime-Abnahme gilt dies fuer AUDSVC; dessen normale
 `IMAGE_SCOPE=full`-Zuordnung und damit Slim und Full bleiben unveraendert.
+Das Benchmarkprofil verwendet stattdessen ausschliesslich das versionierte
+`BenchmarkInjection/` ueber `Injection/` und setzt dort das Terminal als
+AUTOEXEC-faehige Shell. Nicht versionierte und private
+Overlays werden dort absichtlich nicht eingemischt. Seine aktuelle explizite
+Diagnosefreigabe ist `PERFDIAG`; dafuer wurde kein vierter `IMAGE_SCOPE`
+eingefuehrt.
 
 
 Einzelne Repositories bauen
@@ -208,7 +217,7 @@ Artefakte und Inventare
         explizite Eingaben fuer Distribution
 
     Artifacts/Distribution/Generated/MODULES.JSON
-        profilgebundenes technisches Modulinventar
+        profilgebundenes technisches Modulinventar fuer Slim, Full oder Test
 
     Artifacts/Distribution/Generated/PRELOAD.R4I
     Artifacts/Distribution/Generated/RegistryDefaults/SYSTEM.R4R
@@ -223,6 +232,15 @@ Artefakte und Inventare
     Artifacts/Distribution/Profiles/<Profil>/image-adds.txt
     Artifacts/Distribution/Profiles/<Profil>/Legal/
         fertiges Profil
+
+    Artifacts/Distribution/Profiles/Benchmark/MODULES.JSON
+    Artifacts/Distribution/Profiles/Benchmark/common.plan
+    Artifacts/Distribution/Profiles/Benchmark/components.plan
+        mit dem Benchmarkprofil zusammengehaltene Plan- und Inventarwahrheit
+
+    Artifacts/Distribution/Profiles/Benchmark/Runs/current/
+        frisches Lauf-Datenimage, Anforderung, Serial- und Fehlerlog sowie
+        maschinenlesbares benchmark-result.json des letzten expliziten Laufs
 
     Artifacts/Distribution/Releases/<Version>/
         gepruefte und komprimierte Releasepakete, Quellenmanifest,
@@ -266,7 +284,9 @@ Assets erfolgreich hochgeladen wurden.
 Das normale Build-Datenimage liegt unter
 `Artifacts/Distribution/Profiles/<Profil>/data.img`. Beim GUI-Betrieb bleibt
 es absichtlich persistent; nur der Headless-Test erzeugt sein Test-Datenimage
-vor jedem Lauf neu. Der Release-Ablauf uebernimmt dieses lokale Datenimage
+vor jedem Lauf neu. Auch jeder Benchmark-Imagebuild erzeugt ein leeres
+Basis-Datenimage; der Benchmarkrunner arbeitet mit einem getrennten frischen
+Lauf-Datenimage. Der Release-Ablauf uebernimmt dieses lokale Datenimage
 nie, sondern erzeugt fuer jedes Paket ein frisches leeres `data.img` in der
 im Profil festgelegten Groesse.
 
@@ -284,6 +304,24 @@ Full-Image und startet QEMU sichtbar. `-qemu Full` startet nur ein
 vorhandenes Full-Image. GUI-Lauf und Headless-Lauf benutzen beide QEMU aus
 `DevKit/Emulation/QEMU`; im Distribution-Repository liegt nur die
 R4OS-spezifische Konfiguration.
+
+Ein Benchmark wird von keinem Build-, Test-, Headless- oder GUI-Modus
+automatisch gestartet. `-benchmarkimage`, `-all Benchmark` und
+`-image Benchmark` bauen nur das Image. Ein Lauf braucht immer die
+vollstaendige explizite Form:
+
+    Tools\Build.bat -benchmark perfdiag-clock 0.3.7 warm 5 r4os-q35-haswell-1vcpu-1g-tcg-v1
+
+Gueltige Suites sind `perfdiag-blit`, `perfdiag-clock`,
+`perfdiag-service-registry`, `perfdiag-kernel-ipc`, `perfdiag-driver-work` und
+`perfdiag-pci-inventory`. Die Workload-Version muss der im Maschinenblock
+gemeldeten PERFDIAG-Modulversion entsprechen. Die Umgebungs-ID bindet den Lauf
+an q35, TCG single-thread, Haswell, einen vCPU, 1 GiB, deaktiviertes Netzwerk
+und die versionierte feste Geraetekonfiguration. Der Runner lehnt fehlende oder
+abweichende Angaben ab, bevor QEMU startet, erzeugt ein frisches D:-Image mit
+genau einer Workload, verlangt einen vollstaendigen NDJSON-Maschinenblock und
+regulaeres Gast-Poweroff. Ein interaktiver Start des Benchmarkprofils ist
+Diagnose und kein gueltiger Benchmark.
 
 
 Aufraeumen und Fehlersuche

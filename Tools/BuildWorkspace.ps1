@@ -1,12 +1,22 @@
 param(
     [Parameter(Mandatory = $true)]
-    [ValidateSet('central', 'kernel', 'modules', 'module', 'plan', 'image', 'verify', 'qemu', 'headless', 'all', 'test', 'gui')]
+    [ValidateSet('central', 'kernel', 'modules', 'module', 'plan', 'image', 'verify', 'qemu', 'headless', 'benchmark', 'all', 'test', 'gui')]
     [string]$Action,
 
-    [ValidateSet('Slim', 'Full', 'Test')]
+    [ValidateSet('Slim', 'Full', 'Test', 'Benchmark')]
     [string]$Profile = 'Full',
 
-    [string]$ModuleSelector
+    [string]$ModuleSelector,
+
+    [string]$BenchmarkSuite,
+
+    [string]$BenchmarkWorkloadVersion,
+
+    [string]$BenchmarkCacheState,
+
+    [int]$BenchmarkRepetitions,
+
+    [string]$BenchmarkEnvironmentId
 )
 
 $ErrorActionPreference = 'Stop'
@@ -65,6 +75,9 @@ $testImageIncludes = @(
     '/R4OS/SOFTWARE/TERMINAL/REG.R4X',
     '/R4OS/SOFTWARE/TERMINAL/SYSINFO.R4X',
     '/R4OS/SOFTWARE/TERMINAL/BOOTINFO.R4X'
+)
+$benchmarkImageIncludes = @(
+    '/R4OS/SOFTWARE/TERMINAL/DIAG/PERFDIAG.R4X'
 )
 
 function Write-Section([string]$Text) {
@@ -395,14 +408,13 @@ function Prepare-DistributionCommonArtifacts {
     Invoke-External $registryTool @('--output', $registryRoot) $workspaceRoot
 }
 
-function Write-CommonPlan([string]$SelectedProfile) {
+function Write-CommonPlan([string]$ModulesInventory) {
     $kernelArtifact = Join-Path $kernelRoot 'zig-out/bin/r4os.elf'
     $limineConfig = Join-Path $kernelRoot 'Boot/limine.conf'
     $limineArtifact = Join-Path $devKitRoot 'Boot/Limine/limine-bios.sys'
     $limineEfiArtifact = Join-Path $devKitRoot 'Boot/Limine/BOOTX64.EFI'
     $preloadArtifact = Join-Path $distributionGeneratedRoot 'PRELOAD.R4I'
     $registryArtifact = Join-Path $distributionGeneratedRoot 'RegistryDefaults/SYSTEM.R4R'
-    $modulesInventory = Join-Path $distributionGeneratedRoot 'MODULES.JSON'
     Assert-File $kernelArtifact 'Kernelartefakt'
     Assert-File $limineConfig 'Limine-Konfiguration'
     Assert-File $limineArtifact 'Limine BIOS-Datei'
@@ -438,7 +450,15 @@ function New-ImagePlan([string]$SelectedProfile) {
     Write-WorkspaceMap
     Prepare-DistributionCommonArtifacts
     $componentPlan = Join-Path $distributionInputRoot ($SelectedProfile + '.plan')
-    $modulesInventory = Join-Path $distributionGeneratedRoot 'MODULES.JSON'
+    $profileOutput = Join-Path $artifactsRoot ('Distribution/Profiles/' + $SelectedProfile)
+    $modulesInventory = if ($SelectedProfile.Equals('Benchmark', [StringComparison]::OrdinalIgnoreCase)) {
+        if (-not (Test-Path -LiteralPath $profileOutput)) {
+            New-Item -ItemType Directory -Path $profileOutput | Out-Null
+        }
+        Join-Path $profileOutput 'MODULES.JSON'
+    } else {
+        Join-Path $distributionGeneratedRoot 'MODULES.JSON'
+    }
     $arguments = [Collections.Generic.List[string]]::new()
     $arguments.Add('workspace-image-plan')
     $arguments.Add('--workspace-map')
@@ -447,6 +467,12 @@ function New-ImagePlan([string]$SelectedProfile) {
     $arguments.Add($SelectedProfile.ToLowerInvariant())
     if ($SelectedProfile.Equals('Test', [StringComparison]::OrdinalIgnoreCase)) {
         foreach ($target in $testImageIncludes) {
+            $arguments.Add('--include-target')
+            $arguments.Add($target)
+        }
+    }
+    if ($SelectedProfile.Equals('Benchmark', [StringComparison]::OrdinalIgnoreCase)) {
+        foreach ($target in $benchmarkImageIncludes) {
             $arguments.Add('--include-target')
             $arguments.Add($target)
         }
@@ -462,13 +488,17 @@ function New-ImagePlan([string]$SelectedProfile) {
     Invoke-External $moduleCatalogExe @(
         $arguments.ToArray()
     ) $workspaceRoot
-    Write-CommonPlan $SelectedProfile
+    Write-CommonPlan $modulesInventory
+    if ($SelectedProfile.Equals('Benchmark', [StringComparison]::OrdinalIgnoreCase)) {
+        Copy-Item -LiteralPath $componentPlan -Destination (Join-Path $profileOutput 'components.plan') -Force
+        Copy-Item -LiteralPath (Join-Path $distributionInputRoot 'Common.plan') -Destination (Join-Path $profileOutput 'common.plan') -Force
+    }
     Write-Host ('Komponentenplan: ' + $componentPlan)
 }
 
-function Invoke-Distribution([string]$DistributionAction, [string]$SelectedProfile) {
+function Invoke-Distribution([string]$DistributionAction, [string]$SelectedProfile, [string[]]$AdditionalArguments = @()) {
     Write-Section ('Distribution ' + $DistributionAction + ' ' + $SelectedProfile)
-    Invoke-External (Join-Path $distributionRoot 'Build.bat') @($DistributionAction, $SelectedProfile) $distributionRoot
+    Invoke-External (Join-Path $distributionRoot 'Build.bat') (@($DistributionAction, $SelectedProfile) + $AdditionalArguments) $distributionRoot
 }
 
 function Build-All([string]$SelectedProfile) {
@@ -497,6 +527,15 @@ switch ($Action) {
     'verify' { Invoke-Distribution 'verify' $Profile }
     'qemu' { Invoke-Distribution 'qemu' $Profile }
     'headless' { Invoke-Distribution 'headless' 'Test' }
+    'benchmark' {
+        Invoke-Distribution 'benchmark' 'Benchmark' @(
+            $BenchmarkSuite,
+            $BenchmarkWorkloadVersion,
+            $BenchmarkCacheState,
+            [string]$BenchmarkRepetitions,
+            $BenchmarkEnvironmentId
+        )
+    }
     'all' { Build-All $Profile }
     'test' {
         Invoke-Distribution 'test' 'Test'

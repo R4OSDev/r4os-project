@@ -32,6 +32,8 @@ if /i "%R4OS_MODE%"=="-test" goto mode_test
 if /i "%R4OS_MODE%"=="-testimage" goto mode_testimage
 if /i "%R4OS_MODE%"=="-testimageonly" goto mode_testimageonly
 if /i "%R4OS_MODE%"=="-testonly" goto mode_testonly
+if /i "%R4OS_MODE%"=="-benchmarkimage" goto mode_benchmarkimage
+if /i "%R4OS_MODE%"=="-benchmark" goto mode_benchmark
 if /i "%R4OS_MODE%"=="-all" goto mode_all
 if /i "%R4OS_MODE%"=="-norun" goto mode_all
 if /i "%R4OS_MODE%"=="-slim" goto mode_slim
@@ -57,6 +59,7 @@ echo 11 Gesamtbuild, Test-Image und automatischer Headless-Test
 echo 12 Gesamtbuild und Test-Image ohne QEMU
 echo 13 Vorhandenes Test-Image headless testen
 echo 14 Test-Image ohne Neukompilieren neu erzeugen
+echo 15 Gesamtbuild und Benchmark-Image ohne Benchmarklauf
 echo 0  Abbrechen
 echo.
 set /p "R4OS_MENU_CHOICE=Auswahl: "
@@ -74,6 +77,7 @@ if "%R4OS_MENU_CHOICE%"=="11" goto menu_test
 if "%R4OS_MENU_CHOICE%"=="12" goto menu_testimage
 if "%R4OS_MENU_CHOICE%"=="13" goto menu_testonly
 if "%R4OS_MENU_CHOICE%"=="14" goto menu_testimageonly
+if "%R4OS_MENU_CHOICE%"=="15" goto menu_benchmarkimage
 if "%R4OS_MENU_CHOICE%"=="0" exit /b 0
 echo FEHLER: Ungueltige Auswahl.
 goto interactive_error
@@ -138,6 +142,10 @@ goto interactive_result
 
 :menu_testimageonly
 call :run image Test
+goto interactive_result
+
+:menu_benchmarkimage
+call :run all Benchmark
 goto interactive_result
 
 :mode_central
@@ -209,6 +217,21 @@ if not "%~2"=="" goto usage
 call :run headless Test
 exit /b %ERRORLEVEL%
 
+:mode_benchmarkimage
+if not "%~2"=="" goto usage
+call :run all Benchmark
+exit /b %ERRORLEVEL%
+
+:mode_benchmark
+if "%~2"=="" goto usage
+if "%~3"=="" goto usage
+if "%~4"=="" goto usage
+if "%~5"=="" goto usage
+if "%~6"=="" goto usage
+if not "%~7"=="" goto usage
+call :run_benchmark "%~2" "%~3" "%~4" "%~5" "%~6"
+exit /b %ERRORLEVEL%
+
 :mode_all
 call :profile_or_default "%~2"
 if errorlevel 1 goto usage
@@ -232,6 +255,7 @@ if not defined R4OS_PROFILE set "R4OS_PROFILE=Full"
 if /i "%R4OS_PROFILE%"=="Slim" exit /b 0
 if /i "%R4OS_PROFILE%"=="Full" exit /b 0
 if /i "%R4OS_PROFILE%"=="Test" exit /b 0
+if /i "%R4OS_PROFILE%"=="Benchmark" exit /b 0
 exit /b 1
 
 :run
@@ -240,6 +264,10 @@ exit /b %ERRORLEVEL%
 
 :run_module
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File "%R4OS_BUILD_HELPER%" -Action module -Profile Full -ModuleSelector "%~1"
+exit /b %ERRORLEVEL%
+
+:run_benchmark
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File "%R4OS_BUILD_HELPER%" -Action benchmark -Profile Benchmark -BenchmarkSuite "%~1" -BenchmarkWorkloadVersion "%~2" -BenchmarkCacheState "%~3" -BenchmarkRepetitions "%~4" -BenchmarkEnvironmentId "%~5"
 exit /b %ERRORLEVEL%
 
 :interactive_result
@@ -269,15 +297,17 @@ echo   Build.bat -central
 echo   Build.bat -kernel
 echo   Build.bat -modules
 echo   Build.bat -module NAME^|ROLLE\NAME
-echo   Build.bat -plan [Slim^|Full^|Test]
-echo   Build.bat -image [Slim^|Full^|Test]
-echo   Build.bat -verify [Slim^|Full^|Test]
-echo   Build.bat -qemu [Slim^|Full^|Test]
+echo   Build.bat -plan [Slim^|Full^|Test^|Benchmark]
+echo   Build.bat -image [Slim^|Full^|Test^|Benchmark]
+echo   Build.bat -verify [Slim^|Full^|Test^|Benchmark]
+echo   Build.bat -qemu [Slim^|Full^|Test^|Benchmark]
 echo   Build.bat -test
 echo   Build.bat -testimage
 echo   Build.bat -testimageonly
 echo   Build.bat -testonly
-echo   Build.bat -all [Slim^|Full^|Test]
+echo   Build.bat -benchmarkimage
+echo   Build.bat -benchmark SUITE WORKLOAD_VERSION WARM^|COLD REPETITIONS ENVIRONMENT_ID
+echo   Build.bat -all [Slim^|Full^|Test^|Benchmark]
 echo   Build.bat -slim
 echo   Build.bat -gui
 echo.
@@ -287,4 +317,7 @@ echo -qemu startet nur ein bereits vorhandenes Image. Der Build aktualisiert
 echo keine Git-Repositories automatisch.
 echo -test baut den gesamten Workspace, erzeugt das Test-Image und prueft es
 echo headless. -testonly prueft nur ein vorhandenes Test-Image.
+echo -benchmarkimage baut das Benchmark-Image, startet aber keinen Benchmark.
+echo -benchmark startet nur auf explizite, vollstaendige Anforderung ein bereits
+echo vorhandenes Benchmark-Image. Die feste Umgebungs-ID steht in Agents\Build.txt.
 exit /b 0
