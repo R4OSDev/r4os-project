@@ -50,15 +50,17 @@ Die Starter lesen `Settings.R4S` und binden die aktuellen lokalen
 Contract-, SDK- und gegebenenfalls Library-Checkouts ein. So wird immer
 gegen den tatsaechlichen Workspace-Stand getestet.
 
-Linux- und macOS-Starter stellen die hostneutralen Repositorytests bereit.
-Gesamtbuild, Imagebau und QEMU-Abnahme werden ueber den Windows-Workspace-
-Einstieg ausgefuehrt.
+Windows- und Linux-Starter stellen sowohl die hostneutralen Repositorytests
+als auch Gesamtbuild, Imagebau und QEMU-Abnahme bereit. Die oben gezeigten
+Windows-Aufrufe werden unter Linux mit dem jeweiligen `Build.sh` gestartet;
+die Modi und Testschichten bleiben identisch.
 
 
 Die Gesamt-Abnahme
 ------------------
 
     Tools\Build.bat -test
+    ./Tools/Build.sh -test
 
 Der Lauf besteht aus:
 
