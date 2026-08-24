@@ -87,6 +87,10 @@ Unterstuetzte Suites und Metriken
 | perfdiag-driver-work | perfdiag.driver_work.run.latency | ns/work | niedriger |
 | perfdiag-driver-work | perfdiag.driver_work.e2e.latency | ns/work | niedriger |
 | perfdiag-pci-inventory | perfdiag.pci_inventory.latency | ns/inventory | niedriger |
+| perfdiag-memory-metadata | perfdiag.memory_metadata.reserve_commit.latency | ns/page | niedriger |
+| perfdiag-memory-metadata | perfdiag.memory_metadata.fault.latency | ns/page | niedriger |
+| perfdiag-memory-metadata | perfdiag.memory_metadata.page_state.latency | ns/page | niedriger |
+| perfdiag-memory-metadata | perfdiag.memory_metadata.reclaim.latency | ns/frame | niedriger |
 
 1 MB entspricht auch hier 1024 KB. Checksummen, Handles, Flags,
 Besitzertexte, Testanzahlen, Pass/Fail, Fehler, Timeouts und reine

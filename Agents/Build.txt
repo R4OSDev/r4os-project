@@ -333,7 +333,7 @@ vollstaendige explizite Form:
 
 Gueltige Suites sind `perfdiag-blit`, `perfdiag-clock`,
 `perfdiag-service-registry`, `perfdiag-kernel-ipc`, `perfdiag-driver-work` und
-`perfdiag-pci-inventory`. Die Workload-Version muss der im Maschinenblock
+`perfdiag-pci-inventory` sowie `perfdiag-memory-metadata`. Die Workload-Version muss der im Maschinenblock
 gemeldeten PERFDIAG-Modulversion entsprechen. Die Umgebungs-ID bindet den Lauf
 an q35, TCG single-thread, Haswell, einen vCPU, 1 GiB, deaktiviertes Netzwerk
 und die versionierte feste Geraetekonfiguration. Der Runner lehnt fehlende oder
