@@ -70,8 +70,8 @@ arch/x86_64/
     pic.zig           8259 PIC remap/mask/EOI
     pit.zig           PIT Timer IRQ0 und Tick-Zaehler
     ioapic.zig        IOAPIC redirection/routing
-    lapic.zig         Local APIC und LAPIC-Timer (xAPIC MMIO)
-    hpet.zig          HPET, Legacy-Replacement-Timer
+    lapic.zig         Local APIC, periodischer und One-Shot-LAPIC-Timer
+    hpet.zig          HPET-Hauptzaehler, periodischer/One-Shot-Legacy-Timer
     fpu.zig           FPU/SSE/XSAVE-Init, State-Save/Restore pro Task
     rtc.zig, msr.zig, io.zig, interrupts.zig, power.zig, reset.zig
 
@@ -113,7 +113,8 @@ Der Sammelort fuer Kerndienste und Bootschnitte.
     driver_plan.zig   Treiberplan aus BOOT.R4S
     irq_router.zig    IRQ-Routen-Registry: shared INTx, Level/Edge,
                       MSI-Fenster 24..31
-    timer.zig         Timer-Core: PIT-Start, HPET-/LAPIC-Umschaltung
+    timer.zig         logische Tick-Epoche, PIT-Fallback, periodischer und
+                      One-Shot-HPET-/LAPIC-Modus
     modules.zig, module_file.zig, module_r4m.zig   Modulregistry,
                       eingebaute Platform-API-Provider und gemeinsamer
                       Modul-Dateizugriff
@@ -172,9 +173,10 @@ wird vom Kernelbuild als `r4os_kernel_contract` eingebunden.
 sched/
 ------
 
-    scheduler.zig     kooperativer Round-Robin plus Praeemption
-    task.zig          dynamische stabile Task-Registry, guarded Stacks,
-                      optionale FPU-States, Critical-Reserve
+    scheduler.zig     Round-Robin/Praeemption, bounded Deadline-Dispatch,
+                      tickless One-Shot-Idle
+    task.zig          stabile Task-Registry, Ready-/Deadline-/Reap-Projektion,
+                      guarded Stacks, optionale FPU-States, Critical-Reserve
     task_context.zig  Current-Task-Bindung und UnwindToken als
                       Kill-Schutzzaehler - kein Lock
     wait_node.zig     task-owned intrusive Waiter-Verkettung
