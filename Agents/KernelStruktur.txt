@@ -173,16 +173,20 @@ wird vom Kernelbuild als `r4os_kernel_contract` eingebunden.
 sched/
 ------
 
-    scheduler.zig     Round-Robin/Praeemption, bounded Deadline-Dispatch,
-                      tickless One-Shot-Idle
+    scheduler.zig     rollenbewusste Ready-Auswahl/Praeemption, begrenzte
+                      Laufbudgets, sichere Reschedule-Punkte,
+                      bounded Deadline-Dispatch und tickless One-Shot-Idle
     task.zig          stabile Task-Registry, Ready-/Deadline-/Reap-Projektion,
+                      interne Rollen und Budget-/Donationsaccounting,
                       guarded Stacks, optionale FPU-States, Critical-Reserve
     task_context.zig  Current-Task-Bindung und UnwindToken als
                       Kill-Schutzzaehler - kein Lock
     wait_node.zig     task-owned intrusive Waiter-Verkettung
-    sync.zig          generationssichere Mutex/UnwindGuard, Event,
-                      Semaphore, dynamische WaitQueue
-    task_registry_selftest.zig   gebundene QEMU-Laufzeitprobe
+    sync.zig          generationssichere Mutex/UnwindGuard, gerichtete
+                      Einzel-Wakes, begrenzte Rollendonation, Event,
+                      Semaphore und dynamische WaitQueue
+    task_registry_selftest.zig   gebundene QEMU-Laufzeitprobe fuer Registry,
+                      Deadlines, Rollen, Fairness, Inversion und Wake-Latenz
 
 Details: `Docs/Core/ProgramLifecycle.txt` und
 `Docs/Core/Speicherverwaltung.txt`.
