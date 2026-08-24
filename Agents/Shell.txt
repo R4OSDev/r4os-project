@@ -52,16 +52,28 @@ ausschliesslich nach `Agents/Github.txt`.
 SSH zum QEMU-Gast
 -----------------
 
-Bei eingerichteter QEMU-Portweiterleitung `127.0.0.1:10022 -> Gast:22`:
+Ein vorhandenes Full-Image auf dem jeweiligen Host headless starten:
+
+    Tools\Build.bat -ssh
+    ./Tools/Build.sh -ssh
+
+Der Start bleibt im Vordergrund, verwendet das persistente Full-Datenimage und
+schreibt die serielle Ausgabe nach
+`Artifacts/Distribution/Logs/qemu-ssh-debug.log`. Sobald der Gast gebootet
+hat, verbindet ein zweites Host-Terminal die lokale Weiterleitung
+`127.0.0.1:10022 -> 10.0.2.15:22`:
 
     ssh -p 10022 -c chacha20-poly1305@openssh.com r4os@127.0.0.1
 
 Passwort: `rosebud`.
 
 Nach der Anmeldung zuerst `VER` ausfuehren und damit Ziel und Version
-bestaetigen. Die Weiterleitung bleibt auf `127.0.0.1`; SSH- oder andere
-R4OS-Serviceports niemals in ein oeffentliches oder nicht vertrauenswuerdiges
-Netz weiterleiten.
+bestaetigen. `EXIT` beendet nur die SSH-Sitzung; `POWEROFF` beendet den Gast
+und damit den wartenden QEMU-Aufruf. Auch der sichtbare normale QEMU-Modus
+besitzt diese Weiterleitung. Sie bleibt auf `127.0.0.1`; eine externe Firewall-
+oder Routerfreigabe ist weder noetig noch gewuenscht. SSH- oder andere R4OS-
+Serviceports niemals in ein oeffentliches oder nicht vertrauenswuerdiges Netz
+weiterleiten.
 
 
 R4OS-Terminal: Orientierung und Systemstatus

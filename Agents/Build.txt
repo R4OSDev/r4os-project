@@ -75,10 +75,12 @@ immer einen Modus angeben und den Exitcode auswerten.
 | `-image [Profil]` | Plan neu erzeugen und daraus ein Image bauen |
 | `-verify [Profil]` | vorhandenes Image und dessen Rechtsdokumentation pruefen |
 | `-qemu [Profil]` | vorhandenes Image sichtbar in QEMU starten |
+| `-ssh` | vorhandenes Full-Image headless mit lokaler SSH-Weiterleitung starten |
 | `-all [Profil]`, `-norun [Profil]` | zentrale Repos, Kernel und Module bauen, danach Image erzeugen |
 | `-slim` | Kurzform fuer `-all Slim` |
 | `-gui` | kompletter Full-Build, Full-Image und sichtbares QEMU |
-| `-test` | Distributionstests, kompletter Test-Build, Verify und Headless-Abnahme |
+| `-test` | Distributionstests, Test-Build ohne die on-demand-Browsermodule, Verify und Headless-Abnahme |
+| `-testbrowser` | gezielter Test-Build mit Klickifax, KlickifaxLive, Browserprotokollen, Klickifax-Repositorytests und Browser-Headless-Abnahme |
 | `-testimage` | kompletter Test-Build und Test-Image ohne QEMU |
 | `-testimageonly` | Testplan und Test-Image aus vorhandenen Artefakten neu erzeugen |
 | `-testonly`, `-headless` | vorhandenes Test-Image headless pruefen |
@@ -91,8 +93,9 @@ verwendet.
 
 `-image` und `-testimageonly` kompilieren Kernel und Module nicht neu.
 Sie erzeugen jedoch die Workspace- und Imageplaene erneut und verlangen
-deshalb alle benoetigten fertigen Artefakte. `-verify`, `-qemu` und
-`-testonly` arbeiten dagegen ausschliesslich mit bereits vorhandenen
+deshalb alle vom gewaehlten Plan ausgewaehlten fertigen Artefakte. Nicht
+ausgewaehlte on-demand-Module duerfen fehlen. `-verify`, `-qemu`,
+`-ssh` und `-testonly` arbeiten dagegen ausschliesslich mit bereits vorhandenen
 Profilausgaben.
 
 
@@ -111,8 +114,11 @@ Ablauf eines Gesamtbuilds
 5. Kernel ueber `Repositories/Kernel/Build.bat` bauen. Die sechs Platform
    APIs sind Teil dieses Kernelartefakts und keine getrennten Modulbuilds.
 6. Alle direkten Repositoryprojekte unter Apps, Services, Diagnostics,
-   Drivers, Protocols und Subsystems dynamisch entdecken und deren eigenes `Build.bat`
-   aufrufen.
+   Drivers, Protocols und Subsystems dynamisch entdecken und deren eigenes
+   `Build.bat` aufrufen. Normale Profilbuilds lassen KlickifaxLive aus; Slim
+   und Test lassen zusaetzlich Klickifax aus. Full und Benchmark bauen
+   Klickifax, weil ihre Plaene das produktive `IMAGE_SCOPE=full` ausliefern.
+   `-testbrowser` nimmt beide on-demand-Module in Test wieder hinzu.
 7. Aus allen versionierten und nicht ignorierten `module.R4MF` sowie den
    zugehoerigen Artefakten `WorkspaceModules.map` erzeugen. Dazu gehoeren
    Runtime-Libraries und modulnahe, versionierte Zusatzmanifeste. Eingebaute
@@ -144,7 +150,7 @@ Profilzuordnung:
     Full    slim + full
     Test    slim + test sowie die expliziten Test-Includes des Orchestrators
     Benchmark slim + full sowie explizit benannte Diagnosemodule aus test
-    none    in keinem normalen Image
+    none    in keinem normalen Image; nur ausdruecklich in einem Testplan
 
 Das Testprofil verwendet zusaetzlich
 `Repositories/Distribution/TestInjection/` ueber dem normalen
@@ -153,6 +159,14 @@ Das Testprofil verwendet zusaetzlich
 `Artifacts/Distribution/PrivateInjection/` ein. Unbekannte Scopes, doppelte
 Ziele, fehlende Artefakte und unaufloesbare Providerabhaengigkeiten sind harte
 Planfehler.
+Der normale Testplan enthaelt weder Klickifax noch KlickifaxLive und nimmt
+auch R4HTTP, R4HTML, R4CSS und R4JS nicht eigens fuer den Browser auf.
+`-testbrowser` erzeugt eine gezielte Variante desselben Testprofils, nimmt
+diese sechs Artefakte ausdruecklich auf und legt zusaetzlich
+`Repositories/Distribution/BrowserTestInjection/` ueber das Testoverlay.
+Klickifax bleibt unabhaengig davon ueber `IMAGE_SCOPE=full` Bestandteil des
+produktiven Full-Images; KlickifaxLive steht mit `IMAGE_SCOPE=none` nur fuer
+gezielte Testplaene bereit.
 Produktive Full-Module, die nur eine Testkette benoetigt, koennen als
 ausdrueckliche Test-Includes des Orchestrators aufgenommen werden. Fuer die
 Subsystem-Runtime-Abnahme gilt dies fuer AUDSVC; dessen normale
@@ -302,7 +316,8 @@ Assets erfolgreich hochgeladen wurden.
 
 Das normale Build-Datenimage liegt unter
 `Artifacts/Distribution/Profiles/<Profil>/data.img`. Beim GUI-Betrieb bleibt
-es absichtlich persistent; nur der Headless-Test erzeugt sein Test-Datenimage
+es absichtlich persistent; der SSH-Debuglauf verwendet ebenfalls das
+persistente Full-Datenimage. Nur der Headless-Test erzeugt sein Test-Datenimage
 vor jedem Lauf neu. Auch jeder Benchmark-Imagebuild erzeugt ein leeres
 Basis-Datenimage; der Benchmarkrunner arbeitet mit einem getrennten frischen
 Lauf-Datenimage. Der Release-Ablauf uebernimmt dieses lokale Datenimage
@@ -320,9 +335,17 @@ die Headless-Abnahme.
 
 `Tools\Build.bat -gui` baut den gesamten Full-Workspace, erzeugt das
 Full-Image und startet QEMU sichtbar. `-qemu Full` startet nur ein
-vorhandenes Full-Image. GUI-Lauf und Headless-Lauf benutzen beide QEMU aus
+vorhandenes Full-Image. Beide interaktiven QEMU-Modi stellen einen RTL8139-
+Adapter und ausschliesslich die lokale Weiterleitung
+`127.0.0.1:10022 -> 10.0.2.15:22` bereit. `Tools\Build.bat -ssh`
+beziehungsweise `./Tools/Build.sh -ssh` startet dasselbe vorhandene
+Full-Image ohne Anzeige und schreibt die serielle Ausgabe nach
+`Artifacts/Distribution/Logs/qemu-ssh-debug.log`. Der Prozess bleibt im
+Vordergrund und endet beim Gastbefehl `POWEROFF`. Anmeldung und Diagnosefolge
+stehen in `Agents/Shell.txt`. GUI-, SSH- und Headless-Lauf benutzen QEMU aus
 `DevKit/Emulation/QEMU`; im Distribution-Repository liegt nur die
-R4OS-spezifische Konfiguration.
+R4OS-spezifische Konfiguration. Headless-Abnahme und Benchmark behalten ihr
+absichtlich deaktiviertes Netzwerk.
 
 Ein Benchmark wird von keinem Build-, Test-, Headless- oder GUI-Modus
 automatisch gestartet. `-benchmarkimage`, `-all Benchmark` und

@@ -35,7 +35,8 @@ function Show-Usage {
     Write-Host '  Build.bat|Build.sh -central|-kernel|-modules'
     Write-Host '  Build.bat|Build.sh -module NAME|ROLLE/NAME'
     Write-Host '  Build.bat|Build.sh -plan|-image|-verify|-qemu [Slim|Full|Test|Benchmark]'
-    Write-Host '  Build.bat|Build.sh -test|-testimage|-testimageonly|-testonly|-benchmarkimage'
+    Write-Host '  Build.bat|Build.sh -ssh'
+    Write-Host '  Build.bat|Build.sh -test|-testbrowser|-testimage|-testimageonly|-testonly|-benchmarkimage'
     Write-Host '  Build.bat|Build.sh -benchmark SUITE VERSION WARM|COLD WIEDERHOLUNGEN UMGEBUNGS-ID'
     Write-Host '  Build.bat|Build.sh -all [Slim|Full|Test|Benchmark]'
     Write-Host '  Build.bat|Build.sh -slim|-gui'
@@ -59,6 +60,8 @@ function Get-InteractiveArguments {
     Write-Host '13 Vorhandenes Test-Image headless testen'
     Write-Host '14 Test-Image ohne Neukompilieren neu erzeugen'
     Write-Host '15 Gesamtbuild und Benchmark-Image erzeugen'
+    Write-Host '16 Gesamtbuild, Browser-Testimage und Headless-Browsertest'
+    Write-Host '17 Vorhandenes Full-Image headless fuer SSH-Debugging starten'
     Write-Host '0  Abbrechen'
     $choice = Read-Host 'Auswahl'
     switch ($choice) {
@@ -81,6 +84,8 @@ function Get-InteractiveArguments {
         '13' { return @('-testonly') }
         '14' { return @('-testimageonly') }
         '15' { return @('-benchmarkimage') }
+        '16' { return @('-testbrowser') }
+        '17' { return @('-ssh') }
         '0' { return @('-cancel') }
         default { throw 'Ungueltige Auswahl.' }
     }
@@ -122,9 +127,17 @@ try {
             $action = if ($mode -eq '-guionly') { 'qemu' } else { $mode.TrimStart('-') }
             Invoke-WorkspaceBuild -Action $action -Profile $profile
         }
+        '-ssh' {
+            if ($commandArguments.Count -ne 1) { throw '-ssh akzeptiert keine weiteren Argumente.' }
+            Invoke-WorkspaceBuild -Action ssh -Profile Full
+        }
         '-test' {
             if ($commandArguments.Count -ne 1) { throw '-test akzeptiert keine weiteren Argumente.' }
             Invoke-WorkspaceBuild -Action test -Profile Test
+        }
+        '-testbrowser' {
+            if ($commandArguments.Count -ne 1) { throw '-testbrowser akzeptiert keine weiteren Argumente.' }
+            Invoke-WorkspaceBuild -Action test -Profile Test -Additional @{ BrowserTest = $true }
         }
         '-testimage' {
             if ($commandArguments.Count -ne 1) { throw '-testimage akzeptiert keine weiteren Argumente.' }

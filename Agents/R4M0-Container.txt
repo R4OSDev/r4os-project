@@ -235,10 +235,13 @@ Wichtige Manifestregeln
       slim    Bestandteil jedes Images
       full    zusaetzlicher Bestandteil des Full-Images
       test    Bestandteil des Test-Images
-      none    keine automatische Aufnahme in ein Image
+      none    keine automatische Aufnahme in ein Image; gezielte Test-
+              Includes bleiben moeglich
 
   Die Mengen sind exakt: Slim = slim, Full = slim + full, Test =
-  slim + test plus ausdrueckliche Test-Includes des Orchestrators.
+  slim + test plus ausdrueckliche Test-Includes des Orchestrators. Solche
+  Includes duerfen `full` oder `none` besitzen; `none` bleibt ohne diese
+  ausdrueckliche Auswahl in jedem Profil ausgeschlossen.
 - IMPORT ist die einzige Importwahrheit und behaelt seine Reihenfolge.
 - Ein normales R4X mit ENTRY_MODE=app implementiert
   pub fn r4_app_main(app: *r4os.App) i32.

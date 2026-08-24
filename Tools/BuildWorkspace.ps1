@@ -1,6 +1,6 @@
 param(
     [Parameter(Mandatory = $true)]
-    [ValidateSet('central', 'kernel', 'modules', 'module', 'plan', 'image', 'verify', 'qemu', 'headless', 'benchmark', 'all', 'test', 'gui')]
+    [ValidateSet('central', 'kernel', 'modules', 'module', 'plan', 'image', 'verify', 'qemu', 'ssh', 'headless', 'benchmark', 'all', 'test', 'gui')]
     [string]$Action,
 
     [ValidateSet('Slim', 'Full', 'Test', 'Benchmark')]
@@ -16,7 +16,9 @@ param(
 
     [int]$BenchmarkRepetitions,
 
-    [string]$BenchmarkEnvironmentId
+    [string]$BenchmarkEnvironmentId,
+
+    [switch]$BrowserTest
 )
 
 $ErrorActionPreference = 'Stop'
@@ -64,11 +66,6 @@ $testImageIncludes = @(
     '/R4OS/SOFTWARE/DESKTOP/NOTEPAD.R4X',
     '/R4OS/SOFTWARE/DESKTOP/FONTS.R4X',
     '/R4OS/SOFTWARE/DESKTOP/APPEARANCE.R4X',
-    '/R4OS/SOFTWARE/INTERNET/KLICKIFAX.R4X',
-    '/R4OS/PROTOCOLS/R4HTTP.R4P',
-    '/R4OS/PROTOCOLS/R4HTML.R4P',
-    '/R4OS/PROTOCOLS/R4CSS.R4P',
-    '/R4OS/PROTOCOLS/R4JS.R4P',
     '/R4OS/SDK/Toolchains/C/bin/R4CC.R4X',
     '/SOFTWARE/R4CODE/R4PACK.R4X',
     '/SOFTWARE/R4CODE/R4BUILD.R4X',
@@ -80,6 +77,16 @@ $testImageIncludes = @(
     '/R4OS/SOFTWARE/TERMINAL/SYSINFO.R4X',
     '/R4OS/SOFTWARE/TERMINAL/BOOTINFO.R4X'
 )
+$browserTestImageIncludes = @(
+    '/R4OS/SOFTWARE/INTERNET/KLICKIFAX.R4X',
+    '/R4OS/SOFTWARE/TERMINAL/DIAG/KFXLIVE.R4X',
+    '/R4OS/PROTOCOLS/R4HTTP.R4P',
+    '/R4OS/PROTOCOLS/R4HTML.R4P',
+    '/R4OS/PROTOCOLS/R4CSS.R4P',
+    '/R4OS/PROTOCOLS/R4JS.R4P'
+)
+$klickifaxModuleTarget = '/R4OS/SOFTWARE/INTERNET/KLICKIFAX.R4X'
+$klickifaxLiveModuleTarget = '/R4OS/SOFTWARE/TERMINAL/DIAG/KFXLIVE.R4X'
 $benchmarkImageIncludes = @(
     '/R4OS/SOFTWARE/TERMINAL/DIAG/PERFDIAG.R4X'
 )
@@ -216,6 +223,7 @@ function Get-ModuleRepositories {
                 Name = $directory.Name
                 ManifestName = Get-ManifestValue $manifest 'NAME'
                 ManifestKind = Get-ManifestValue $manifest 'KIND'
+                ManifestTarget = Get-ManifestValue $manifest 'TARGET'
                 Root = $directory.FullName
                 Manifest = $manifest
                 Build = $build
@@ -274,9 +282,20 @@ function Build-OneModule($Module, [int]$Index, [int]$Count) {
     Invoke-External $Module.Build @() $Module.Root
 }
 
-function Build-AllModules {
-    $modules = @(Get-ModuleRepositories)
-    Write-Section ('Module (' + $modules.Count + ')')
+function Build-AllModules([string[]]$ExcludedTargets = @()) {
+    $allModules = @(Get-ModuleRepositories)
+    foreach ($target in $ExcludedTargets) {
+        $matches = @($allModules | Where-Object { $_.ManifestTarget.Equals($target, [StringComparison]::OrdinalIgnoreCase) })
+        if ($matches.Count -ne 1) {
+            throw ('On-demand-Modulziel muss genau einmal vorhanden sein: ' + $target + ' (gefunden: ' + $matches.Count + ')')
+        }
+    }
+    $modules = @($allModules | Where-Object { $ExcludedTargets -notcontains $_.ManifestTarget })
+    $skipped = @($allModules | Where-Object { $ExcludedTargets -contains $_.ManifestTarget })
+    Write-Section ('Module (' + $modules.Count + $(if ($skipped.Count -ne 0) { ', ' + $skipped.Count + ' gezielt ausgelassen' } else { '' }) + ')')
+    foreach ($module in $skipped) {
+        Write-Host ('[on-demand] ' + $module.Role + '/' + $module.Name)
+    }
     for ($index = 0; $index -lt $modules.Count; $index++) {
         Build-OneModule $modules[$index] ($index + 1) $modules.Count
     }
@@ -288,15 +307,19 @@ function Build-SelectedModule([string]$Selector) {
     Build-OneModule $module 1 1
 }
 
-function Get-ManifestArtifact([string]$ManifestPath, [string]$ArtifactRoot, [string]$Label) {
-    Assert-Directory $ArtifactRoot ('Artefaktwurzel fuer ' + $Label)
+function Test-BrowserOwner {
+    $module = Resolve-Module 'Apps/Klickifax'
+    Write-Section 'Klickifax Repositorytests'
+    Invoke-External $module.Build @('test') $module.Root
+}
+
+function Get-ManifestArtifactPath([string]$ManifestPath, [string]$ArtifactRoot) {
     $manifestName = Get-ManifestValue $ManifestPath 'NAME'
     $manifestKind = Get-ManifestValue $ManifestPath 'KIND'
     if ($manifestKind -notin @('R4X', 'R4D', 'R4P', 'R4L')) {
         throw ('Unbekannte Modulart in ' + $ManifestPath + ': ' + $manifestKind)
     }
     $artifact = Join-Path $ArtifactRoot ($manifestName + '.' + $manifestKind)
-    Assert-File $artifact ('Artefakt fuer ' + $Label + ' (' + $manifestName + '.' + $manifestKind + ')')
     return [IO.Path]::GetFullPath($artifact)
 }
 
@@ -325,15 +348,14 @@ function Write-WorkspaceMap {
         $artifactRoot = Resolve-SettingPath $module.Root $artifactSetting
         $manifests = @(Get-RepositoryManifests $module.Root)
         foreach ($manifest in $manifests) {
-            $label = $module.Role + '/' + $module.Name
-            $artifact = Get-ManifestArtifact $manifest $artifactRoot $label
+            $artifact = Get-ManifestArtifactPath $manifest $artifactRoot
             $lines.Add((Convert-ToPlanPath $manifest) + '|' + (Convert-ToPlanPath $artifact))
         }
     }
 
     $sdkArtifactRoot = Join-Path $sdkRoot 'zig-out'
     foreach ($manifest in (Get-RepositoryManifests $sdkRoot)) {
-        $artifact = Get-ManifestArtifact $manifest $sdkArtifactRoot 'SDK'
+        $artifact = Get-ManifestArtifactPath $manifest $sdkArtifactRoot
         $lines.Add((Convert-ToPlanPath $manifest) + '|' + (Convert-ToPlanPath $artifact))
     }
 
@@ -341,7 +363,7 @@ function Write-WorkspaceMap {
         if (-not (Test-Path -LiteralPath (Join-Path $libraryRoot.FullName 'module.R4MF') -PathType Leaf)) { continue }
         $libraryArtifactRoot = Join-Path $libraryRoot.FullName 'zig-out'
         foreach ($manifest in (Get-RepositoryManifests $librariesRoot $libraryRoot.FullName)) {
-            $artifact = Get-ManifestArtifact $manifest $libraryArtifactRoot ('Libraries/' + $libraryRoot.Name)
+            $artifact = Get-ManifestArtifactPath $manifest $libraryArtifactRoot
             $lines.Add((Convert-ToPlanPath $manifest) + '|' + (Convert-ToPlanPath $artifact))
         }
     }
@@ -448,7 +470,10 @@ function Write-CommonPlan([string]$ModulesInventory) {
     Write-Host ('Common-Plan: ' + $commonEntries.Count + ' Eintraege -> ' + $commonPlan)
 }
 
-function New-ImagePlan([string]$SelectedProfile) {
+function New-ImagePlan([string]$SelectedProfile, [switch]$IncludeBrowserTest) {
+    if ($IncludeBrowserTest -and -not $SelectedProfile.Equals('Test', [StringComparison]::OrdinalIgnoreCase)) {
+        throw 'Der Browser-Testzusatz ist nur fuer das Testprofil zulaessig.'
+    }
     Write-Section ($SelectedProfile + '-Imageplan')
     Ensure-ModuleCatalog
     Write-WorkspaceMap
@@ -473,6 +498,12 @@ function New-ImagePlan([string]$SelectedProfile) {
         foreach ($target in $testImageIncludes) {
             $arguments.Add('--include-target')
             $arguments.Add($target)
+        }
+        if ($IncludeBrowserTest) {
+            foreach ($target in $browserTestImageIncludes) {
+                $arguments.Add('--include-target')
+                $arguments.Add($target)
+            }
         }
     }
     if ($SelectedProfile.Equals('Benchmark', [StringComparison]::OrdinalIgnoreCase)) {
@@ -505,12 +536,21 @@ function Invoke-Distribution([string]$DistributionAction, [string]$SelectedProfi
     Invoke-External (Join-Path $distributionRoot $repositoryBuildName) (@($DistributionAction, $SelectedProfile) + $AdditionalArguments) $distributionRoot
 }
 
-function Build-All([string]$SelectedProfile) {
+function Build-All([string]$SelectedProfile, [switch]$IncludeBrowserTest) {
     Build-Central
     Build-Kernel
-    Build-AllModules
-    New-ImagePlan $SelectedProfile
-    Invoke-Distribution 'image' $SelectedProfile
+    $excludedTargets = [Collections.Generic.List[string]]::new()
+    if (-not $IncludeBrowserTest) {
+        $excludedTargets.Add($klickifaxLiveModuleTarget)
+        if ($SelectedProfile.Equals('Slim', [StringComparison]::OrdinalIgnoreCase) -or
+            $SelectedProfile.Equals('Test', [StringComparison]::OrdinalIgnoreCase)) {
+            $excludedTargets.Add($klickifaxModuleTarget)
+        }
+    }
+    Build-AllModules $excludedTargets.ToArray()
+    New-ImagePlan $SelectedProfile -IncludeBrowserTest:$IncludeBrowserTest
+    $variant = if ($IncludeBrowserTest) { @('browser') } else { @() }
+    Invoke-Distribution 'image' $SelectedProfile $variant
 }
 
 Assert-Directory $repositoriesRoot 'Repositories'
@@ -523,14 +563,19 @@ switch ($Action) {
     'kernel' { Build-Kernel }
     'modules' { Build-AllModules }
     'module' { Build-SelectedModule $ModuleSelector }
-    'plan' { New-ImagePlan $Profile }
+    'plan' { New-ImagePlan $Profile -IncludeBrowserTest:$BrowserTest }
     'image' {
-        New-ImagePlan $Profile
-        Invoke-Distribution 'image' $Profile
+        New-ImagePlan $Profile -IncludeBrowserTest:$BrowserTest
+        $variant = if ($BrowserTest) { @('browser') } else { @() }
+        Invoke-Distribution 'image' $Profile $variant
     }
     'verify' { Invoke-Distribution 'verify' $Profile }
     'qemu' { Invoke-Distribution 'qemu' $Profile }
-    'headless' { Invoke-Distribution 'headless' 'Test' }
+    'ssh' { Invoke-Distribution 'ssh' 'Full' }
+    'headless' {
+        $variant = if ($BrowserTest) { @('browser') } else { @() }
+        Invoke-Distribution 'headless' 'Test' $variant
+    }
     'benchmark' {
         Invoke-Distribution 'benchmark' 'Benchmark' @(
             $BenchmarkSuite,
@@ -540,12 +585,14 @@ switch ($Action) {
             $BenchmarkEnvironmentId
         )
     }
-    'all' { Build-All $Profile }
+    'all' { Build-All $Profile -IncludeBrowserTest:$BrowserTest }
     'test' {
         Invoke-Distribution 'test' 'Test'
-        Build-All 'Test'
+        if ($BrowserTest) { Test-BrowserOwner }
+        Build-All 'Test' -IncludeBrowserTest:$BrowserTest
         Invoke-Distribution 'verify' 'Test'
-        Invoke-Distribution 'headless' 'Test'
+        $variant = if ($BrowserTest) { @('browser') } else { @() }
+        Invoke-Distribution 'headless' 'Test' $variant
     }
     'gui' {
         Build-All 'Full'

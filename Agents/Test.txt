@@ -67,8 +67,8 @@ Der Lauf besteht aus:
 1. Distribution-Hosttools in ReleaseSafe bauen und deren Zig-Tests fahren.
 2. Rechtsdokumentation, deterministische Slim-/Full-/Test-Plaene und den
    QEMU-Markerauswerter im Selbsttest pruefen.
-3. Contract, SDK, Runtime-Libraries, Kernel und alle Modul-Repositories
-   regulär bauen.
+3. Contract, SDK, Runtime-Libraries, Kernel und die Modul-Repositories ausser
+   den beiden on-demand-Besitzern Klickifax und KlickifaxLive regulaer bauen.
 4. Testprofil planen und
    `Artifacts/Distribution/Generated/MODULES.JSON` erzeugen.
 5. Testimage unter
@@ -81,6 +81,18 @@ Wichtig: Schritt 3 verwendet die normalen Buildsteps der Repositories.
 `Tools\Build.bat -test` ruft nicht pauschal jeden repositoryeigenen
 `test`-Step auf. Tests des konkret geaenderten Besitzers deshalb vorher
 oder danach separat ausfuehren.
+
+Nach Aenderungen an Klickifax, KlickifaxLive oder der gemeinsam verwendeten
+Browserkette wird stattdessen der gezielte Lauf verwendet:
+
+    Tools\Build.bat -testbrowser
+    ./Tools/Build.sh -testbrowser
+
+Er fuehrt zusaetzlich die Klickifax-Repositorytests aus, baut Klickifax und
+KlickifaxLive, nimmt beide sowie R4HTTP, R4HTML, R4CSS und R4JS in den
+Testplan auf und verlangt im Gast die Offline-Klickifax-Selbsttestmarker.
+KlickifaxLive bleibt dabei ein aufgenommenes Live-Diagnoseartefakt: QEMU hat
+im Headless-Lauf kein Netzwerk, deshalb wird KFXLIVE dort nicht gestartet.
 
 
 Teilaufgaben
@@ -100,8 +112,9 @@ Teilaufgaben
     Tools\Build.bat -verify Test
         vorhandenes Testimage strukturell pruefen
 
-`-testimageonly` benoetigt alle bereits gebauten Komponenten, weil der
-Workspace-Plan neu entsteht. `-testonly` kompiliert und packt nichts neu.
+`-testimageonly` benoetigt alle vom Standard-Testplan ausgewaehlten bereits
+gebauten Komponenten. Nicht ausgewaehlte on-demand-Artefakte duerfen fehlen.
+`-testonly` kompiliert und packt nichts neu.
 
 
 Testprofil und Overlay
@@ -120,6 +133,12 @@ Dateien fuer die Abnahme ersetzen. Der Standardlauf benoetigt einen
 Konsolenboot und ein `AUTOEXEC.BAT`, das am Ende `POWEROFF` ausfuehrt.
 Bootet das Testprofil stattdessen in eine dauerhafte Desktop-Sitzung, fehlt
 der Poweroff-Marker und der Watchdog beendet den Lauf als Fehler.
+
+Der gezielte Browserlauf legt danach noch
+`Repositories/Distribution/BrowserTestInjection/` auf. Es ersetzt nur die
+AUTOEXEC-Folge und fuegt den Klickifax-Selbsttest hinzu. Standard- und
+Browservariante verwenden bewusst dasselbe Testprofil und denselben
+Imagepfad; der zuletzt erzeugte Lauf bestimmt daher dessen Inhalt.
 
 Testfixtures werden entweder ueber das Testoverlay oder als versionierte
 modulnahe Zusatzmanifeste in den gemeinsamen Imageplan aufgenommen. Es gibt
@@ -143,8 +162,10 @@ Ausgaben:
     Artifacts/Distribution/Logs/qemu-test-standard.log
     Artifacts/Distribution/Logs/qemu-test-standard.err
 
-Beide Dateien werden vor jedem Lauf geloescht. Einen wichtigen roten Log
-deshalb vor dem naechsten Lauf kopieren.
+Der Browserlauf schreibt getrennt nach `qemu-test-browser.log` und
+`qemu-test-browser.err`. Die Dateien der jeweiligen Variante werden vor
+ihrem Lauf geloescht. Einen wichtigen roten Log deshalb vor dem naechsten
+Lauf kopieren.
 
 
 Watchdog
@@ -191,9 +212,10 @@ Markervertrag
   Ergebnisse enthalten;
 - QEMU-stderr einen relevanten Konfigurations- oder Laufzeitfehler meldet.
 
-Zu den Pflichtmarkern gehoeren Boot und Poweroff, `dirs=ok`, Loader- und
-Ressourcendiagnose, Explorer-, Appearance-, Klickifax- und Notepad-
-Selbsttests, Zig-/C-App-Entry sowie R4CC, R4PACK und R4BUILD. Die vollstaendige
+Zu den Pflichtmarkern des Standardlaufs gehoeren Boot und Poweroff,
+`dirs=ok`, Loader- und Ressourcendiagnose, Explorer-, Appearance- und
+Notepad-Selbsttests, Zig-/C-App-Entry sowie R4CC, R4PACK und R4BUILD. Nur die
+Browservariante verlangt zusaetzlich die Klickifax-Marker. Die vollstaendige
 Liste steht nur im Script, damit sie nicht doppelt gepflegt wird.
 
 Verboten sind insbesondere `PANIC`, `FATAL`, CPU Exceptions, Page/General
