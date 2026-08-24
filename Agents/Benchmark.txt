@@ -25,8 +25,9 @@ festgeschrieben, sondern ausschliesslich von der aktuellen Roadmap bestimmt.
 Kanonische Besitzer und Dateien
 -------------------------------
 
-    Tools\Build.bat
-        Workspace-Einstieg fuer Benchmark-Image und ausdruecklichen Lauf
+    Tools\Build.bat / ./Tools/Build.sh
+        Workspace-Einstieg unter Windows beziehungsweise Linux fuer
+        Benchmark-Image und ausdruecklichen Lauf
 
     Repositories\Distribution\Profiles\Benchmark.R4S
     Repositories\Distribution\BenchmarkInjection\
@@ -112,6 +113,10 @@ Auswahl der Anforderung
 
 Verbindlicher Ablauf
 --------------------
+
+Die folgenden Befehle zeigen die Windows-Schreibweise. Unter Linux wird
+`Tools\Build.bat` durch `./Tools/Build.sh` ersetzt. PowerShell-Werkzeuge
+werden dort mit `pwsh -NoLogo -NoProfile -File` und Pfaden mit `/` gestartet.
 
 1. Zustaendige Besitzerbuilds und Tests abschliessen. Release- und nur
    tatsaechlich geaenderte Artefaktversionen vor dem Imagebau pflegen.
