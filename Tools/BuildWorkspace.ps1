@@ -542,10 +542,7 @@ function Build-All([string]$SelectedProfile, [switch]$IncludeBrowserTest) {
     $excludedTargets = [Collections.Generic.List[string]]::new()
     if (-not $IncludeBrowserTest) {
         $excludedTargets.Add($klickifaxLiveModuleTarget)
-        if ($SelectedProfile.Equals('Slim', [StringComparison]::OrdinalIgnoreCase) -or
-            $SelectedProfile.Equals('Test', [StringComparison]::OrdinalIgnoreCase)) {
-            $excludedTargets.Add($klickifaxModuleTarget)
-        }
+        $excludedTargets.Add($klickifaxModuleTarget)
     }
     Build-AllModules $excludedTargets.ToArray()
     New-ImagePlan $SelectedProfile -IncludeBrowserTest:$IncludeBrowserTest

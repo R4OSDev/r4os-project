@@ -115,10 +115,9 @@ Ablauf eines Gesamtbuilds
    APIs sind Teil dieses Kernelartefakts und keine getrennten Modulbuilds.
 6. Alle direkten Repositoryprojekte unter Apps, Services, Diagnostics,
    Drivers, Protocols und Subsystems dynamisch entdecken und deren eigenes
-   `Build.bat` aufrufen. Normale Profilbuilds lassen KlickifaxLive aus; Slim
-   und Test lassen zusaetzlich Klickifax aus. Full und Benchmark bauen
-   Klickifax, weil ihre Plaene das produktive `IMAGE_SCOPE=full` ausliefern.
-   `-testbrowser` nimmt beide on-demand-Module in Test wieder hinzu.
+   `Build.bat` aufrufen. Normale Profilbuilds lassen Klickifax und
+   KlickifaxLive aus. `-testbrowser` baut beide on-demand-Module gezielt und
+   nimmt sie in das Testprofil auf.
 7. Aus allen versionierten und nicht ignorierten `module.R4MF` sowie den
    zugehoerigen Artefakten `WorkspaceModules.map` erzeugen. Dazu gehoeren
    Runtime-Libraries und modulnahe, versionierte Zusatzmanifeste. Eingebaute
@@ -164,9 +163,11 @@ auch R4HTTP, R4HTML, R4CSS und R4JS nicht eigens fuer den Browser auf.
 `-testbrowser` erzeugt eine gezielte Variante desselben Testprofils, nimmt
 diese sechs Artefakte ausdruecklich auf und legt zusaetzlich
 `Repositories/Distribution/BrowserTestInjection/` ueber das Testoverlay.
-Klickifax bleibt unabhaengig davon ueber `IMAGE_SCOPE=full` Bestandteil des
-produktiven Full-Images; KlickifaxLive steht mit `IMAGE_SCOPE=none` nur fuer
-gezielte Testplaene bereit.
+Der Standard-Headless-Lauf hat ein 240-Sekunden-Limit; der umfangreichere
+Browserlauf 360 Sekunden. `QEMU_TEST_TIMEOUT_SECONDS` kann beide bei Bedarf
+explizit ueberschreiben.
+Klickifax und KlickifaxLive stehen mit `IMAGE_SCOPE=none` nur fuer gezielte
+Testplaene bereit.
 Produktive Full-Module, die nur eine Testkette benoetigt, koennen als
 ausdrueckliche Test-Includes des Orchestrators aufgenommen werden. Fuer die
 Subsystem-Runtime-Abnahme gilt dies fuer AUDSVC; dessen normale
