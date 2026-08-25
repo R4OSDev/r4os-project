@@ -36,7 +36,7 @@ function Show-Usage {
     Write-Host '  Build.bat|Build.sh -module NAME|ROLLE/NAME'
     Write-Host '  Build.bat|Build.sh -plan|-image|-verify|-qemu [Slim|Full|Test|Benchmark]'
     Write-Host '  Build.bat|Build.sh -ssh'
-    Write-Host '  Build.bat|Build.sh -test|-testbrowser|-testimage|-testimageonly|-testonly|-benchmarkimage'
+    Write-Host '  Build.bat|Build.sh -test|-testbrowser|-testsmp|-testimage|-testimageonly|-testonly|-benchmarkimage'
     Write-Host '  Build.bat|Build.sh -benchmark SUITE VERSION WARM|COLD WIEDERHOLUNGEN UMGEBUNGS-ID'
     Write-Host '  Build.bat|Build.sh -all [Slim|Full|Test|Benchmark]'
     Write-Host '  Build.bat|Build.sh -slim|-gui'
@@ -62,6 +62,7 @@ function Get-InteractiveArguments {
     Write-Host '15 Gesamtbuild und Benchmark-Image erzeugen'
     Write-Host '16 Gesamtbuild, Browser-Testimage und Headless-Browsertest'
     Write-Host '17 Vorhandenes Full-Image headless fuer SSH-Debugging starten'
+    Write-Host '18 Vorhandenes Test-Image mit 4 CPUs headless testen'
     Write-Host '0  Abbrechen'
     $choice = Read-Host 'Auswahl'
     switch ($choice) {
@@ -86,6 +87,7 @@ function Get-InteractiveArguments {
         '15' { return @('-benchmarkimage') }
         '16' { return @('-testbrowser') }
         '17' { return @('-ssh') }
+        '18' { return @('-testsmp') }
         '0' { return @('-cancel') }
         default { throw 'Ungueltige Auswahl.' }
     }
@@ -138,6 +140,10 @@ try {
         '-testbrowser' {
             if ($commandArguments.Count -ne 1) { throw '-testbrowser akzeptiert keine weiteren Argumente.' }
             Invoke-WorkspaceBuild -Action test -Profile Test -Additional @{ BrowserTest = $true }
+        }
+        '-testsmp' {
+            if ($commandArguments.Count -ne 1) { throw '-testsmp akzeptiert keine weiteren Argumente.' }
+            Invoke-WorkspaceBuild -Action headless -Profile Test -Additional @{ SmpTest = $true }
         }
         '-testimage' {
             if ($commandArguments.Count -ne 1) { throw '-testimage akzeptiert keine weiteren Argumente.' }

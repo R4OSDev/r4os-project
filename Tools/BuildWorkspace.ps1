@@ -18,7 +18,9 @@ param(
 
     [string]$BenchmarkEnvironmentId,
 
-    [switch]$BrowserTest
+    [switch]$BrowserTest,
+
+    [switch]$SmpTest
 )
 
 $ErrorActionPreference = 'Stop'
@@ -571,7 +573,7 @@ switch ($Action) {
     'qemu' { Invoke-Distribution 'qemu' $Profile }
     'ssh' { Invoke-Distribution 'ssh' 'Full' }
     'headless' {
-        $variant = if ($BrowserTest) { @('browser') } else { @() }
+        $variant = if ($BrowserTest) { @('browser') } elseif ($SmpTest) { @('smp4') } else { @() }
         Invoke-Distribution 'headless' 'Test' $variant
     }
     'benchmark' {
@@ -591,6 +593,7 @@ switch ($Action) {
         Invoke-Distribution 'verify' 'Test'
         $variant = if ($BrowserTest) { @('browser') } else { @() }
         Invoke-Distribution 'headless' 'Test' $variant
+        if (-not $BrowserTest) { Invoke-Distribution 'headless' 'Test' @('smp4') }
     }
     'gui' {
         Build-All 'Full'

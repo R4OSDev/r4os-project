@@ -74,8 +74,9 @@ Der Lauf besteht aus:
 5. Testimage unter
    `Artifacts/Distribution/Profiles/Test/disk.img` bauen.
 6. Image, NTFS-Struktur und gestagte Rechtsdokumentation verifizieren.
-7. Test-Datenplatte frisch erzeugen, QEMU unsichtbar starten und den
-   seriellen Log auswerten.
+7. Test-Datenplatte je Lauf frisch erzeugen, QEMU zuerst mit einer und danach
+   mit vier CPUs unsichtbar starten und die getrennten seriellen Logs
+   auswerten.
 
 Wichtig: Schritt 3 verwendet die normalen Buildsteps der Repositories.
 `Tools\Build.bat -test` ruft nicht pauschal jeden repositoryeigenen
@@ -108,6 +109,10 @@ Teilaufgaben
     Tools\Build.bat -testonly
     Tools\Build.bat -headless
         vorhandenes Testimage headless pruefen
+
+    Tools\Build.bat -testsmp
+    ./Tools/Build.sh -testsmp
+        vorhandenes Testimage mit vier CPUs headless pruefen
 
     Tools\Build.bat -verify Test
         vorhandenes Testimage strukturell pruefen
@@ -155,12 +160,18 @@ Der Headless-Lauf verwendet:
     Repositories/Distribution/Tests/Invoke-QemuHeadless.ps1
 
 QEMU startet ohne sichtbares Fenster, mit einer Haswell-CPU, 1 GiB RAM,
-einem vCPU, deaktiviertem Netzwerk und COM1-Ausgabe in eine Datei.
+standardmaessig einem vCPU, deaktiviertem Netzwerk und COM1-Ausgabe in eine
+Datei. Die SMP-Varianten `smp2` und `smp4` verwenden dasselbe Image mit zwei
+beziehungsweise vier vCPUs. `smpfail4` erwartet zusaetzlich genau einen ueber
+die private Kernel-Buildoption `-Dsmp-fail-ap-index=2` injizierten AP-Ausfall.
 
 Ausgaben:
 
     Artifacts/Distribution/Logs/qemu-test-standard.log
     Artifacts/Distribution/Logs/qemu-test-standard.err
+    Artifacts/Distribution/Logs/qemu-test-smp2.log
+    Artifacts/Distribution/Logs/qemu-test-smp4.log
+    Artifacts/Distribution/Logs/qemu-test-smpfail4.log
 
 Der Browserlauf schreibt getrennt nach `qemu-test-browser.log` und
 `qemu-test-browser.err`. Die Dateien der jeweiligen Variante werden vor
@@ -217,6 +228,11 @@ Zu den Pflichtmarkern des Standardlaufs gehoeren Boot und Poweroff,
 Notepad-Selbsttests, Zig-/C-App-Entry sowie R4CC, R4PACK und R4BUILD. Nur die
 Browservariante verlangt zusaetzlich die Klickifax-Marker. Die vollstaendige
 Liste steht nur im Script, damit sie nicht doppelt gepflegt wird.
+
+Der Ein-CPU-Lauf verlangt den expliziten SMP-Probe-Skip. Mehrkernlaeufe
+verlangen die exakte Online-/Fehlerzusammenfassung, produktive R4X-Arbeit auf
+einem AP sowie die interne Kernel-Skalierungsprobe mit mindestens 1,050x.
+Diese Probe ist eine Testprofil-Abnahme und kein regulaerer Benchmark.
 
 Verboten sind insbesondere `PANIC`, `FATAL`, CPU Exceptions, Page/General
 Protection Faults, `dirs=missing`, sichtbare NTFS-Metadateien wie `$MFT`

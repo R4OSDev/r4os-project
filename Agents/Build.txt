@@ -81,6 +81,7 @@ immer einen Modus angeben und den Exitcode auswerten.
 | `-gui` | kompletter Full-Build, Full-Image und sichtbares QEMU |
 | `-test` | Distributionstests, Test-Build ohne die on-demand-Browsermodule, Verify und Headless-Abnahme |
 | `-testbrowser` | gezielter Test-Build mit Klickifax, KlickifaxLive, Browserprotokollen, Klickifax-Repositorytests und Browser-Headless-Abnahme |
+| `-testsmp` | vorhandenes Test-Image mit vier QEMU-CPUs headless pruefen |
 | `-testimage` | kompletter Test-Build und Test-Image ohne QEMU |
 | `-testimageonly` | Testplan und Test-Image aus vorhandenen Artefakten neu erzeugen |
 | `-testonly`, `-headless` | vorhandenes Test-Image headless pruefen |
