@@ -1,4 +1,4 @@
-﻿R4OS Benchmark - Agent-Referenz
+R4OS Benchmark - Agent-Referenz
 ================================
 
 Zweck: Verbindlicher Ablauf fuer reproduzierbare Performancebenchmarks,
@@ -113,6 +113,10 @@ Auswahl der Anforderung
 - Workload-ID, Samplezahl, Einheit und Richtung werden beim Import aus den
   katalogisierten Maschinenrecords abgeleitet und duerfen nicht frei
   erfunden werden.
+- `perfdiag-blit` misst pro Sample mindestens 250 ms lang denselben
+  320x64-XRGB-Frame. Iterationen und Gesamtbytes sind dabei Resultate und
+  duerfen zwischen Samples variieren; die Workload-ID bindet stattdessen das
+  feste 250-ms-Fenster und die aus `bytes / iterations` validierte Framegroesse.
 
 
 Verbindlicher Ablauf
@@ -153,6 +157,10 @@ werden dort mit `pwsh -NoLogo -NoProfile -File` und Pfaden mit `/` gestartet.
 7. Nur dieselbe Suite, Workload-ID, Environment-ID und Metrik vergleichen:
 
        powershell.exe -NoProfile -ExecutionPolicy Bypass -File Repositories\Distribution\Tools\BenchmarkHistory.ps1 -Action compare -HistoryPath ExFiles\Reports\Benchmarks.jsonl -Suite perfdiag-clock -WorkloadId perfdiag.clock.calls-10000.v1 -EnvironmentId r4os-q35-haswell-1vcpu-1g-tcg-v1 -CacheState warm -Metric perfdiag.clock.latency
+
+   Gibt es fuer diese vollstaendige Identitaet noch keinen Vorgaenger, ist
+   der importierte Lauf die neue Vergleichsbasis. Er darf nicht mit einer
+   anderen Umgebung oder Workload zwangsverglichen werden.
 
 8. Harte Resultate und ihre Interpretation in den Roadmap-Abschluss
    aufnehmen. Danach die Unterversion gesammelt pushen. Keine
