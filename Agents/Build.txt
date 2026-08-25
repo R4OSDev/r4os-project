@@ -170,8 +170,9 @@ Klickifax und KlickifaxLive stehen mit `IMAGE_SCOPE=none` nur fuer gezielte
 Testplaene bereit.
 Produktive Full-Module, die nur eine Testkette benoetigt, koennen als
 ausdrueckliche Test-Includes des Orchestrators aufgenommen werden. Fuer die
-Subsystem-Runtime-Abnahme gilt dies fuer AUDSVC; dessen normale
-`IMAGE_SCOPE=full`-Zuordnung und damit Slim und Full bleiben unveraendert.
+Subsystem-Runtime- und Registry-Abnahmen gilt dies fuer AUDSVC und REGEDIT;
+deren normale `IMAGE_SCOPE=full`-Zuordnung und damit Slim und Full bleiben
+unveraendert.
 Das Benchmarkprofil verwendet stattdessen ausschliesslich das versionierte
 `BenchmarkInjection/` ueber `Injection/` und setzt dort das Terminal als
 AUTOEXEC-faehige Shell. Nicht versionierte und private
