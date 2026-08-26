@@ -297,16 +297,17 @@ Die Inline-Tests in `Repositories/SDK/r4os/subsystem_host.zig` pruefen
 Viewport und Letterboxing, ganzzahlige und fraktionale
 Naechste-Nachbar-Skalierung, 128x128-Tiling, Indexed8 und XRGB32,
 Palettenwechsel, Voll-/Damage-Frames, Damage-Verdichtung, ausbleibende Frames
-ohne Aenderung sowie die Uebersetzung von Resize, Fokus, Tastatur, Text und
-Maus.
+ohne Aenderung sowie die sequenz- und ticktreue Uebersetzung von Resize,
+Fokus, Tastatur, Text und Maus. Ein gastdefiniertes Profil prueft ausserdem
+genau ein Text-Ereignis je druckbarer Taste, Mausfilterung vor der
+Koordinatenabbildung und sichtbare Filtergruende.
 
 Die Inline-Tests in `Repositories/SDK/r4os/subsystem_runtime.zig` pruefen
 monotone und pausenbereinigte Gastzeit, driftarmes Pacing, die caller-eigene
 PCM-Ringqueue, begrenzte Gast-Scheiben, Pause/Fortsetzen/Reset/Close,
 Gastabschluss und kontrollierte Fehler, Stille bei Unterlauf, Mute, fehlendes
-Audio, partiellen Audiofehler sowie zwei isolierte Runtime-Instanzen. Der
-direkte Testlauf umfasst zusammen mit dem importierten Zeitvertrag zehn
-Tests.
+Audio, partiellen Audiofehler, verworfene Eingaben ohne unberechtigtes
+Gast-Wakeup sowie zwei isolierte Runtime-Instanzen.
 
 Das Testprofil startet R4DESK mit dem ausschliesslich im Testoverlay gesetzten
 Shellargument `/HEADLESS-SUBSYSTEM`. AUDSVC wird dafuer als ausdruecklicher
@@ -334,7 +335,7 @@ AUTOEXEC uebernimmt die Datei mit `TYPE` in den seriellen Log und fuehrt
 danach die bestehende Suite bis zum Poweroff aus. Erfolg verlangt beide
 exakten Marker:
 
-`SUBSYSTEM host selftest: OK modes=640x350+320x200+256x224 formats=indexed8+xrgb32 tiles=bounded input=translated idle=no-frame fps>=20`
+`SUBSYSTEM host selftest: OK modes=640x350+320x200+256x224 formats=indexed8+xrgb32 damage=sparse indexed8=abi tiles=bounded input=sequenced+policy-filtered idle=no-frame fps>=20`
 
 `SUBSYSTEM runtime selftest: OK instances=2 slices=bounded time=monotonic audio=s16le-buffered lifecycle=pause+resume+reset+complete+close errors=isolated resources=closed`
 
