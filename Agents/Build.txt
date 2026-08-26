@@ -306,10 +306,13 @@ Releases
 GitHub Releases gehoeren dem Repository `r4os-distribution`. Vor der
 Vorbereitung muessen die gewuenschten Images bereits gebaut sein.
 
-    Repositories\Distribution\Release.bat selftest
-    Repositories\Distribution\Release.bat prepare Standard
-    Repositories\Distribution\Release.bat publish Standard
-    Repositories\Distribution\Release.bat publish Standard -prerelease
+    Repositories\Distribution\Release.bat selftest                       (Windows)
+    Repositories\Distribution\Release.bat publish Standard               (Windows)
+    ./Repositories/Distribution/Release.sh selftest                        (Linux)
+    ./Repositories/Distribution/Release.sh publish Standard                (Linux)
+
+`prepare Standard` bereitet die gleichen Pakete nur lokal vor;
+`publish Standard -prerelease` markiert sie auf beiden Hosts als Vorabrelease.
 
 `Standard` umfasst Slim und Full, `All` zusaetzlich Test. `prepare` prueft
 die Images, komprimiert je Profil ein Paket, erzeugt SHA-256-Pruefsummen und
