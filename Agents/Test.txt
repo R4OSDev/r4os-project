@@ -320,6 +320,11 @@ loest `C:\TEMP\SUBSYSTEM-A.BAS` sowie `C:\TEMP\SUBSYSTEM-B.BAS` ueber den
 gemeinsamen R4STD-Dateihandler zu zwei `R4SUBSYS1`-Starts desselben Hosts auf.
 Damit durchlaeuft die Abnahme Katalog, Probe, Zuordnung, Startvertrag,
 getrennte Fensterhandles, Video, Eingabe, Zeit und Audio.
+Vor den beiden Gaststarts prueft derselbe Desktop-Lauf ausserdem den sichtbaren
+Terminal-Close-Pfad sowie einen echten SDK-Anbieter ueber die von `WINSVC`
+vermittelten Tray-Operationen:
+generationgebundene Registrierung, 16x16-ARGB32-Kopie, Primaerklick,
+begrenztes sequenziertes Wait und automatische Besitzerbereinigung nach Exit.
 
 Beide Instanzen laufen gleichzeitig unter echter Ereignis- und
 Kompositionsverarbeitung. Der Desktop prueft Fokus sowie
@@ -332,12 +337,14 @@ Instanz B ueber Close. Nur die beiden urspruenglichen Handles mit Exitcode 0
 erzeugen `C:\TEMP\SUBSYS.OK`; Fehler schreiben einen konkreten Marker.
 
 AUTOEXEC uebernimmt die Datei mit `TYPE` in den seriellen Log und fuehrt
-danach die bestehende Suite bis zum Poweroff aus. Erfolg verlangt beide
-exakten Marker:
+danach die bestehende Suite bis zum Poweroff aus. Zu den exakten Pflichtmarkern
+gehoeren:
 
 `SUBSYSTEM host selftest: OK modes=640x350+320x200+256x224 formats=indexed8+xrgb32 damage=sparse indexed8=abi tiles=bounded input=sequenced+policy-filtered idle=no-frame fps>=20`
 
 `SUBSYSTEM runtime selftest: OK instances=2 slices=bounded time=monotonic audio=s16le-buffered lifecycle=pause+resume+reset+complete+close errors=isolated resources=closed`
+
+`DESKTOP tray selftest: OK ipc=service owner=generation registry=16 icon=argb32 events=sequenced wait=bounded cleanup=owner`
 
 Host-, Runtime- und Bootstrap-FAILED-Marker sind verboten.
 
