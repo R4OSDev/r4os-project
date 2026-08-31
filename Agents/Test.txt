@@ -159,11 +159,14 @@ Der Headless-Lauf verwendet:
     Repositories/Distribution/QEMU/standard.conf
     Repositories/Distribution/Tests/Invoke-QemuHeadless.ps1
 
-QEMU startet ohne sichtbares Fenster, mit einer Haswell-CPU, 1 GiB RAM,
-standardmaessig einem vCPU, deaktiviertem Netzwerk und COM1-Ausgabe in eine
-Datei. Die SMP-Varianten `smp2` und `smp4` verwenden dasselbe Image mit zwei
-beziehungsweise vier vCPUs. `smpfail4` erwartet zusaetzlich genau einen ueber
-die private Kernel-Buildoption `-Dsmp-fail-ap-index=2` injizierten AP-Ausfall.
+QEMU startet ohne sichtbares Fenster, mit 1 GiB RAM, standardmaessig einem
+vCPU, deaktiviertem Netzwerk und COM1-Ausgabe in eine Datei. Auf Linux wird
+bei vorhandenem `/dev/kvm` KVM mit der Host-CPU verwendet und TCG als
+Rueckfall angegeben; ohne KVM und unter Windows wird TCG mit dem
+Haswell-CPU-Modell verwendet. Die SMP-Varianten `smp2` und `smp4` verwenden
+dasselbe Image mit zwei beziehungsweise vier vCPUs. `smpfail4` erwartet
+zusaetzlich genau einen ueber die private Kernel-Buildoption
+`-Dsmp-fail-ap-index=2` injizierten AP-Ausfall.
 
 Ausgaben:
 
@@ -182,14 +185,14 @@ Lauf kopieren.
 Watchdog
 --------
 
-`Invoke-QemuHeadless.ps1` setzt eine harte Wall-Clock-Frist von 240
+`Invoke-QemuHeadless.ps1` setzt eine harte Wall-Clock-Frist von 360
 Sekunden. Sie kann fuer einen Gegencheck erhoeht werden:
 
     $env:QEMU_TEST_TIMEOUT_SECONDS = '600'
     Tools\Build.bat -testonly
 
 Exitcode 124 bedeutet Timeout, 125 eine fehlende oder ungueltige
-Runnerkonfiguration. Unter starker Hostlast kann 240 Sekunden knapp sein.
+Runnerkonfiguration. Unter starker Hostlast kann 360 Sekunden knapp sein.
 Ein fehlender Poweroff ohne Panic-, Fatal- oder CPU-Marker ist deshalb
 einmal mit hoeherem Timeout gegenzupruefen, nicht einfach als Flake
 abzulegen.

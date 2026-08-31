@@ -164,9 +164,8 @@ auch R4HTTP, R4HTML, R4CSS und R4JS nicht eigens fuer den Browser auf.
 `-testbrowser` erzeugt eine gezielte Variante desselben Testprofils, nimmt
 diese sechs Artefakte ausdruecklich auf und legt zusaetzlich
 `Repositories/Distribution/BrowserTestInjection/` ueber das Testoverlay.
-Der Standard-Headless-Lauf hat ein 240-Sekunden-Limit; der umfangreichere
-Browserlauf 360 Sekunden. `QEMU_TEST_TIMEOUT_SECONDS` kann beide bei Bedarf
-explizit ueberschreiben.
+Standard- und Browser-Headless-Lauf haben ein 360-Sekunden-Limit.
+`QEMU_TEST_TIMEOUT_SECONDS` kann es bei Bedarf explizit ueberschreiben.
 Klickifax und KlickifaxLive stehen mit `IMAGE_SCOPE=none` nur fuer gezielte
 Testplaene bereit.
 Produktive Full-Module, die nur eine Testkette benoetigt, koennen als
