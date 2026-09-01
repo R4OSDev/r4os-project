@@ -204,6 +204,14 @@ Ein vorbereitbarer Zustand erscheint als prepare-retry.
 Ein bereits geladenes Paket kann fuer einen Suchsnapshot verwendet werden,
 wenn sein vollstaendiger Katalogfingerprint uebereinstimmt.
 
+Ein vorbereitender Batch ohne dauerhaftes Transaktionsjournal kann mit
+`SYSUPD ABORT-BATCH` verworfen werden. Das ist ausschliesslich in den Phasen
+staged, verifying und staging zulaessig. Private Stagedateien werden aus den
+weiterhin gebundenen Paketen rekonstruiert und nur bei passender Laenge und
+Pruefsumme geloescht; Systemziele und letzte gute Backups bleiben unberuehrt.
+Nach Beginn einer Transaktion ist RESUME beziehungsweise RESUME-BATCH zu
+verwenden.
+
 
 Post-Boot und Recovery
 ----------------------
