@@ -185,17 +185,21 @@ Lauf kopieren.
 Watchdog
 --------
 
-`Invoke-QemuHeadless.ps1` setzt eine harte Wall-Clock-Frist von 360
-Sekunden. Sie kann fuer einen Gegencheck erhoeht werden:
+`Invoke-QemuHeadless.ps1` setzt fuer direkte Aufrufe standardmaessig eine
+harte Wall-Clock-Frist; der kanonische Workspace-/Distribution-Test setzt sie
+auf 1200 Sekunden. Dieses groessere Fenster ist fuer die parallelen
+R4GB-/R4SNES-Abnahmen mit jeweils 60 Sekunden Gastzeit erforderlich. Fuer
+einen ausdruecklichen Gegencheck kann die Frist weiter erhoeht werden:
 
-    $env:QEMU_TEST_TIMEOUT_SECONDS = '600'
+    $env:QEMU_TEST_TIMEOUT_SECONDS = '1500'
     Tools\Build.bat -testonly
 
 Exitcode 124 bedeutet Timeout, 125 eine fehlende oder ungueltige
-Runnerkonfiguration. Unter starker Hostlast kann 360 Sekunden knapp sein.
-Ein fehlender Poweroff ohne Panic-, Fatal- oder CPU-Marker ist deshalb
-einmal mit hoeherem Timeout gegenzupruefen, nicht einfach als Flake
-abzulegen.
+Runnerkonfiguration. Ein fehlender Poweroff ohne Panic-, Fatal- oder
+CPU-Marker ist einmal mit hoeherem Timeout gegenzupruefen, nicht einfach als
+Flake abzulegen. Das `SLEEP`-Fenster im Test-AUTOEXEC muss zugleich lang genug
+sein, dass alle Desktop-E2E-Berichte vor dem anschliessenden `POWEROFF`
+veroeffentlicht wurden.
 
 
 Die Test-Datenplatte
@@ -257,7 +261,8 @@ Wenn der Headless-Lauf rot ist
 3. Im seriellen Log die erste fehlende oder verbotene Bedingung suchen.
 4. Bei Panic oder CPU Exception die letzten Zeilen vor dem Abbruch
    untersuchen.
-5. Bei Timeout ohne Crashmarker einmal mit 600 Sekunden gegenpruefen.
+5. Bei Timeout ohne Crashmarker einmal mit einer ausdruecklich hoeheren Frist
+   als dem aktuellen kanonischen Testwert gegenpruefen.
 6. Bei fehlenden Dateien den Testplan, `image-adds.txt` und
    `MODULES.JSON` desselben Testbuilds kontrollieren.
 7. Bei moeglichen Altartefakten ausserhalb von `Artifacts/Distribution`
