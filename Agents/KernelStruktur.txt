@@ -41,7 +41,7 @@ voraus:
     platform_boot                ACPI, PCIe, Device-Mappings und CR3
     usb_protocol_preload_boot    USB-Protokolle vor dem Hostcontroller
     service_boot                 Registry, Endpoints und Queues
-    storage_boot.initControllers Controller, Blockdevice-Scan, MBR und Mounts
+    storage_boot.initControllers Controller, Blockdevice-Scan, MBR/GPT und Mounts
     loader_boot                  Runtime-Libraries, R4D-Discovery und BOOT.R4S
     system_update_recovery_boot  SYSUPD-Journale, siehe RemoteUpdate.txt
     upload_claim_boot            offene Uploadtransaktionen
@@ -209,7 +209,8 @@ fs/ und storage/
                       Transaktionen fuer Update und Upload
 
     storage/block.zig Blockdevice-Registry, Request-Queue, Worker
-    storage/mbr.zig   MBR-Scan mit FS-neutraler Systemvolume-Erkennung
+    storage/mbr.zig   MBR-/GPT-Scan, FS-Probe und Mountentscheidung
+    storage/gpt.zig   validierter GPT-Parser mit CRC und Backup-Fallback
 
 Details: `Docs/FileSystem/DateisystemUndStorage.txt`.
 
