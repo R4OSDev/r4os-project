@@ -64,9 +64,17 @@ Invarianten:
 - Aktivitaetsproduzenten veroeffentlichen Queueeintrag, Eingabestatus oder
   GUI-/Console-Revision vor `desktop_events.signal()`. Sequenzinkrement und
   WaitQueue-Wake bleiben ein gemeinsamer kritischer Abschnitt.
-- Speicher-Owner-Locks werden ausschliesslich in der Reihenfolge VM (10),
-  Seitentabellen (20), physischer PMM-/MemoryBlock-Zustand (30) verschachtelt.
-  Sie duerfen weder I/O noch Yield, Wait oder Callback ueberspannen.
+- No-Sleep-Owner-Locks werden ausschliesslich in aufsteigender Reihenfolge
+  verschachtelt: Programmzustand (1), unabhaengige Storage-/Netz-/Driver-Work-
+  Einstiege (2; nicht untereinander), Heap (5), VM (10), Seitentabellen (20),
+  physischer PMM-/MemoryBlock-Zustand (30), Bootlog (70), Serialausgabe (80).
+  Sie duerfen weder blockierendes I/O noch Yield, Wait oder Callback
+  ueberspannen. Ausschliesslich der zustaendige Treiber-Owner darf darin
+  begrenzte MMIO-/Portregisterzugriffe ausfuehren.
+- Scheduler, Taskzustand, Wait-Queues und IRQ-seitige Praeemption verwenden
+  gemeinsam den Runtime-Owner, den der Assembly-Kontextwechsel erst nach
+  gesichertem ausgehendem RSP freigibt. Der alte globale Legacy-BKL und
+  `saveAndDisableFor` duerfen nicht wiedereingefuehrt werden.
 - Unmap, Decommit und Adressraumabbau duerfen physische Frames erst nach dem
   generationstreuen TLB-Ack aller betroffenen Online-CPUs freigeben. Timeout
   bedeutet PTE-Rollback und behaltenen Frame, niemals optimistische

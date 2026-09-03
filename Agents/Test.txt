@@ -116,8 +116,8 @@ Teilaufgaben
     Tools\Build.bat -testquick
     ./Tools/Build.sh -testquick
         vorhandenes Testimage mit vier CPUs starten und unmittelbar nach dem
-        erfolgreichen SMP-/Heap-/TLB-/Lock-/CLOCKPROBE-Nachweis beenden;
-        R4GB- und R4SNES-Langlaeufe werden dabei nicht erreicht
+        erfolgreichen SMP-/Heap-/TLB-/Lock-/Serial-/CLOCKPROBE-Nachweis beenden;
+        Userland, R4GB und R4SNES werden dabei nicht gestartet
 
     Tools\Build.bat -verify Test
         vorhandenes Testimage strukturell pruefen
@@ -128,8 +128,8 @@ gebauten Komponenten. Nicht ausgewaehlte on-demand-Artefakte duerfen fehlen.
 
 Waehrend 0.75.X ist `-testquick` die Gastabnahme fuer gezielte Kernel- und
 Performancearbeiten. Die vollstaendige SMP4-Produktabnahme bleibt erhalten,
-wird in dieser Roadmap aber wegen der beiden 60-Gastsekunden-Langlaeufe nicht
-gestartet.
+wird in dieser Roadmap aber nicht gestartet, weil ausschliesslich der kurze
+`-testquick`-Lauf vorgesehen ist.
 
 
 Testprofil und Overlay
