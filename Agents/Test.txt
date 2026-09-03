@@ -116,8 +116,8 @@ Teilaufgaben
     Tools\Build.bat -testquick
     ./Tools/Build.sh -testquick
         vorhandenes Testimage mit vier CPUs starten und unmittelbar nach dem
-        erfolgreichen CLOCKPROBE-Nachweis beenden; R4GB- und R4SNES-Langlaeufe
-        werden dabei nicht erreicht
+        erfolgreichen SMP-/Heap-/TLB-/Lock-/CLOCKPROBE-Nachweis beenden;
+        R4GB- und R4SNES-Langlaeufe werden dabei nicht erreicht
 
     Tools\Build.bat -verify Test
         vorhandenes Testimage strukturell pruefen
