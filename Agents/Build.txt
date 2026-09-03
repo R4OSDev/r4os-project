@@ -79,12 +79,12 @@ immer einen Modus angeben und den Exitcode auswerten.
 | `-all [Profil]`, `-norun [Profil]` | zentrale Repos, Kernel und Module bauen, danach Image erzeugen |
 | `-slim` | Kurzform fuer `-all Slim` |
 | `-gui [VirtioNet|RTL8139]` | kompletter Full-Build, Full-Image und sichtbares QEMU |
-| `-test` | Distributionstests, Test-Build ohne die on-demand-Browsermodule, Verify und Headless-Abnahme |
+| `-test` | Distributionstests, Test-Build ohne die on-demand-Browsermodule, Verify und SMP4-Headless-Abnahme |
 | `-testbrowser` | gezielter Test-Build mit Klickifax, KlickifaxLive, Browserprotokollen, Klickifax-Repositorytests und Browser-Headless-Abnahme |
 | `-testsmp` | vorhandenes Test-Image mit vier QEMU-CPUs headless pruefen |
 | `-testimage` | kompletter Test-Build und Test-Image ohne QEMU |
 | `-testimageonly` | Testplan und Test-Image aus vorhandenen Artefakten neu erzeugen |
-| `-testonly`, `-headless` | vorhandenes Test-Image headless pruefen |
+| `-testonly`, `-headless` | vorhandenes Test-Image mit vier QEMU-CPUs headless pruefen |
 | `-benchmarkimage` | kompletter Build des Benchmark-Images ohne Benchmarklauf |
 | `-benchmark SUITE VERSION WARM|COLD WIEDERHOLUNGEN UMGEBUNGS-ID` | genau einen explizit angeforderten Benchmark in einem vorhandenen Benchmark-Image ausfuehren |
 
@@ -164,7 +164,7 @@ auch R4HTTP, R4HTML, R4CSS und R4JS nicht eigens fuer den Browser auf.
 `-testbrowser` erzeugt eine gezielte Variante desselben Testprofils, nimmt
 diese sechs Artefakte ausdruecklich auf und legt zusaetzlich
 `Repositories/Distribution/BrowserTestInjection/` ueber das Testoverlay.
-Standard- und Browser-Headless-Lauf haben ein 360-Sekunden-Limit.
+SMP4- und Browser-Headless-Lauf haben ein 1200-Sekunden-Limit.
 `QEMU_TEST_TIMEOUT_SECONDS` kann es bei Bedarf explizit ueberschreiben.
 Klickifax und KlickifaxLive stehen mit `IMAGE_SCOPE=none` nur fuer gezielte
 Testplaene bereit.

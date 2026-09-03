@@ -159,14 +159,15 @@ Der Headless-Lauf verwendet:
     Repositories/Distribution/QEMU/standard.conf
     Repositories/Distribution/Tests/Invoke-QemuHeadless.ps1
 
-QEMU startet ohne sichtbares Fenster, mit 1 GiB RAM, standardmaessig einem
-vCPU, deaktiviertem Netzwerk und COM1-Ausgabe in eine Datei. Dieselbe
+QEMU startet ohne sichtbares Fenster, mit 1 GiB RAM, fuer die kanonische
+Abnahme mit vier vCPUs, deaktiviertem Netzwerk und COM1-Ausgabe in eine Datei. Dieselbe
 Hostprofilauswahl wie GUI und SSH verwendet auf x86_64-Linux bei tatsaechlich
 zugaenglichem `/dev/kvm` KVM mit der Host-CPU, auf geeigneten Windows-Hosts
 WHPX und auf Intel-macOS HVF. Hardwarepfade nennen TCG als Rueckfallebene;
 alle uebrigen Faelle verwenden TCG mit dem Haswell-CPU-Modell. Die
-SMP-Varianten `smp2` und `smp4` verwenden
-dasselbe Image mit zwei beziehungsweise vier vCPUs. `smpfail4` erwartet
+Die expliziten Diagnosevarianten `smp2` und `smp4` verwenden
+dasselbe Image mit zwei beziehungsweise vier vCPUs; regulaere Abnahmen laufen
+ausschliesslich als SMP4. `smpfail4` erwartet
 zusaetzlich genau einen ueber die private Kernel-Buildoption
 `-Dsmp-fail-ap-index=2` injizierten AP-Ausfall.
 

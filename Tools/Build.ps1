@@ -171,7 +171,7 @@ try {
         }
         { $_ -in @('-testonly', '-headless') } {
             if ($commandArguments.Count -ne 1) { throw ($mode + ' akzeptiert keine weiteren Argumente.') }
-            Invoke-WorkspaceBuild -Action headless -Profile Test
+            Invoke-WorkspaceBuild -Action headless -Profile Test -Additional @{ SmpTest = $true }
         }
         '-benchmarkimage' {
             if ($commandArguments.Count -ne 1) { throw '-benchmarkimage akzeptiert keine weiteren Argumente.' }

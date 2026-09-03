@@ -597,9 +597,8 @@ switch ($Action) {
         if ($BrowserTest) { Test-BrowserOwner }
         Build-All 'Test' -IncludeBrowserTest:$BrowserTest
         Invoke-Distribution 'verify' 'Test'
-        $variant = if ($BrowserTest) { @('browser') } else { @() }
+        $variant = if ($BrowserTest) { @('browser') } else { @('smp4') }
         Invoke-Distribution 'headless' 'Test' $variant
-        if (-not $BrowserTest) { Invoke-Distribution 'headless' 'Test' @('smp4') }
     }
     'gui' {
         Build-All 'Full'
