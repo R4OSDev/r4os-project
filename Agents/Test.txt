@@ -116,8 +116,9 @@ Teilaufgaben
     Tools\Build.bat -testquick
     ./Tools/Build.sh -testquick
         vorhandenes Testimage mit vier CPUs starten und unmittelbar nach dem
-        erfolgreichen SMP-/Heap-/TLB-/Lock-/Serial-/CLOCKPROBE-Nachweis beenden;
-        Userland, R4GB und R4SNES werden dabei nicht gestartet
+        kurzen SMP-/Heap-/TLB-/Lock-/Serial-/CLOCKPROBE-Nachweis sowie den
+        fuer die aktuelle Unterversion gezielt aktivierten Zusatzmarkern am
+        QUICKPROBE beenden; Userland, R4GB und R4SNES werden dabei nicht gestartet
 
     Tools\Build.bat -verify Test
         vorhandenes Testimage strukturell pruefen

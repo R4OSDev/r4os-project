@@ -82,7 +82,7 @@ immer einen Modus angeben und den Exitcode auswerten.
 | `-test` | Distributionstests, Test-Build ohne die on-demand-Browsermodule, Verify und SMP4-Headless-Abnahme |
 | `-testbrowser` | gezielter Test-Build mit Klickifax, KlickifaxLive, Browserprotokollen, Klickifax-Repositorytests und Browser-Headless-Abnahme |
 | `-testsmp` | vorhandenes Test-Image mit vier QEMU-CPUs headless pruefen |
-| `-testquick` | vorhandenes Test-Image mit vier QEMU-CPUs bis zu SMP-/Heap-/TLB-/Lock-/Serial-/Clock-Markern pruefen und am CLOCKPROBE beenden |
+| `-testquick` | vorhandenes Test-Image mit vier QEMU-CPUs nur bis zu den kurzen SMP-/Heap-/TLB-/Lock-/Serial-/Clock- und gezielten Zusatzmarkern pruefen und am QUICKPROBE beenden |
 | `-testimage` | kompletter Test-Build und Test-Image ohne QEMU |
 | `-testimageonly` | Testplan und Test-Image aus vorhandenen Artefakten neu erzeugen |
 | `-testonly`, `-headless` | vorhandenes Test-Image mit vier QEMU-CPUs headless pruefen |
