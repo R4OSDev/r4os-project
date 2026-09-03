@@ -74,9 +74,8 @@ Der Lauf besteht aus:
 5. Testimage unter
    `Artifacts/Distribution/Profiles/Test/disk.img` bauen.
 6. Image, NTFS-Struktur und gestagte Rechtsdokumentation verifizieren.
-7. Test-Datenplatte je Lauf frisch erzeugen, QEMU zuerst mit einer und danach
-   mit vier CPUs unsichtbar starten und die getrennten seriellen Logs
-   auswerten.
+7. Test-Datenplatte je Lauf frisch erzeugen, QEMU mit vier CPUs unsichtbar
+   starten und das serielle Log auswerten.
 
 Wichtig: Schritt 3 verwendet die normalen Buildsteps der Repositories.
 `Tools\Build.bat -test` ruft nicht pauschal jeden repositoryeigenen
@@ -114,12 +113,23 @@ Teilaufgaben
     ./Tools/Build.sh -testsmp
         vorhandenes Testimage mit vier CPUs headless pruefen
 
+    Tools\Build.bat -testquick
+    ./Tools/Build.sh -testquick
+        vorhandenes Testimage mit vier CPUs starten und unmittelbar nach dem
+        erfolgreichen CLOCKPROBE-Nachweis beenden; R4GB- und R4SNES-Langlaeufe
+        werden dabei nicht erreicht
+
     Tools\Build.bat -verify Test
         vorhandenes Testimage strukturell pruefen
 
 `-testimageonly` benoetigt alle vom Standard-Testplan ausgewaehlten bereits
 gebauten Komponenten. Nicht ausgewaehlte on-demand-Artefakte duerfen fehlen.
 `-testonly` kompiliert und packt nichts neu.
+
+Waehrend 0.75.X ist `-testquick` die Gastabnahme fuer gezielte Kernel- und
+Performancearbeiten. Die vollstaendige SMP4-Produktabnahme bleibt erhalten,
+wird in dieser Roadmap aber wegen der beiden 60-Gastsekunden-Langlaeufe nicht
+gestartet.
 
 
 Testprofil und Overlay

@@ -22,6 +22,8 @@ param(
 
     [switch]$SmpTest,
 
+    [switch]$QuickTest,
+
     [ValidateSet('VirtioNet', 'RTL8139')]
     [string]$QemuNetworkAdapter = 'VirtioNet'
 )
@@ -579,7 +581,7 @@ switch ($Action) {
     'qemu' { Invoke-Distribution 'qemu' $Profile @($QemuNetworkAdapter) }
     'ssh' { Invoke-Distribution 'ssh' 'Full' @($QemuNetworkAdapter) }
     'headless' {
-        $variant = if ($BrowserTest) { @('browser') } elseif ($SmpTest) { @('smp4') } else { @() }
+        $variant = if ($BrowserTest) { @('browser') } elseif ($QuickTest) { @('clock4') } elseif ($SmpTest) { @('smp4') } else { @() }
         Invoke-Distribution 'headless' 'Test' $variant
     }
     'benchmark' {

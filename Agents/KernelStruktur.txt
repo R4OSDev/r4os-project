@@ -113,8 +113,8 @@ Der Sammelort fuer Kerndienste und Bootschnitte.
     driver_plan.zig   Treiberplan aus BOOT.R4S
     irq_router.zig    IRQ-Routen-Registry: shared INTx, Level/Edge,
                       MSI-Fenster 24..31
-    timer.zig         logische Tick-Epoche, PIT-Fallback, periodischer und
-                      One-Shot-HPET-/LAPIC-Modus
+    timer.zig         logische Tick-Epoche aus gemeinsamer Clocksource,
+                      PIT-Fallback, periodischer und One-Shot-HPET-/LAPIC-Modus
     modules.zig, module_file.zig, module_r4m.zig   Modulregistry,
                       eingebaute Platform-API-Provider und gemeinsamer
                       Modul-Dateizugriff
@@ -256,7 +256,8 @@ net/, audio/, platform/, protocol/
     audio/pcm.zig     PCM-Format und Puffer
 
     platform/         acpi.zig, pcie.zig, pci.zig, cpu.zig, irq.zig,
-                      time.zig, device_inventory.zig
+                      clocksource.zig, monotonic.zig, time.zig,
+                      device_inventory.zig
     protocol/registry.zig   Protocol-Registry fuer Builtins und R4P
 
     linker.ld         minimal: OUTPUT_FORMAT und ENTRY
