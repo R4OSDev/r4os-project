@@ -20,7 +20,10 @@ param(
 
     [switch]$BrowserTest,
 
-    [switch]$SmpTest
+    [switch]$SmpTest,
+
+    [ValidateSet('VirtioNet', 'RTL8139')]
+    [string]$QemuNetworkAdapter = 'VirtioNet'
 )
 
 $ErrorActionPreference = 'Stop'
@@ -573,8 +576,8 @@ switch ($Action) {
         Invoke-Distribution 'image' $Profile $variant
     }
     'verify' { Invoke-Distribution 'verify' $Profile }
-    'qemu' { Invoke-Distribution 'qemu' $Profile }
-    'ssh' { Invoke-Distribution 'ssh' 'Full' }
+    'qemu' { Invoke-Distribution 'qemu' $Profile @($QemuNetworkAdapter) }
+    'ssh' { Invoke-Distribution 'ssh' 'Full' @($QemuNetworkAdapter) }
     'headless' {
         $variant = if ($BrowserTest) { @('browser') } elseif ($SmpTest) { @('smp4') } else { @() }
         Invoke-Distribution 'headless' 'Test' $variant
@@ -600,7 +603,7 @@ switch ($Action) {
     }
     'gui' {
         Build-All 'Full'
-        Invoke-Distribution 'qemu' 'Full'
+        Invoke-Distribution 'qemu' 'Full' @($QemuNetworkAdapter)
     }
 }
 

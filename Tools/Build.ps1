@@ -3,11 +3,19 @@ $ErrorActionPreference = 'Stop'
 
 $buildHelper = Join-Path $PSScriptRoot 'BuildWorkspace.ps1'
 $validProfiles = @('Slim', 'Full', 'Test', 'Benchmark')
+$validNetworkAdapters = @('VirtioNet', 'RTL8139')
 
 function Get-Profile([string]$Value, [string]$Default = 'Full') {
     $profile = if ([string]::IsNullOrWhiteSpace($Value)) { $Default } else { $Value }
     $match = @($validProfiles | Where-Object { $_.Equals($profile, [StringComparison]::OrdinalIgnoreCase) })
     if ($match.Count -ne 1) { throw ('Ungueltiges Buildprofil: ' + $profile) }
+    return $match[0]
+}
+
+function Get-QemuNetworkAdapter([string]$Value) {
+    $adapter = if ([string]::IsNullOrWhiteSpace($Value)) { 'VirtioNet' } else { $Value }
+    $match = @($validNetworkAdapters | Where-Object { $_.Equals($adapter, [StringComparison]::OrdinalIgnoreCase) })
+    if ($match.Count -ne 1) { throw ('Ungueltiger QEMU-Netzwerkadapter: ' + $adapter) }
     return $match[0]
 }
 
@@ -34,12 +42,13 @@ function Show-Usage {
     Write-Host '  Build.bat|Build.sh'
     Write-Host '  Build.bat|Build.sh -central|-kernel|-modules'
     Write-Host '  Build.bat|Build.sh -module NAME|ROLLE/NAME'
-    Write-Host '  Build.bat|Build.sh -plan|-image|-verify|-qemu [Slim|Full|Test|Benchmark]'
-    Write-Host '  Build.bat|Build.sh -ssh'
+    Write-Host '  Build.bat|Build.sh -plan|-image|-verify [Slim|Full|Test|Benchmark]'
+    Write-Host '  Build.bat|Build.sh -qemu [Slim|Full|Test|Benchmark] [VirtioNet|RTL8139]'
+    Write-Host '  Build.bat|Build.sh -ssh [VirtioNet|RTL8139]'
     Write-Host '  Build.bat|Build.sh -test|-testbrowser|-testsmp|-testimage|-testimageonly|-testonly|-benchmarkimage'
     Write-Host '  Build.bat|Build.sh -benchmark SUITE VERSION WARM|COLD WIEDERHOLUNGEN UMGEBUNGS-ID'
     Write-Host '  Build.bat|Build.sh -all [Slim|Full|Test|Benchmark]'
-    Write-Host '  Build.bat|Build.sh -slim|-gui'
+    Write-Host '  Build.bat|Build.sh -slim|-gui [VirtioNet|RTL8139]'
 }
 
 function Get-InteractiveArguments {
@@ -123,15 +132,22 @@ try {
             if ($commandArguments.Count -ne 2) { throw ($mode + ' benoetigt genau einen Modulnamen.') }
             Invoke-WorkspaceBuild -Action module -Additional @{ ModuleSelector = $commandArguments[1] }
         }
-        { $_ -in @('-plan', '-image', '-verify', '-qemu', '-guionly') } {
+        { $_ -in @('-plan', '-image', '-verify') } {
             if ($commandArguments.Count -gt 2) { throw ($mode + ' akzeptiert hoechstens ein Profil.') }
             $profile = Get-Profile $(if ($commandArguments.Count -eq 2) { $commandArguments[1] } else { '' })
-            $action = if ($mode -eq '-guionly') { 'qemu' } else { $mode.TrimStart('-') }
+            $action = $mode.TrimStart('-')
             Invoke-WorkspaceBuild -Action $action -Profile $profile
         }
+        { $_ -in @('-qemu', '-guionly') } {
+            if ($commandArguments.Count -gt 3) { throw ($mode + ' akzeptiert hoechstens Profil und Netzwerkadapter.') }
+            $profile = Get-Profile $(if ($commandArguments.Count -ge 2) { $commandArguments[1] } else { '' })
+            $adapter = Get-QemuNetworkAdapter $(if ($commandArguments.Count -eq 3) { $commandArguments[2] } else { '' })
+            Invoke-WorkspaceBuild -Action qemu -Profile $profile -Additional @{ QemuNetworkAdapter = $adapter }
+        }
         '-ssh' {
-            if ($commandArguments.Count -ne 1) { throw '-ssh akzeptiert keine weiteren Argumente.' }
-            Invoke-WorkspaceBuild -Action ssh -Profile Full
+            if ($commandArguments.Count -gt 2) { throw '-ssh akzeptiert hoechstens einen Netzwerkadapter.' }
+            $adapter = Get-QemuNetworkAdapter $(if ($commandArguments.Count -eq 2) { $commandArguments[1] } else { '' })
+            Invoke-WorkspaceBuild -Action ssh -Profile Full -Additional @{ QemuNetworkAdapter = $adapter }
         }
         '-test' {
             if ($commandArguments.Count -ne 1) { throw '-test akzeptiert keine weiteren Argumente.' }
@@ -185,8 +201,9 @@ try {
             Invoke-WorkspaceBuild -Action all -Profile Slim
         }
         '-gui' {
-            if ($commandArguments.Count -ne 1) { throw '-gui akzeptiert keine weiteren Argumente.' }
-            Invoke-WorkspaceBuild -Action gui -Profile Full
+            if ($commandArguments.Count -gt 2) { throw '-gui akzeptiert hoechstens einen Netzwerkadapter.' }
+            $adapter = Get-QemuNetworkAdapter $(if ($commandArguments.Count -eq 2) { $commandArguments[1] } else { '' })
+            Invoke-WorkspaceBuild -Action gui -Profile Full -Additional @{ QemuNetworkAdapter = $adapter }
         }
         default { throw ('Unbekannter Buildmodus: ' + $mode) }
     }

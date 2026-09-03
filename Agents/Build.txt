@@ -74,11 +74,11 @@ immer einen Modus angeben und den Exitcode auswerten.
 | `-plan [Profil]` | Workspace-Map, gemeinsame Artefakte, Profilplan und MODULES.JSON erzeugen |
 | `-image [Profil]` | Plan neu erzeugen und daraus ein Image bauen |
 | `-verify [Profil]` | vorhandenes Image und dessen Rechtsdokumentation pruefen |
-| `-qemu [Profil]` | vorhandenes Image sichtbar in QEMU starten |
-| `-ssh` | vorhandenes Full-Image headless mit lokaler SSH-Weiterleitung starten |
+| `-qemu [Profil] [VirtioNet|RTL8139]` | vorhandenes Image sichtbar in QEMU starten; VirtioNet ist Standard |
+| `-ssh [VirtioNet|RTL8139]` | vorhandenes Full-Image headless mit lokaler SSH-Weiterleitung starten |
 | `-all [Profil]`, `-norun [Profil]` | zentrale Repos, Kernel und Module bauen, danach Image erzeugen |
 | `-slim` | Kurzform fuer `-all Slim` |
-| `-gui` | kompletter Full-Build, Full-Image und sichtbares QEMU |
+| `-gui [VirtioNet|RTL8139]` | kompletter Full-Build, Full-Image und sichtbares QEMU |
 | `-test` | Distributionstests, Test-Build ohne die on-demand-Browsermodule, Verify und Headless-Abnahme |
 | `-testbrowser` | gezielter Test-Build mit Klickifax, KlickifaxLive, Browserprotokollen, Klickifax-Repositorytests und Browser-Headless-Abnahme |
 | `-testsmp` | vorhandenes Test-Image mit vier QEMU-CPUs headless pruefen |
@@ -340,8 +340,10 @@ die Headless-Abnahme.
 
 `Tools\Build.bat -gui` baut den gesamten Full-Workspace, erzeugt das
 Full-Image und startet QEMU sichtbar. `-qemu Full` startet nur ein
-vorhandenes Full-Image. Beide interaktiven QEMU-Modi stellen einen RTL8139-
-Adapter und ausschliesslich die lokale Weiterleitung
+vorhandenes Full-Image. GUI und SSH verwenden standardmaessig modernes
+VirtioNet; `-qemu Full RTL8139`, `-gui RTL8139` beziehungsweise
+`-ssh RTL8139` waehlen den Kompatibilitaetsadapter ausdruecklich. Alle drei
+Wege stellen ausschliesslich die lokale Weiterleitung
 `127.0.0.1:10022 -> 10.0.2.15:22` bereit. `Tools\Build.bat -ssh`
 beziehungsweise `./Tools/Build.sh -ssh` startet dasselbe vorhandene
 Full-Image ohne Anzeige und schreibt die serielle Ausgabe nach
@@ -349,8 +351,13 @@ Full-Image ohne Anzeige und schreibt die serielle Ausgabe nach
 Vordergrund und endet beim Gastbefehl `POWEROFF`. Anmeldung und Diagnosefolge
 stehen in `Agents/Shell.txt`. GUI-, SSH- und Headless-Lauf benutzen QEMU aus
 `DevKit/Emulation/QEMU`; im Distribution-Repository liegt nur die
-R4OS-spezifische Konfiguration. Headless-Abnahme und Benchmark behalten ihr
-absichtlich deaktiviertes Netzwerk.
+R4OS-spezifische Konfiguration. Eine gemeinsame Hostauswahl verwendet unter
+x86_64-Linux bei zugaenglichem `/dev/kvm` KVM und die Host-CPU, auf geeigneten
+Windows- beziehungsweise Intel-macOS-Hosts WHPX oder HVF und ansonsten
+deterministisch TCG mit Haswell. Jede Hardwareauswahl fuehrt TCG als
+Rueckfallebene. Headless-Abnahme und Benchmark behalten ihr absichtlich
+deaktiviertes Netzwerk; das versionierte Benchmarkprofil bleibt fest auf
+TCG single-thread und Haswell.
 
 Ein Benchmark wird von keinem Build-, Test-, Headless- oder GUI-Modus
 automatisch gestartet. `-benchmarkimage`, `-all Benchmark` und
