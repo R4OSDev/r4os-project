@@ -220,6 +220,12 @@ Ein Modul kann `Build.bat test` verwenden, wenn sein Zig-Build einen
 `test`-Step definiert. Der globale `-test`-Lauf ersetzt diese
 repositoryeigenen Tests nicht; Details stehen in `Agents/Test.txt`.
 
+Alle kompilierten R4M0-Artefakte lesen `OPTIMIZE=size|speed` ausschliesslich
+aus ihrem `module.R4MF`. `size` beziehungsweise ein fehlendes Feld waehlt
+ReleaseSmall; `speed` waehlt ReleaseFast. Eine Profilwahl im Aufruf oder eine
+zweite Modulnamensliste ist unzulaessig. Der Kernel bleibt davon getrennt auf
+seinem festen ReleaseSafe-Profil.
+
 
 Artefakte und Inventare
 -----------------------

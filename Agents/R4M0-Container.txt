@@ -243,6 +243,9 @@ Wichtige Manifestregeln
   Includes duerfen `full` oder `none` besitzen; `none` bleibt ohne diese
   ausdrueckliche Auswahl in jedem Profil ausgeschlossen.
 - IMPORT ist die einzige Importwahrheit und behaelt seine Reihenfolge.
+- OPTIMIZE=size|speed gilt einheitlich fuer R4X, R4L, R4D und R4P. Ohne Feld
+  bleibt ReleaseSmall der Default; ReleaseFast ist nur fuer einen belegten
+  modulnahen Hotpath vorgesehen und aendert weder ABI noch Imagescope.
 - Ein normales R4X mit ENTRY_MODE=app implementiert
   pub fn r4_app_main(app: *r4os.App) i32.
 - Quell- und Ressourcenpfade sind kanonische, vorwaertsgerichtete Pfade
