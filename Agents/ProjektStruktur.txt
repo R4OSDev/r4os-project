@@ -77,7 +77,9 @@ baut -Mode Kernel einen eigenen recovery.elf; -Mode BootTest prueft dessen
 SYSTEM-unabhaengige BIOS-/UEFI-Grundlage mit SMP4. Seit 0.76.3 baut -Mode
 Runtime ein vollstaendiges FAT32-RAM-Volume; -Mode Kernel bindet dessen
 Hash/Groesse in recovery.elf. -Mode RuntimeTest prueft unveraenderte Module
-und Dateizugriffe nach Entzug des physischen Bootmediums.
+und Dateizugriffe nach Entzug des physischen Bootmediums. Seit 0.76.4
+kommen Medieninventar, echte Limine-Bootidentitaet und feste C:/R:-Zuordnung
+hinzu; -Mode StorageTest prueft USB-/AHCI-/NVMe- und Fehlerfaelle mit SMP4.
 
 Komponentenrollen:
 
