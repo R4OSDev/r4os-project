@@ -82,6 +82,10 @@ kommen Medieninventar, echte Limine-Bootidentitaet und feste C:/R:-Zuordnung
 hinzu; -Mode StorageTest prueft USB-/AHCI-/NVMe- und Fehlerfaelle mit SMP4.
 Seit 0.76.5 bindet Recovery interne und USB-Tastaturen ohne Mausaufnahme;
 -Mode InputTest prueft beide Wege samt Layouts und Terminal unter BIOS/UEFI.
+Seit 0.76.6 besitzt RecoveryTools/Menu die Konsolenanwendung RECOVERY.R4X:
+Menue und Terminal teilen den begrenzten Monitorbereich des Hintergrundbilds.
+Der Recovery-Build prueft und integriert das eigene Modul zusaetzlich zu den
+37 festgehaltenen Binaermodulen; -Mode UITest prueft die Gastdarstellung.
 
 Komponentenrollen:
 
