@@ -74,8 +74,10 @@ festgehaltene Quellkopien, binaere Runtime-Module, Originalquellenarchive und
 eine unabhaengige Bestandspruefung ueber Build.ps1 mit beiden Hoststartern.
 Der explizite Import bleibt vom normalen Recovery-Build getrennt. Seit 0.76.2
 baut -Mode Kernel einen eigenen recovery.elf; -Mode BootTest prueft dessen
-SYSTEM-unabhaengige BIOS-/UEFI-Grundlage mit SMP4. RAM-Dateisystem und
-Userland-Aufnahme folgen in 0.76.3.
+SYSTEM-unabhaengige BIOS-/UEFI-Grundlage mit SMP4. Seit 0.76.3 baut -Mode
+Runtime ein vollstaendiges FAT32-RAM-Volume; -Mode Kernel bindet dessen
+Hash/Groesse in recovery.elf. -Mode RuntimeTest prueft unveraenderte Module
+und Dateizugriffe nach Entzug des physischen Bootmediums.
 
 Komponentenrollen:
 
