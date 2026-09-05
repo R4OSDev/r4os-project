@@ -1,16 +1,16 @@
 ﻿Shell und Befehlsausfuehrung - Agent-Referenz
 ==================================================
 
-Zweck: Verlaessliche Aufrufe zwischen PowerShell, Batch und den R4OS-
-Werkzeugen unter Windows.
+Zweck: Verlaessliche Aufrufe zwischen PowerShell 7, den duennen Batch-/Bash-
+Startern und den R4OS-Werkzeugen unter Windows und Linux.
 
 
 Grundregeln
 -----------
 
-- Der normale Workspace-Einstieg laeuft ueber PowerShell und ruft teilweise
-  Batchdateien auf. Bash ist nur bei einem ausdruecklichen `Build.sh`-Aufruf
-  beteiligt und darf nicht still vorausgesetzt werden.
+- Die gemeinsame Ablaufsteuerung liegt in PowerShell-7-Skripten. Unter
+  Windows startet die passende .bat, unter Linux die passende .sh denselben
+  .ps1-Einstieg. Shellsyntax immer an der tatsaechlichen Hostshell ausrichten.
 - Fuer Dateipfade in PowerShell `-LiteralPath` verwenden und den Arbeitsordner
   bewusst setzen. Keine Pfade durch unkontrollierte Stringverkettung bauen.
 - Komplexe Texte mit Backslashes, Backticks, regulaeren Ausdruecken,
@@ -19,8 +19,12 @@ Grundregeln
   interpretierte Kommandozeile.
 - Lokale Dateiaenderungen mit dem Patch-Werkzeug ausfuehren. Mechanische
   Formatierung darf danach mit einem dafuer bestimmten Werkzeug erfolgen.
-- Erfolg am Exitcode messen. PowerShell 5.1 kann stderr nativer Programme als
-  `NativeCommandError` darstellen, obwohl deren Exitcode 0 ist.
+- Erfolg am Exitcode messen; stderr allein bedeutet bei nativen Programmen
+  noch keinen Fehler.
+- Get-Content auf einer noch leeren Logdatei kann AutomationNull liefern.
+  Bereitschaft positiv mit -match nachweisen, nicht aus einem falschen
+  -notmatch-Ergebnis ableiten. [string]-Konvertierung normalisiert leere
+  Ausgaben, bevor Laenge, Methoden oder Abschlussmarker ausgewertet werden.
 
 
 Batch und Commit-Beschreibungen
@@ -38,8 +42,8 @@ Ein Batchstarter muss bis zu seinem Exitcode laufen. Ausgabe wie `ERFOLG` oder
 PowerShell-Skripte und Gates
 ----------------------------
 
-Eigenstaendige PowerShell-Pruefungen mit `powershell -File <Script>` oder dem
-gleichwertigen vollstaendigen `-File`-Aufruf starten. Ein Aufruf ueber den
+Eigenstaendige PowerShell-Pruefungen mit `pwsh -NoLogo -NoProfile -File <Script>`
+starten. Ein Aufruf ueber den
 PowerShell-Aufrufoperator kann in `$LASTEXITCODE` nur den letzten nativen
 Unterprozess hinterlassen und damit das Ergebnis des eigentlichen Skripts
 verschleiern.

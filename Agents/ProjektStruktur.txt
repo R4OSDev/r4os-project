@@ -80,6 +80,8 @@ Hash/Groesse in recovery.elf. -Mode RuntimeTest prueft unveraenderte Module
 und Dateizugriffe nach Entzug des physischen Bootmediums. Seit 0.76.4
 kommen Medieninventar, echte Limine-Bootidentitaet und feste C:/R:-Zuordnung
 hinzu; -Mode StorageTest prueft USB-/AHCI-/NVMe- und Fehlerfaelle mit SMP4.
+Seit 0.76.5 bindet Recovery interne und USB-Tastaturen ohne Mausaufnahme;
+-Mode InputTest prueft beide Wege samt Layouts und Terminal unter BIOS/UEFI.
 
 Komponentenrollen:
 
