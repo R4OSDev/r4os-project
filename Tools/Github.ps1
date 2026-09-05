@@ -12,6 +12,7 @@ param(
     [switch]$SDK,
     [switch]$Libraries,
     [switch]$Kernel,
+    [switch]$Recovery,
     [switch]$Distribution,
     [switch]$Organization,
     [string]$App,
@@ -117,6 +118,10 @@ function New-CentralTarget([string]$Key) {
             $label = 'Kernel'; $root = Join-Path $projectRoot 'Repositories/Kernel'; $name = 'r4os-kernel'
             $description = 'R4OS kernel, boot integration and kernel-owned tests.'; $allowInit = $true; $defaultCommit = 'Kernel-Stand sichern'
         }
+        'recovery' {
+            $label = 'Recovery'; $root = Join-Path $projectRoot 'Repositories/Recovery'; $name = 'r4os-recovery'
+            $description = 'Independent R4OS recovery environment with a lightweight kernel and a pinned console runtime.'; $allowInit = $true; $defaultCommit = 'Recovery-Stand sichern'
+        }
         'distribution' {
             $label = 'Distribution'; $root = Join-Path $projectRoot 'Repositories/Distribution'; $name = 'r4os-distribution'
             $description = 'R4OS image assembly, release configuration and distribution-owned host tools.'; $allowInit = $true; $defaultCommit = 'Distribution-Stand sichern'
@@ -188,6 +193,7 @@ function Get-SelectedTarget {
         [pscustomobject]@{ Selected = [bool]$SDK; Key = 'sdk' },
         [pscustomobject]@{ Selected = [bool]$Libraries; Key = 'libraries' },
         [pscustomobject]@{ Selected = [bool]$Kernel; Key = 'kernel' },
+        [pscustomobject]@{ Selected = [bool]$Recovery; Key = 'recovery' },
         [pscustomobject]@{ Selected = [bool]$Distribution; Key = 'distribution' },
         [pscustomobject]@{ Selected = [bool]$Organization; Key = 'organization' }
     )) {
@@ -238,7 +244,7 @@ function Get-WorkspaceTargets {
             $targets.Add((New-ComponentTarget $role.Kind $directory.Name))
         }
     }
-    foreach ($key in @('distribution', 'docs', 'devkit', 'organization', 'project')) {
+    foreach ($key in @('recovery', 'distribution', 'docs', 'devkit', 'organization', 'project')) {
         $targets.Add((New-CentralTarget $key))
     }
     return @($targets)
@@ -434,8 +440,8 @@ function Invoke-ChangedPush {
 function Show-Usage {
     Write-Host 'Verwendung:'
     Write-Host '  Github.bat|Github.sh -Push -Changed ["Commit-Beschreibung"]'
-    Write-Host '  Github.bat|Github.sh -Pull -Project|-DevKit|-Docs|-Contract|-SDK|-Libraries|-Kernel|-Distribution|-Organization'
-    Write-Host '  Github.bat|Github.sh -Push -Project|-DevKit|-Docs|-Contract|-SDK|-Libraries|-Kernel|-Distribution|-Organization ["Commit-Beschreibung"]'
+    Write-Host '  Github.bat|Github.sh -Pull -Project|-DevKit|-Docs|-Contract|-SDK|-Libraries|-Kernel|-Recovery|-Distribution|-Organization'
+    Write-Host '  Github.bat|Github.sh -Push -Project|-DevKit|-Docs|-Contract|-SDK|-Libraries|-Kernel|-Recovery|-Distribution|-Organization ["Commit-Beschreibung"]'
     Write-Host '  Github.bat|Github.sh -Pull -App|-Service|-Diagnostic|-Driver|-Protocol|-Subsystem NAME'
     Write-Host '  Github.bat|Github.sh -Push -App|-Service|-Diagnostic|-Driver|-Protocol|-Subsystem NAME ["Commit-Beschreibung"]'
 }
@@ -458,7 +464,7 @@ function Set-InteractiveSelection {
         if ($modeChoice -ne '2') { throw 'Ungueltige Auswahl.' }
     }
 
-    Write-Host 'Repository: Project, DevKit, Docs, Contract, SDK, Libraries, Kernel, Distribution, Organization, App, Service, Diagnostic, Driver, Protocol oder Subsystem'
+    Write-Host 'Repository: Project, DevKit, Docs, Contract, SDK, Libraries, Kernel, Recovery, Distribution, Organization, App, Service, Diagnostic, Driver, Protocol oder Subsystem'
     $targetChoice = (Read-Host 'Ziel').Trim().ToLowerInvariant()
     switch ($targetChoice) {
         'project' { $script:Project = $true }
@@ -468,6 +474,7 @@ function Set-InteractiveSelection {
         'sdk' { $script:SDK = $true }
         'libraries' { $script:Libraries = $true }
         'kernel' { $script:Kernel = $true }
+        'recovery' { $script:Recovery = $true }
         'distribution' { $script:Distribution = $true }
         'organization' { $script:Organization = $true }
         'app' { $script:App = Read-Host 'Komponentenname'; $PSBoundParameters['App'] = $script:App }

@@ -6,7 +6,7 @@ jeweilige Wahrheit besitzt.
 
 Der Workspace steht unter Windows standardmaessig unter `D:\R4OS` und kann
 unter Linux an einem frei gewaehlten Pfad liegen. Das Root-Repository
-koordiniert die Arbeit. Contract, SDK, Kernel, Libraries, Distribution, das
+koordiniert die Arbeit. Contract, SDK, Kernel, Libraries, Recovery, Distribution, das
 GitHub-Organisationsprofil und jedes einzelne Modul besitzen eigene
 Git-Repositories.
 
@@ -62,8 +62,15 @@ Zentrale Repositories:
       R4FONT/         Fontdecoder und Font-API
 
     Kernel/         Kernel, Limine-Konfiguration und kernel-eigene Tests
+    Recovery/       eigenstaendiges Recovery-Monorepo (Roadmap 0.76.X)
     Distribution/   Imageprofile, Overlays, Hosttools, QEMU und Systemtests
     Organization/   oeffentliches GitHub-Organisationsprofil (Remote: .github)
+
+Recovery besitzt ein eigenes oeffentliches Repository `R4OSDev/r4os-recovery`
+und wird ueber das GitHub-Ziel `-recovery` verwaltet. Es ist fuer den separaten
+Recovery-Kernel, dessen festgehaltenen Contract-/SDK-Stand, uebernommene
+Laufzeitmodule und Recovery-Werkzeuge vorgesehen. Der initiale Stand enthaelt
+die Repository-Grunddateien; Build und Laufzeit folgen in der Roadmap 0.76.X.
 
 Komponentenrollen:
 

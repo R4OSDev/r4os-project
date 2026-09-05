@@ -14,7 +14,7 @@ Grundregeln
 -----------
 
 - Für Project, DevKit, Docs, Organisationsprofil, Contract, SDK, Libraries,
-  Kernel, Distribution und Module ausschließlich `Tools\Github.bat` unter
+  Kernel, Recovery, Distribution und Module ausschließlich `Tools\Github.bat` unter
   Windows oder `./Tools/Github.sh` unter Linux verwenden. Beide starten die
   gemeinsame PowerShell-7-Logik in `Tools/Github.ps1`.
 - Der private Package-Server ist die einzige Ausnahme. Er wird ausschließlich
@@ -63,7 +63,7 @@ Remote-Name: origin
 Branch: main
 
 Project, DevKit, Docs, Organisationsprofil, Contract, SDK, Libraries, Kernel,
-Distribution sowie Apps, Services, Diagnostics, Drivers, Protocols und
+Recovery, Distribution sowie Apps, Services, Diagnostics, Drivers, Protocols und
 Subsystems werden
 bei einem fehlenden Remote-Repository oeffentlich angelegt. Der Package-Server
 ist die private Ausnahme, wird aber nicht vom globalen Script angelegt oder
@@ -164,6 +164,7 @@ ZIEL ist eines von:
     -sdk
     -libraries
     -kernel
+    -recovery
     -distribution
     -organization
 
@@ -273,6 +274,15 @@ Kernel
     Lokal: Repositories/Kernel/
     GitHub: R4OSDev/r4os-kernel
 
+Recovery
+    Ziel: -recovery
+    Lokal: Repositories/Recovery/
+    GitHub: R4OSDev/r4os-recovery
+    Inhalt: Eigenstaendiges Recovery-Monorepo mit separatem Kernel,
+    festgehaltenem Plattformvertrag, Laufzeitmodulen und Recovery-Werkzeugen.
+    Derzeit Repository-Grundlage fuer die Roadmap 0.76.X; noch kein
+    bootfaehiger Recovery-Stand.
+
 Distribution
     Ziel: -distribution
     Lokal: Repositories/Distribution/
@@ -336,7 +346,7 @@ feste Workspace-Struktur:
 1. Contract, SDK, Libraries und Kernel.
 2. Direkte Projektverzeichnisse unter Apps, Services, Diagnostics, Drivers,
    Protocols und Subsystems, innerhalb jeder Rolle alphabetisch.
-3. Distribution, Docs, DevKit, Organisationsprofil und zuletzt Project.
+3. Recovery, Distribution, Docs, DevKit, Organisationsprofil und zuletzt Project.
 
 Server ist vollständig ausgeschlossen. Unterrepositories und installierte
 Fremdquellen in DevKit, insbesondere QEMU, Limine und Zig, werden nicht
@@ -480,7 +490,7 @@ Checkout im frei gewaehlten Workspace-Root existiert:
    `<Workspace-Root>` klonen und in dieses Verzeichnis wechseln.
 2. Unter Windows `Tools\Setup.bat`, unter Linux `./Tools/Setup.sh` ausfuehren.
 3. DevKit mit dem passenden GitHub-Starter und `-pull -devkit` anonym beziehen.
-4. Docs, Contract, SDK, Libraries, Kernel, Distribution und bei Bedarf das
+4. Docs, Contract, SDK, Libraries, Kernel, Recovery, Distribution und bei Bedarf das
    Organisationsprofil mit ihren jeweiligen Pull-Zielen beziehen.
 5. Den privaten Package-Server bei Bedarf separat klonen und danach mit
    dessen eigenem Pull-Starter aktualisieren.

@@ -74,6 +74,13 @@ repositories use `Repositories/Subsystems/<Project>` and the public
 `r4os-subsystem-*` naming convention. Installed hosts and guest formats are
 resolved in userland from the profile-specific `MODULES.JSON` inventory.
 
+The independent Recovery repository lives at `Repositories/Recovery` and is
+managed with the `-Recovery` GitHub target. Use
+`Tools\Github.bat -Pull -Recovery` on Windows or
+`./Tools/Github.sh -Pull -Recovery` on Linux to check it out. Its public remote
+is [R4OSDev/r4os-recovery](https://github.com/R4OSDev/r4os-recovery). The initial
+repository prepares the Recovery work planned for roadmap 0.76.X.
+
 ## License
 
 Original R4OS workspace material is licensed under Apache License 2.0. See
