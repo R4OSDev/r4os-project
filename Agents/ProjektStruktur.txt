@@ -72,8 +72,10 @@ Recovery-Kernel, dessen festgehaltenen Contract-/SDK-Stand, uebernommene
 Laufzeitmodule und Recovery-Werkzeuge vorgesehen. Seit 0.76.1 enthaelt es
 festgehaltene Quellkopien, binaere Runtime-Module, Originalquellenarchive und
 eine unabhaengige Bestandspruefung ueber Build.ps1 mit beiden Hoststartern.
-Der explizite Import ist vom normalen Recovery-Build getrennt; die bootbare
-Laufzeit folgt in den anschliessenden Schritten der Roadmap 0.76.X.
+Der explizite Import bleibt vom normalen Recovery-Build getrennt. Seit 0.76.2
+baut -Mode Kernel einen eigenen recovery.elf; -Mode BootTest prueft dessen
+SYSTEM-unabhaengige BIOS-/UEFI-Grundlage mit SMP4. RAM-Dateisystem und
+Userland-Aufnahme folgen in 0.76.3.
 
 Komponentenrollen:
 
