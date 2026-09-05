@@ -280,8 +280,8 @@ Recovery
     GitHub: R4OSDev/r4os-recovery
     Inhalt: Eigenstaendiges Recovery-Monorepo mit separatem Kernel,
     festgehaltenem Plattformvertrag, Laufzeitmodulen und Recovery-Werkzeugen.
-    Derzeit Repository-Grundlage fuer die Roadmap 0.76.X; noch kein
-    bootfaehiger Recovery-Stand.
+    Bootfaehige BIOS-/UEFI-Recovery mit RAM-Laufzeit, Menue, Terminal,
+    SSH/FTP und R4PART. Installations- und Updatewege folgen der Roadmap.
 
 Distribution
     Ziel: -distribution
