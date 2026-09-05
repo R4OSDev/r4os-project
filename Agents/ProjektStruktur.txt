@@ -86,6 +86,10 @@ Seit 0.76.6 besitzt RecoveryTools/Menu die Konsolenanwendung RECOVERY.R4X:
 Menue und Terminal teilen den begrenzten Monitorbereich des Hintergrundbilds.
 Der Recovery-Build prueft und integriert das eigene Modul zusaetzlich zu den
 37 festgehaltenen Binaermodulen; -Mode UITest prueft die Gastdarstellung.
+Seit 0.76.7 starten Netzwerk, SSH und FTP aus dem RAM. -Mode NetworkTest
+prueft Fernzugriff, Offline-Dateireparatur und Konsolenisolation. Explizite
+Besitzerupdates fuer SSHD/FTPSVC/Terminal stehen samt Patches und Hashes
+in Provenance/owner-update-0.76.7.json; normale Builds importieren nichts.
 
 Komponentenrollen:
 

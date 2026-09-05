@@ -22,7 +22,10 @@ Gesamtweg
       -> Post-Boot-Pruefung und Releaseabschluss
 
 SFTP, SCP und HTTPS transportieren Dateien. Systemziele werden
-ausschliesslich durch SYSUPD veraendert.
+ausschliesslich durch SYSUPD veraendert. Diese Regel betrifft das gestartete
+R4OS. Seit 0.76.7 darf die eigenstaendige Recovery-RAM-Laufzeit offline
+eingebundene Installationen direkt ueber SSH/SFTP/SCP/FTP reparieren; deren
+Laufwerke liefern dabei keine ausfuehrbaren Module.
 
 
 Komponenten und Versionen
