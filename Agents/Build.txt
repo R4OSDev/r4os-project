@@ -133,7 +133,7 @@ Ablauf eines Gesamtbuilds
 10. Den Common-Plan fuer Kernel, Limine, Preload, Registry, Fonts und
     `MODULES.JSON` schreiben.
 11. Den eigentlichen Imageplan im Distribution-Repository erzeugen und mit
-    ImageCreator `disk.img` sowie bei Bedarf `data.img` bauen.
+    ImageCreator die gemeinsame Fuenf-Partitionen-`disk.img` bauen.
 12. Limine in das Systemimage installieren und die Rechtsdokumentation neben
     dem Image stageieren.
 
@@ -270,7 +270,7 @@ Artefakte und Inventare
         gebaute Hosttools und Systemfonts
 
     Artifacts/Distribution/Profiles/<Profil>/disk.img
-    Artifacts/Distribution/Profiles/<Profil>/data.img
+    Artifacts/Distribution/Profiles/<Profil>/image.json
     Artifacts/Distribution/Profiles/<Profil>/image-adds.txt
     Artifacts/Distribution/Profiles/<Profil>/Legal/
         fertiges Profil
@@ -326,15 +326,17 @@ ein Quellenmanifest mit den genauen Repository-Commits. `publish` legt den
 GitHub Release erst als Draft an und veroeffentlicht ihn erst, nachdem alle
 Assets erfolgreich hochgeladen wurden.
 
-Das normale Build-Datenimage liegt unter
-`Artifacts/Distribution/Profiles/<Profil>/data.img`. Beim GUI-Betrieb bleibt
-es absichtlich persistent; der SSH-Debuglauf verwendet ebenfalls das
-persistente Full-Datenimage. Nur der Headless-Test erzeugt sein Test-Datenimage
-vor jedem Lauf neu. Auch jeder Benchmark-Imagebuild erzeugt ein leeres
-Basis-Datenimage; der Benchmarkrunner arbeitet mit einem getrennten frischen
-Lauf-Datenimage. Der Release-Ablauf uebernimmt dieses lokale Datenimage
-nie, sondern erzeugt fuer jedes Paket ein frisches leeres `data.img` in der
-im Profil festgelegten Groesse.
+Alle Profile verwenden eine `disk.img` mit BIOSBOOT/BOOT/SYSTEM/RECOVERY/DATA.
+`image.json` versiegelt das Quellimage mit SHA256. GUI und SSH arbeiten auf
+einer persistenten Kopie unter `Interactive/<Quell-SHA256>/disk.img`;
+Headless und Benchmark erhalten eine frische Kopie unter `Runs/<Lauf>/`.
+Ein neues Quellimage erhaelt einen neuen interaktiven Zustand. Der Releasebau
+formatiert DATA in seiner privaten Arbeitskopie neu. USB-Starter und das
+Original-ZIP liegen im Paket; das Quellimage selbst enthaelt keinen ZIP-Cache.
+`RecoveryPin.json` verlangt einen ausdruecklich veroeffentlichten Recovery-
+Stand. Technische Pruefungen verwenden `-RecoveryCandidate <ZIP>` beim
+Distribution-Build bzw. `-TechnicalCandidate -RecoveryCandidate <ZIP>` bei
+`Tools/Release.ps1`. Technische Pakete koennen nicht veroeffentlicht werden.
 
 
 Test- und GUI-Lauf
@@ -371,15 +373,15 @@ automatisch gestartet. `-benchmarkimage`, `-all Benchmark` und
 `-image Benchmark` bauen nur das Image. Ein Lauf braucht immer die
 vollstaendige explizite Form:
 
-    Tools\Build.bat -benchmark perfdiag-clock 0.3.7 warm 5 r4os-q35-haswell-1vcpu-1g-tcg-v1
+    Tools\Build.bat -benchmark perfdiag-clock 0.3.7 warm 5 r4os-q35-haswell-smp4-1g-tcg-gpt1-v1
 
 Gueltige Suites sind `perfdiag-blit`, `perfdiag-clock`,
 `perfdiag-service-registry`, `perfdiag-kernel-ipc`, `perfdiag-driver-work` und
 `perfdiag-pci-inventory` sowie `perfdiag-memory-metadata`. Die Workload-Version muss der im Maschinenblock
 gemeldeten PERFDIAG-Modulversion entsprechen. Die Umgebungs-ID bindet den Lauf
-an q35, TCG single-thread, Haswell, einen vCPU, 1 GiB, deaktiviertes Netzwerk
+an q35, TCG single-thread, Haswell, vier vCPUs, 1 GiB, deaktiviertes Netzwerk
 und die versionierte feste Geraetekonfiguration. Der Runner lehnt fehlende oder
-abweichende Angaben ab, bevor QEMU startet, erzeugt ein frisches D:-Image mit
+abweichende Angaben ab, bevor QEMU startet, erzeugt frisches DATA mit
 genau einer Workload, verlangt einen vollstaendigen NDJSON-Maschinenblock und
 regulaeres Gast-Poweroff. Ein interaktiver Start des Benchmarkprofils ist
 Diagnose und kein gueltiger Benchmark.

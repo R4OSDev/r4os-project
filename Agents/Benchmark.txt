@@ -56,17 +56,18 @@ Feste Umgebung
 
 Die Environment-ID
 
-    r4os-q35-haswell-1vcpu-1g-tcg-v1
+    r4os-q35-haswell-smp4-1g-tcg-gpt1-v1
 
-steht fuer q35, TCG single-thread, Haswell, einen vCPU, 1 GiB RAM,
+steht fuer q35, TCG single-thread, Haswell, vier vCPUs, 1 GiB RAM,
 deaktiviertes Netzwerk, festen IDE-Plattenanschluss, HDA ohne Hostaudio,
 serielle Dateiausgabe, feste RTC-Parameter und die versionierte
 Benchmarkkonfiguration. Eine Aenderung dieser Grenze benoetigt eine neue
 Environment-ID; Ergebnisse verschiedener IDs werden nicht verglichen.
 
-Jeder Lauf verwendet `disk.img` des Benchmarkprofils und ein neu erzeugtes
-Lauf-Datenimage mit genau einer `BENCHMARK.BAT`. Das profilweite `data.img`
-und alle Full-, Slim-, Test- oder GUI-Daten bleiben unberuehrt.
+Jeder Lauf verwendet eine frische private Kopie der gemeinsamen `disk.img`
+des Benchmarkprofils. DATA wird darin neu formatiert und erhaelt genau eine
+`BENCHMARK.BAT`. Quellimages und interaktive Zustaende bleiben erhalten.
+Historische Ergebnisse der vorherigen Environment-ID bleiben getrennt.
 
 
 Unterstuetzte Suites und Metriken
@@ -141,7 +142,7 @@ werden dort mit `pwsh -NoLogo -NoProfile -File` und Pfaden mit `/` gestartet.
 
 4. Genau den angeordneten Lauf explizit starten, zum Beispiel:
 
-       Tools\Build.bat -benchmark perfdiag-clock 0.3.7 warm 5 r4os-q35-haswell-1vcpu-1g-tcg-v1
+       Tools\Build.bat -benchmark perfdiag-clock 0.3.7 warm 5 r4os-q35-haswell-smp4-1g-tcg-gpt1-v1
 
 5. Nur ein Ergebnis mit QEMU-Exit 0, regulaerem Gast-Poweroff, genau einem
    vollstaendigen `PERFDIAG machine-result`-Block, passender Requestidentitaet,
@@ -156,7 +157,7 @@ werden dort mit `pwsh -NoLogo -NoProfile -File` und Pfaden mit `/` gestartet.
 
 7. Nur dieselbe Suite, Workload-ID, Environment-ID und Metrik vergleichen:
 
-       powershell.exe -NoProfile -ExecutionPolicy Bypass -File Repositories\Distribution\Tools\BenchmarkHistory.ps1 -Action compare -HistoryPath ExFiles\Reports\Benchmarks.jsonl -Suite perfdiag-clock -WorkloadId perfdiag.clock.calls-10000.v1 -EnvironmentId r4os-q35-haswell-1vcpu-1g-tcg-v1 -CacheState warm -Metric perfdiag.clock.latency
+       powershell.exe -NoProfile -ExecutionPolicy Bypass -File Repositories\Distribution\Tools\BenchmarkHistory.ps1 -Action compare -HistoryPath ExFiles\Reports\Benchmarks.jsonl -Suite perfdiag-clock -WorkloadId perfdiag.clock.calls-10000.v1 -EnvironmentId r4os-q35-haswell-smp4-1g-tcg-gpt1-v1 -CacheState warm -Metric perfdiag.clock.latency
 
    Gibt es fuer diese vollstaendige Identitaet noch keinen Vorgaenger, ist
    der importierte Lauf die neue Vergleichsbasis. Er darf nicht mit einer

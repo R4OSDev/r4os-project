@@ -204,7 +204,7 @@ Clean-Modi hinweg bestehen. Wichtige Orte sind:
     Distribution/Generated/            MODULES.JSON, PRELOAD.R4I, Registry
     Distribution/HostTools/bin/        gebaute Distribution-Hosttools
     Distribution/HostTools/share/      erzeugte Systemfonts
-    Distribution/Profiles/<Profil>/    disk.img, data.img, image-adds.txt,
+    Distribution/Profiles/<Profil>/    disk.img, image.json, image-adds.txt,
                                        Legal/
     Distribution/Releases/<Version>/   ZIP-Pakete, Quellenmanifest,
                                        SHA256SUMS.txt, Release-Notes

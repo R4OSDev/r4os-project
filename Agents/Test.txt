@@ -175,10 +175,9 @@ Abnahme mit vier vCPUs, deaktiviertem Netzwerk und COM1-Ausgabe in eine Datei. D
 Hostprofilauswahl wie GUI und SSH verwendet auf x86_64-Linux bei tatsaechlich
 zugaenglichem `/dev/kvm` KVM mit der Host-CPU, auf geeigneten Windows-Hosts
 WHPX und auf Intel-macOS HVF. Hardwarepfade nennen TCG als Rueckfallebene;
-alle uebrigen Faelle verwenden TCG mit dem Haswell-CPU-Modell. Die
-Die expliziten Diagnosevarianten `smp2` und `smp4` verwenden
-dasselbe Image mit zwei beziehungsweise vier vCPUs; regulaere Abnahmen laufen
-ausschliesslich als SMP4. `smpfail4` erwartet
+alle uebrigen Faelle verwenden TCG mit dem Haswell-CPU-Modell.
+Die Diagnosevarianten `smp4`, `clock4` und `smpfail4` verwenden wie der
+regulaere Lauf vier vCPUs. `smpfail4` erwartet
 zusaetzlich genau einen ueber die private Kernel-Buildoption
 `-Dsmp-fail-ap-index=2` injizierten AP-Ausfall.
 
@@ -186,7 +185,6 @@ Ausgaben:
 
     Artifacts/Distribution/Logs/qemu-test-standard.log
     Artifacts/Distribution/Logs/qemu-test-standard.err
-    Artifacts/Distribution/Logs/qemu-test-smp2.log
     Artifacts/Distribution/Logs/qemu-test-smp4.log
     Artifacts/Distribution/Logs/qemu-test-smpfail4.log
 
@@ -219,17 +217,15 @@ veroeffentlicht wurden.
 Die Test-Datenplatte
 --------------------
 
-Vor jedem Headless-Lauf wird
-`Artifacts/Distribution/Profiles/Test/data.img` geloescht und mit der im
-Testprofil festgelegten Groesse neu erzeugt. Ein automatischer Test erbt
-damit keinen Zustand aus einem vorherigen Lauf.
-
-Sichtbare QEMU-Sitzungen behalten die Datenplatte ihres Profils dagegen
-absichtlich. Wird eine GUI-Sitzung hart beendet, kann ihre `data.img`
-inkonsistent sein. Bei ungewoehnlichem Verhalten einer manuellen Sitzung die
-betroffene Profilausgabe bewusst neu erzeugen. Ein Schaden auf der
-Datenplatte meldet sich oft erst beim ersten Verbraucher; dessen Fehlerstelle
-ist deshalb nicht automatisch die Ursache.
+Vor jedem Headless-Lauf wird aus der SHA256-geprueften kanonischen
+`Profiles/Test/disk.img` eine frische gemeinsame Arbeitsplatte unter
+`Profiles/Test/Runs/headless-<Variante>/disk.img` erstellt. DATA ist darin
+eine Partition; der Test erbt keinen Zustand aus einem vorherigen Lauf.
+GUI und SSH behalten ihre separate Arbeitskopie unter
+`Interactive/<Quell-SHA256>/disk.img`. Ein hart beendeter Gast kann diese
+Arbeitskopie inkonsistent hinterlassen; sie kann bewusst neu erstellt werden.
+Der Releasebau verwendet ausschliesslich das gepruefte Quellimage und
+formatiert DATA in einer eigenen Kopie erneut.
 
 
 Markervertrag
