@@ -116,10 +116,12 @@ Ablauf eines Gesamtbuilds
 5. Kernel ueber `Repositories/Kernel/Build.bat` bauen. Die sechs Platform
    APIs sind Teil dieses Kernelartefakts und keine getrennten Modulbuilds.
 6. Alle direkten Repositoryprojekte unter Apps, Services, Diagnostics,
-   Drivers, Protocols und Subsystems dynamisch entdecken und deren eigenes
-   `Build.bat` aufrufen. Normale Profilbuilds lassen Klickifax und
-   KlickifaxLive aus. `-testbrowser` baut beide on-demand-Module gezielt und
-   nimmt sie in das Testprofil auf.
+   Drivers, Protocols und Subsystems dynamisch entdecken. ModuleCatalog
+   bestimmt aus den Manifesten die Profilmenge samt Test-Includes und prueft
+   deren Abhaengigkeiten, ohne vorhandene Modulartefakte vorauszusetzen.
+   Nur deren Besitzerstarter werden aufgerufen; SDK und Libraries wurden
+   bereits zentral gebaut. `-testbrowser` ergaenzt die Browserziele.
+   Der ausdrueckliche Modus `-modules` baut weiterhin alle direkten Module.
 7. Aus allen versionierten und nicht ignorierten `module.R4MF` sowie den
    zugehoerigen Artefakten `WorkspaceModules.map` erzeugen. Dazu gehoeren
    Runtime-Libraries und modulnahe, versionierte Zusatzmanifeste. Eingebaute

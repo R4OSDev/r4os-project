@@ -318,6 +318,44 @@ function Build-SelectedModule([string]$Selector) {
     Build-OneModule $module 1 1
 }
 
+function Get-ImageSelectionArguments([string]$SelectedProfile, [switch]$IncludeBrowserTest) {
+    if ($IncludeBrowserTest -and $SelectedProfile -ne 'Test') { throw 'Browser-Testzusatz erfordert Test.' }
+    $arguments = [Collections.Generic.List[string]]::new()
+    $arguments.AddRange([string[]]@('--workspace-map', $workspaceMapPath, '--image-mode', $SelectedProfile.ToLowerInvariant()))
+    $includes = if ($SelectedProfile -eq 'Test') { @($testImageIncludes) } elseif ($SelectedProfile -eq 'Benchmark') { @($benchmarkImageIncludes) } else { @() }
+    if ($IncludeBrowserTest) { $includes += $browserTestImageIncludes }
+    foreach ($target in $includes) { $arguments.AddRange([string[]]@('--include-target', $target)) }
+    return $arguments.ToArray()
+}
+
+function Build-ProfileModules([string]$SelectedProfile, [switch]$IncludeBrowserTest) {
+    Ensure-ModuleCatalog
+    Write-WorkspaceMap
+    $plan = Join-Path $distributionInputRoot ($SelectedProfile + '.build-manifests.txt')
+    $arguments = @('workspace-build-plan') + @(Get-ImageSelectionArguments $SelectedProfile -IncludeBrowserTest:$IncludeBrowserTest) + @('--output', $plan)
+    # Selection reads manifests, never module artifacts. Even a dry-run must
+    # resolve the actual profile instead of reusing a possibly stale plan.
+    $savedDryRun = $dryRun
+    try { $dryRun = $false; Invoke-External $moduleCatalogExe $arguments $workspaceRoot }
+    finally { $dryRun = $savedDryRun }
+    $allModules = @(Get-ModuleRepositories)
+    $comparer = if ($IsWindows) { [StringComparer]::OrdinalIgnoreCase } else { [StringComparer]::Ordinal }
+    $owners = [Collections.Generic.HashSet[string]]::new($comparer)
+    foreach ($line in [IO.File]::ReadAllLines($plan)) {
+        if ([string]::IsNullOrWhiteSpace($line)) { continue }
+        $manifest = [IO.Path]::GetFullPath($line)
+        $matches = @($allModules | Where-Object { $manifest.StartsWith($_.Root + [IO.Path]::DirectorySeparatorChar, $pathComparison) })
+        if ($matches.Count -eq 1) { [void]$owners.Add($matches[0].Root); continue }
+        # SDK and runtime library owners have already been built by Central.
+        if ($matches.Count -eq 0 -and ($manifest.StartsWith($sdkRoot + [IO.Path]::DirectorySeparatorChar, $pathComparison) -or
+            $manifest.StartsWith($librariesRoot + [IO.Path]::DirectorySeparatorChar, $pathComparison))) { continue }
+        throw ('Ausgewaehltes Manifest hat keinen eindeutigen Besitzer: ' + $manifest)
+    }
+    $modules = @($allModules | Where-Object { $owners.Contains($_.Root) })
+    Write-Section ('Profilmodule ' + $SelectedProfile + ' (' + $modules.Count + ' von ' + $allModules.Count + ')')
+    for ($index = 0; $index -lt $modules.Count; $index++) { Build-OneModule $modules[$index] ($index + 1) $modules.Count }
+}
+
 function Test-BrowserOwner {
     $module = Resolve-Module 'Apps/Klickifax'
     Write-Section 'Klickifax Repositorytests'
@@ -501,28 +539,7 @@ function New-ImagePlan([string]$SelectedProfile, [switch]$IncludeBrowserTest) {
     }
     $arguments = [Collections.Generic.List[string]]::new()
     $arguments.Add('workspace-image-plan')
-    $arguments.Add('--workspace-map')
-    $arguments.Add($workspaceMapPath)
-    $arguments.Add('--image-mode')
-    $arguments.Add($SelectedProfile.ToLowerInvariant())
-    if ($SelectedProfile.Equals('Test', [StringComparison]::OrdinalIgnoreCase)) {
-        foreach ($target in $testImageIncludes) {
-            $arguments.Add('--include-target')
-            $arguments.Add($target)
-        }
-        if ($IncludeBrowserTest) {
-            foreach ($target in $browserTestImageIncludes) {
-                $arguments.Add('--include-target')
-                $arguments.Add($target)
-            }
-        }
-    }
-    if ($SelectedProfile.Equals('Benchmark', [StringComparison]::OrdinalIgnoreCase)) {
-        foreach ($target in $benchmarkImageIncludes) {
-            $arguments.Add('--include-target')
-            $arguments.Add($target)
-        }
-    }
+    $arguments.AddRange([string[]]@(Get-ImageSelectionArguments $SelectedProfile -IncludeBrowserTest:$IncludeBrowserTest))
     $arguments.Add('--output')
     $arguments.Add($componentPlan)
     $arguments.Add('--kernel-version-source')
@@ -550,12 +567,7 @@ function Invoke-Distribution([string]$DistributionAction, [string]$SelectedProfi
 function Build-All([string]$SelectedProfile, [switch]$IncludeBrowserTest) {
     Build-Central
     Build-Kernel
-    $excludedTargets = [Collections.Generic.List[string]]::new()
-    if (-not $IncludeBrowserTest) {
-        $excludedTargets.Add($klickifaxLiveModuleTarget)
-        $excludedTargets.Add($klickifaxModuleTarget)
-    }
-    Build-AllModules $excludedTargets.ToArray()
+    Build-ProfileModules $SelectedProfile -IncludeBrowserTest:$IncludeBrowserTest
     New-ImagePlan $SelectedProfile -IncludeBrowserTest:$IncludeBrowserTest
     $variant = if ($IncludeBrowserTest) { @('browser') } else { @() }
     Invoke-Distribution 'image' $SelectedProfile $variant
