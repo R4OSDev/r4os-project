@@ -58,9 +58,10 @@ Wenn der User ausdruecklich Roadmap aufraeumen verlangt:
 
        GET /current/markdown
 
-   als Docs/Changelogs/V<Major>.<Minor>.txt sichern. Eine vorhandene Datei
-   zuerst pruefen und nicht blind ueberschreiben. Der gespeicherte Export muss
-   die erwartete Releasefamilie und alle Unterversionen enthalten.
+   als Docs/Changelogs/V<Releasefamilie>.txt sichern, etwa V0.77.X.txt.
+   Eine vorhandene Datei zuerst pruefen und nicht blind ueberschreiben.
+   Der gespeicherte Export muss die erwartete Releasefamilie und alle
+   Unterversionen enthalten.
 5. Den Status der aktuellen Version mit
 
        PATCH /current/status
@@ -76,9 +77,10 @@ Wenn der User ausdruecklich Roadmap aufraeumen verlangt:
    Versionsnummer, den Titel Neu und den Status Offen.
 7. Die neue aktuelle Version erneut lesen und sicherstellen, dass sie offen
    ist und weder Unterversionen noch uebernommene Notizen enthaelt.
-8. Alle geaenderten verwalteten Repositories mit dem verbindlichen
-   Tools/Github.bat-Sammelpush veroeffentlichen und seine Restpruefung
-   abwarten.
+8. Alle geaenderten verwalteten Repositories mit dem passenden Starter
+   veroeffentlichen: Tools/Github.bat unter Windows oder ./Tools/Github.sh
+   unter Linux, jeweils mit -push -changed "Roadmap aufraeumen".
+   Die Abschlussliste und Restpruefung vollstaendig abwarten.
 
 Das Changelog gehoert zum Docs-Repository. Roadmapstatus und neue leere
 Version verbleiben in der Roadmap-API.
