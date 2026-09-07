@@ -101,7 +101,10 @@ Vorwaertsschragen verwendet.
 
 Anforderungssyntax:
 
-    KIND|NAME|TARGET|MIN_VERSION|installed|active
+    KIND|NAME|TARGET|MIN_VERSION|STATE
+
+STATE ist genau einer der Werte installed oder active. Jede Anforderung
+enthaelt genau fuenf Felder; die beiden Zustaende sind Alternativen.
 
 Paketversion und Releaseversion besitzen getrennte Bedeutungen.
 Kompatibilitaet wird durch konkrete Anforderungen an Komponenten bestimmt.
