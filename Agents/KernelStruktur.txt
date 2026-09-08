@@ -83,8 +83,8 @@ bootloader/ und display/
     bootloader/boot_info.zig  bootloader-neutrale BootInfo-Sicht
 
     display/boot_display.zig  fruehe Ausgabe auf dem Limine-Framebuffer
-    display/console.zig       fruehe Kernel-Console mit RAM-Zellscroll
-    display/console_scroll_buffer.zig  readbackfreier Scroll
+    display/console.zig       fruehe Kernel-Console mit begrenztem RAM-Pixelscroll
+    display/console_scroll_buffer.zig  RAM-Zell-/Pixelverschiebung
     display/surface.zig       generisches XRGB32-Surface-Modell
     display/presenter.zig     Present-Vertrag Surface gegen DisplayManager
     display/display.zig       DisplayManager, Backend, Present-/Blit-Pfad
