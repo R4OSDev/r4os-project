@@ -1,16 +1,16 @@
 R4OS Shell und Befehlsausfuehrung - Agent-Referenz
 ==================================================
 
-Zweck: Verlaessliche Host-Aufrufe unter Windows und eine kompakte Referenz
-fuer die produktive R4OS-Terminal-Shell.
+Zweck: Verlaessliche Host-Aufrufe unter Windows und Linux sowie eine kompakte
+Referenz fuer die produktive R4OS-Terminal-Shell.
 
 
 Host-Shell: Grundregeln
 -----------------------
 
-- Der normale Workspace-Einstieg laeuft ueber PowerShell und ruft teilweise
-  Batchdateien auf. Bash ist nur bei einem ausdruecklichen `Build.sh`-Aufruf
-  beteiligt und darf nicht still vorausgesetzt werden.
+- Projektablaeufe verwenden gemeinsame PowerShell-7-Skripte. Unter Windows
+  starten duenne `.bat`-Wrapper, unter Linux `.sh`-Wrapper dieselbe Logik.
+  Die interaktive Host-Shell kann davon abweichen; ihre Syntax nicht mischen.
 - Fuer Dateipfade in PowerShell `-LiteralPath` verwenden und den Arbeitsordner
   bewusst setzen. Keine Pfade durch unkontrollierte Stringverkettung bauen.
 - Komplexe Texte mit Backslashes, Backticks, regulaeren Ausdruecken,
@@ -19,15 +19,16 @@ Host-Shell: Grundregeln
   interpretierte Kommandozeile.
 - Lokale Dateiaenderungen mit dem Patch-Werkzeug ausfuehren. Mechanische
   Formatierung darf danach mit einem dafuer bestimmten Werkzeug erfolgen.
-- Erfolg wird am Exitcode gemessen. PowerShell 5.1 kann stderr nativer
-  Programme als `NativeCommandError` darstellen, obwohl deren Exitcode 0 ist.
+- Erfolg wird am Exitcode gemessen. PowerShell 7 ist auf beiden Hosts die
+  unterstuetzte Version; stderr allein belegt keinen fehlgeschlagenen Aufruf.
 
 
 Batch und Commit-Beschreibungen
 -------------------------------
 
 Commit-Beschreibungen zuerst in eine PowerShell-Variable legen und ohne
-eingebettete doppelte Anfuehrungszeichen an `Tools/Github.bat` uebergeben.
+eingebettete doppelte Anfuehrungszeichen an `Tools/Github.bat` unter Windows
+beziehungsweise `./Tools/Github.sh` unter Linux uebergeben.
 Wo Zitate im Text noetig sind, einfache Anfuehrungszeichen verwenden.
 
 Ein Batchstarter muss bis zu seinem Exitcode laufen. Ausgabe wie `ERFOLG` oder
@@ -38,8 +39,8 @@ Ein Batchstarter muss bis zu seinem Exitcode laufen. Ausgabe wie `ERFOLG` oder
 PowerShell-Skripte und Gates
 ----------------------------
 
-Eigenstaendige PowerShell-Pruefungen mit `powershell -File <Script>` oder dem
-gleichwertigen vollstaendigen `-File`-Aufruf starten. Ein Aufruf ueber den
+Eigenstaendige PowerShell-Pruefungen mit `pwsh -File <Script>` oder dem
+zugehoerigen Hoststarter starten. Ein Aufruf ueber den
 PowerShell-Aufrufoperator kann in `$LASTEXITCODE` nur den letzten nativen
 Unterprozess hinterlassen und damit das Ergebnis des eigentlichen Skripts
 verschleiern.
