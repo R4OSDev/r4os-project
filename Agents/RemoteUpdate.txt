@@ -95,6 +95,10 @@ Gueltige Arten:
     data
     sdk
 
+Die generische Art data ist reserviert und wird derzeit als
+UnsupportedDataPayload abgewiesen. Begleitlizenzen gehoeren als Ressource
+in das Modul; eigenstaendige Lizenzdateien gelangen ueber das Image auf C:.
+
 auto leitet die Art aus dem Zielpfad ab. Zielpfade im Paket sind
 DOS-Pfade wie C:\R4OS\..., waehrend module.R4MF Imagepfade mit
 Vorwaertsschragen verwendet.
