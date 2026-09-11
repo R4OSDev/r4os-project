@@ -161,6 +161,13 @@ abgelegt. Nach dem Transfer Groesse und SHA-256 gegen den Hostwert pruefen.
 Ein Rueckdownload mit erneutem SHA-256-Vergleich ist die vollstaendige
 Transportabnahme.
 
+SFTP-Uploads erzeugen nur neue Dateien; vorhandene Inbox-Pakete werden nicht
+ueberschrieben. Fuer eine korrigierte Paketdatei einen neuen Namen verwenden.
+Vor grossen Transfers mit SYSINFO den freien Systemplatz fuer Paket, Stage
+und Backup pruefen. Nicht mehr benoetigte eigene Inbox-Pakete duerfen nach
+Abgleich mit SYSUPD STATUS entfernt werden; aktive Batchquellen und die
+privaten Stage-/Backup-/Journaldateien bleiben unter dem Update-Besitzer.
+
 Systemdateien, Kernel, Treiber, Protokolle, Libraries und Dienste werden
 nicht direkt per SFTP oder SCP ueberschrieben.
 
