@@ -17,6 +17,14 @@ Conformance-Fixtures, API-Dokumente und das API-Inventar liegen unter
 `Repositories/Contract/Generated/`. Erzeugte Dateien und erzeugte Bereiche in
 `Docs/API/` werden nicht von Hand editiert.
 
+Ausnahme im bestehenden technischen Fassadenbestand: In
+`Generated/SDK/Zig/abi.zig` verwaltet der Generator nur den markierten
+`R4OS-ABI-GENERATED-EXPORTS`-Block. Die technischen Typen ausserhalb dieses
+Blocks (darunter DriverApi) werden im Contract bewusst append-only gepflegt;
+der Generator erhaelt sie unveraendert. Solche Aenderungen benoetigen den
+passenden Versionsentscheid, dokumentierten Praefixvergleich und SDK-/Kernel-
+Layoutpruefung. Der markierte Block bleibt ausschliesslich generiert.
+
 Das maschinenlesbare Funktionsinventar ist:
 
     Repositories/Contract/Generated/Inventory/API.json
