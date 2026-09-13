@@ -58,6 +58,18 @@ Ein Import nennt Modul, Symbol und Mindestversion:
     R4SYS:Query:1
     ACMECODEC:API_V1:2
 
+Optionale Runtime-R4L-Imports verwenden das vierte Feld Flags=1:
+    IMPORT=R4NV:BACKEND_V1:1:1
+R4M0-Importbit 0 erlaubt einen fehlenden Export oder eine zu alte Version.
+Ein solcher Import bleibt benannt, liefert aber Adresse/Tabelle, aufgeloeste
+Version und Providergeneration 0. Der Verbraucher muss die Verfuegbarkeit
+pruefen; die generierten Library-Bindings weisen diese Nullbindung ab.
+Pflichtimports behalten Flags=0. Platform APIs duerfen nicht optional sein;
+unbekannte Flags werden abgewiesen. Der Imageplan erzwingt keine Aufnahme
+optionaler Libraries. Import-Slot-Relocations einer Nullbindung erlauben
+keinen von 0 verschiedenen Addend. R4M0-Flags sind keine R4XStart-Flags.
+Die Aufloesung ist eine Momentaufnahme beim Laden; eine Nullbindung wird
+nicht spaeter automatisch ersetzt. Unterstuetzung ab Release 0.79.17.
 Ein Export nennt oeffentlichen Namen, Section, Sectionoffset und Revision.
 Namen und Revisionen muessen innerhalb des Moduls case-insensitiv eindeutig
 sein.
@@ -272,6 +284,9 @@ Ein einfaches R4X, R4D oder R4P verwendet:
         const sdk = sdk_build.sdk(b, sdk_dep, .{});
         _ = sdk.addR4MF(b.path("module.R4MF"));
     }
+
+R4L kann kompilierte Library-Bindings wie R4X/R4D per ZIG_MODULE nutzen;
+r4l_contract bleibt fuer den eigenen generierten Contract reserviert.
 
 Benoetigt ein Projekt Library-Bindings, uebergibt es diese ueber
 addR4MFWithOptions. Namen und ZIG_MODULE-Zuordnung bleiben im Manifest;
