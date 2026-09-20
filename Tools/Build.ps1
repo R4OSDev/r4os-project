@@ -42,6 +42,7 @@ function Show-Usage {
     Write-Host '  Build.bat|Build.sh'
     Write-Host '  Build.bat|Build.sh -central|-kernel|-modules'
     Write-Host '  Build.bat|Build.sh -module NAME|ROLLE/NAME'
+    Write-Host '  Build.bat|Build.sh -map (Manifeste und Artefaktpfade ohne Imageplan)'
     Write-Host '  Build.bat|Build.sh -plan|-image|-verify [Slim|Full|Test|Benchmark]'
     Write-Host '  Build.bat|Build.sh -qemu [Slim|Full|Test|Benchmark] [VirtioNet|RTL8139]'
     Write-Host '  Build.bat|Build.sh -ssh [VirtioNet|RTL8139]'
@@ -121,6 +122,10 @@ try {
         '-kernel' {
             if ($commandArguments.Count -ne 1) { throw '-kernel akzeptiert keine weiteren Argumente.' }
             Invoke-WorkspaceBuild -Action kernel
+        }
+        '-map' {
+            if ($commandArguments.Count -ne 1) { throw '-map akzeptiert keine weiteren Argumente.' }
+            Invoke-WorkspaceBuild -Action map
         }
         '-modules' {
             if ($commandArguments.Count -ne 1) { throw '-modules akzeptiert keine weiteren Argumente.' }

@@ -444,3 +444,12 @@ Weiterfuehrend
     Agents/Test.txt                  Testschichten und Headless-Abnahme
     Repositories/Distribution/README.md
     Docs/Inventory/AllModules.json
+
+Grafikpakete ab 0.79.42
+----------------------
+./Tools/Build.sh -map (Windows: Tools\Build.bat -map) erzeugt ausschliesslich
+die kanonische Manifest-/Artefaktzuordnung. Nach passenden Einzelbuilds:
+Repositories/Distribution/Build.sh graphics-packages -GraphicsGroup all
+-ReleaseVersion 0.79.42 -OutputRoot <neues-Verzeichnis>. Gruppen: platform,
+core, api, video, desktop; keine Imagekopie, Netzabfrage oder Hardwareprobe.
+Details und Updatefolge: Docs/Deployment/GrafikPakete07942.txt.

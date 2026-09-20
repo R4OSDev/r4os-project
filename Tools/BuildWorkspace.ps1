@@ -1,6 +1,6 @@
 param(
     [Parameter(Mandatory = $true)]
-    [ValidateSet('central', 'kernel', 'modules', 'module', 'plan', 'image', 'verify', 'qemu', 'ssh', 'headless', 'benchmark', 'all', 'test', 'gui')]
+    [ValidateSet('central', 'kernel', 'modules', 'module', 'map', 'plan', 'image', 'verify', 'qemu', 'ssh', 'headless', 'benchmark', 'all', 'test', 'gui')]
     [string]$Action,
 
     [ValidateSet('Slim', 'Full', 'Test', 'Benchmark')]
@@ -583,6 +583,7 @@ switch ($Action) {
     'kernel' { Build-Kernel }
     'modules' { Build-AllModules }
     'module' { Build-SelectedModule $ModuleSelector }
+    'map' { Ensure-ModuleCatalog; Write-WorkspaceMap }
     'plan' { New-ImagePlan $Profile -IncludeBrowserTest:$BrowserTest }
     'image' {
         New-ImagePlan $Profile -IncludeBrowserTest:$BrowserTest
