@@ -193,6 +193,10 @@ Vollstaendiges R4X-Beispiel:
     HELP=Assets/Help.txt
     RESOURCE=TOOLBAR.BMP:Assets/Toolbar.bmp
 
+C_INCLUDE/C_DEFINE sind bei Zig-R4D und Zig-R4L auch ohne C-Quelle oder
+Native-Archive fuer @cImport-Datenheader erlaubt. C_FLAG erfordert weiter
+eine tatsaechliche C-Compilationseinheit (0.80.5).
+
 Kanonische Feldreihenfolge:
 
     R4OS_MODULE_MANIFEST
