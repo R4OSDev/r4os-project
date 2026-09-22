@@ -94,10 +94,16 @@ Gueltige Arten:
     config
     data
     sdk
+    license
+    source
+    preload
 
 Die generische Art data ist reserviert und wird derzeit als
-UnsupportedDataPayload abgewiesen. Begleitlizenzen gehoeren als Ressource
-in das Modul; eigenstaendige Lizenzdateien gelangen ueber das Image auf C:.
+UnsupportedDataPayload abgewiesen. Begleitlizenzen und erforderliche Fremdquellen koennen als unversionierte
+license/source-Payloads unter C:\R4OS\LICENSES\ beziehungsweise SOURCES\
+mitgeliefert werden (aktiver Kernel >=0.1.199). preload ist seit0.80.37
+auf PRELOAD.R4I und die vier bekannten Boot-R4P-Spiegel begrenzt und
+benoetigt aktiven Kernel >=0.1.208. Details: AMD_Pakete08037.txt.
 
 auto leitet die Art aus dem Zielpfad ab. Zielpfade im Paket sind
 DOS-Pfade wie C:\R4OS\..., waehrend module.R4MF Imagepfade mit
