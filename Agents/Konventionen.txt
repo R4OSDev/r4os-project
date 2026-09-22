@@ -17,7 +17,9 @@ Kernelgrenze und Hardware
 - PCI-Config-Zugriffe auf fremde Geraete sind ausschliesslich im
   Treiber-Init-Kontext erlaubt. Inventarscan, Bridge-Reads oder -Writes aus
   Recovery- und Poll-Tasks sind nicht tasksicher und koennen einen GPF
-  ausloesen.
+  ausloesen. Die gesonderte DriverPlatformApi leiht authentifizierten
+  Firmwarearbeitern ausschliesslich bereits permanente Firmware-/UC-Seiten;
+  ACPIPLAT verwendet darauf validierte MCFG/ECAM-Zugriffe ohne CF8/CFC.
 - Der produktive Kernel baut `ReleaseSafe` und ohne SIMD (`soft_float`). R4X,
   R4D, R4P und R4L duerfen die vom SDK freigegebenen SIMD-Features bis AVX2
   sowie AES-NI/PCLMULQDQ nutzen. Zielhardware ist die AVX2-Klasse; der
@@ -139,3 +141,9 @@ Treiber- und Buildfallen
 
 API-/ABI-Regeln stehen in `Agents/API-ABI.txt`; Modul-, Relocation- und
 Manifestregeln in `Agents/R4M0-Container.txt`.
+
+- Externe R4D-Input-Rollen quiescieren vor der generischen Heap-/Semaphore-/
+  Task-Aufnahmesperre: abschliessende AML-Methoden benoetigen eigene
+  Ressourcen. Ihre eigene Stopbarriere sperrt neue Ereignisse zuerst.
+  Callback-Timeout schliesst und quarantiniert den Owner; Freigabe bleibt
+  an den bestehenden vollstaendigen Ressourcen-/Join-Nachweis gebunden.
