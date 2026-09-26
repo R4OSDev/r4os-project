@@ -118,7 +118,9 @@ Teilaufgaben
         vorhandenes Testimage mit vier CPUs starten und unmittelbar nach dem
         kurzen SMP-/Heap-/TLB-/Lock-/Serial-/CLOCKPROBE-Nachweis sowie den
         fuer die aktuelle Unterversion gezielt aktivierten Zusatzmarkern am
-        QUICKPROBE beenden; Userland, R4GB und R4SNES werden dabei nicht gestartet
+        QUICKPROBE beenden. Seit 0.81.19 gehoeren zwei kurze normale CALC-GUIs
+        und CLIPSVC/IPC-Worker zur SMP-Besitzerprobe; regulaere Shell, R4GB
+        und R4SNES werden dabei nicht gestartet
 
     Tools\Build.bat -verify Test
         vorhandenes Testimage strukturell pruefen
