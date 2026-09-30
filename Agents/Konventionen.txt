@@ -23,8 +23,11 @@ Kernelgrenze und Hardware
 - Der produktive Kernel baut `ReleaseSafe` und ohne SIMD (`soft_float`). R4X,
   R4D, R4P und R4L duerfen die vom SDK freigegebenen SIMD-Features bis AVX2
   sowie AES-NI/PCLMULQDQ nutzen. Zielhardware ist die AVX2-Klasse; der
-  Scheduler sichert den nach CPUID/XCR0 benoetigten FPU-State nur fuer
-  SIMD-faehige Tasks. Ein Debug-Kernel ist kein unterstuetztes Ersatzprofil
+  Scheduler sichert den nach CPUID/XCR0 benoetigten FPU-State fuer alle
+  ausfuehrbaren Tasks einschliesslich Kernel-Workern und kernel-main: auch
+  indirekte R4D-/R4P-Aufrufe koennen SIMD verwenden. Nur reine CPU-Idle-Tasks
+  ohne Modulaufrufe sind ausgenommen. Kritische Worker besitzen ihren
+  FPU-Puffer bereits in der Bootreserve. Ein Debug-Kernel ist kein Ersatzprofil
   fuer den produktiven Build.
 - `Repositories/Kernel/kernel/font.zig` ist Kernelcode. Die Fontquellen und
   Hostgeneratoren unter `Repositories/Distribution/Assets/SystemFonts/`
