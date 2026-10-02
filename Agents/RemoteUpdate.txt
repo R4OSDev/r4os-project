@@ -115,6 +115,9 @@ Anforderungssyntax:
 
 STATE ist genau einer der Werte installed oder active. Jede Anforderung
 enthaelt genau fuenf Felder; die beiden Zustaende sind Alternativen.
+active ist ausschliesslich fuer KERNEL-Anforderungen zulaessig. Fuer R4X,
+R4L, R4D und R4P installed verwenden; eine fachlich benoetigte aktive
+Treiberbindung vorab mit der zustaendigen Diagnose separat bestaetigen.
 
 Paketversion und Releaseversion besitzen getrennte Bedeutungen.
 Kompatibilitaet wird durch konkrete Anforderungen an Komponenten bestimmt.
