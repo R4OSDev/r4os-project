@@ -200,7 +200,16 @@ Aktivierung und Prioritaet muessen der geplanten Aenderung entsprechen.
 
 STATUS zeigt im Bereitschaftszustand idle sowie Inbox, Stagingwurzel und
 dirs=ok. VERIFY ist read-only und akzeptiert nur ein vollstaendig sichtbares
-Paket in der Inbox.
+Paket in der Inbox. Der Quellpfad muss unter
+`C:\R4OS\UPDATE\INBOX\` liegen; ein Paket auf D: wird auch bei korrektem
+Inhalt mit `package-not-in-inbox` abgewiesen. Fuer grosse Pakete auf C:
+Platz fuer Inboxkopie und Stagedateien einplanen. Ueberholte eigene
+Quellpakete erst nach vollstaendiger Archivierung und Ausschluss aller
+aktuellen Journalbindungen entfernen; letzte gute Backups bleiben erhalten.
+Fuer lange SSH-Kopierbefehle kurze lokale Paketnamen verwenden: SSHD baut
+die Terminalargumente samt `/NOAUTOEXEC` und `/C` in einem128-Byte-Puffer.
+Ein zu langer Exec-Aufruf wird vor der Ausfuehrung abgewiesen. Name und
+Zielpfad ersetzen weiterhin keinen vollstaendigen SHA-256-Rueckvergleich.
 
 
 STAGE und COMMIT
