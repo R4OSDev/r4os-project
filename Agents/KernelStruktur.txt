@@ -42,15 +42,16 @@ voraus:
     usb_protocol_preload_boot    USB-Protokolle vor dem Hostcontroller
     service_boot                 Registry, Endpoints und Queues
     storage_boot.initControllers Controller, Blockdevice-Scan, MBR/GPT und Mounts
-    loader_boot                  Runtime-Libraries, R4D-Discovery und BOOT.R4S
     system_update_recovery_boot  SYSUPD-Journale, siehe RemoteUpdate.txt
     upload_claim_boot            offene Uploadtransaktionen
+    loader_boot                  Runtime-Libraries, R4D-Discovery, CONFIG.R4S
+                                 und Fonts erst nach beiden Recoveries lesen
     platform_irq_boot            APIC, IOAPIC, HPET und Timer-Handoff
     audio_boot                   Audio-Core und Geraeteauswahl
     network_boot                 Adapter und Netzgrundlage
     usb_hid_boot                 USB-HID-Eingabe
     runtime_boot.initTaskRuntime Task-Runtime
-    driver_policy_boot           Treiberpolicy aus BOOT.R4S
+    driver_policy_boot           Treiberpolicy aus CONFIG.R4S
     Hintergrundaufgaben          Netzwerk, DHCP, HID und Selbsttests
     runtime_boot.start           Services und Shell
 
@@ -110,7 +111,7 @@ Der Sammelort fuer Kerndienste und Bootschnitte.
                       DMA, IRQ inklusive MSI, Net-/Storage-/USB-Backends,
                       Owner-Cleanup
     driver_work.zig   Workqueue und Completion fuer Treiber
-    driver_plan.zig   Treiberplan aus BOOT.R4S
+    driver_plan.zig   Treiberplan aus CONFIG.R4S
     irq_router.zig    IRQ-Routen-Registry: shared INTx, Level/Edge,
                       MSI-Fenster 24..31
     timer.zig         logische Tick-Epoche aus gemeinsamer Clocksource,
@@ -125,7 +126,7 @@ Der Sammelort fuer Kerndienste und Bootschnitte.
     desktop_events.zig  gemeinsames Desktop-Aktivitaets-Event
     font.zig          Kernel-Fallback-Font, R4F1-Loader, Renderer-Helfer
     bootscreen*.zig   Bootscreen und R4B-Format
-    boot_config.zig   BOOT.R4S-Konfiguration
+    boot_config.zig   CONFIG.R4S-Konfiguration
     *_boot.zig        die Bootschnitte aus der Reihenfolge oben
 
 

@@ -260,7 +260,10 @@ das Journal. Nach erfolgreicher Pruefung wird VERSION.R4S auf den
 Zielrelease gesetzt und Installed gemeldet.
 
 Die Boot-Recovery laeuft nach dem Einhaengen von C: und vor IRQ-,
-Treiberpolicy-, Service- und Shellstart:
+Treiberpolicy-, Service- und Shellstart. Seit Kernel 0.1.241 liest auch der
+Filesystem-Loader Bibliotheken, R4D-Metadaten, CONFIG.R4S und Fonts erst
+nach SYSUPD- und Upload-Recovery; vorher konnte der erste Restore-Boot noch
+die alte Grafikpolicy und alte Bibliotheken im Speicher behalten:
 
 - Eine unvollstaendige einzelne Transaktion wird in umgekehrter
   Payloadreihenfolge zurueckgerollt.
@@ -271,9 +274,19 @@ Treiberpolicy-, Service- und Shellstart:
 SYSUPD RESUME setzt eine einzelne laufende Transaktion fort.
 SYSUPD RESUME-BATCH setzt den gebundenen Neustartbatch fort.
 
-Fuer eine fachlich unerwuenschte, technisch erfolgreich installierte
-Aenderung wird ein bekannt-gutes Rueckrollpaket erstellt und ueber denselben
-Workflow installiert.
+`SYSUPD ROLLBACK-LAST` prueft den vollstaendigen letzten Ziel-/Backupsatz
+und startet mit dauerhaftem Rollbackauftrag neu. Erst die fruehe
+Boot-Recovery restauriert die Dateien; es wird kein laufender Grafiktreiber
+entladen. Anschliessend RESUME-BATCH, STATUS und den tatsaechlich geladenen
+Stand pruefen. Das erste RESUME kann nur die Batchquittung schreiben und
+ohne Text enden; der terminale Folgebefehl meldet `rolled-back`, das
+Transaktionsjournal `rolled_back`. Bei restauriertem Kernel oder Preload
+ist ein weiterer normaler Start erforderlich, weil Limine diese Dateien
+bereits vor der Recovery gelesen hat.
+
+Fuer einen anderen als den letzten gesicherten Stand wird ein bekannt-gutes
+Rueckrollpaket ueber denselben Updateworkflow installiert. Eine unabhaengige
+Recovery bleibt erforderlich, wenn der normale Kernel gar nicht startet.
 
 
 Weiterfuehrend
