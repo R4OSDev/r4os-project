@@ -203,13 +203,26 @@ dirs=ok. VERIFY ist read-only und akzeptiert nur ein vollstaendig sichtbares
 Paket in der Inbox. Der Quellpfad muss unter
 `C:\R4OS\UPDATE\INBOX\` liegen; ein Paket auf D: wird auch bei korrektem
 Inhalt mit `package-not-in-inbox` abgewiesen. Fuer grosse Pakete auf C:
-Platz fuer Inboxkopie und Stagedateien einplanen. Ueberholte eigene
-Quellpakete erst nach vollstaendiger Archivierung und Ausschluss aller
-aktuellen Journalbindungen entfernen; letzte gute Backups bleiben erhalten.
+Platz fuer Inboxkopie und Stagedateien einplanen. Quellpakete laufender oder
+fortsetzbarer Transaktionen behalten. Nach terminalem Journalstatus
+`cleanup`/`rolled_back` und terminalem Batchstatus `installed`/`rolled_back`
+koennen auch Pakete mit historischem SOURCE-Eintrag geloescht werden;
+Boot-Recovery und terminales RESUME benoetigen deren Transportdatei nicht.
+Bei vorhandenem Quellstand ist keine Paketarchivierung erforderlich.
+Letzte gute private Backups bleiben beim Updatebesitzer erhalten.
 Fuer lange SSH-Kopierbefehle kurze lokale Paketnamen verwenden: SSHD baut
 die Terminalargumente samt `/NOAUTOEXEC` und `/C` in einem128-Byte-Puffer.
 Ein zu langer Exec-Aufruf wird vor der Ausfuehrung abgewiesen. Name und
 Zielpfad ersetzen weiterhin keinen vollstaendigen SHA-256-Rueckvergleich.
+
+Bei Kernelpayloads reicht freier Platz auf C: nicht: die interne FAT32-
+Bootpartition muss auch das neue Kernelstage aufnehmen. Auf OssiPC stoppten
+alte Kernelbackups einen solchen Stream trotz freiem C:. Nur nachweislich
+unreferenzierte Bootbackups mit `SYSUPD ARCHIVE-BOOT-BACKUP Bxxxxxxx.R4U`
+archivieren; der Updatebesitzer prueft Journale, Bootziele, FAT-Identitaet
+und die vollstaendige Kopie vor der Freigabe. Danach den unveraenderten
+gebundenen Batch mit `SYSUPD RESUME-BATCH` fortsetzen; keine privaten
+Stage-/Backupdateien manuell loeschen.
 
 
 STAGE und COMMIT
