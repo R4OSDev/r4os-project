@@ -270,9 +270,11 @@ API, Hoststarter und private Betriebsreferenz liegen in diesem einen
 Repository. Es wird wie Server/ vom Project-Root ignoriert und ist kein Ziel
 des globalen GitHub-Starters, der R4OS-Builds oder der Modulinventare.
 
-Linux verwendet `./DevCenter/Start.sh`, `./DevCenter/Push.sh` und
+Linux verwendet `./DevCenter/Tools/Start.sh`, `./DevCenter/Push.sh` und
 `./DevCenter/Pull.sh`; Windows die entsprechenden .bat-Starter. Gemeinsame
-Orchestrierung liegt in `Start.ps1` und `Github.ps1`. Web lauscht standardmaessig
+Orchestrierung liegt in `Tools/Start.ps1`, `Tools/Service.ps1` und `Github.ps1`.
+Start/Stop/Restart unter `DevCenter/Tools/` steuern WebApp und API gemeinsam;
+`Service.sh -Action Install` richtet den Linux-Autostart ein. Web lauscht standardmaessig
 im LAN auf Port 5000, API auf Port 5001. Weitere private Anleitung:
 `DevCenter/Agents/DevCenter.txt`.
 
