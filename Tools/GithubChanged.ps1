@@ -330,7 +330,7 @@ try {
     Write-Host
     Write-Host '=== Sammel-Push: Vorpruefung ==='
     Write-Host 'Reihenfolge: Contract, SDK, Libraries, Kernel, Apps, Services, Diagnostics, Drivers, Protocols, Subsystems, Distribution, Docs, DevKit, Organisation, Project.'
-    Write-Host 'Ausgeschlossen: Server sowie alle verschachtelten DevKit- und Third-Party-Repositories.'
+    Write-Host 'Ausgeschlossen: Server, DevCenter sowie alle verschachtelten DevKit- und Third-Party-Repositories.'
     Write-Host
     foreach ($state in $states) {
         Write-RepositoryState -State $state

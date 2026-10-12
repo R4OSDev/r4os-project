@@ -17,9 +17,9 @@ Grundregeln
   Kernel, Recovery, Distribution und Module ausschließlich `Tools\Github.bat` unter
   Windows oder `./Tools/Github.sh` unter Linux verwenden. Beide starten die
   gemeinsame PowerShell-7-Logik in `Tools/Github.ps1`.
-- Der private Package-Server ist die einzige Ausnahme. Er wird ausschließlich
-  mit seinen eigenen Startern unter `Server/` verwaltet und besitzt bewusst
-  kein Ziel im globalen GitHub-Starter.
+- Der private Package-Server und das private DevCenter sind Ausnahmen. Sie
+  werden ausschliesslich mit ihren eigenen Startern unter `Server/` und
+  `DevCenter/` verwaltet und besitzen kein Ziel im globalen GitHub-Starter.
 - Pulls aus allen vom globalen Script verwalteten öffentlichen Repositories
   laufen anonym. Github.ps1 lädt dafür keine Credentials und deaktiviert
   interaktive Anmeldung sowie lokale Git-Credential-Helper.
@@ -65,9 +65,9 @@ Branch: main
 Project, DevKit, Docs, Organisationsprofil, Contract, SDK, Libraries, Kernel,
 Recovery, Distribution sowie Apps, Services, Diagnostics, Drivers, Protocols und
 Subsystems werden
-bei einem fehlenden Remote-Repository oeffentlich angelegt. Der Package-Server
-ist die private Ausnahme, wird aber nicht vom globalen Script angelegt oder
-verwaltet.
+bei einem fehlenden Remote-Repository oeffentlich angelegt. Package-Server und
+DevCenter sind private Ausnahmen; das globale Script legt sie nicht an und
+verwaltet sie nicht.
 Bereits vorhandene Repositories werden durch Push oder Pull nicht in ihrer
 Sichtbarkeit veraendert.
 
@@ -127,8 +127,8 @@ geänderten Repositories die empfohlene erste Auswahl; alternativ kann ein
 einzelnes Repository gewählt werden. Pull fragt weiterhin immer nach genau
 einem Repository. Bei Apps, Services, Diagnostics, Drivers, Protocols und
 Subsystems wird
-für den Einzelweg zusätzlich der lokale Komponentenname abgefragt. Der
-Package-Server ist nicht Teil dieses Menüs.
+fuer den Einzelweg zusaetzlich der lokale Komponentenname abgefragt.
+Package-Server und DevCenter sind nicht Teil dieses Menues.
 
 Ein interaktiver Push fragt nicht nach einer Commit-Beschreibung. Ohne direkt
 übergebenen Text verwendet das Script die hinterlegte Standardbeschreibung des
@@ -254,6 +254,17 @@ Server
     sowie die eigenen lokalen Push-/Pull-Starter.
     Push und Pull: eigene Starter des Server-Repositories verwenden
 
+DevCenter
+    Kein Ziel im globalen GitHub-Starter
+    Lokal: DevCenter/
+    GitHub: R4OSDev/r4os-devcenter
+    Sichtbarkeit: privat
+    Inhalt: eigenstaendige Host-WebApp, LAN-API und private Betriebsreferenz.
+    Push und Pull: DevCenter/Push.bat bzw. ./DevCenter/Push.sh sowie
+    DevCenter/Pull.bat bzw. ./DevCenter/Pull.sh verwenden.
+    Gemeinsame Logik: DevCenter/Github.ps1; authentifizierte Pulls und
+    ausschliesslich private Repository-Erstellung beim ersten Push.
+
 Contract
     Ziel: -contract
     Lokal: Repositories/Contract/
@@ -348,8 +359,8 @@ feste Workspace-Struktur:
    Protocols und Subsystems, innerhalb jeder Rolle alphabetisch.
 3. Recovery, Distribution, Docs, DevKit, Organisationsprofil und zuletzt Project.
 
-Server ist vollständig ausgeschlossen. Unterrepositories und installierte
-Fremdquellen in DevKit, insbesondere QEMU, Limine und Zig, werden nicht
+Server und DevCenter sind vollstaendig ausgeschlossen. Unterrepositories und
+installierte Fremdquellen in DevKit, insbesondere QEMU, Limine und Zig, werden nicht
 rekursiv gesucht und können deshalb kein Sammel-Pushziel werden. Ein neues
 gültiges Komponentenverzeichnis mit `module.R4MF` in einer der sechs Rollen
 wird ohne zusätzlichen Indexeintrag erkannt.
@@ -407,7 +418,9 @@ nicht veröffentlichter vorhandener main-Stand wird trotzdem gepusht.
 
 Alle vom globalen Script unterstützten Ziele werden öffentlich angelegt. Das
 private Package-Server-Repository wird von seinen eigenen Scripts nur
-synchronisiert und niemals automatisch angelegt. Eine spätere Änderung der
+synchronisiert und niemals automatisch angelegt. Das DevCenter besitzt eigene
+Starter und legt ein fehlendes Repository ausschliesslich privat an; vorhandene
+oeffentliche Repositories werden abgelehnt. Eine spaetere Aenderung der
 Sichtbarkeit ist ein eigener administrativer Vorgang.
 
 
@@ -492,8 +505,8 @@ Checkout im frei gewaehlten Workspace-Root existiert:
 3. DevKit mit dem passenden GitHub-Starter und `-pull -devkit` anonym beziehen.
 4. Docs, Contract, SDK, Libraries, Kernel, Recovery, Distribution und bei Bedarf das
    Organisationsprofil mit ihren jeweiligen Pull-Zielen beziehen.
-5. Den privaten Package-Server bei Bedarf separat klonen und danach mit
-   dessen eigenem Pull-Starter aktualisieren.
+5. Package-Server und DevCenter bei Bedarf separat aus ihren privaten
+   Repositories klonen und mit ihren eigenen Pull-Startern aktualisieren.
 6. Benötigte Apps, Services, Diagnostics, Drivers, Protocols und Subsystems einzeln mit
    Rollenflag und Komponentenname beziehen.
 7. Die DevKit-Abhängigkeiten anschließend über dessen Setup installieren; die
@@ -574,5 +587,5 @@ Grenzen des Scripts
 - Neue zentrale Repositoryarten benötigen eine ausdrückliche Zuordnung in
   Tools/Github.ps1 und in der festen Sammelreihenfolge. Apps, Services,
   Diagnostics, Drivers, Protocols und Subsystems werden bereits generisch über
-  Rollenverzeichnis und Komponentenname erkannt. Der Package-Server bleibt
-  bewusst außerhalb dieses globalen Scripts.
+  Rollenverzeichnis und Komponentenname erkannt. Package-Server und DevCenter
+  bleiben bewusst ausserhalb dieses globalen Scripts.

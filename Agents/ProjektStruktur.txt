@@ -17,6 +17,7 @@ Workspace-Ueberblick
     Agents/         kompakte Arbeitsreferenzen fuer Agents
     Artifacts/      lokale Build-, Image- und Testausgaben
     DevKit/         installierte Toolchains und Arbeitskopien
+    DevCenter/      private Host-WebApp mit eigener LAN-API
     Docs/           eigenes Repository fuer projektweite Dokumentation
     Repositories/   kanonische Quell-Repositories
     Server/         privates Package-Server-Repository
@@ -261,11 +262,26 @@ Laufzeitdaten, veröffentlichte Pakete, Datenbanken, Umgebungsdateien und
 Zugangsdaten bleiben durch `Server/.gitignore` vollständig lokal.
 
 
+DevCenter/
+----------
+
+`DevCenter/` ist das private Repository `R4OSDev/r4os-devcenter`. WebApp,
+API, Hoststarter und private Betriebsreferenz liegen in diesem einen
+Repository. Es wird wie Server/ vom Project-Root ignoriert und ist kein Ziel
+des globalen GitHub-Starters, der R4OS-Builds oder der Modulinventare.
+
+Linux verwendet `./DevCenter/Start.sh`, `./DevCenter/Push.sh` und
+`./DevCenter/Pull.sh`; Windows die entsprechenden .bat-Starter. Gemeinsame
+Orchestrierung liegt in `Start.ps1` und `Github.ps1`. Web lauscht standardmaessig
+im LAN auf Port 5000, API auf Port 5001. Weitere private Anleitung:
+`DevCenter/Agents/DevCenter.txt`.
+
+
 Was lokal bleibt
 ----------------
 
 Das Root-Repository ignoriert unter anderem `Artifacts/`, `DevKit/`,
-`Docs/`, `Repositories/`, `Server/`, `ExFiles/`, `Reports/`, `Temp/`, die
+`Docs/`, `Repositories/`, `Server/`, `DevCenter/`, `ExFiles/`, `Reports/`, `Temp/`, die
 Credentials sowie `QuickNotes.txt`. Diese Orte besitzen
 entweder eigene Repositories oder ausschliesslich lokalen Inhalt.
 

@@ -11,6 +11,8 @@
 /Artifacts/*
 /DevKit/
 /DevKit/*
+/DevCenter/
+/DevCenter/*
 /Docs/
 /Docs/*
 /ExFiles/
