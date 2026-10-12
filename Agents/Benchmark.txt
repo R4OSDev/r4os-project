@@ -1,232 +1,81 @@
-R4OS Benchmark - Agent-Referenz
+﻿R4OS Benchmark - Agent-Referenz
 ================================
-
-Zweck: Verbindlicher Ablauf fuer reproduzierbare Performancebenchmarks,
-maschinenlesbare Historie und richtungsbewusste Vergleiche.
-
 
 Ausloesung
 ----------
+Benchmarks nur auf ausdruecklichen Userauftrag oder aufgrund einer bereits
+vorhandenen Roadmap-Aufgabe starten. Ein Build oder Imagebau startet keinen
+Benchmark. Alle QEMU-Gasttests verwenden vier vCPUs (SMP4).
 
-Benchmarks werden ausschliesslich ausgefuehrt, wenn der User oder eine
-bereits vorhandene Roadmap-Unterversion sie ausdruecklich anweist. Sie sind
-kein Bestandteil des normalen Agentenworkflows und werden niemals vorsorglich
-oder automatisch durch Build, Test, Imagebau, Headless, GUI oder Modulbuild
-gestartet.
+Roadmap 0.83.1 ordnet einen begrenzten A/B-Vergleich der Kernelinstrumentierung
+an. Roadmap 0.83.3 ordnet danach einen kurzen fuenfteiligen Standardbenchmark
+im regulaeren SMP4-Testlauf an. Diese Standardphase ist noch nicht umgesetzt;
+Quick-Probes bleiben gezielte kurze Funktionsproben.
 
-Wenn eine vorhandene Roadmap-Unterversion einen Abschlussbenchmark
-ausdruecklich anordnet, ist genau dieser eine regulaere Lauf auszufuehren.
-Weitere Laeufe sind nur bei einer konkret belegten methodischen oder
-technischen Notwendigkeit zulaessig; der Grund gehoert in die Roadmap, nicht
-in die Messhistorie. Versionsbereiche werden nicht in dieser Anleitung
-festgeschrieben, sondern ausschliesslich von der aktuellen Roadmap bestimmt.
+Benchmarks.jsonl spielt fuer diese Roadmap keine Rolle. Weder lesen,
+importieren, validieren noch fortschreiben; auch keine Ersatzhistorie als
+Teil dieser Arbeit bauen. Das private Datenbank-/WebAPI-Tool ist getrennt.
 
-
-Kanonische Besitzer und Dateien
--------------------------------
-
-    Tools\Build.bat / ./Tools/Build.sh
-        Workspace-Einstieg unter Windows beziehungsweise Linux fuer
-        Benchmark-Image und ausdruecklichen Lauf
-
-    Repositories\Distribution\Profiles\Benchmark.R4S
-    Repositories\Distribution\BenchmarkInjection\
-    Repositories\Distribution\QEMU\benchmark.conf
-        versioniertes Image- und Umgebungsprofil
-
-    Repositories\Distribution\Tests\Invoke-QemuBenchmark.ps1
-        Request-, QEMU-, Maschinenblock- und Poweroff-Gate
-
-    Repositories\Distribution\Tools\BenchmarkHistory.ps1
-        Import, Validierung, Migration und Vergleich
-
-    ExFiles\Reports\Benchmarks.jsonl
-        einzige fortzuschreibende Performancehistorie
-
-    Artifacts\Distribution\Profiles\Benchmark\Runs\current\
-        Anforderung, frisches Lauf-Datenimage, Logs und Ergebnis des letzten
-        ausdruecklichen Laufs
-
-`ExFiles/Reports/Diagnose.txt` ist Legacy und wird nicht neu angelegt oder
-fortgeschrieben.
-
-
-Feste Umgebung
---------------
-
-Die Environment-ID
-
-    r4os-q35-haswell-smp4-1g-tcg-gpt1-v1
-
-steht fuer q35, TCG single-thread, Haswell, vier vCPUs, 1 GiB RAM,
-deaktiviertes Netzwerk, festen IDE-Plattenanschluss, HDA ohne Hostaudio,
-serielle Dateiausgabe, feste RTC-Parameter und die versionierte
-Benchmarkkonfiguration. Eine Aenderung dieser Grenze benoetigt eine neue
-Environment-ID; Ergebnisse verschiedener IDs werden nicht verglichen.
-
-Jeder Lauf verwendet eine frische private Kopie der gemeinsamen `disk.img`
-des Benchmarkprofils. DATA wird darin neu formatiert und erhaelt genau eine
-`BENCHMARK.BAT`. Quellimages und interaktive Zustaende bleiben erhalten.
-Historische Ergebnisse der vorherigen Environment-ID bleiben getrennt.
-
-
-Unterstuetzte Suites und Metriken
----------------------------------
-
-| Suite | Metrik-ID | Einheit | Besser |
-|---|---|---|---|
-| perfdiag-blit | perfdiag.blit.throughput | KB/s | hoeher |
-| perfdiag-clock | perfdiag.clock.latency | ns/call | niedriger |
-| perfdiag-service-registry | perfdiag.service_registry.service_info.latency | ns/enumeration | niedriger |
-| perfdiag-service-registry | perfdiag.service_registry.service_detail.latency | ns/enumeration | niedriger |
-| perfdiag-service-registry | perfdiag.service_registry.servman_diag.latency | ns/enumeration | niedriger |
-| perfdiag-kernel-ipc | perfdiag.kernel_ipc.caller.latency | ns/request | niedriger |
-| perfdiag-kernel-ipc | perfdiag.kernel_ipc.handler_queue.latency | ns/request | niedriger |
-| perfdiag-kernel-ipc | perfdiag.kernel_ipc.handler_run.latency | ns/request | niedriger |
-| perfdiag-kernel-ipc | perfdiag.kernel_ipc.handler_e2e.latency | ns/request | niedriger |
-| perfdiag-driver-work | perfdiag.driver_work.queue.latency | ns/work | niedriger |
-| perfdiag-driver-work | perfdiag.driver_work.run.latency | ns/work | niedriger |
-| perfdiag-driver-work | perfdiag.driver_work.e2e.latency | ns/work | niedriger |
-| perfdiag-pci-inventory | perfdiag.pci_inventory.latency | ns/inventory | niedriger |
-| perfdiag-memory-metadata | perfdiag.memory_metadata.reserve_commit.latency | ns/page | niedriger |
-| perfdiag-memory-metadata | perfdiag.memory_metadata.fault.latency | ns/page | niedriger |
-| perfdiag-memory-metadata | perfdiag.memory_metadata.page_state.latency | ns/page | niedriger |
-| perfdiag-memory-metadata | perfdiag.memory_metadata.reclaim.latency | ns/frame | niedriger |
-
-1 MB entspricht auch hier 1024 KB. Checksummen, Handles, Flags,
-Besitzertexte, Testanzahlen, Pass/Fail, Fehler, Timeouts und reine
-Konformitaetszaehler sind keine Historienmetriken. Ein solcher Fehler macht
-den Lauf ungueltig; er wird nicht als Zahlenwert importiert.
-
-
-Auswahl der Anforderung
------------------------
-
-- Suite nach der geaenderten Performancegrenze waehlen. Fuer reine
-  Gegenregressionen `perfdiag-clock` verwenden, wenn keine fachlich passendere
-  bestehende Suite existiert.
-- Die Workload-Version ist die installierte PERFDIAG-Modulversion. Sie muss
-  dem Maschinenblock entsprechen.
-- `warm` misst den normalen Abschlussvergleich. `cold` nur verwenden, wenn
-  kalter Zustand fachlich das Ziel ist. Warm und kalt sind nicht vergleichbar.
-- Regulaer fuenf Wiederholungen verwenden. Erlaubt sind 3 bis 20; eine andere
-  Zahl muss methodisch begruendet sein.
-- Workload-ID, Samplezahl, Einheit und Richtung werden beim Import aus den
-  katalogisierten Maschinenrecords abgeleitet und duerfen nicht frei
-  erfunden werden.
-- `perfdiag-blit` misst pro Sample mindestens 250 ms lang denselben
-  320x64-XRGB-Frame. Iterationen und Gesamtbytes sind dabei Resultate und
-  duerfen zwischen Samples variieren; die Workload-ID bindet stattdessen das
-  feste 250-ms-Fenster und die aus `bytes / iterations` validierte Framegroesse.
-
-
-Verbindlicher Ablauf
---------------------
-
-Die folgenden Befehle zeigen die Windows-Schreibweise. Unter Linux wird
-`Tools\Build.bat` durch `./Tools/Build.sh` ersetzt. PowerShell-Werkzeuge
-werden dort mit `pwsh -NoLogo -NoProfile -File` und Pfaden mit `/` gestartet.
-
-1. Zustaendige Besitzerbuilds und Tests abschliessen. Release- und nur
-   tatsaechlich geaenderte Artefaktversionen vor dem Imagebau pflegen.
-2. Benchmark-Image bauen, ohne einen Benchmark zu starten:
-
-       Tools\Build.bat -benchmarkimage
-
-   Gleichwertig sind `-image Benchmark` beziehungsweise ein bereits
-   vollstaendiger `-all Benchmark`-Build. `-qemu Benchmark` ist nur ein
-   interaktiver Diagnoselauf und kein Benchmark.
-3. Image strukturell pruefen:
-
-       Tools\Build.bat -verify Benchmark
-
-4. Genau den angeordneten Lauf explizit starten, zum Beispiel:
-
-       Tools\Build.bat -benchmark perfdiag-clock 0.3.7 warm 5 r4os-q35-haswell-smp4-1g-tcg-gpt1-v1
-
-5. Nur ein Ergebnis mit QEMU-Exit 0, regulaerem Gast-Poweroff, genau einem
-   vollstaendigen `PERFDIAG machine-result`-Block, passender Requestidentitaet,
-   gueltiger Clockbasis und ausschliesslich erfolgreichen Korrektheitschecks
-   importieren:
-
-       powershell.exe -NoProfile -ExecutionPolicy Bypass -File Repositories\Distribution\Tools\BenchmarkHistory.ps1 -Action import -InputPath Artifacts\Distribution\Profiles\Benchmark\Runs\current\benchmark-result.json -HistoryPath ExFiles\Reports\Benchmarks.jsonl
-
-6. Historie separat validieren:
-
-       powershell.exe -NoProfile -ExecutionPolicy Bypass -File Repositories\Distribution\Tools\BenchmarkHistory.ps1 -Action validate -HistoryPath ExFiles\Reports\Benchmarks.jsonl
-
-7. Nur dieselbe Suite, Workload-ID, Environment-ID und Metrik vergleichen:
-
-       powershell.exe -NoProfile -ExecutionPolicy Bypass -File Repositories\Distribution\Tools\BenchmarkHistory.ps1 -Action compare -HistoryPath ExFiles\Reports\Benchmarks.jsonl -Suite perfdiag-clock -WorkloadId perfdiag.clock.calls-10000.v1 -EnvironmentId r4os-q35-haswell-smp4-1g-tcg-gpt1-v1 -CacheState warm -Metric perfdiag.clock.latency
-
-   Gibt es fuer diese vollstaendige Identitaet noch keinen Vorgaenger, ist
-   der importierte Lauf die neue Vergleichsbasis. Er darf nicht mit einer
-   anderen Umgebung oder Workload zwangsverglichen werden.
-
-8. Harte Resultate und ihre Interpretation in den Roadmap-Abschluss
-   aufnehmen. Danach die Unterversion gesammelt pushen. Keine
-   Implementierungs- oder Testberichte in `Benchmarks.jsonl` schreiben.
-
-
-Historienformat
----------------
-
-`Benchmarks.jsonl` ist UTF-8 ohne BOM mit LF. Jede Zeile ist genau ein
-`r4os.benchmark.metric`-Objekt der Schema-Version 1 mit:
-
-    schema, schema_version, run_id, release, suite, workload_id,
-    environment_id, image_sha256, cache_state, metric, unit, direction,
-    samples, min, p50, p95, p99, max, mean
-
-Die Kombination `run_id/metric` ist eindeutig. Alle Metriken desselben Runs
-besitzen dieselbe Identitaet. Neue Imports verlangen einen echten
-SHA-256-Wert des Benchmark-Images. Nur die einmalig migrierten Legacyzeilen
-duerfen `image_sha256: null` tragen, weil die alten Images nicht mehr
-verifizierbar vorliegen.
-
-Die Historie wird nicht per Texteditor erweitert. Das Werkzeug validiert
-zuerst Altbestand und neuen Lauf, verweigert Duplikate oder Mischidentitaeten
-und ersetzt die Datei erst danach atomar. Bei jedem Fehler bleibt der
-vorherige Bytebestand unveraendert.
-
-
-Vergleich und Interpretation
+Aktueller Besitzer und Aufruf
 ----------------------------
+PERFDIAG gehoert Repositories/Diagnostics/PerformanceDiag und wird in 0.83.2
+mit seinen Kernelfunktionen durch Spectra ersetzt. Aktuelle explizite Suites:
+BLIT, CLOCK, SERVICE-REGISTRY, KERNEL-IPC, DRIVER-WORK, PCI-INVENTORY und
+MEMORY-METADATA. /BASELINE liest passiv; /CONFORMANCE startet Funktionsproben.
 
-`compare` sortiert die stabile Zeitreihe nach Release und liefert Mittelwert,
-absolutes Delta, Prozentdelta sowie richtungsbewusste Verbesserung. Bei
-`lower` ist ein negatives Rohdelta eine Verbesserung, bei `higher` ein
-positives. Ungleiche Workloads, Environments, Cachezustaende oder Metriken
-werden nicht zusammengelegt.
+Der normale Kernel verwendet -Dmetrics=false. -Dmetrics=true aktiviert
+optionale Zeit-/Stackmessungen. KERNEL-IPC und DRIVER-WORK verlangen diesen
+Detailmodus, weil ihre bisherigen Ergebnisvertraege interne Nanosekundenwerte
+enthalten. Messmodus immer mit dem Ergebnis aufzeichnen; deaktivierte Werte
+sind unverfuegbar, nicht gemessene Nullzeiten.
 
-Auch kleine reproduzierbare Verbesserungen duerfen bestehen bleiben. Es gibt
-keine allgemeine automatische Regressionsschwelle. Streuung, min/p50/p95/p99,
-Rohsamples und fachlicher Umfang muessen gemeinsam bewertet werden; ein
-Pass/Fail-Ergebnis ersetzt diese Einordnung nicht.
+Die Hoststarter sind Tools/Build.bat beziehungsweise ./Tools/Build.sh.
+-benchmarkimage baut ausschliesslich das Image. -benchmark SUITE VERSION
+WARM|COLD WIEDERHOLUNGEN UMGEBUNGS-ID startet den ausdruecklichen Lauf im
+vorhandenen Benchmarkprofil. Der Runner liegt unter
+Repositories/Distribution/Tests/Invoke-QemuBenchmark.ps1.
 
+Die bestehende Environment-ID r4os-q35-haswell-smp4-1g-tcg-gpt1-v1 beschreibt
+q35, TCG single-thread, Haswell, vier vCPUs, 1 GiB RAM, deaktiviertes Netzwerk,
+feste Platten-/RTC-Konfiguration und HDA ohne Hostaudio. Pro Lauf entsteht
+eine frische Datenplattenkopie. Nur identische Umgebungs-/Workload-/Cache-
+Identitaeten vergleichen. Regulaer fuenf Wiederholungen (erlaubt 3..20).
+Die Workloadversion ist die installierte PERFDIAG-Modulversion.
 
-Fehlerbehandlung
-----------------
+Kernelinstrumentierung: ausdruecklicher A/B-Nachweis
+---------------------------------------------------
+PERFDIAG /OBSERVER fuehrt die begrenzte Arbeitslast
+kernel-instrumentation-v1 mit einem Warmlauf und fuenf Rohsamples je Phase
+aus. Kernelvarianten unterscheiden sich nur durch -Dmetrics=false/true;
+QEMU-Backend, CPU/RAM, Imagebestand, Last und Clockbasis bleiben gleich.
 
-- Einen abgebrochenen, fehlerhaften, unvollstaendigen oder nicht passenden
-  Lauf niemals manuell reparieren oder importieren.
-- Vor einem begruendeten Wiederholungslauf relevante `Runs/current`-Logs nach
-  `Temp/` kopieren, weil der naechste Lauf seine aktuellen Dateien ersetzt.
-- Timeout, fehlendes Poweroff, falsche Environment-ID, fehlende Samples,
-  unbekannte Metrik, falsche Einheit oder Clockbasis zuerst als methodischen
-  beziehungsweise technischen Fehler klaeren.
-- Ein zusaetzlicher Lauf ist erst nach dokumentierter Notwendigkeit erlaubt.
-  Ein GUI-Sichtlauf und ein Start ohne Request-/Maschinenblock sind keine
-  gueltigen Benchmarkresultate.
-- Bei Importfehlern `validate` auf der unveraenderten Historie ausfuehren und
-  den konkreten Lauf unter `Runs/current` untersuchen. Keine JSONL-Zeile von
-  Hand loeschen oder umschreiben.
+Phasen: Clock, Runtime/Yield, VM, Thread-/Stackanlage, Driver-Work/IRQ,
+Metadatenabfrage, Lockabfrage, grosse Summary und Konsolenausgabe. Die
+Work-Audiolast enthaelt feste Pausen; sie ist kein reiner CPU-Benchmark.
+Ausgaben ausserhalb der gemessenen Schleifen halten, ausgenommen die
+klar bezeichnete Ausgabephase. Der versionierte NDJSON-Block erhaelt genaue
+Nanosekunden/Zaehler als Dezimalstrings, Clockgeneration, Modus und Pass/Fail.
+Beide Modi pruefen ihre Erfassungsgrenzen. Kein Hintergrundsammler entsteht.
 
+Der A/B-Bericht haelt Host/QEMU, Bild-/Artefaktidentitaeten, Rohwerte,
+Median/Spannweite und Grenzen fest. Aus einer verrauschten Differenz keinen
+allgemeinen Performanceprozentsatz ableiten. TCG-SMP belegt keine physische
+Parallelskalierung. Zusatzausfuehrungen brauchen einen konkreten methodischen
+oder technischen Grund, der in den Roadmap-Notizen dokumentiert wird.
 
-Weiterfuehrend
---------------
+Auswertung und kuenftiger Standardbenchmark
+------------------------------------------
+Nur vollstaendige Laeufe mit gueltiger Clock, erfolgreichen Checks,
+korrektem Ressourcenabbau und regulaerem Gastende als Vergleich verwenden.
+Fehler/Timeout/Abbruch sichtbar erhalten, nie zu Messzahlen reparieren.
+Vor Wiederholung aktuelle Belege sichern. Es gibt keine pauschale
+Geschwindigkeits-Regressionsschwelle.
 
-    Agents/Build.txt
-    Agents/Test.txt
-    Repositories/Distribution/DOCUMENTATION.de.txt
-    Repositories/Distribution/README.md
+0.83.3 verwendet scheduler_sync, memory, ipc, lifecycle und filesystem_io
+separat und einen Gesamtindex. Referenz 100, feste versionierte Gewichte,
+geometrische Mittel; ohne alle fuenf gueltigen vergleichbaren Bereiche kein
+Gesamtwert. Export/Referenzvergleich funktionieren ohne Datenbankdienst.
+Der Ergebnisvertrag wird in Docs/Diagnostics/README.txt konkretisiert.
+
+Weiterfuehrend: Agents/Build.txt, Agents/Test.txt,
+Docs/Diagnostics/KernelInstrumentation.txt und die aktive Roadmap.
