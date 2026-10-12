@@ -171,6 +171,11 @@ SMP4- und Browser-Headless-Lauf haben ein 1200-Sekunden-Limit.
 `QEMU_TEST_TIMEOUT_SECONDS` kann es bei Bedarf explizit ueberschreiben.
 Klickifax und KlickifaxLive stehen mit `IMAGE_SCOPE=none` nur fuer gezielte
 Testplaene bereit.
+Seit dem Treiberschnitt0.82.44 starten Standard-Slim/Full mit
+`GRAPHICS=SOFTWARE`. NVIDIA/R4NV/R4NAK stehen wie AMDGPU/R4AMD/R4ACO auf
+`IMAGE_SCOPE=none`. Der Distribution-Starter kann den gewuenschten Stapel
+gezielt mit `image Full -GraphicsVendor nvidia` beziehungsweise `amd`
+aufnehmen; die native Aktivierung bleibt eine ausdrueckliche CONFIG-Wahl.
 Produktive Full-Module, die nur eine Testkette benoetigt, koennen als
 ausdrueckliche Test-Includes des Orchestrators aufgenommen werden. Fuer die
 Subsystem-Runtime- und Registry-Abnahmen gilt dies fuer AUDSVC und REGEDIT;
