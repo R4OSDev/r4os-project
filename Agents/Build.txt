@@ -31,7 +31,7 @@ Unter Linux werden dieselben Project-Aktionen ueber `Tools/Setup.sh`,
     ./Tools/Github.sh -pull -devkit
     ./DevKit/Setup/Setup_Linux.sh
 
-Das Linux-DevKit installiert Zig, Limine und QEMU, bezieht seine
+Das Linux-DevKit installiert Zig, Rust, Limine und QEMU, bezieht seine
 Verbraucherkopien und baut die Hosttools nativ. Image-, Verify- und
 QEMU-Aktionen setzen zusaetzlich die Linux-Unterstuetzung des
 Distribution-Besitzers voraus.
@@ -46,6 +46,7 @@ Libraries, Kernel und Distribution an.
 Erwartete zentrale Pfade:
 
     DevKit/Toolchains/Zig/zig[.exe]
+    DevKit/Toolchains/Rust/
     DevKit/Boot/Limine/
     DevKit/Emulation/QEMU/
     Repositories/Contract/
@@ -53,6 +54,14 @@ Erwartete zentrale Pfade:
     Repositories/Libraries/
     Repositories/Kernel/
     Repositories/Distribution/
+
+Rust-Vorbereitung: ./DevKit/Setup/Rust.sh setup beziehungsweise
+DevKit\Setup\Rust.bat setup richtet ausschliesslich die in
+DevKit/Setup/RustToolchain.json festgelegte Stable-Toolchain ein: rustc/Cargo,
+rustfmt, Clippy, LLVM-Werkzeuge, Rust-Quellen und x86_64-unknown-none.
+Werkzeuge mit demselben Starter aufrufen, z. B. Rust.sh cargo --version;
+er setzt die isolierten Compilerhomes und die genaue Version nur pro Aufruf.
+Der vorhandene Kernel-/Modulbau bleibt bis zur jeweiligen Migration bei Zig.
 
 
 Der Workspace-Einstieg

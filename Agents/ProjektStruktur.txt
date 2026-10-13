@@ -157,6 +157,7 @@ DevKit/
 
     Setup/              hostspezifische Installationsskripte
     Toolchains/Zig/     installierte Zig-Toolchain
+    Toolchains/Rust/    festgelegte Rust-Toolchain mit eigenen Cargo-/rustup-Homes
     Boot/Limine/        installierter Bootloader und Hosttool
     Emulation/QEMU/     installierter Emulator
     SDK/Core/           installierte SDK-Arbeitskopie
@@ -186,7 +187,7 @@ Das Distribution-Repository besitzt:
     Tools/               ImageCreator, ImagePlan, NtfsVerify, R4UPack usw.
     Tests/               Plan-, Tool- und Headless-Auswertung
 
-QEMU, Limine und Zig selbst liegen nur im DevKit. Distribution enthaelt die
+QEMU, Limine, Zig und die vorbereitete Rust-Toolchain liegen nur im DevKit. Distribution enthaelt die
 R4OS-spezifischen Profile, Overlays und Aufrufe, aber keine zweite
 Installation dieser Fremdwerkzeuge.
 
