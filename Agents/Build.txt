@@ -61,7 +61,11 @@ DevKit/Setup/RustToolchain.json festgelegte Stable-Toolchain ein: rustc/Cargo,
 rustfmt, Clippy, LLVM-Werkzeuge, Rust-Quellen und x86_64-unknown-none.
 Werkzeuge mit demselben Starter aufrufen, z. B. Rust.sh cargo --version;
 er setzt die isolierten Compilerhomes und die genaue Version nur pro Aufruf.
-Der vorhandene Kernel-/Modulbau bleibt bis zur jeweiligen Migration bei Zig.
+Seit 0.83.6 startet der Kernel dieselbe PowerShell-Logik auf beiden Hosts:
+erst gepruefte Cargo-Nativobjekte, danach Linking der noch produktiven
+Zig-Besitzer. Kerneloptionen: Repositories/Kernel/BuildOptions.json.
+Rustprofil und ELF-gebundene Compiler-/Benchmarkherkunft:
+Docs/Core/KernelRustBuild.txt. Andere Modulbauten bleiben unveraendert.
 
 
 Der Workspace-Einstieg
@@ -436,7 +440,9 @@ Bei einem Fehler:
   den benoetigten Build erneut fahren. Distribution-Ausgaben werden vom
   Clean bewusst nicht entfernt und durch den zustaendigen Image-, Tool- oder
   Releasebuild gezielt erneuert.
-- Der Kernel bleibt auf `ReleaseSafe` und ohne SIMD.
+- Zig-Kernelteile bleiben ReleaseSafe ohne SIMD. Rust verwendet das feste
+  Releaseprofil mit Overflowchecks/Assertions, panic=abort und ohne
+  Red-Zone/SIMD; keine pauschale Optimize-Aenderung durch den Caller.
 
 
 Weiterfuehrend

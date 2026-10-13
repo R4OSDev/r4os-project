@@ -320,3 +320,10 @@ no_std-Crate. Cargo und der bestehende Zig-Standalonebau pinnen denselben
 Contract-Commit. Der produktive Kernelbau bleibt bis 0.83.6 Zig; keine
 zusaetzliche Bindingkopie oder neue API-Version. Darstellungs-/Aufrufnachweis:
 Docs/API/RustContractBindings.txt und Docs/Core/KernelRustBindings0835.json.
+
+0.83.6: Build.ps1 baut Cargo-Nativobjekte und die noch produktiven Zig-Owner.
+BuildOptions.json ist die gemeinsame Optionsquelle; kernel/rust_bridge.zig
+und Rust/build_bridge.rs behalten nur private Buildinfo-/Panicgrenzen.
+r4os.build.json bindet wirkliche Compiler/Profile an den ELF-Hash fuer Spectra.
+Aufrufe und Herkunft: Docs/Core/KernelRustBuild.txt; Abnahme:
+Docs/Core/KernelRustBuild0836.json. Fachliche Owner folgen ihren Rust-Wellen.
