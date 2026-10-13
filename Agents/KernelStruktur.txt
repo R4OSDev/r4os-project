@@ -296,7 +296,7 @@ Locks und Stackaggregate. SPECTRA METRICS/LOGS liest passiv, CHECK und BENCH
 starten nur ausdruecklich. Quellen, Eigenkosten und Migration stehen in
 Docs/Diagnostics/Spectra.txt und KernelInstrumentation.txt.
 
-Geplante Rust-Kernelmigration (0.83.4–27)
+Rust-Kernelmigration (0.83.4–27)
 -----------------------------------------
 Die obige Dateiliste beschreibt den aktuellen Zig-Produktstand. Die aktuelle
 Roadmap plant zuerst Ausgangsstand, vollstaendige Migrationsmatrix, Rust-ABI-
@@ -309,3 +309,8 @@ Apps, Services, Libraries, R4D/R4P, Subsysteme, Spectra und der separate Recover
 Kernel bleiben Zig. Noetige Contract-/Host-/Dokumentationsaenderungen erfolgen
 beim jeweiligen Besitzer. Performanceoptimierungen werden erst nach der
 Migration separat geplant. Aufgaben und Abnahmen sind in der Roadmap kanonisch.
+
+0.83.4 sichert den bytegleichen Zig-Kernel, alle 350 versionierten Dateien,
+vorhandene Modulbinaerdateien und Spectra-/DevCenter-Belege. Vollstaendige
+Matrix: Docs/Core/KernelRustBaseline0834.json; Rust-Profil, ABI-/Besitzregeln,
+Abnahmen und Rueckweg: Docs/Core/KernelRustMigration.txt.
