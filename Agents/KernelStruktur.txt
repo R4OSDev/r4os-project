@@ -136,17 +136,23 @@ Der Sammelort fuer Kerndienste und Bootschnitte.
 memory/
 -------
 
-    layout.zig        Konstanten des Adressraums und Page-Flags
-    map.zig           normalisierte physische Memory Map
-    blocks.zig        MemoryBlock-Tabelle aus der BootInfo-Map
-    phys.zig          Physical Memory Manager, Frame-Allokator
-    paging.zig        Paging-/CR3-Grundzustand
-    page_tables.zig   eigene PML4, Dry-Run, Device-Mappings, CR3-Switch
-    virt.zig          virtuelle Kernelfenster und Virtual Ranges
-    heap.zig          Kernel-Heap
+    Rust/memory/layout.rs, map.rs     Adressfenster/Flags, normalisierte Map
+    Rust/memory/blocks.rs, phys.rs    Blockkatalog, Bitmap, Frames/Extents
+    Rust/memory/owner.rs              ranggebundene CPU-Owner-Locks
+    Rust/memory/paging.rs             aktiver Paging-/CR3-Grundzustand
+    Rust/memory/page_tables.rs, root.rs  eigene PML4, Dry-Run, Geraete,
+                                      Rootwechsel und Limine-Quarantaene
+    Rust/memory/heap.rs               Heap und initialisierter Rust-Allocator
+    Rust/memory/boot.rs               Speicher-Bootkoordination
+    Rust/memory/vm_ranges.rs, vm_index.rs, vm_commit_spans.rs
+                                     einziger Range-/ID-/Adress-/Spankatalog
+    Rust/memory/vm_frames.rs, vm_transactions.rs, vm_query.rs
+                                     eager/residente VM, Rollback, Snapshots
+    memory/*.zig                     private C-Fassaden; virt.zig behaelt
+                                     wartenden Pager/Page-State bis 0.83.17
     backing_store.zig, reclaim.zig   Auslagerung und globaler Reclaim
 
-Details: `Docs/Core/Speicherverwaltung.txt`.
+Details: `Docs/Core/Speicherverwaltung.txt`, `Docs/Core/KernelRustMemory.txt`.
 
 
 program/
