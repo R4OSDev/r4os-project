@@ -1,4 +1,4 @@
-R4OS Shell und Befehlsausfuehrung - Agent-Referenz
+﻿R4OS Shell und Befehlsausfuehrung - Agent-Referenz
 ==================================================
 
 Zweck: Verlaessliche Host-Aufrufe unter Windows und Linux sowie eine kompakte
@@ -85,9 +85,10 @@ R4OS-Terminal: Orientierung und Systemstatus
     <PROGRAMM> /?           Programmspezifische Hilfe anzeigen
     VER                     Release sowie aktive/installierte Kernelversion
     SYSINFO                 System-, Hardware-, Speicher- und Netzuebersicht
-    BOOTINFO /SUMMARY       Kompakte Bootinformationen
-    BOOTINFO /FB            Framebuffer-Informationen
-    BOOTINFO /MAP           Speicherkarte ausgeben
+    SPECTRA METRICS BOOT    Bootinformationen, Phasen und Speicherkarte
+    SPECTRA METRICS ALL     Alle Kernelmessgruppen (gezielt Gruppe bevorzugen)
+    SPECTRA LOGS BOOT       Begrenzter Kernel-Bootlog
+    SPECTRA HELP            Gruppen, JSON, Export und begrenztes Watch
     DATE                    Datum anzeigen
     TIME                    Uhrzeit anzeigen
     VOL                     Informationen zum aktuellen Laufwerk anzeigen

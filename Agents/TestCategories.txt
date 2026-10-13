@@ -150,3 +150,8 @@ Weiterfuehrend
 
     Agents/Test.txt
     Docs/Inventory/Tests.json
+
+0.83.2: Spectra besitzt die Kernel-Gastpruefungen und ihre Fixtures;
+Aufruf SPECTRA CHECK <Gruppe>. METRICS/LOGS sind passive Diagnose, BENCH ist
+explizite Performancearbeit. Verbleibende Treiber-/Service-/SDK-Diagnosen
+behalten ihre eigene Kategorie. Migrationszuordnung: Docs/Diagnostics/SpectraMigration.json.

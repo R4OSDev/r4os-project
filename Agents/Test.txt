@@ -425,3 +425,13 @@ Weiterfuehrend
     Docs/Inventory/Tests.json
     Repositories/Distribution/README.md
     Repositories/Distribution/Tests/Test-QemuApiMarkers.ps1
+
+Kernelabnahmen seit 0.83.2
+--------------------------
+Bisherige eigenstaendige Kernel-Diagnosen sind Spectra-Gruppen. Erhaltene
+Loader-/Dateisystem-/Ressourcenmarker beginnen mit SPECTRA LOADER,
+SPECTRA FILESYSTEM und SPECTRA RESOURCES. BUILD und CHECK gezielt waehlen;
+Repositories/Diagnostics/Spectra/Build.sh test prueft CLI, Kindargumente und
+die migrierten Messvertraege. BOOT /CONFORMANCE erst nach dem ersten
+Shellprompt per SSH starten: AUTOEXEC laeuft vor der Boot-Ready-Quittung.
+Alle Gastlaeufe ausschliesslich SMP4. Neue Dauergates sparsam verwenden.

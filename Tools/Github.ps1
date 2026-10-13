@@ -3,6 +3,7 @@ param(
     [switch]$Push,
     [switch]$Pull,
     [switch]$Query,
+    [switch]$Delete,
     [switch]$Changed,
     [switch]$Workspace,
     [switch]$Project,
@@ -363,6 +364,7 @@ function Ensure-GitHubRepository([psobject]$Target, [psobject]$Credentials) {
 }
 
 function Invoke-Pull([psobject]$Target) {
+    Assert-NotRetired $Target
     Ensure-LocalRepository $Target
     Assert-MainBranch $Target
     Ensure-Origin $Target
@@ -382,6 +384,7 @@ function Invoke-Pull([psobject]$Target) {
 }
 
 function Invoke-Push([psobject]$Target) {
+    Assert-NotRetired $Target
     $credentials = Read-Credentials
     Ensure-LocalRepository $Target
     Assert-MainBranch $Target
@@ -437,6 +440,84 @@ function Invoke-ChangedPush {
     if ($LASTEXITCODE -ne 0) { throw ('Sammel-Push fehlgeschlagen, Exitcode ' + $LASTEXITCODE + '.') }
 }
 
+function Assert-NotRetired([psobject]$Target) {
+    $path = Join-Path $PSScriptRoot 'RetiredRepositories.json'
+    if (-not (Test-Path -LiteralPath $path -PathType Leaf)) { return }
+    $catalog = Get-Content -Raw -LiteralPath $path | ConvertFrom-Json
+    if (@($catalog.repositories | Where-Object { $_.name -ceq $Target.Name }).Count -ne 0) {
+        throw ('Repository wurde abgeloest und wird nicht neu angelegt: ' + $Target.Name)
+    }
+}
+
+function Invoke-Retirement([psobject]$Target) {
+    if ($Target.Flag -notin @('-app', '-diagnostic')) { throw '-Delete ist auf ein einzelnes App-/Diagnoserepository begrenzt.' }
+    $catalogPath = Join-Path $PSScriptRoot 'RetiredRepositories.json'
+    $catalog = Get-Content -Raw -LiteralPath $catalogPath | ConvertFrom-Json
+    $matches = @($catalog.repositories | Where-Object { $_.name -ceq $Target.Name })
+    if ($matches.Count -ne 1) { throw 'Ein eindeutiger abgeschlossener Migrationseintrag fehlt.' }
+    $migration = $matches[0]
+    if ($migration.verified -isnot [bool] -or -not $migration.verified -or $migration.replacement -cne 'r4os-diagnostic-spectra' -or
+        [string]$migration.source_commit -notmatch '^[0-9a-f]{40}$' -or
+        [string]$migration.replacement_commit -notmatch '^[0-9a-f]{40}$') { throw 'Migration ist nicht als geprueft belegt.' }
+    if (-not (Test-Path -LiteralPath (Join-Path $Target.Root '.git') -PathType Container)) { throw 'Lokales Quellrepository fehlt.' }
+    if ((Get-Item -LiteralPath $Target.Root).Attributes -band [IO.FileAttributes]::ReparsePoint) { throw 'Kein Loeschen ueber einen Repository-Link.' }
+    Assert-MainBranch $Target
+    $origin = Invoke-GitCommand $Target.Root @('remote', 'get-url', 'origin')
+    Assert-GitSuccess $origin 'Origin nicht lesbar.'
+    if (($origin.Output -join '').Trim() -cne $Target.Remote) { throw 'Origin stimmt nicht exakt mit dem kanonischen oeffentlichen Ziel ueberein.' }
+    $head = Invoke-GitCommand $Target.Root @('rev-parse', 'HEAD')
+    Assert-GitSuccess $head 'Commit nicht lesbar.'
+    if (($head.Output -join '').Trim() -cne $migration.source_commit) { throw 'Quellcommit weicht vom Migrationsbeleg ab.' }
+    $status = Invoke-GitCommand $Target.Root @('status', '--porcelain')
+    Assert-GitSuccess $status 'Arbeitsstand nicht lesbar.'
+    if ($status.Output.Count) { throw 'Repository hat ungesicherte Aenderungen.' }
+    if ($Preview) {
+        Write-Host ('Gepruefte Migration: ' + $Target.Name + ' -> ' + $migration.replacement + '; Archiv, Remote-Loeschung, lokale Loeschung.')
+        return
+    }
+    $credentials = Read-Credentials
+    $headers = @{ Accept='application/vnd.github+json'; Authorization=('Bearer ' + $credentials.Token); 'X-GitHub-Api-Version'='2022-11-28' }
+    $uri = 'https://api.github.com/repos/' + $organizationName + '/' + $Target.Name
+    $remote = Invoke-WebRequest -Uri $uri -Headers $headers -Method Get -SkipHttpErrorCheck
+    if ($remote.StatusCode -ne 200) { throw ('Quellrepository nicht bestaetigt: HTTP ' + $remote.StatusCode) }
+    $identity = $remote.Content | ConvertFrom-Json
+    if ($identity.private -or $identity.full_name -cne ($organizationName + '/' + $Target.Name)) { throw 'Remote ist nicht das erwartete oeffentliche Repository.' }
+    $remoteHead = Invoke-WebRequest -Uri ($uri + '/commits/main') -Headers $headers -Method Get -SkipHttpErrorCheck
+    if ($remoteHead.StatusCode -ne 200 -or ($remoteHead.Content | ConvertFrom-Json).sha -cne $migration.source_commit) { throw 'GitHub-main hat sich seit der geprueften Uebernahme veraendert.' }
+    $replacementUri = 'https://api.github.com/repos/' + $organizationName + '/' + $migration.replacement
+    $replacement = Invoke-WebRequest -Uri $replacementUri -Headers $headers -Method Get -SkipHttpErrorCheck
+    if ($replacement.StatusCode -ne 200 -or ($replacement.Content | ConvertFrom-Json).private) { throw 'Oeffentlicher Ersatz fehlt.' }
+    $replacementCommit = Invoke-WebRequest -Uri ($replacementUri + '/commits/' + $migration.replacement_commit) -Headers $headers -Method Get -SkipHttpErrorCheck
+    if ($replacementCommit.StatusCode -ne 200) { throw 'Gepruefter Ersatzcommit fehlt auf GitHub.' }
+    # Every public branch/tag tip must be in the local bundle; never discard
+    # a remote branch just because local main contains the migrated source.
+    $remoteRefs = Invoke-GitCommand $Target.Root @('-c', 'credential.helper=', 'ls-remote', '--heads', '--tags', $Target.Remote)
+    Assert-GitSuccess $remoteRefs 'Oeffentliche Git-Referenzen konnten nicht geprueft werden.'
+    $localRefs = Invoke-GitCommand $Target.Root @('show-ref')
+    Assert-GitSuccess $localRefs 'Lokale Git-Referenzen konnten nicht geprueft werden.'
+    $savedTips = @($localRefs.Output | ForEach-Object { ($_ -split '\s+')[0] })
+    foreach ($line in $remoteRefs.Output) {
+        if ($line -match '\^\{\}$') { continue }
+        if (($line -split '\s+')[0] -cnotin $savedTips) { throw 'Ein oeffentlicher Branch-/Tagstand fehlt im lokalen Git-Archiv.' }
+    }
+    $archive = Join-Path $projectRoot ('ExFiles/RetiredRepositories/' + $Target.Name + '-' + [DateTime]::UtcNow.ToString('yyyyMMddTHHmmssZ'))
+    [IO.Directory]::CreateDirectory($archive) | Out-Null
+    $bundle = Join-Path $archive 'history.bundle'
+    $saved = Invoke-GitCommand $Target.Root @('bundle', 'create', $bundle, '--all')
+    Assert-GitSuccess $saved 'Git-Historie konnte nicht gesichert werden.'
+    $verified = Invoke-GitCommand $Target.Root @('bundle', 'verify', $bundle)
+    Assert-GitSuccess $verified 'Git-Archiv ist ungueltig.'
+    [IO.File]::WriteAllText((Join-Path $archive 'migration.json'), ($migration | ConvertTo-Json -Depth 8), [Text.UTF8Encoding]::new($false))
+    $deleted = Invoke-WebRequest -Uri $uri -Headers $headers -Method Delete -SkipHttpErrorCheck
+    if ($deleted.StatusCode -ne 204) { throw ('GitHub-Loeschung abgelehnt: HTTP ' + $deleted.StatusCode + '; lokales Repository bleibt erhalten.') }
+    $absent = Invoke-WebRequest -Uri $uri -Headers $headers -Method Get -SkipHttpErrorCheck
+    if ($absent.StatusCode -ne 404) { throw ('Remote-Loeschung nicht bestaetigt: HTTP ' + $absent.StatusCode + '; lokales Repository bleibt erhalten.') }
+    $receipt = @{ repository=$identity.full_name; source_commit=$migration.source_commit; replacement_commit=$migration.replacement_commit; remote_deleted_utc=[DateTime]::UtcNow.ToString('o'); bundle_sha256=(Get-FileHash -LiteralPath $bundle).Hash.ToLowerInvariant() }
+    [IO.File]::WriteAllText((Join-Path $archive 'receipt.json'), ($receipt | ConvertTo-Json), [Text.UTF8Encoding]::new($false))
+    Remove-Item -LiteralPath $Target.Root -Recurse -Force
+    Write-Host ('Entfernt: ' + $identity.full_name + '; lokale Git-Historie: ' + $archive)
+}
+
 function Show-Usage {
     Write-Host 'Verwendung:'
     Write-Host '  Github.bat|Github.sh -Push -Changed ["Commit-Beschreibung"]'
@@ -444,6 +525,7 @@ function Show-Usage {
     Write-Host '  Github.bat|Github.sh -Push -Project|-DevKit|-Docs|-Contract|-SDK|-Libraries|-Kernel|-Recovery|-Distribution|-Organization ["Commit-Beschreibung"]'
     Write-Host '  Github.bat|Github.sh -Pull -App|-Service|-Diagnostic|-Driver|-Protocol|-Subsystem NAME'
     Write-Host '  Github.bat|Github.sh -Push -App|-Service|-Diagnostic|-Driver|-Protocol|-Subsystem NAME ["Commit-Beschreibung"]'
+    Write-Host '  Github.bat|Github.sh -Delete -App|-Diagnostic NAME [-Preview] (nur gepruefte Ablosungen im Katalog)'
 }
 
 function Set-InteractiveSelection {
@@ -492,12 +574,12 @@ try {
         throw 'Git wurde nicht gefunden.'
     }
 
-    $actionCount = @(@([bool]$Push, [bool]$Pull, [bool]$Query) | Where-Object { $_ }).Count
+    $actionCount = @(@([bool]$Push, [bool]$Pull, [bool]$Query, [bool]$Delete) | Where-Object { $_ }).Count
     if ($actionCount -eq 0) {
         Set-InteractiveSelection
-        $actionCount = @(@([bool]$Push, [bool]$Pull, [bool]$Query) | Where-Object { $_ }).Count
+        $actionCount = @(@([bool]$Push, [bool]$Pull, [bool]$Query, [bool]$Delete) | Where-Object { $_ }).Count
     }
-    if ($actionCount -ne 1) { throw 'Genau eine Aktion (-Push, -Pull oder -Query) ist erforderlich.' }
+    if ($actionCount -ne 1) { throw 'Genau eine Aktion (-Push, -Pull, -Query oder -Delete) ist erforderlich.' }
 
     if ($Changed) {
         if (-not $Push -or $Query -or $Pull) { throw '-Changed ist nur mit -Push erlaubt.' }
@@ -527,6 +609,7 @@ try {
         Write-Output (@($target.Key, $target.Label, $target.Root, $target.Name, $target.Remote, $(if ($target.AllowInit) { '1' } else { '0' })) -join '|')
         exit 0
     }
+    if ($Delete) { Invoke-Retirement $target; exit 0 }
     if ($Pull) { Invoke-Pull $target; exit 0 }
     Invoke-Push $target
     exit 0

@@ -18,10 +18,15 @@ Teil dieser Arbeit bauen. Das private Datenbank-/WebAPI-Tool ist getrennt.
 
 Aktueller Besitzer und Aufruf
 ----------------------------
-PERFDIAG gehoert Repositories/Diagnostics/PerformanceDiag und wird in 0.83.2
-mit seinen Kernelfunktionen durch Spectra ersetzt. Aktuelle explizite Suites:
-BLIT, CLOCK, SERVICE-REGISTRY, KERNEL-IPC, DRIVER-WORK, PCI-INVENTORY und
-MEMORY-METADATA. /BASELINE liest passiv; /CONFORMANCE startet Funktionsproben.
+Spectra gehoert Repositories/Diagnostics/Spectra. METRICS fragt passiv ab,
+CHECK startet explizite Funktionspruefungen, BENCH die gewaehlt begrenzte Suite.
+Aktuelle Suites: BLIT, CLOCK, SERVICE-REGISTRY, KERNEL-IPC, DRIVER-WORK,
+PCI-INVENTORY und MEMORY-METADATA. Beispiel:
+    SPECTRA BENCH CLOCK /REPEAT:5 /WARM /JSON
+    SPECTRA CHECK PERFORMANCE
+    SPECTRA METRICS CLOCK /JSON
+Die alten perfdiag-* Host-Suite-IDs und r4os.perfdiag.ndjson Schema 7 bleiben
+fuer diese uebernommenen Einzelbenchmarks kompatibel; Modulname ist SPECTRA.
 
 Der normale Kernel verwendet -Dmetrics=false. -Dmetrics=true aktiviert
 optionale Zeit-/Stackmessungen. KERNEL-IPC und DRIVER-WORK verlangen diesen
@@ -40,11 +45,11 @@ q35, TCG single-thread, Haswell, vier vCPUs, 1 GiB RAM, deaktiviertes Netzwerk,
 feste Platten-/RTC-Konfiguration und HDA ohne Hostaudio. Pro Lauf entsteht
 eine frische Datenplattenkopie. Nur identische Umgebungs-/Workload-/Cache-
 Identitaeten vergleichen. Regulaer fuenf Wiederholungen (erlaubt 3..20).
-Die Workloadversion ist die installierte PERFDIAG-Modulversion.
+Die Workloadversion ist die installierte SPECTRA-Modulversion.
 
 Kernelinstrumentierung: ausdruecklicher A/B-Nachweis
 ---------------------------------------------------
-PERFDIAG /OBSERVER fuehrt die begrenzte Arbeitslast
+SPECTRA BENCH OBSERVER fuehrt die begrenzte Arbeitslast
 kernel-instrumentation-v1 mit einem Warmlauf und fuenf Rohsamples je Phase
 aus. Kernelvarianten unterscheiden sich nur durch -Dmetrics=false/true;
 QEMU-Backend, CPU/RAM, Imagebestand, Last und Clockbasis bleiben gleich.

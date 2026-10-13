@@ -1,0 +1,186 @@
+{
+  "schema_version": 1,
+  "roadmap": "0.83.2",
+  "repositories": [
+    {
+      "name": "r4os-diagnostic-bootcorediag",
+      "source_commit": "3203565db1ae87479af632ba504a04d0462c0ee5",
+      "replacement": "r4os-diagnostic-spectra",
+      "replacement_commit": "793dfc81a1c11e745d9a401d9eb59bc439f25e92",
+      "verified": true,
+      "reason": "Full kernel diagnostic migration; no remaining independent purpose",
+      "replacement_group": "boot",
+      "evidence": "Docs/Diagnostics/Spectra0832.json; ExFiles/Reports/Spectra/20261013-consolidation"
+    },
+    {
+      "name": "r4os-diagnostic-performancediag",
+      "source_commit": "a4038938d542f3542128f8685864a59220c0d9f0",
+      "replacement": "r4os-diagnostic-spectra",
+      "replacement_commit": "793dfc81a1c11e745d9a401d9eb59bc439f25e92",
+      "verified": true,
+      "reason": "Full kernel diagnostic migration; no remaining independent purpose",
+      "replacement_group": "performance",
+      "evidence": "Docs/Diagnostics/Spectra0832.json; ExFiles/Reports/Spectra/20261013-consolidation"
+    },
+    {
+      "name": "r4os-diagnostic-driverdiag",
+      "source_commit": "dff0dafa8d4fe455cb9f30b48c61dde5c3dd46f1",
+      "replacement": "r4os-diagnostic-spectra",
+      "replacement_commit": "793dfc81a1c11e745d9a401d9eb59bc439f25e92",
+      "verified": true,
+      "reason": "Full kernel diagnostic migration; no remaining independent purpose",
+      "replacement_group": "work",
+      "evidence": "Docs/Diagnostics/Spectra0832.json; ExFiles/Reports/Spectra/20261013-consolidation"
+    },
+    {
+      "name": "r4os-diagnostic-threaddiag",
+      "source_commit": "f408c3ae2e0c615ec0449d291a36c83c7fafefd2",
+      "replacement": "r4os-diagnostic-spectra",
+      "replacement_commit": "793dfc81a1c11e745d9a401d9eb59bc439f25e92",
+      "verified": true,
+      "reason": "Full kernel diagnostic migration; no remaining independent purpose",
+      "replacement_group": "thread",
+      "evidence": "Docs/Diagnostics/Spectra0832.json; ExFiles/Reports/Spectra/20261013-consolidation"
+    },
+    {
+      "name": "r4os-diagnostic-stackdiag",
+      "source_commit": "3e00cbd41de070d27f9f64ba7e17f886044e4015",
+      "replacement": "r4os-diagnostic-spectra",
+      "replacement_commit": "793dfc81a1c11e745d9a401d9eb59bc439f25e92",
+      "verified": true,
+      "reason": "Full kernel diagnostic migration; no remaining independent purpose",
+      "replacement_group": "stack",
+      "evidence": "Docs/Diagnostics/Spectra0832.json; ExFiles/Reports/Spectra/20261013-consolidation"
+    },
+    {
+      "name": "r4os-diagnostic-simddiag",
+      "source_commit": "7cb3317c35c1e1849cc188b27a63da624cef929f",
+      "replacement": "r4os-diagnostic-spectra",
+      "replacement_commit": "793dfc81a1c11e745d9a401d9eb59bc439f25e92",
+      "verified": true,
+      "reason": "Full kernel diagnostic migration; no remaining independent purpose",
+      "replacement_group": "simd",
+      "evidence": "Docs/Diagnostics/Spectra0832.json; ExFiles/Reports/Spectra/20261013-consolidation"
+    },
+    {
+      "name": "r4os-diagnostic-cleanupdiag",
+      "source_commit": "13b2d7419089d03bc24cb81c0675f5c098b075c2",
+      "replacement": "r4os-diagnostic-spectra",
+      "replacement_commit": "793dfc81a1c11e745d9a401d9eb59bc439f25e92",
+      "verified": true,
+      "reason": "Full kernel diagnostic migration; no remaining independent purpose",
+      "replacement_group": "lifecycle",
+      "evidence": "Docs/Diagnostics/Spectra0832.json; ExFiles/Reports/Spectra/20261013-consolidation"
+    },
+    {
+      "name": "r4os-diagnostic-asynciodiag",
+      "source_commit": "da055f77cea434d8e9d302cc27d73ef0ff2585a7",
+      "replacement": "r4os-diagnostic-spectra",
+      "replacement_commit": "793dfc81a1c11e745d9a401d9eb59bc439f25e92",
+      "verified": true,
+      "reason": "Full kernel diagnostic migration; no remaining independent purpose",
+      "replacement_group": "async_io",
+      "evidence": "Docs/Diagnostics/Spectra0832.json; ExFiles/Reports/Spectra/20261013-consolidation"
+    },
+    {
+      "name": "r4os-diagnostic-memorysuite",
+      "source_commit": "8aad38d0804759545a35fa27b1d19d167844cc3f",
+      "replacement": "r4os-diagnostic-spectra",
+      "replacement_commit": "793dfc81a1c11e745d9a401d9eb59bc439f25e92",
+      "verified": true,
+      "reason": "Full kernel diagnostic migration; no remaining independent purpose",
+      "replacement_group": "memory",
+      "evidence": "Docs/Diagnostics/Spectra0832.json; ExFiles/Reports/Spectra/20261013-consolidation"
+    },
+    {
+      "name": "r4os-diagnostic-fsdiag",
+      "source_commit": "1d3b0aa2a40aa6444f5126dfd6970069491cbc8c",
+      "replacement": "r4os-diagnostic-spectra",
+      "replacement_commit": "793dfc81a1c11e745d9a401d9eb59bc439f25e92",
+      "verified": true,
+      "reason": "Full kernel diagnostic migration; no remaining independent purpose",
+      "replacement_group": "filesystem",
+      "evidence": "Docs/Diagnostics/Spectra0832.json; ExFiles/Reports/Spectra/20261013-consolidation"
+    },
+    {
+      "name": "r4os-diagnostic-ntfsdiag",
+      "source_commit": "d02b413256e8e864d7df31ab7470467655fc260a",
+      "replacement": "r4os-diagnostic-spectra",
+      "replacement_commit": "793dfc81a1c11e745d9a401d9eb59bc439f25e92",
+      "verified": true,
+      "reason": "Full kernel diagnostic migration; no remaining independent purpose",
+      "replacement_group": "ntfs",
+      "evidence": "Docs/Diagnostics/Spectra0832.json; ExFiles/Reports/Spectra/20261013-consolidation"
+    },
+    {
+      "name": "r4os-diagnostic-loaderdiag",
+      "source_commit": "36cf9afe140d28703ead8f931cc287110404c853",
+      "replacement": "r4os-diagnostic-spectra",
+      "replacement_commit": "793dfc81a1c11e745d9a401d9eb59bc439f25e92",
+      "verified": true,
+      "reason": "Full kernel diagnostic migration; no remaining independent purpose",
+      "replacement_group": "loader",
+      "evidence": "Docs/Diagnostics/Spectra0832.json; ExFiles/Reports/Spectra/20261013-consolidation"
+    },
+    {
+      "name": "r4os-diagnostic-resourcediag",
+      "source_commit": "595c4cc766cace8f72b3d683d3c2f663f18099e5",
+      "replacement": "r4os-diagnostic-spectra",
+      "replacement_commit": "793dfc81a1c11e745d9a401d9eb59bc439f25e92",
+      "verified": true,
+      "reason": "Full kernel diagnostic migration; no remaining independent purpose",
+      "replacement_group": "resources",
+      "evidence": "Docs/Diagnostics/Spectra0832.json; ExFiles/Reports/Spectra/20261013-consolidation"
+    },
+    {
+      "name": "r4os-diagnostic-inputdiag",
+      "source_commit": "a4e61ac593aa68345ea9b43794d2aa6600a058c9",
+      "replacement": "r4os-diagnostic-spectra",
+      "replacement_commit": "793dfc81a1c11e745d9a401d9eb59bc439f25e92",
+      "verified": true,
+      "reason": "Full kernel diagnostic migration; no remaining independent purpose",
+      "replacement_group": "input",
+      "evidence": "Docs/Diagnostics/Spectra0832.json; ExFiles/Reports/Spectra/20261013-consolidation"
+    },
+    {
+      "name": "r4os-diagnostic-netdiag",
+      "source_commit": "8d9d12599df12f43092c66616d3ac41606b50009",
+      "replacement": "r4os-diagnostic-spectra",
+      "replacement_commit": "793dfc81a1c11e745d9a401d9eb59bc439f25e92",
+      "verified": true,
+      "reason": "Full kernel diagnostic migration; no remaining independent purpose",
+      "replacement_group": "network",
+      "evidence": "Docs/Diagnostics/Spectra0832.json; ExFiles/Reports/Spectra/20261013-consolidation"
+    },
+    {
+      "name": "r4os-diagnostic-netsvcdiag",
+      "source_commit": "569105f35dede54f41d70053dd66726c3b37a6ac",
+      "replacement": "r4os-diagnostic-spectra",
+      "replacement_commit": "793dfc81a1c11e745d9a401d9eb59bc439f25e92",
+      "verified": true,
+      "reason": "Full kernel diagnostic migration; no remaining independent purpose",
+      "replacement_group": "ipc",
+      "evidence": "Docs/Diagnostics/Spectra0832.json; ExFiles/Reports/Spectra/20261013-consolidation"
+    },
+    {
+      "name": "r4os-app-bootinfo",
+      "source_commit": "437e2896436c3bf09c98f8655b73b88e3abd0c64",
+      "replacement": "r4os-diagnostic-spectra",
+      "replacement_commit": "793dfc81a1c11e745d9a401d9eb59bc439f25e92",
+      "verified": true,
+      "reason": "Full kernel diagnostic migration; no remaining independent purpose",
+      "replacement_group": "boot metadata and memory map",
+      "evidence": "Docs/Diagnostics/Spectra0832.json; ExFiles/Reports/Spectra/20261013-consolidation"
+    },
+    {
+      "name": "r4os-app-memview",
+      "source_commit": "c9f0dd8613628aa7b1d8644fd6ecb01b542ea4d1",
+      "replacement": "r4os-diagnostic-spectra",
+      "replacement_commit": "793dfc81a1c11e745d9a401d9eb59bc439f25e92",
+      "verified": true,
+      "reason": "Full kernel diagnostic migration; no remaining independent purpose",
+      "replacement_group": "memory snapshot",
+      "evidence": "Docs/Diagnostics/Spectra0832.json; ExFiles/Reports/Spectra/20261013-consolidation"
+    }
+  ]
+}

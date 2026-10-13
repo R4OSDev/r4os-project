@@ -86,8 +86,7 @@ $testImageIncludes = @(
     '/R4OS/SUBSYSTEMS/r4os.snes/R4SNES.R4X',
     '/R4OS/SOFTWARE/TERMINAL/REG.R4X',
     '/R4OS/SOFTWARE/DESKTOP/REGEDIT.R4X',
-    '/R4OS/SOFTWARE/TERMINAL/SYSINFO.R4X',
-    '/R4OS/SOFTWARE/TERMINAL/BOOTINFO.R4X'
+    '/R4OS/SOFTWARE/TERMINAL/SYSINFO.R4X'
 )
 $browserTestImageIncludes = @(
     '/R4OS/SOFTWARE/INTERNET/KLICKIFAX.R4X',
@@ -99,9 +98,8 @@ $browserTestImageIncludes = @(
 )
 $klickifaxModuleTarget = '/R4OS/SOFTWARE/INTERNET/KLICKIFAX.R4X'
 $klickifaxLiveModuleTarget = '/R4OS/SOFTWARE/TERMINAL/DIAG/KFXLIVE.R4X'
-$benchmarkImageIncludes = @(
-    '/R4OS/SOFTWARE/TERMINAL/DIAG/PERFDIAG.R4X'
-)
+# Spectra has IMAGE_SCOPE=slim and is already present in every profile.
+$benchmarkImageIncludes = @()
 
 function Write-Section([string]$Text) {
     Write-Host ''

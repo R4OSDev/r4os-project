@@ -200,7 +200,7 @@ Beispiele fuer beide Hosts:
 
     Tools\Github.bat -push -app Clock "Clock aktualisieren"
     Tools\Github.bat -pull -service SSHD
-    Tools\Github.bat -push -diagnostic FsDiag "FsDiag korrigieren"
+    Tools\Github.bat -push -diagnostic Spectra "Spectra aktualisieren"
     ./Tools/Github.sh -pull -driver MIDI
     ./Tools/Github.sh -push -protocol JSON "JSON aktualisieren"
     ./Tools/Github.sh -pull -subsystem QBasic
@@ -589,3 +589,27 @@ Grenzen des Scripts
   Diagnostics, Drivers, Protocols und Subsystems werden bereits generisch über
   Rollenverzeichnis und Komponentenname erkannt. Package-Server und DevCenter
   bleiben bewusst ausserhalb dieses globalen Scripts.
+
+
+Abgeloeste App-/Diagnoserepositories entfernen
+--------------------------------------------
+
+Nur bei ausdruecklich beauftragter Entfernung und gepruefter Migration:
+
+    <Github-Starter> -Delete -Diagnostic NAME -Preview
+    <Github-Starter> -Delete -Diagnostic NAME
+
+Fuer Apps entsprechend -App. Tools/RetiredRepositories.json bindet genaues
+oeffentliches Quellrepository, geprueften Quellcommit und veroeffentlichten
+Spectra-Ersatzcommit. Preview prueft ausschliesslich lokal und schreibt nichts.
+Der reale Aufruf prueft sauberes main, kanonisches origin, GitHub-main und
+Gesamtsicherung aller oeffentlichen Branch-/Tagspitzen. Er sichert die lokale
+Git-Historie als verifiziertes Bundle unter ExFiles/RetiredRepositories/,
+loescht das zugeordnete oeffentliche Repository, bestaetigt dessen Abwesenheit
+und entfernt erst dann das lokale Projekt. Das Belegarchiv bleibt erhalten.
+Der Token braucht dafuer die GitHub-Berechtigung zum Repositoryloeschen; bei
+Ablehnung bleibt das lokale Projekt erhalten. Ein unterbrochener Loeschlauf
+wird anhand seines Archivs/Belegs geprueft, niemals blind wiederholt.
+Push/Pull verweigern Katalogeintraege, damit entfernte Projekte nicht erneut
+entstehen. Artefakte, aktive Aufrufer, Imageplaene und Inventare werden beim
+fachlichen Migrationsschritt bereinigt; das Loeschwerkzeug aendert sie nicht.

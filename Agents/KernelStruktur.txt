@@ -287,3 +287,11 @@ Weiterfuehrend
     Docs/Core/ProgramLifecycle.txt     Programmlebenszyklus
     Docs/Core/Speicherverwaltung.txt   Speicher- und Registryinvarianten
     Agents/ProjektStruktur.txt         der Baum ausserhalb des Kernels
+
+Kernelinstrumentierung und Bedienung (0.83.2)
+--------------------------------------------
+Kernelbesitzer liefern begrenzte Snapshots; die Anzeige und aktiven Checks
+gehoeren Repositories/Diagnostics/Spectra. R4DEV v13 liefert Modus/Sampling,
+Locks und Stackaggregate. SPECTRA METRICS/LOGS liest passiv, CHECK und BENCH
+starten nur ausdruecklich. Quellen, Eigenkosten und Migration stehen in
+Docs/Diagnostics/Spectra.txt und KernelInstrumentation.txt.
