@@ -1,6 +1,6 @@
 param(
     [Parameter(Mandatory = $true)]
-    [ValidateSet('central', 'kernel', 'modules', 'module', 'map', 'plan', 'image', 'verify', 'qemu', 'ssh', 'headless', 'benchmark', 'all', 'test', 'gui')]
+    [ValidateSet('central', 'kernel', 'modules', 'module', 'map', 'plan', 'image', 'verify', 'qemu', 'ssh', 'headless', 'standardbenchmark', 'benchmark', 'all', 'test', 'gui')]
     [string]$Action,
 
     [ValidateSet('Slim', 'Full', 'Test', 'Benchmark')]
@@ -596,6 +596,7 @@ switch ($Action) {
         $variant = if ($BrowserTest) { @('browser') } elseif ($QuickTest) { @('clock4') } elseif ($SmpTest) { @('smp4') } else { @() }
         Invoke-Distribution 'headless' 'Test' $variant
     }
+    'standardbenchmark' { Invoke-Distribution 'headless' 'Test' @('standard4') }
     'benchmark' {
         Invoke-Distribution 'benchmark' 'Benchmark' @(
             $BenchmarkSuite,

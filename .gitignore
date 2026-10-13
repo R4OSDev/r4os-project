@@ -28,6 +28,7 @@
 /Temp/*
 /Tools/Credentials/
 /Tools/Credentials/*
+/Tools/BenchmarkHost.R4S
 
 # Ausgeschlossene Artefakte
 **/.zig-cache/

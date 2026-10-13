@@ -204,3 +204,8 @@ Empfohlene erste Remote-Diagnose
     IPCONFIG /ALL
     SERVMAN DIAG
     SERVMAN STATUS SSHD
+
+SPECTRA BENCH STANDARD [/AREA:scheduler_sync|memory|ipc|lifecycle|filesystem_io]
+    [/BASELINE | /REFERENCE:path /COMPAREKEY:method] [/JSON] [/EXPORT:path]
+CHECK LIFECYCLE /STANDARDCANCEL prueft den begrenzten Benchmark-Abbruch.
+Standardlauf/Referenzdaten: Docs/Diagnostics/SpectraStandardBenchmark.txt.

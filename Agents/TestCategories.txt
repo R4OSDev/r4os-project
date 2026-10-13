@@ -155,3 +155,12 @@ Weiterfuehrend
 Aufruf SPECTRA CHECK <Gruppe>. METRICS/LOGS sind passive Diagnose, BENCH ist
 explizite Performancearbeit. Verbleibende Treiber-/Service-/SDK-Diagnosen
 behalten ihre eigene Kategorie. Migrationszuordnung: Docs/Diagnostics/SpectraMigration.json.
+
+Spectra-Standardphase 0.83.3: Regulaere SMP4-Headless-Laeufe beginnen mit einem
+begrenzten fuenfteiligen Benchmark im vorhandenen Distribution-Runner. Der
+separate frische Terminal-Boot hat keine Desktop-/Subsystemlast. Die folgende
+bisherige Abnahme behaelt ihr Bootprofil. -standardbenchmark startet nur diese
+Phase auf aktuellen Testartefakten; Quick-, Browser-, Fehler-Injektionsproben
+und reine Builds starten sie nicht. Referenzvergleich/Verlustfrei-Export beim
+Spectra-Besitzer, ohne Datenbankdienst. Workloads, Grenzen und Datensatz:
+Docs/Diagnostics/SpectraStandardBenchmark.txt.

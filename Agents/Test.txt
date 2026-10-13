@@ -435,3 +435,12 @@ Repositories/Diagnostics/Spectra/Build.sh test prueft CLI, Kindargumente und
 die migrierten Messvertraege. BOOT /CONFORMANCE erst nach dem ersten
 Shellprompt per SSH starten: AUTOEXEC laeuft vor der Boot-Ready-Quittung.
 Alle Gastlaeufe ausschliesslich SMP4. Neue Dauergates sparsam verwenden.
+
+Spectra-Standardphase 0.83.3: Regulaere SMP4-Headless-Laeufe beginnen mit einem
+begrenzten fuenfteiligen Benchmark im vorhandenen Distribution-Runner. Der
+separate frische Terminal-Boot hat keine Desktop-/Subsystemlast. Die folgende
+bisherige Abnahme behaelt ihr Bootprofil. -standardbenchmark startet nur diese
+Phase auf aktuellen Testartefakten; Quick-, Browser-, Fehler-Injektionsproben
+und reine Builds starten sie nicht. Referenzvergleich/Verlustfrei-Export beim
+Spectra-Besitzer, ohne Datenbankdienst. Workloads, Grenzen und Datensatz:
+Docs/Diagnostics/SpectraStandardBenchmark.txt.

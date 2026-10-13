@@ -9,8 +9,10 @@ Benchmark. Alle QEMU-Gasttests verwenden vier vCPUs (SMP4).
 
 Roadmap 0.83.1 ordnet einen begrenzten A/B-Vergleich der Kernelinstrumentierung
 an. Roadmap 0.83.3 ordnet danach einen kurzen fuenfteiligen Standardbenchmark
-im regulaeren SMP4-Testlauf an. Diese Standardphase ist noch nicht umgesetzt;
-Quick-Probes bleiben gezielte kurze Funktionsproben.
+im regulaeren SMP4-Testlauf an. Die begrenzte Standardphase laeuft vor den
+bisherigen Tests im vorhandenen Runner; Quick/Browser/Build-only starten sie
+nicht. Einzelaufruf: -standardbenchmark. Spezifikation, Referenz und Schema-1-
+Offlineexport: Docs/Diagnostics/SpectraStandardBenchmark.txt.
 
 Benchmarks.jsonl spielt fuer diese Roadmap keine Rolle. Weder lesen,
 importieren, validieren noch fortschreiben; auch keine Ersatzhistorie als

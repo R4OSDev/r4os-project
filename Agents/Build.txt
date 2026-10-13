@@ -459,3 +459,12 @@ Repositories/Distribution/Build.sh graphics-packages -GraphicsGroup all
 -ReleaseVersion 0.79.42 -OutputRoot <neues-Verzeichnis>. Gruppen: platform,
 core, api, video, desktop; keine Imagekopie, Netzabfrage oder Hardwareprobe.
 Details und Updatefolge: Docs/Deployment/GrafikPakete07942.txt.
+
+Spectra-Standardphase 0.83.3: Regulaere SMP4-Headless-Laeufe beginnen mit einem
+begrenzten fuenfteiligen Benchmark im vorhandenen Distribution-Runner. Der
+separate frische Terminal-Boot hat keine Desktop-/Subsystemlast. Die folgende
+bisherige Abnahme behaelt ihr Bootprofil. -standardbenchmark startet nur diese
+Phase auf aktuellen Testartefakten; Quick-, Browser-, Fehler-Injektionsproben
+und reine Builds starten sie nicht. Referenzvergleich/Verlustfrei-Export beim
+Spectra-Besitzer, ohne Datenbankdienst. Workloads, Grenzen und Datensatz:
+Docs/Diagnostics/SpectraStandardBenchmark.txt.

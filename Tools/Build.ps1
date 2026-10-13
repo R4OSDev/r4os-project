@@ -48,6 +48,7 @@ function Show-Usage {
     Write-Host '  Build.bat|Build.sh -ssh [VirtioNet|RTL8139]'
     Write-Host '  Build.bat|Build.sh -test|-testbrowser|-testsmp|-testquick|-testimage|-testimageonly|-testonly|-benchmarkimage'
     Write-Host '  Build.bat|Build.sh -benchmark SUITE VERSION WARM|COLD WIEDERHOLUNGEN UMGEBUNGS-ID'
+    Write-Host '  Build.bat|Build.sh -standardbenchmark (bounded five-area SMP4 phase on current Test artifacts)'
     Write-Host '  Build.bat|Build.sh -all [Slim|Full|Test|Benchmark]'
     Write-Host '  Build.bat|Build.sh -slim|-gui [VirtioNet|RTL8139]'
 }
@@ -171,6 +172,10 @@ try {
         '-testquick' {
             if ($commandArguments.Count -ne 1) { throw '-testquick akzeptiert keine weiteren Argumente.' }
             Invoke-WorkspaceBuild -Action headless -Profile Test -Additional @{ QuickTest = $true }
+        }
+        '-standardbenchmark' {
+            if ($commandArguments.Count -ne 1) { throw '-standardbenchmark akzeptiert keine weiteren Argumente.' }
+            Invoke-WorkspaceBuild -Action standardbenchmark -Profile Test
         }
         '-testimage' {
             if ($commandArguments.Count -ne 1) { throw '-testimage akzeptiert keine weiteren Argumente.' }
