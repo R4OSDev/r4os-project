@@ -19,9 +19,10 @@ den vollstaendigen Bestand gilt der Kernelbaum selbst.
 Einstieg und Bootreihenfolge
 ----------------------------
 
-`main.zig` exportiert `kmain`, initialisiert die Grundlagen in fester
-Reihenfolge und uebergibt danach an `kernel/runtime_boot.zig`, das Services
-und Shell startet.
+`Rust/boot/entry.rs` exportiert seit 0.83.7 `kmain` und haelt die feste
+Reihenfolge. `main.zig` verbindet noch ausstehende Fachbesitzer ueber private
+C-Bootschnitte. `kernel/runtime_boot.zig` startet bis zu seiner eigenen
+Rust-Welle weiterhin Services und Shell. Details: Docs/Core/KernelRustBoot.txt.
 
 Die Reihenfolge ist Vertrag, nicht Zufall - jede Stufe setzt die vorige
 voraus:
@@ -65,9 +66,9 @@ bleibt in den Modulen ihres Bereichs.
 arch/x86_64/
 ------------
 
-    gdt.zig           Global Descriptor Table und TSS-Descriptor
-    idt.zig           Interrupt Descriptor Table, Exception-/IRQ-Dispatch
-    tss.zig           Task State Segment, IST-Stacks
+    Rust/arch/tables.rs  GDT/TSS/IDT/IST und Assembly-Frames
+    gdt.zig, tss.zig     Uebergangsfassaden ohne eigene Tabellen
+    idt.zig             Adapter zum noch nicht migrierten IRQ-/VM-Besitzer
     pic.zig           8259 PIC remap/mask/EOI
     pit.zig           PIT Timer IRQ0 und Tick-Zaehler
     ioapic.zig        IOAPIC redirection/routing
@@ -80,8 +81,9 @@ arch/x86_64/
 bootloader/ und display/
 ------------------------
 
-    bootloader/limine.zig     Request-Marker und Bootloader-Antworten
-    bootloader/boot_info.zig  bootloader-neutrale BootInfo-Sicht
+    Rust/boot/limine.rs       Request-Marker und volatile Antworten
+    Rust/boot/info.rs         normalisierte residente Bootdaten
+    bootloader/*.zig          unveraenderliche Uebergangsviews fuer Zig
 
     display/boot_display.zig  fruehe Ausgabe auf dem Limine-Framebuffer
     display/console.zig       fruehe Kernel-Console mit begrenztem RAM-Pixelscroll
@@ -100,11 +102,12 @@ kernel/
 Der Sammelort fuer Kerndienste und Bootschnitte.
 
     log.zig           Logging, optionaler Serial-Sink
-    boot_status.zig   dauerhafte COM1-/Bootlog-Umleitung; sichtbare Console
-                      nur vor Redirect und im Crashpfad
-    bootlog.zig       Bootlog-/DMESG-Ringpuffer
-    fatal.zig         Fatalpfad und Bootphasen
-    crash.zig, crash_screen.zig, diag_screen.zig   sichtbare Fehlerbilder
+    Rust/boot/foundation.rs  CPU-Boot/Intro/COM1-Hooks/Logumleitung
+    Rust/boot/log.rs, serial.rs  Bootlog und einziger COM1-TX-Ring
+    Rust/boot/fatal.rs, crash.rs  Fatalzustand, Bootphasen und Records
+    Rust/boot/r4b.rs   R4B0-Splashdecoder und frueher MMIO-Bildpfad
+    boot_status/bootlog/fatal/crash.zig  private Uebergangsfassaden
+    crash_screen.zig, diag_screen.zig   bestehender Anzeigenbesitzer
     deadman.zig       kooperativer Deadman; kann einen harten Spin mit
                       gesperrten Interrupts NICHT praemptieren
     driver_api.zig    DriverApi-Tabelle fuer R4D: PCI-Inventar und -Config,
@@ -298,8 +301,8 @@ Docs/Diagnostics/Spectra.txt und KernelInstrumentation.txt.
 
 Rust-Kernelmigration (0.83.4–27)
 -----------------------------------------
-Die obige Dateiliste beschreibt den aktuellen Zig-Produktstand. Die aktuelle
-Roadmap plant zuerst Ausgangsstand, vollstaendige Migrationsmatrix, Rust-ABI-
+Die obige Dateiliste beschreibt den aktuellen gemischten Rust-/Zig-Stand. Die
+Roadmap sichert zuerst Ausgangsstand, vollstaendige Migrationsmatrix, Rust-ABI-
 Bindings und Buildintegration, danach die einzelnen Kernelbesitzer und zuletzt
 die komplette Rust-Abnahme. Private C-ABI-Bruecken erlauben den Uebergang mit
 genau einem aktiven Besitzer je Zustand; 0.83.27 entfernt produktiven Zig-
@@ -327,3 +330,10 @@ und Rust/build_bridge.rs behalten nur private Buildinfo-/Panicgrenzen.
 r4os.build.json bindet wirkliche Compiler/Profile an den ELF-Hash fuer Spectra.
 Aufrufe und Herkunft: Docs/Core/KernelRustBuild.txt; Abnahme:
 Docs/Core/KernelRustBuild0836.json. Fachliche Owner folgen ihren Rust-Wellen.
+
+0.83.7: kmain, Limine/BootInfo, CPU-Tabellen/IST-Frames, Intro/Logumleitung,
+COM1-/Bootlog-Ringe, R4B und Fatal-/Crashrecords gehoeren Rust. Die vorhandenen
+Ownerfixtures binden echte Rustfunktionen; neue SMP4-Images sind am ELF-Hash
+gebunden. Renderer-/Font-/Framebufferbesitzer folgen 0.83.21, Clock/Runtime/VM
+ihren eigenen Wellen. Grenzen und Beleg: Docs/Core/KernelRustBoot.txt und
+Docs/Core/KernelRustBoot0837.json. Naechster Schritt ist 0.83.8.

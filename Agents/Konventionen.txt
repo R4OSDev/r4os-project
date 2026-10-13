@@ -20,7 +20,9 @@ Kernelgrenze und Hardware
   ausloesen. Die gesonderte DriverPlatformApi leiht authentifizierten
   Firmwarearbeitern ausschliesslich bereits permanente Firmware-/UC-Seiten;
   ACPIPLAT verwendet darauf validierte MCFG/ECAM-Zugriffe ohne CF8/CFC.
-- Der produktive Kernel baut `ReleaseSafe` und ohne SIMD (`soft_float`). R4X,
+- Die verbleibenden Zig-Kernelteile bauen `ReleaseSafe`/`soft_float`; Rust
+  verwendet das feste gepruefte Releaseprofil ohne SIMD aus
+  Docs/Core/KernelRustBuild.txt. R4X,
   R4D, R4P und R4L duerfen die vom SDK freigegebenen SIMD-Features bis AVX2
   sowie AES-NI/PCLMULQDQ nutzen. Zielhardware ist die AVX2-Klasse; der
   Scheduler sichert den nach CPUID/XCR0 benoetigten FPU-State fuer alle
@@ -32,9 +34,10 @@ Kernelgrenze und Hardware
 - `Repositories/Kernel/kernel/font.zig` ist Kernelcode. Die Fontquellen und
   Hostgeneratoren unter `Repositories/Distribution/Assets/SystemFonts/`
   importieren keinen Kernelcode; die Glyphquellen bleiben bewusst getrennt.
-- Limine-Requestsektionen bleiben alphabetisch als
+- Limine-Requestsektionen behalten die alphabetisch benannten Sektionen
   `.limine_reqs_a_start`, `.limine_reqs_m_data`, `.limine_reqs_z_end`
-  sortiert. Vom Bootloader befuellte Antworten benoetigen volatile Reads.
+  bei. Nicht aus Namen auf physische ELF-Reihenfolge schliessen; Retention und
+  wirklichen Limine-Handoff pruefen. Antworten benoetigen volatile Reads.
 - COM1-Debug haengt an `config.enable_com1_debug` und ist standardmaessig an,
   weil die Headless-Abnahme den seriellen Pfad benoetigt.
   `Repositories/Kernel/Build.bat -Dcom1-debug=false` muss weiterhin bauen;
