@@ -1,88 +1,60 @@
 ﻿R4OS Benchmark - Agent-Referenz
 ================================
 
-Ausloesung
-----------
-Benchmarks nur auf ausdruecklichen Userauftrag oder aufgrund einer bereits
-vorhandenen Roadmap-Aufgabe starten. Ein Build oder Imagebau startet keinen
-Benchmark. Alle QEMU-Gasttests verwenden vier vCPUs (SMP4).
+Verbindlicher Standard
+---------------------
+Performancebenchmarks verwenden ausschliesslich den Spectra-Standardbenchmark.
+Alle QEMU-Laeufe nutzen vier vCPUs (SMP4). Regulaere SMP4-Headless-Abnahmen
+enthalten genau eine begrenzte Standardphase vor den bisherigen Tests.
+Quick-, Browser-, Fehler-Injektionsproben und reine Builds starten sie nicht.
 
-Roadmap 0.83.1 ordnet einen begrenzten A/B-Vergleich der Kernelinstrumentierung
-an. Roadmap 0.83.3 ordnet danach einen kurzen fuenfteiligen Standardbenchmark
-im regulaeren SMP4-Testlauf an. Die begrenzte Standardphase laeuft vor den
-bisherigen Tests im vorhandenen Runner; Quick/Browser/Build-only starten sie
-nicht. Einzelaufruf: -standardbenchmark. Spezifikation, Referenz und Schema-1-
-Offlineexport: Docs/Diagnostics/SpectraStandardBenchmark.txt.
+Nur die Standardphase auf aktuellen Testartefakten und aktuellem Imageplan:
+    ./Tools/Build.sh -standardbenchmark
+    Tools\Build.bat -standardbenchmark
+Weitere Laeufe nur bei Userauftrag, Roadmap-Aufgabe oder einem dokumentierten
+technischen/methodischen Grund. Keine Wiederholung allein wegen Uploadfehlern.
 
-Benchmarks.jsonl spielt fuer diese Roadmap keine Rolle. Weder lesen,
-importieren, validieren noch fortschreiben; auch keine Ersatzhistorie als
-Teil dieser Arbeit bauen. Das private Datenbank-/WebAPI-Tool ist getrennt.
+Messung und Ergebnis
+--------------------
+Spectra misst scheduler_sync, memory, ipc, lifecycle und filesystem_io.
+Je Bereich ein Warmlauf und fuenf Messungen: insgesamt 30 Rohsamples,
+fuenf Hauptmetriken und sechs Scores einschliesslich overall. Die feste
+Referenz definiert 100 Punkte; alle Bereiche tragen gleich zum geometrischen
+Gesamtindex bei. Fehlerhafte, unvollstaendige oder inkompatible Laeufe behalten
+ihre Rohdaten und Fehlergruende, aber keinen gueltigen Gesamtindex.
 
-Aktueller Besitzer und Aufruf
-----------------------------
-Spectra gehoert Repositories/Diagnostics/Spectra. METRICS fragt passiv ab,
-CHECK startet explizite Funktionspruefungen, BENCH die gewaehlt begrenzte Suite.
-Aktuelle Suites: BLIT, CLOCK, SERVICE-REGISTRY, KERNEL-IPC, DRIVER-WORK,
-PCI-INVENTORY und MEMORY-METADATA. Beispiel:
-    SPECTRA BENCH CLOCK /REPEAT:5 /WARM /JSON
-    SPECTRA CHECK PERFORMANCE
-    SPECTRA METRICS CLOCK /JSON
-Die alten perfdiag-* Host-Suite-IDs und r4os.perfdiag.ndjson Schema 7 bleiben
-fuer diese uebernommenen Einzelbenchmarks kompatibel; Modulname ist SPECTRA.
+Der Runner erzeugt einen unveraenderlichen vollstaendigen Schema-1-Export:
+    Artifacts/Distribution/Diagnostics/SpectraStandard/<run_id>/run.json
+Daneben liegen context.json, serial.log und qemu.err. Host/CPU/QEMU/Storage,
+Versionen, Commits, Artefakthashes, Messmodus, Arbeitsmengen und Clockangaben
+bleiben mit dem Ergebnis verbunden. Fuer diesen Host gilt hetzner-qemu;
+R4OS_BENCHMARK_HOST_ID oder Tools/BenchmarkHost.R4S setzt die lokale Host-ID.
+Messung und Offlineexport brauchen keinen laufenden DevCenter-Dienst.
 
-Der normale Kernel verwendet -Dmetrics=false. -Dmetrics=true aktiviert
-optionale Zeit-/Stackmessungen. KERNEL-IPC und DRIVER-WORK verlangen diesen
-Detailmodus, weil ihre bisherigen Ergebnisvertraege interne Nanosekundenwerte
-enthalten. Messmodus immer mit dem Ergebnis aufzeichnen; deaktivierte Werte
-sind unverfuegbar, nicht gemessene Nullzeiten.
+Die Referenz Repositories/Diagnostics/Spectra/Baselines/standard-1.json
+bleibt unveraendert. Suite, Scoring, Messmodus und vollstaendige Methodik
+muessen passen; CPU-/Hostunterschiede bleiben als Kontext sichtbar. Eine
+andere QEMU-/Storage-/Bootmethodik darf keinen gueltigen Vergleich ergeben.
+Fruehere Einzelmessungen sind historische Fachbelege, keine Standardindizes.
 
-Die Hoststarter sind Tools/Build.bat beziehungsweise ./Tools/Build.sh.
--benchmarkimage baut ausschliesslich das Image. -benchmark SUITE VERSION
-WARM|COLD WIEDERHOLUNGEN UMGEBUNGS-ID startet den ausdruecklichen Lauf im
-vorhandenen Benchmarkprofil. Der Runner liegt unter
-Repositories/Distribution/Tests/Invoke-QemuBenchmark.ps1.
+DevCenter-Import und Kontrolle
+-----------------------------
+1. Die Host-ID muss im DevCenter registriert sein. Eine noch fehlende
+   referenzierte Baseline zuerst als vollstaendigen echten Lauf importieren.
+2. Die unveraenderten Originalbytes von run.json mit Bearer-Authentisierung
+   per PUT /api/v1/benchmark-runs/<run_id> senden; Pfad- und JSON-UUID gleich.
+   Alle Metriken, Rohsamples, Scores, Umgebungs- und Artefaktdaten mitsenden.
+   Token niemals ausgeben oder versionieren. Keine synthetischen Messungen.
+3. 201 bedeutet neuer Lauf, 200 identische Wiederholung ohne Duplikat.
+   Bei 401/409/422 oder Transportfehlern Originalexport und Fehler erhalten;
+   weder Messwerte noch UUID fuer einen Retry aendern oder einen Lauf ersetzen.
+4. Per GET derselben URL die gespeicherten Daten kontrollieren. Fuer einen
+   erfolgreichen Standardvergleich muessen alle fuenf Metriken, 30 Rohsamples
+   und sechs Scores vorhanden und score_validation sowie alle sechs Bereiche
+   valid sein. Ein HTTP-Erfolg garantiert keine gueltigen Scores.
 
-Die bestehende Environment-ID r4os-q35-haswell-smp4-1g-tcg-gpt1-v1 beschreibt
-q35, TCG single-thread, Haswell, vier vCPUs, 1 GiB RAM, deaktiviertes Netzwerk,
-feste Platten-/RTC-Konfiguration und HDA ohne Hostaudio. Pro Lauf entsteht
-eine frische Datenplattenkopie. Nur identische Umgebungs-/Workload-/Cache-
-Identitaeten vergleichen. Regulaer fuenf Wiederholungen (erlaubt 3..20).
-Die Workloadversion ist die installierte SPECTRA-Modulversion.
-
-Kernelinstrumentierung: ausdruecklicher A/B-Nachweis
----------------------------------------------------
-SPECTRA BENCH OBSERVER fuehrt die begrenzte Arbeitslast
-kernel-instrumentation-v1 mit einem Warmlauf und fuenf Rohsamples je Phase
-aus. Kernelvarianten unterscheiden sich nur durch -Dmetrics=false/true;
-QEMU-Backend, CPU/RAM, Imagebestand, Last und Clockbasis bleiben gleich.
-
-Phasen: Clock, Runtime/Yield, VM, Thread-/Stackanlage, Driver-Work/IRQ,
-Metadatenabfrage, Lockabfrage, grosse Summary und Konsolenausgabe. Die
-Work-Audiolast enthaelt feste Pausen; sie ist kein reiner CPU-Benchmark.
-Ausgaben ausserhalb der gemessenen Schleifen halten, ausgenommen die
-klar bezeichnete Ausgabephase. Der versionierte NDJSON-Block erhaelt genaue
-Nanosekunden/Zaehler als Dezimalstrings, Clockgeneration, Modus und Pass/Fail.
-Beide Modi pruefen ihre Erfassungsgrenzen. Kein Hintergrundsammler entsteht.
-
-Der A/B-Bericht haelt Host/QEMU, Bild-/Artefaktidentitaeten, Rohwerte,
-Median/Spannweite und Grenzen fest. Aus einer verrauschten Differenz keinen
-allgemeinen Performanceprozentsatz ableiten. TCG-SMP belegt keine physische
-Parallelskalierung. Zusatzausfuehrungen brauchen einen konkreten methodischen
-oder technischen Grund, der in den Roadmap-Notizen dokumentiert wird.
-
-Auswertung und kuenftiger Standardbenchmark
-------------------------------------------
-Nur vollstaendige Laeufe mit gueltiger Clock, erfolgreichen Checks,
-korrektem Ressourcenabbau und regulaerem Gastende als Vergleich verwenden.
-Fehler/Timeout/Abbruch sichtbar erhalten, nie zu Messzahlen reparieren.
-Vor Wiederholung aktuelle Belege sichern. Es gibt keine pauschale
-Geschwindigkeits-Regressionsschwelle.
-
-0.83.3 verwendet scheduler_sync, memory, ipc, lifecycle und filesystem_io
-separat und einen Gesamtindex. Referenz 100, feste versionierte Gewichte,
-geometrische Mittel; ohne alle fuenf gueltigen vergleichbaren Bereiche kein
-Gesamtwert. Export/Referenzvergleich funktionieren ohne Datenbankdienst.
-Der Ergebnisvertrag wird in Docs/Diagnostics/README.txt konkretisiert.
-
-Weiterfuehrend: Agents/Build.txt, Agents/Test.txt,
-Docs/Diagnostics/KernelInstrumentation.txt und die aktive Roadmap.
+Lokale API-Adresse, sichere Tokenbereitstellung und fertige Windows-/Linux-
+Aufrufe: Agents/DevCenter.txt. DevCenter bleibt ein getrenntes privates
+Hosttool ausserhalb der R4OS-Builds, Modulinventare und Sammelpushes.
+Workloads, Terminal-/SSH-Aufrufe, Offlineexport und Vergleichsvertrag:
+Docs/Diagnostics/SpectraStandardBenchmark.txt.
