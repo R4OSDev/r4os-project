@@ -314,3 +314,9 @@ Migration separat geplant. Aufgaben und Abnahmen sind in der Roadmap kanonisch.
 vorhandene Modulbinaerdateien und Spectra-/DevCenter-Belege. Vollstaendige
 Matrix: Docs/Core/KernelRustBaseline0834.json; Rust-Profil, ABI-/Besitzregeln,
 Abnahmen und Rueckweg: Docs/Core/KernelRustMigration.txt.
+
+0.83.5: Rust/lib.rs importiert ausschliesslich die vom Contract erzeugte
+no_std-Crate. Cargo und der bestehende Zig-Standalonebau pinnen denselben
+Contract-Commit. Der produktive Kernelbau bleibt bis 0.83.6 Zig; keine
+zusaetzliche Bindingkopie oder neue API-Version. Darstellungs-/Aufrufnachweis:
+Docs/API/RustContractBindings.txt und Docs/Core/KernelRustBindings0835.json.

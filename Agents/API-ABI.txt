@@ -12,7 +12,7 @@ Die zentrale Plattform-API und -ABI gehoert dem Contract-Repository:
 
     Repositories/Contract/API/ApiContract.json
 
-Die erzeugten Zig- und C-Bindings, Kernelseite, Contractlayouts,
+Die erzeugten Zig-, C- und Rust-Bindings, Kernelseite, Contractlayouts,
 Conformance-Fixtures, API-Dokumente und das API-Inventar liegen unter
 `Repositories/Contract/Generated/`. Erzeugte Dateien und erzeugte Bereiche in
 `Docs/API/` werden nicht von Hand editiert.
@@ -24,6 +24,13 @@ Blocks (darunter DriverApi) werden im Contract bewusst append-only gepflegt;
 der Generator erhaelt sie unveraendert. Solche Aenderungen benoetigen den
 passenden Versionsentscheid, dokumentierten Praefixvergleich und SDK-/Kernel-
 Layoutpruefung. Der markierte Block bleibt ausschliesslich generiert.
+
+Rust-Bindings unter Contract/Generated/SDK/Rust/ reflektieren den gesamten
+kanonischen Zig-Typbestand einschliesslich dieses technischen Fassadenteils.
+Contract write erzeugt zuerst Zig/C und danach Rust; normaler Build/check
+vergleichen alle Ausgaben. Host-/Baretarget-Layouts und native Rust/Zig/C-
+Callbacks gehoeren zum bestehenden Contract-test. Darstellung, Defaults,
+Float-/SIMD-Grenze und Standalone-Pins: Docs/API/RustContractBindings.txt.
 
 Das maschinenlesbare Funktionsinventar ist:
 
