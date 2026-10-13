@@ -295,3 +295,17 @@ gehoeren Repositories/Diagnostics/Spectra. R4DEV v13 liefert Modus/Sampling,
 Locks und Stackaggregate. SPECTRA METRICS/LOGS liest passiv, CHECK und BENCH
 starten nur ausdruecklich. Quellen, Eigenkosten und Migration stehen in
 Docs/Diagnostics/Spectra.txt und KernelInstrumentation.txt.
+
+Geplante Rust-Kernelmigration (0.83.4–27)
+-----------------------------------------
+Die obige Dateiliste beschreibt den aktuellen Zig-Produktstand. Die aktuelle
+Roadmap plant zuerst Ausgangsstand, vollstaendige Migrationsmatrix, Rust-ABI-
+Bindings und Buildintegration, danach die einzelnen Kernelbesitzer und zuletzt
+die komplette Rust-Abnahme. Private C-ABI-Bruecken erlauben den Uebergang mit
+genau einem aktiven Besitzer je Zustand; 0.83.27 entfernt produktiven Zig-
+Kernelcode und Uebergangspfade. Benoetigte Assembly darf erhalten bleiben.
+Modul-, API-/ABI-, Boot-, Ressourcen- und Dateiformatvertraege bleiben gleich.
+Apps, Services, Libraries, R4D/R4P, Subsysteme, Spectra und der separate Recovery-
+Kernel bleiben Zig. Noetige Contract-/Host-/Dokumentationsaenderungen erfolgen
+beim jeweiligen Besitzer. Performanceoptimierungen werden erst nach der
+Migration separat geplant. Aufgaben und Abnahmen sind in der Roadmap kanonisch.
