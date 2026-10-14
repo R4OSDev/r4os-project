@@ -114,13 +114,14 @@ Der Sammelort fuer Kerndienste und Bootschnitte.
     crash_screen.zig, diag_screen.zig   bestehender Anzeigenbesitzer
     Rust/kernel/deadman.rs  kooperativer Deadman; kein IRQ-gesperrter Spin
     deadman/deadman_bridge.zig  zustandslose Start-/Storage-/Displayfassaden
-    driver_api.zig    DriverApi-Tabelle fuer R4D: PCI-Inventar und -Config,
-                      DMA, IRQ inklusive MSI, Net-/Storage-/USB-Backends,
-                      Owner-Cleanup
-    driver_work.zig   Workqueue und Completion fuer Treiber
-    driver_plan.zig   Treiberplan aus CONFIG.R4S
-    irq_router.zig    IRQ-Routen-Registry: shared INTx, Level/Edge,
-                      MSI-Fenster 24..31
+    Rust/driver/api_*.rs  DriverApi-Admission, Tabellen/Praefixe, PCI/DMA/MSI,
+                      Backends und terminaler Cleanup; driver_api.zig ist
+                      C-Fassade und Backend-/Darstellungsschnitt
+    Rust/driver/work.rs, work_queue.rs  Work/Completion, Klassen und Ledger
+    Rust/driver/threads.rs, semaphores.rs, heap.rs  residente Treiberruntimes
+    Rust/driver/driver_plan.rs, driver_policy.rs  CONFIG-Plan/-Policy
+    Rust/driver/irq_router.rs  shared INTx/Level/Edge/MSI-IRQ-Routen
+    driver_work/driver_plan/irq_router.zig  private C-Fassaden
     Rust/platform/timer.rs  Tick-Epoche, absolute Deadlines und Timerbackend
     Rust/platform/timer_boot.rs, irq_boot.rs  frueher PIT und validierter Handoff
     timer/platform_irq_boot/timer_boot.zig   private C-Fassaden/Darstellung
@@ -239,7 +240,8 @@ driver/
 -------
 
     com.zig           16550-UART: COM1 Debug, COM2 Link-Basis
-    registry.zig      Treiber-Registry fuer Built-ins und R4D
+    Rust/driver/registry.rs  Treiber-Registry fuer Built-ins und R4D
+    registry.zig      private C-Fassade mit kopierten Entries
     input/            PS/2-Keyboard und -Mouse, kanonische Codepointqueue,
                       Layouts unter key_layouts/
     storage/          Built-in-Boot-Probing fuer AHCI; NVMe besitzt genau
@@ -280,7 +282,8 @@ net/, audio/, platform/, protocol/
     platform/*.zig    C-Projektionen fuer die noch aktiven Zig-Verbraucher;
                       originale Hosttestkoerper bei ihren bestehenden Gates
     Docs/Core/KernelRustPlatform.txt  Besitz-/Frist-/Firmware-/Inventarvertraege
-    protocol/registry.zig   Protocol-Registry fuer Builtins und R4P
+    Rust/driver/protocol_registry.rs  Built-in-/R4P-Registry
+    protocol/registry.zig   private C-Fassade mit kopierten Entries
 
     linker.ld         minimal: OUTPUT_FORMAT und ENTRY
 
@@ -362,4 +365,10 @@ Keine mutable Zig-Registry oder zweite Wait-/Lockpolitik. Feste private C-
 Records und opake Taskhandles binden noch Zig-basierte Fachbesitzer. Original-
 Hostfaelle, echte SMP4-/IF-/FPU-/OOM-/Abbaunachweise und Standard/DevCenter:
 Docs/Core/KernelRustTasks.txt und Docs/Core/KernelRustTasks08311.json.
-Naechster Schritt: 0.83.12 Treiberregistry, IRQ-Work und Ressourcenbesitz.
+0.83.12: Rust/driver besitzt Registry/Plan/Policy, IRQ/Work/Completion,
+Treiberheap/Threads/Semaphore, DMA/MMIO und die DriverApi einschliesslich
+Praefixen, Grafikeinstiegen und terminalem Cleanup. Private C-Fassaden
+reichen nur an noch nicht migrierte Fachbesitzer weiter. Original439-Host-,
+SMP4-/R4D-/Detail- und Standard-/DevCenter-Belege:
+Docs/Core/KernelRustDrivers.txt und KernelRustDrivers08312.json.
+Naechster Schritt: 0.83.13 Blockstorage, Bootmedium und Partitionen.
