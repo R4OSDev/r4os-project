@@ -112,8 +112,8 @@ Der Sammelort fuer Kerndienste und Bootschnitte.
     Rust/boot/r4b.rs   R4B0-Splashdecoder und frueher MMIO-Bildpfad
     boot_status/bootlog/fatal/crash.zig  private Uebergangsfassaden
     crash_screen.zig, diag_screen.zig   bestehender Anzeigenbesitzer
-    deadman.zig       kooperativer Deadman; kann einen harten Spin mit
-                      gesperrten Interrupts NICHT praemptieren
+    Rust/kernel/deadman.rs  kooperativer Deadman; kein IRQ-gesperrter Spin
+    deadman/deadman_bridge.zig  zustandslose Start-/Storage-/Displayfassaden
     driver_api.zig    DriverApi-Tabelle fuer R4D: PCI-Inventar und -Config,
                       DMA, IRQ inklusive MSI, Net-/Storage-/USB-Backends,
                       Owner-Cleanup
@@ -191,18 +191,22 @@ sched/
     Rust/sched/scheduler.rs  rollenbewusste Ready-/Fairness-/IRQ-Auswahl,
                       Kontextwechsel, Wake-/Deadline-/Idlegrenzen und Zaehler
     scheduler.zig     private C-Fassade zum einzigen nativen Scheduler
-    scheduler_bridge.zig  genaue Task-C-Projektionen bis zur Taskmigration11
-    task.zig          stabile Task-Registry, Ready-/Deadline-/Reap-Projektion,
-                      interne Rollen und Budget-/Donationsaccounting,
-                      guarded Stacks, optionale FPU-States, Critical-Reserve
+    scheduler_bridge.zig  zustandslose Serialdarstellung
+    Rust/sched/task/  dynamische Taskregistry, Rollen/Budget/Donation,
+                      Ready-/Deadline-/Reap-/Rollbacklisten, guarded Stacks,
+                      FPU-Ressourcen, Reserve und paginierte Inventare
+    task.zig          C-Fassade mit opaken Taskhandles; native Feld-/Ownerzugriffe
+    task_vm_bridge.zig  zustandslose VM-Aufrufe bis zur VM-Migration17
     Rust/sched/task_context.rs  genaue Unwind-Bindung/Anker pro CPU
     task_context.zig  private C-Tokenfassade; kein zweiter Bindungsbesitzer
-    wait_node.zig     task-owned intrusive Waiter-Verkettung
-    sync.zig          generationssichere Mutex/UnwindGuard, gerichtete
-                      Einzel-Wakes, begrenzte Rollendonation, Event,
-                      Semaphore und dynamische WaitQueue
-    task_registry_selftest.zig   gebundene QEMU-Laufzeitprobe fuer Registry,
-                      Deadlines, Rollen, Fairness, Inversion und Wake-Latenz
+    Rust/sched/task_index.rs, wait_node.rs  intrusive AVL-/Waiterverkettung
+    task_index/wait_node.zig  C-Records und unveraenderte Originalfixtures
+    Rust/sched/sync_*.rs  Mutex/UnwindGuard/Event/Completion/Semaphore/WaitQueue,
+                      generationentreue gerichtete Wakes und originale SYNCCHECK
+    sync.zig          feste embedded C-Records und Callback-/Ownerfassade
+    Rust/sched/task_probe/  originale Registry-/Deadline-/Rollen-/OOM-/FPU-Probe
+    task_registry_selftest.zig, task_probe_bridge.zig  Bootoption/Darstellung
+                      und zustandslose Work-/VM-/Owner-/Netzwerkcuts
 
 Details: `Docs/Core/ProgramLifecycle.txt` und
 `Docs/Core/Speicherverwaltung.txt`.
@@ -350,4 +354,12 @@ COM1-/Bootlog-Ringe, R4B und Fatal-/Crashrecords gehoeren Rust. Die vorhandenen
 Ownerfixtures binden echte Rustfunktionen; neue SMP4-Images sind am ELF-Hash
 gebunden. Renderer-/Font-/Framebufferbesitzer folgen 0.83.21, Clock/Runtime/VM
 ihren eigenen Wellen. Grenzen und Beleg: Docs/Core/KernelRustBoot.txt und
-Docs/Core/KernelRustBoot0837.json. Naechster Schritt ist 0.83.8.
+Docs/Core/KernelRustBoot0837.json.
+
+0.83.11: Native Taskobjekte/Ressourcen/Listen/Identitaeten, Sync/Wait-/Unwind-
+Primitive, kooperativer Deadman und komplette bisherige TaskRegistry-Diagnose.
+Keine mutable Zig-Registry oder zweite Wait-/Lockpolitik. Feste private C-
+Records und opake Taskhandles binden noch Zig-basierte Fachbesitzer. Original-
+Hostfaelle, echte SMP4-/IF-/FPU-/OOM-/Abbaunachweise und Standard/DevCenter:
+Docs/Core/KernelRustTasks.txt und Docs/Core/KernelRustTasks08311.json.
+Naechster Schritt: 0.83.12 Treiberregistry, IRQ-Work und Ressourcenbesitz.
