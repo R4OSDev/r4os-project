@@ -68,12 +68,12 @@ arch/x86_64/
 
     Rust/arch/tables.rs  GDT/TSS/IDT/IST und Assembly-Frames
     gdt.zig, tss.zig     Uebergangsfassaden ohne eigene Tabellen
-    idt.zig             Adapter zum noch nicht migrierten IRQ-/VM-Besitzer
-    pic.zig           8259 PIC remap/mask/EOI
-    pit.zig           PIT Timer IRQ0 und Tick-Zaehler
-    ioapic.zig        IOAPIC redirection/routing
-    lapic.zig         Local APIC, periodischer und One-Shot-LAPIC-Timer
-    hpet.zig          HPET-Hauptzaehler, periodischer/One-Shot-Legacy-Timer
+    Rust/arch/irq.rs, runtime.rs  IRQ/IPI-Reihenfolge und einziger Runtime-Owner
+    Rust/arch/pic.rs, pit.rs      8259/PIT und Tickzaehler
+    Rust/arch/ioapic.rs, lapic.rs IOAPIC-Routen, xAPIC/x2APIC und LAPIC-Timer
+    Rust/arch/hpet.rs, rtc.rs, msr.rs  HPET/RTC/MSR-Besitzer
+    idt.zig             C-Adapter zum nativen IRQ-Eintritt; wartende VM folgt17
+    pic/pit/ioapic/lapic/hpet/rtc/msr/interrupts.zig  private C-Fassaden
     fpu.zig           FPU/SSE/XSAVE-Init, State-Save/Restore pro Task
     rtc.zig, msr.zig, io.zig, interrupts.zig, power.zig, reset.zig
 
@@ -117,8 +117,9 @@ Der Sammelort fuer Kerndienste und Bootschnitte.
     driver_plan.zig   Treiberplan aus CONFIG.R4S
     irq_router.zig    IRQ-Routen-Registry: shared INTx, Level/Edge,
                       MSI-Fenster 24..31
-    timer.zig         logische Tick-Epoche aus gemeinsamer Clocksource,
-                      PIT-Fallback, periodischer und One-Shot-HPET-/LAPIC-Modus
+    Rust/platform/timer.rs  Tick-Epoche, absolute Deadlines und Timerbackend
+    Rust/platform/timer_boot.rs, irq_boot.rs  frueher PIT und validierter Handoff
+    timer/platform_irq_boot/timer_boot.zig   private C-Fassaden/Darstellung
     modules.zig, module_file.zig, module_r4m.zig   Modulregistry,
                       eingebaute Platform-API-Provider und gemeinsamer
                       Modul-Dateizugriff
@@ -265,9 +266,11 @@ net/, audio/, platform/, protocol/
     audio/core.zig    Audio-Core und PCM; SID, OPL3 und MIDI ueber R4D/R4P
     audio/pcm.zig     PCM-Format und Puffer
 
-    platform/         acpi.zig, pcie.zig, pci.zig, cpu.zig, irq.zig,
-                      clocksource.zig, monotonic.zig, time.zig,
-                      device_inventory.zig
+    Rust/platform/    CPU/Clocksource/Monotonic/Time, ACPI/Firmwareansichten,
+                      PCI/ECAM, kanonischer PCI-/Geraetebestand, Plattformstart
+    platform/*.zig    C-Projektionen fuer die noch aktiven Zig-Verbraucher;
+                      originale Hosttestkoerper bei ihren bestehenden Gates
+    Docs/Core/KernelRustPlatform.txt  Besitz-/Frist-/Firmware-/Inventarvertraege
     protocol/registry.zig   Protocol-Registry fuer Builtins und R4P
 
     linker.ld         minimal: OUTPUT_FORMAT und ENTRY
