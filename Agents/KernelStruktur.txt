@@ -229,9 +229,13 @@ fs/ und storage/
     fs/system_update_atomic.zig, fs/upload_claim_store.zig
                       Transaktionen fuer Update und Upload
 
-    storage/block.zig Blockdevice-Registry, Request-Queue, Worker
-    storage/mbr.zig   MBR-/GPT-Scan, FS-Probe und Mountentscheidung
-    storage/gpt.zig   validierter GPT-Parser mit CRC und Backup-Fallback
+    Rust/storage/    Blockregistry, Requests, Worker, I/O/Diagnose,
+                      GPT/MBR/GUID, Bootquelle, Medieninventar,
+                      Mount-/Claim-/Flush-/Remount-/Cleanuppolitik
+    storage/*.zig    private C-Fassaden und Originalfixtures;
+                      generische FS-/Drive-Blattaufrufe bleiben bis .14
+    Rust/storage/ahci.rs  bisheriges kernelkritisches AHCI-Boot-Probing
+    Rust/storage/boot.rs  Controllerreihenfolge und Bootdiagnose
 
 Details: `Docs/FileSystem/DateisystemUndStorage.txt`.
 
@@ -371,4 +375,8 @@ Praefixen, Grafikeinstiegen und terminalem Cleanup. Private C-Fassaden
 reichen nur an noch nicht migrierte Fachbesitzer weiter. Original439-Host-,
 SMP4-/R4D-/Detail- und Standard-/DevCenter-Belege:
 Docs/Core/KernelRustDrivers.txt und KernelRustDrivers08312.json.
-Naechster Schritt: 0.83.13 Blockstorage, Bootmedium und Partitionen.
+0.83.13: Alle 16 Storagebesitzer nativ, mit Original439/Storage21,
+oeffentlichen Wartungs-/Fehler-/Cleanupfaellen und frischen SMP4-/
+GPT-/MBR-/Detail-/Standard-/DevCenter-Belegen. Grenzen und gemeinsame
+Abnahme: Docs/Core/KernelRustStorage.txt und KernelRustStorage08313.json.
+Naechster Schritt: 0.83.14 VFS, Dateisysteme, Streams und Pagecache.
