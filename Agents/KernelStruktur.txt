@@ -159,9 +159,12 @@ memory/
                                      einziger Range-/ID-/Adress-/Spankatalog
     Rust/memory/vm_frames.rs, vm_transactions.rs, vm_query.rs
                                      eager/residente VM, Rollback, Snapshots
-    memory/*.zig                     private C-Fassaden; virt.zig behaelt
-                                     wartenden Pager/Page-State bis 0.83.17
-    backing_store.zig, reclaim.zig   Auslagerung und globaler Reclaim
+    Rust/memory/vm_page_state.rs, vm_pager*.rs
+                                     Demandfault, wartender Pager, Page-State
+    Rust/memory/backing_store.rs, reclaim.rs
+                                     genaue Backing-/Slotidentitaet, Reclaim
+    memory/*.zig                     typisierte private C-Fassaden ohne
+                                     zweiten mutablen VM-/Pagerbesitzer
 
 Details: `Docs/Core/Speicherverwaltung.txt`, `Docs/Core/KernelRustMemory.txt`.
 
@@ -401,4 +404,9 @@ Docs/Core/KernelRustLoader.txt und KernelRustLoader08315.json.
 0.83.16: Alle sechs Start-/Programm-/Prozessbesitzer liegen in Rust/program;
 119 Zig-Verbraucher unveraendert. Gebuendelte Original-/SMP4-Abnahmen und
 Original-Zig-Grenzen: Docs/Core/KernelRustPrograms.txt und
-KernelRustPrograms08316.json. Naechster Schritt: 0.83.17 wartende VM/Backing.
+KernelRustPrograms08316.json.
+0.83.17: Wartender Pager/Page-State, Backingdatei/Slots und Reclaim sind nativ.
+Taskframe/SIMD, genaue Generationen und quittierter Rueckbau bleiben erhalten.
+Gebuendelte Originalfaelle, alte Eltern-Stackbilanz und Standard-/DevCenter:
+Docs/Core/KernelRustVm.txt und KernelRustVm08317.json.
+Naechster Schritt: 0.83.18 Servicecore/IPC/R4SYS.
