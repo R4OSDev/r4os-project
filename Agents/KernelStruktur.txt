@@ -125,9 +125,14 @@ Der Sammelort fuer Kerndienste und Bootschnitte.
     Rust/platform/timer.rs  Tick-Epoche, absolute Deadlines und Timerbackend
     Rust/platform/timer_boot.rs, irq_boot.rs  frueher PIT und validierter Handoff
     timer/platform_irq_boot/timer_boot.zig   private C-Fassaden/Darstellung
-    modules.zig, module_file.zig, module_r4m.zig   Modulregistry,
-                      eingebaute Platform-API-Provider und gemeinsamer
-                      Modul-Dateizugriff
+    Rust/loader/boot.rs   Modul-/Loaderboot und sechs Platform-Provider
+    Rust/loader/resources.rs, file.rs, r4m.rs   Ressourcenkataloge,
+                      requestgebundener Dateizugriff und R4M0-Fenster
+    Rust/loader/format.rs, registry_*.rs   Container-/Import-/Exportpruefung,
+                      Registry, Katalog, Resolver, Instanzgenerationen,
+                      Bildanlage, Relocations und Retention
+    modules/module_file/module_r4m/module_resources/module_boot/loader_boot.zig
+                      private C-Fassaden; Originalfixturekoerper bleiben Zig
     services.zig, service_core.zig, service_ipc.zig   Service-Registry,
                       Endpoints, Queues und Kanal-IPC
     protocol_api.zig  Protokollzugriff fuer Kernelverbraucher
@@ -170,8 +175,10 @@ Die Programm- und ABI-Ebene.
                       dynamische ProgramInstance-Chunkregistry,
                       generationensicherer Lifecycle mit Deferred-Reaper,
                       paginiertes Program-/Task-/Thread-Inventar
-    r4d.zig, r4p.zig  Lade- und Aktivierungspfad fuer Treiber und
-                      Protokollmodule
+    Rust/loader/r4d.rs  Treibermodul-/Laufzeitbesitz, Init/Cleanup/Shutdown
+    Rust/loader/r4p.rs  Preloads, bedarfsgesteuerter Protokollkatalog,
+                      Abhaengigkeiten und Callbackreihenfolge
+    r4d.zig, r4p.zig  private C-Fassaden ohne zweite Ladeimplementierung
     r4x_start.zig     R4XStart-Kontext und Startvertrag
     r4x_api.zig       zyklusfreie Fassade auf das als
                       r4os_kernel_contract importierte Contractmodul samt
@@ -216,24 +223,26 @@ Details: `Docs/Core/ProgramLifecycle.txt` und
 fs/ und storage/
 ----------------
 
-    fs/vfs.zig        FS-neutrale Dispatchschicht: Volume-Tabelle je
-                      Laufwerk, NodeRef-/Entry-Vokabular, plus interner
-                      Bootvolume-Slot fuer die buchstabenlose Bootpartition
-    fs/ntfs/ntfs.zig  NTFS-3.1-Kerneladapter, duenne Fassade ueber den
-                      geteilten Kern ntfs_volume
-    fs/fat/fat32.zig  FAT32-Backend
-    fs/page_cache.zig page-organisierter Sektor-Cache mit Writeback
-    fs/request.zig    FS-Request-Schicht
-    fs/drive.zig      Laufwerksverwaltung
-    fs/glob.zig       Glob-Matching
+    Rust/fs/vfs.rs, vfs_types.rs  Volume-/Bootmounttabelle, Pfad-/Node-/
+                      Entry-Dispatch und neutrale private C-Werte
+    Rust/fs/drive.rs, directory_changes.rs  Laufwerke und Verzeichnisrevisionen
+    Rust/fs/request.rs, request_scope.rs  FS-Requests und genaue Volumelanes
+    Rust/fs/page_cache*.rs  Sektorcache, Batch/Policy, Fill und Writeback
+    Rust/fs/fat*.rs, directory_growth.rs  FAT32 und Verzeichniserweiterung
+    Rust/fs/ntfs_format*.rs  Kernel-NTFS-Formatkern
+    Rust/fs/ntfs_volume*.rs, ntfs_adapter*.rs  NTFS-Volumen und Mountbesitzer
+    Rust/fs/copy_transfer.rs, glob.rs  Kopierfortsetzungen und Glob
+    fs/*.zig, Support/ntfs_format.zig, Support/ntfs_volume.zig
+                      private C-Fassaden und unveraenderte Originalfixtures;
+                      externe SDK-/Hosttool-/Recovery-Kopien bleiben Zig
     fs/system_update_atomic.zig, fs/upload_claim_store.zig
-                      Transaktionen fuer Update und Upload
+                      Update-/Upload-Transaktionsadapter bis Welle 0.83.25
 
     Rust/storage/    Blockregistry, Requests, Worker, I/O/Diagnose,
                       GPT/MBR/GUID, Bootquelle, Medieninventar,
                       Mount-/Claim-/Flush-/Remount-/Cleanuppolitik
     storage/*.zig    private C-Fassaden und Originalfixtures;
-                      generische FS-/Drive-Blattaufrufe bleiben bis .14
+                      FS-/Drive-Blattaufrufe vermitteln an Rust/fs weiter
     Rust/storage/ahci.rs  bisheriges kernelkritisches AHCI-Boot-Probing
     Rust/storage/boot.rs  Controllerreihenfolge und Bootdiagnose
 
