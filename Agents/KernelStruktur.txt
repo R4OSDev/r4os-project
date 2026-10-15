@@ -379,4 +379,10 @@ Docs/Core/KernelRustDrivers.txt und KernelRustDrivers08312.json.
 oeffentlichen Wartungs-/Fehler-/Cleanupfaellen und frischen SMP4-/
 GPT-/MBR-/Detail-/Standard-/DevCenter-Belegen. Grenzen und gemeinsame
 Abnahme: Docs/Core/KernelRustStorage.txt und KernelRustStorage08313.json.
-Naechster Schritt: 0.83.14 VFS, Dateisysteme, Streams und Pagecache.
+0.83.14: Rust/fs besitzt alle 15 VFS-/Drive-/Request-/Cache-/FAT32-/NTFS-
+Implementierungen einschliesslich Kernel-Supportkern und residentem
+Mountadapter. Private Zig-Fassaden haben keinen zweiten Algorithmus.
+Original 458/129/60 Wurzeln, gezielte Normal-/Detail-/Offline-/Update-
+und Standard-/DevCenter-Belege samt expliziten Altfehlergrenzen:
+Docs/Core/KernelRustFilesystem.txt und KernelRustFilesystem08314.json.
+Naechster Schritt: 0.83.15 Modulregistry und R4M0-/R4L-/R4D-/R4P-Loader.
