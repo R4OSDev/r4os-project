@@ -171,15 +171,15 @@ program/
 
 Die Programm- und ABI-Ebene.
 
-    r4x.zig           produktiver R4M0-/R4X-Loader, R4XStart-Runtime,
-                      dynamische ProgramInstance-Chunkregistry,
-                      generationensicherer Lifecycle mit Deferred-Reaper,
-                      paginiertes Program-/Task-/Thread-Inventar
+    Rust/program/    R4X-Start, Registry/Generationen/Completions/Threads,
+                      Exit/Kill/Reap, VM-/Stackzulassung und Inventare,
+                      Console/GUI/SharedRaster, AsyncIO und Programm-APIs
+    r4x.zig           typisierte private C-Fassade zu den nativen Besitzern
     Rust/loader/r4d.rs  Treibermodul-/Laufzeitbesitz, Init/Cleanup/Shutdown
     Rust/loader/r4p.rs  Preloads, bedarfsgesteuerter Protokollkatalog,
                       Abhaengigkeiten und Callbackreihenfolge
     r4d.zig, r4p.zig  private C-Fassaden ohne zweite Ladeimplementierung
-    r4x_start.zig     R4XStart-Kontext und Startvertrag
+    r4x_start.zig     private C-Fassade fuer nativen R4XStart-Vertrag
     r4x_api.zig       zyklusfreie Fassade auf das als
                       r4os_kernel_contract importierte Contractmodul samt
                       erzeugten Platform-API-Metadaten
@@ -394,4 +394,11 @@ Mountadapter. Private Zig-Fassaden haben keinen zweiten Algorithmus.
 Original 458/129/60 Wurzeln, gezielte Normal-/Detail-/Offline-/Update-
 und Standard-/DevCenter-Belege samt expliziten Altfehlergrenzen:
 Docs/Core/KernelRustFilesystem.txt und KernelRustFilesystem08314.json.
-Naechster Schritt: 0.83.15 Modulregistry und R4M0-/R4L-/R4D-/R4P-Loader.
+0.83.15: Alle acht Modul-/R4M0-/R4L-/R4D-/R4P-Loaderbesitzer sind nativ;
+119 bestehende Zig-Verbraucher bleiben bytegleich. Originalfixtures,
+Normal-/Detail-/Standard-/DevCenter-Belege und Messgrenzen:
+Docs/Core/KernelRustLoader.txt und KernelRustLoader08315.json.
+0.83.16: Alle sechs Start-/Programm-/Prozessbesitzer liegen in Rust/program;
+119 Zig-Verbraucher unveraendert. Gebuendelte Original-/SMP4-Abnahmen und
+Original-Zig-Grenzen: Docs/Core/KernelRustPrograms.txt und
+KernelRustPrograms08316.json. Naechster Schritt: 0.83.17 wartende VM/Backing.
