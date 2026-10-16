@@ -269,19 +269,18 @@ driver/
     storage/          Built-in-Boot-Probing fuer AHCI; NVMe besitzt genau
                       einen Controllerpfad in NVME.R4D. Produktiver Storage
                       ueber NVME.R4D, AHCI.R4D und ATAPIO.R4D
-    driver/usb/xhci.zig   XHCI-Host-Backend mit der Kernel-Logik; XHCI.R4D ist
-                      das duenne Aktivierungsmodul des USB-Hostpfads
-    driver/usb/host_controller.zig   Owner-Abstraktion und Backendregistry
-    driver/usb/core.zig      USB-Core- und Device-Modell
-    driver/usb/hid.zig       USB-HID-Boot ueber R4P-Decode
-    driver/usb/msc.zig       USB-Mass-Storage, BOT/SCSI-Blockpfad
-    driver/usb/xhci_*.zig    Event-Router mit Port-Change-Pendingbesitz,
-                      Ringzyklus, Endpointkontext und -Recovery,
-                      Bulk-Completion
-    driver/usb/usb_*.zig     Bootzeitverhalten, Waits und MSC-Retrypolicy
+    Rust/usb/xhci*.rs        nativer Controller, Runtimegenerationen,
+                      Ports, DMA/Ringe, IRQ/Worker, Transfers und Recovery
+    Rust/usb/host_controller.rs   Hostregistry und Backenddispatch
+    Rust/usb/core.rs         kopierter USB-Geraetekatalog
+    Rust/usb/hid.rs          HID-Bindungen/Polling ueber bestehende R4Ps
+    Rust/usb/msc*.rs         eigene BOT-Medien und SCSI-Clientpolicy
+    Rust/usb/*              native Timing-/Wait-/Ring-/Kontexthelfer
+    driver/usb/*.zig         feste private C-Projektionen und Adapter;
+                      XHCI.R4D bleibt das duenne Aktivierungsmodul
 
-Die Klassentreiber `driver/usb/hid.zig` und `driver/usb/msc.zig`
-verwenden das XHCI-Backend direkt.
+HID und MSC verwenden den genauen nativen Controller-/Runtimebesitzer.
+Zig-Input- und Blockcallbacks behalten typisierte zustandslose Invoker.
 
 
 net/, audio/, platform/, protocol/
@@ -419,4 +418,9 @@ Docs/Core/KernelRustVm.txt und KernelRustVm08317.json.
 kernelprivatem R4R1-Codec sind nativ. SERVMAN-Policy und 119 Module bleiben
 unveraendert. Originalfaelle, SMP4/SSH, alter Cachefehler und STANDARD:
 Docs/Core/KernelRustServices.txt und KernelRustServices08318.json.
-Naechster Schritt: 0.83.19 USB/xHCI/HID/MSC.
+0.83.19: Alle 18 USB-/xHCI-/HID-/MSC- und Bootbesitzer sind nativ.
+Exakte Generationen/Quittungen, atomare IRQ-/Workerproduzenten und eigene
+BOT-Medien behalten die vorhandenen externen Module. Originalfaelle,
+gegliederter USB-SMP4-Gast und STANDARD/DevCenter samt Grenzen:
+Docs/Core/KernelRustUsb.txt und KernelRustUsb08319.json.
+Naechster Schritt: 0.83.20 Netzwerk/R4NET.
