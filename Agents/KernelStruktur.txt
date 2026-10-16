@@ -21,8 +21,9 @@ Einstieg und Bootreihenfolge
 
 `Rust/boot/entry.rs` exportiert seit 0.83.7 `kmain` und haelt die feste
 Reihenfolge. `main.zig` verbindet noch ausstehende Fachbesitzer ueber private
-C-Bootschnitte. `kernel/runtime_boot.zig` startet bis zu seiner eigenen
-Rust-Welle weiterhin Services und Shell. Details: Docs/Core/KernelRustBoot.txt.
+C-Bootschnitte. Seit 0.83.18 besitzt `Rust/boot/runtime.rs` die Task-/Worker-
+und Service-/Shellkoordination; `kernel/runtime_boot.zig` ist ihre private
+Fassade. Details: Docs/Core/KernelRustBoot.txt und KernelRustServices.txt.
 
 Die Reihenfolge ist Vertrag, nicht Zufall - jede Stufe setzt die vorige
 voraus:
@@ -59,8 +60,9 @@ voraus:
 Storage besitzt getrennte Foundation- und Controllerphasen. Die
 Task-Runtime wird vor Treiberpolicy und Hintergrundaufgaben initialisiert.
 
-Die `*_boot.zig`-Dateien orchestrieren NUR die Reihenfolge; die Fachlogik
-bleibt in den Modulen ihres Bereichs.
+Verbliebene `*_boot.zig`-Orchestratoren halten nur ihre Reihenfolge;
+bereits migrierte Einstiege sind private Fassaden auf die Rust-Besitzer.
+Die Fachlogik bleibt bei ihrem Bereich.
 
 
 arch/x86_64/
@@ -72,7 +74,7 @@ arch/x86_64/
     Rust/arch/pic.rs, pit.rs      8259/PIT und Tickzaehler
     Rust/arch/ioapic.rs, lapic.rs IOAPIC-Routen, xAPIC/x2APIC und LAPIC-Timer
     Rust/arch/hpet.rs, rtc.rs, msr.rs  HPET/RTC/MSR-Besitzer
-    idt.zig             C-Adapter zum nativen IRQ-Eintritt; wartende VM folgt17
+    idt.zig             C-Adapter zum nativen IRQ-/Exceptioneintritt
     pic/pit/ioapic/lapic/hpet/rtc/msr/interrupts.zig  private C-Fassaden
     Rust/arch/percpu.rs, smp.rs  Per-CPU/GS/Lifecycle, AP-Trampoline und IPIs
     Rust/arch/tlb.rs, fpu.rs     TLB-Generationen/ACKs und Task/AP/IRQ-FPU
@@ -133,11 +135,12 @@ Der Sammelort fuer Kerndienste und Bootschnitte.
                       Bildanlage, Relocations und Retention
     modules/module_file/module_r4m/module_resources/module_boot/loader_boot.zig
                       private C-Fassaden; Originalfixturekoerper bleiben Zig
-    services.zig, service_core.zig, service_ipc.zig   Service-Registry,
-                      Endpoints, Queues und Kanal-IPC
+    Rust/service/     Service-Registry, Endpoints, Queues und Kanal-IPC
+    services/service_core/service_ipc*.zig  private typisierte C-Fassaden
+    Rust/boot/runtime.rs, Rust/service/boot.rs  native Bootkoordination
     protocol_api.zig  Protokollzugriff fuer Kernelverbraucher
     shell_launcher.zig  Start der konfigurierten Shell
-    desktop_events.zig  gemeinsames Desktop-Aktivitaets-Event
+    desktop_events.zig  Fassade auf natives Desktop-Aktivitaets-Event
     font.zig          Kernel-Fallback-Font, R4F1-Loader, Renderer-Helfer
     bootscreen*.zig   Bootscreen und R4B-Format
     boot_config.zig   CONFIG.R4S-Konfiguration
@@ -187,7 +190,10 @@ Die Programm- und ABI-Ebene.
                       r4os_kernel_contract importierte Contractmodul samt
                       erzeugten Platform-API-Metadaten
     r4api.zig         zentraler Export der API-Gruppenmodule
-    r4sys.zig         R4SYS-Systembasis
+    Rust/program/system/  native R4SYS-Dateien, Streams, Registry/Systempfade
+    Rust/program/registry_format*.rs  kernelprivater R4R1-Codec
+    Rust/program/notifications.rs  genaue Prozess-Notifications
+    r4sys.zig         zustandslose R4SYS-Fassade und Zig-ABI-Invokers
     r4desk.zig, r4draw.zig, r4net.zig, r4audio.zig, r4dev.zig
                       die uebrigen Gruppentabellen
 
@@ -409,4 +415,8 @@ KernelRustPrograms08316.json.
 Taskframe/SIMD, genaue Generationen und quittierter Rueckbau bleiben erhalten.
 Gebuendelte Originalfaelle, alte Eltern-Stackbilanz und Standard-/DevCenter:
 Docs/Core/KernelRustVm.txt und KernelRustVm08317.json.
-Naechster Schritt: 0.83.18 Servicecore/IPC/R4SYS.
+0.83.18: Service-/Kanal-IPC, Notifications, Bootkoordination und R4SYS samt
+kernelprivatem R4R1-Codec sind nativ. SERVMAN-Policy und 119 Module bleiben
+unveraendert. Originalfaelle, SMP4/SSH, alter Cachefehler und STANDARD:
+Docs/Core/KernelRustServices.txt und KernelRustServices08318.json.
+Naechster Schritt: 0.83.19 USB/xHCI/HID/MSC.
