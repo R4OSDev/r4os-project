@@ -331,8 +331,15 @@ net/, audio/, platform/, protocol/
                       kein zweiter produktiver Netzwerkzustand
     Docs/Core/KernelRustNetwork.txt  Besitz-/Callback-/Wait-/Abnahmegrenzen
 
-    audio/core.zig    Audio-Core und PCM; SID, OPL3 und MIDI ueber R4D/R4P
-    audio/pcm.zig     PCM-Format und Puffer
+    Rust/audio/core.rs  Streamringe, Backend-/Synthregister und Outputpermit
+    Rust/audio/pcm.rs, mixer.rs, backend_contract.rs
+                       exakte PCM-Phase, Mischung und Idle-/Stopquittungen
+    Rust/audio/boot.rs, Rust/program/r4audio.rs
+                       Boot-/Geraetestatus und19 native R4AUDIO-Einstiege
+    audio/*.zig, kernel/audio_boot.zig, program/r4audio.zig
+                       feste C-Projektionen, Originalfaelle und genaue
+                       Legacy-Callbackthunks; kein zweiter Audiozustand
+    SID, OPL3 und MIDI  unveraenderte externe R4D-/R4P-Besitzer
 
     Rust/platform/    CPU/Clocksource/Monotonic/Time, ACPI/Firmwareansichten,
                       PCI/ECAM, kanonischer PCI-/Geraetebestand, Plattformstart
@@ -481,4 +488,9 @@ sind als Voraussetzung aus0.83.24 vorgezogen;119 Module bytegleich.
 Gebuendelte Originalfaelle, zwei kurze SMP4-Gaeste und STANDARD/DevCenter
 samt Hardware-/Quittungs-/Messgrenzen: Docs/Core/KernelRustDisplay.txt
 und KernelRustDisplay08323.json. Poweroff ist kein DriverShutdown-Beleg.
-Naechster Schritt: 0.83.24 Audio-Core, Mixer und R4AUDIO.
+0.83.24: Sechs verbleibende Audiobesitzer nativ in Rust/audio und
+Rust/program/r4audio.rs; Routenmetadaten seit0.83.23.119 Module bytegleich.
+Zehn Originalfaelle einmal, ein gebuendelter SMP4-Audiogast und STANDARD/
+DevCenter samt Quittungs-/Hardware-/Messgrenzen: Docs/Core/KernelRustAudio.txt
+und KernelRustAudio08324.json. Normales Poweroff belegt keinen DriverShutdown.
+Naechster Schritt: 0.83.25 Bootpolicy, Updates, Recovery und Shutdown.
