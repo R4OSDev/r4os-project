@@ -44,8 +44,9 @@ voraus:
     usb_protocol_preload_boot    USB-Protokolle vor dem Hostcontroller
     service_boot                 Registry, Endpoints und Queues
     storage_boot.initControllers Controller, Blockdevice-Scan, MBR/GPT und Mounts
-    system_update_recovery_boot  SYSUPD-Journale, siehe RemoteUpdate.txt
-    upload_claim_boot            offene Uploadtransaktionen
+    Rust/update/boot             SYSUPD-Recovery vor allen Loadercaches
+    Rust/update/upload_boot      offene Uploadtransaktionen
+                                 feste *_boot.zig-Aufrufadapter ohne Zustand
     loader_boot                  Runtime-Libraries, R4D-Discovery, CONFIG.R4S
                                  und Fonts erst nach beiden Recoveries lesen
     platform_irq_boot            APIC, IOAPIC, HPET und Timer-Handoff
@@ -81,7 +82,9 @@ arch/x86_64/
     Rust/arch/smp_probe.rs       bestehende begrenzte SMP-/TLB-/Clock-Probe
     percpu/fpu/tlb_shootdown.zig C-Fassaden ohne zweite Zustandstabelle
     kernel/smp.zig, smp_probe_bridge.zig  Aufnahme/Darstellung und Ownercuts
-    rtc.zig, msr.zig, io.zig, interrupts.zig, power.zig, reset.zig
+    Rust/arch/terminal_power.rs  S5/Reset/GAS/PCI und begrenzter8042-Fallback
+    power/reset.zig     feste Aufruf-/Logadapter ohne Powerzustand
+    rtc.zig, msr.zig, io.zig, interrupts.zig
 
 
 bootloader/ und display/
@@ -156,7 +159,8 @@ Der Sammelort fuer Kerndienste und Bootschnitte.
     font/font_catalog/font_format.zig  feste C-Fassaden und Originalfaelle
     bootscreen/crash_screen/diag_screen.zig  feste private Anzeigenfassaden
     bootscreen_r4b*.zig  C-Fassade zum nativen Rust/boot/r4b.rs-Decoder
-    boot_config.zig   CONFIG.R4S-Konfiguration
+    Rust/boot/config.rs  begrenzter CONFIG.R4S-Parser und residente Sicht
+    boot_config.zig   festes C-Layout und Instrumentierungsadapter
     *_boot.zig        die Bootschnitte aus der Reihenfolge oben
 
 
@@ -278,8 +282,13 @@ fs/ und storage/
     fs/*.zig, Support/ntfs_format.zig, Support/ntfs_volume.zig
                       private C-Fassaden und unveraenderte Originalfixtures;
                       externe SDK-/Hosttool-/Recovery-Kopien bleiben Zig
-    fs/system_update_atomic.zig, fs/upload_claim_store.zig
-                      Update-/Upload-Transaktionsadapter bis Welle 0.83.25
+    Rust/update/      Journal-/Claimbytes, Replay, gepruefte Atomic-/Cleanup-
+                      Uebergaenge, persistente Claims und fruehe Recovery
+                      mit residenten Buffern und wartespannendem Besitzer
+    fs/system_update_atomic.zig, fs/upload_claim_store.zig,
+    Support/system_update_recovery.zig, upload_publish_claim.zig
+                      feste private C-Projektionen und Originalfaelle;
+                      SDK-/Hosttool-/Recovery-Kopien bleiben unveraendert
 
     Rust/storage/    Blockregistry, Requests, Worker, I/O/Diagnose,
                       GPT/MBR/GUID, Bootquelle, Medieninventar,
@@ -493,4 +502,11 @@ Rust/program/r4audio.rs; Routenmetadaten seit0.83.23.119 Module bytegleich.
 Zehn Originalfaelle einmal, ein gebuendelter SMP4-Audiogast und STANDARD/
 DevCenter samt Quittungs-/Hardware-/Messgrenzen: Docs/Core/KernelRustAudio.txt
 und KernelRustAudio08324.json. Normales Poweroff belegt keinen DriverShutdown.
-Naechster Schritt: 0.83.25 Bootpolicy, Updates, Recovery und Shutdown.
+0.83.25: Zehn Update-/Claim-/Bootconfig-/Powerbesitzer nativ; R4SYS und
+Boot binden denselben Besitzer. Residente Journale, genaue Dateireferenzen,
+Recovery-vor-Loader und wartespannende Arbeitsbuffer-Leihen bleiben gebunden.
+119 Verbraucher unveraendert. Gezielt gepruefte Originale, aktueller SMP4-Gast,
+Recovery-Paketleser und STANDARD/DevCenter mit alter284-Zwischenstart-
+Beobachtung und Pruefgrenzen: Docs/Core/KernelRustUpdate.txt und
+KernelRustUpdate08325.json.
+Naechster Schritt: 0.83.26 Instrumentierung, R4DEV und Spectra-Schnittstellen.
