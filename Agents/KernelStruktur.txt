@@ -194,7 +194,9 @@ Die Programm- und ABI-Ebene.
     Rust/program/registry_format*.rs  kernelprivater R4R1-Codec
     Rust/program/notifications.rs  genaue Prozess-Notifications
     r4sys.zig         zustandslose R4SYS-Fassade und Zig-ABI-Invokers
-    r4desk.zig, r4draw.zig, r4net.zig, r4audio.zig, r4dev.zig
+    Rust/program/network_api.rs, network_projection.rs  alle41 R4NET-Einstiege
+    r4net.zig         zustandslose C-Fassade mit festen ABI-Projektionen
+    r4desk.zig, r4draw.zig, r4audio.zig, r4dev.zig
                       die uebrigen Gruppentabellen
 
 Die generierte Kernelseite des Plattformvertrags liegt unter
@@ -286,14 +288,15 @@ Zig-Input- und Blockcallbacks behalten typisierte zustandslose Invoker.
 net/, audio/, platform/, protocol/
 ----------------------------------
 
-    net/core.zig      Adapter, RX/TX, UDP-Sockets, ARP-Cache, Demux
-    net/tcp.zig       TCP-State-Machine
-    net/ethernet.zig, arp.zig, ipv4.zig, icmp.zig, udp.zig, dhcp.zig,
-    net/dns.zig       Kernelpfade fuer die Netzgrundlage
-    net/ipc_services.zig  Netz-IPC-Service-Bruecke
-    net/timing.zig    Timeout- und Deadline-Helfer
-    net/r4p_contract.zig  R4P-Netzvertraege
-    net/serial_link.zig, config.zig, config_writer.zig
+    Rust/net/         einziger Netzwerkbesitzer seit0.83.20: Adapter/Pakete,
+                      RX-/TX-Handoff, ARP/IP/ICMP/UDP/TCP, DHCP/DNS und Cache
+    Rust/net/tcp*.rs  TCP-Verbindungen/RTO/Wire/Wait und atomare Ready-Projektion
+    Rust/net/ipc_*.rs NIPC-Handler, acht Wireantworten, genaue Socketidentitaeten
+    Rust/net/config*.rs, diagnostics.rs  Konfiguration und bestehende Diagnosen
+    Rust/net/serial*.rs, boot.rs  SerialLink-COM2 und Netzwerk-Bootkoordination
+    net/*.zig, kernel/network_boot.zig  feste C-Fassaden/typisierte Invoker;
+                      kein zweiter produktiver Netzwerkzustand
+    Docs/Core/KernelRustNetwork.txt  Besitz-/Callback-/Wait-/Abnahmegrenzen
 
     audio/core.zig    Audio-Core und PCM; SID, OPL3 und MIDI ueber R4D/R4P
     audio/pcm.zig     PCM-Format und Puffer
