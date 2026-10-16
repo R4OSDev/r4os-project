@@ -1,7 +1,9 @@
 ﻿# R4OS Project Workspace
 
 This public repository defines the lightweight workspace used to coordinate
-the independent R4OS repositories.
+the independent R4OS repositories. The production kernel uses Rust and the
+required x86_64 assembly. Applications, services, libraries, drivers, protocols
+and the separate Recovery kernel retain their existing Zig builds.
 
     Agents/        Compact agent-facing project references
     DevKit/        Installed SDK and host tools

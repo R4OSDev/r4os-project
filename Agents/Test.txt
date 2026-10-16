@@ -17,8 +17,12 @@ Zwei getrennte Ebenen
 1. Repositoryeigene Tests pruefen den Besitzer einer Aenderung auf dem Host.
 2. Der Workspace-Test prueft Bau, Image und laufendes Gesamtsystem.
 
-Beide Ebenen sind notwendig. Ein gruener Headless-Lauf ersetzt keine
-Contract-, SDK-, Kernel-, Library- oder Komponententests.
+Den Umfang auf den geaenderten Besitzer und betroffene vorhandene Faelle
+begrenzen. Vorhandene gruene Belege wiederverwenden; keine pauschalen
+Katalogwiederholungen. Compiler-/ABI-Pruefung und echte Gastfunktion belegen
+verschiedene Grenzen. Der Rust-Kernel besitzt keine alten Zig-Testselektoren;
+fmt/check/clippy und gezielte SMP4-Laufzeitdiagnosen sind sein aktueller Weg.
+Historische Originalfaelle bleiben in Git und den Migrationsarchiven erhalten.
 
 
 Repositoryeigene Tests
@@ -34,7 +38,9 @@ Die wichtigsten Aufrufe unter Windows:
     Repositories\Libraries\Build.bat R4STD test
     Repositories\Libraries\Build.bat R4IMG test
     Repositories\Libraries\Build.bat R4FONT test
-    Repositories\Kernel\Build.bat test
+    Repositories\Kernel\Build.bat fmt
+    Repositories\Kernel\Build.bat check
+    Repositories\Kernel\Build.bat clippy
     Repositories\Distribution\Build.bat test
 
 Bei einer einzelnen App, einem Dienst, Diagnoseprogramm, Treiber, Protokoll
@@ -42,7 +48,7 @@ oder Subsystem:
 
     Repositories\<Rolle>\<Projekt>\Build.bat test
 
-Das funktioniert nur, wenn das Projekt einen Zig-`test`-Step besitzt. Sonst
+Fuer Zig-Modulprojekte funktioniert dies nur mit einem eigenen `test`-Step. Sonst
 den normalen `Build.bat` ausfuehren und die fuer das Projekt im
 `Docs/Inventory/Tests.json` genannten Tests gezielt verwenden.
 

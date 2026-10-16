@@ -62,7 +62,7 @@ Zentrale Repositories:
       R4IMG/          Bilddecoder
       R4FONT/         Fontdecoder und Font-API
 
-    Kernel/         Kernel, Limine-Konfiguration und kernel-eigene Tests
+    Kernel/         Rust-/Assembly-Kernel, Limine und Laufzeitdiagnosen
     Recovery/       eigenstaendiges Recovery-Monorepo (Roadmap 0.76.X)
     Distribution/   Imageprofile, Overlays, Hosttools, QEMU und Systemtests
     Organization/   oeffentliches GitHub-Organisationsprofil (Remote: .github)
@@ -187,7 +187,7 @@ Das Distribution-Repository besitzt:
     Tools/               ImageCreator, ImagePlan, NtfsVerify, R4UPack usw.
     Tests/               Plan-, Tool- und Headless-Auswertung
 
-QEMU, Limine, Zig und die vorbereitete Rust-Toolchain liegen nur im DevKit. Distribution enthaelt die
+QEMU, Limine, Zig und die gepinnte Rust-Toolchain liegen nur im DevKit. Distribution enthaelt die
 R4OS-spezifischen Profile, Overlays und Aufrufe, aber keine zweite
 Installation dieser Fremdwerkzeuge.
 

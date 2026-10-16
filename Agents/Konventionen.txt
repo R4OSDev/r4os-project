@@ -20,8 +20,8 @@ Kernelgrenze und Hardware
   ausloesen. Die gesonderte DriverPlatformApi leiht authentifizierten
   Firmwarearbeitern ausschliesslich bereits permanente Firmware-/UC-Seiten;
   ACPIPLAT verwendet darauf validierte MCFG/ECAM-Zugriffe ohne CF8/CFC.
-- Die verbleibenden Zig-Kernelteile bauen `ReleaseSafe`/`soft_float`; Rust
-  verwendet das feste gepruefte Releaseprofil ohne SIMD aus
+- Der produktive Kernel baut ausschliesslich Rust und notwendige Assembly.
+  Rust verwendet das feste gepruefte Releaseprofil ohne SIMD aus
   Docs/Core/KernelRustBuild.txt. R4X,
   R4D, R4P und R4L duerfen die vom SDK freigegebenen SIMD-Features bis AVX2
   sowie AES-NI/PCLMULQDQ nutzen. Zielhardware ist die AVX2-Klasse; der
@@ -31,7 +31,7 @@ Kernelgrenze und Hardware
   ohne Modulaufrufe sind ausgenommen. Kritische Worker besitzen ihren
   FPU-Puffer bereits in der Bootreserve. Ein Debug-Kernel ist kein Ersatzprofil
   fuer den produktiven Build.
-- `Repositories/Kernel/kernel/font.zig` ist Kernelcode. Die Fontquellen und
+- `Repositories/Kernel/Rust/font/` ist Kernelcode. Die Fontquellen und
   Hostgeneratoren unter `Repositories/Distribution/Assets/SystemFonts/`
   importieren keinen Kernelcode; die Glyphquellen bleiben bewusst getrennt.
 - Limine-Requestsektionen behalten die alphabetisch benannten Sektionen
@@ -41,7 +41,7 @@ Kernelgrenze und Hardware
 - COM1-Debug haengt an `config.enable_com1_debug` und ist standardmaessig an,
   weil die Headless-Abnahme den seriellen Pfad benoetigt.
   `Repositories/Kernel/Build.bat -Dcom1-debug=false` muss weiterhin bauen;
-  `kernel/log.zig` importiert `driver/com.zig` nicht direkt.
+  `Rust/boot/log.rs` bindet die Ausgabe ueber das vorhandene Logrouting.
 
 Die Baum- und Besitzdetails stehen in `Agents/KernelStruktur.txt`.
 
@@ -113,7 +113,7 @@ Systempfade und Laufzeitverhalten
   case-insensitiv. Externe Icons liegen unter `C:\R4OS\Media\Icons\`;
   Programmicons und programmeigene Medien gehoeren in den R4M0-Container.
 - Dokumentation und Projekttexte (`*.md`, `*.txt`, `*.R4S`) sind UTF-8 mit
-  BOM. Code und Skripte (`*.zig`, `*.S`, `*.ld`, `*.bat`, `*.ps1`) sowie
+  BOM. Code und Skripte (`*.rs`, `*.zig`, `*.S`, `*.ld`, `*.bat`, `*.ps1`) sowie
   `module.R4MF` sind UTF-8 ohne BOM. PowerShell-Schreiboperationen verwenden
   immer eine ausdrueckliche Kodierung.
 - `TERMINAL.R4X` ist der produktive Shellpfad. Neue Shell- und Consolelogik

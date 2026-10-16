@@ -1,526 +1,137 @@
 ﻿R4OS Kernel-Struktur - Agent-Referenz
 =====================================
 
-Zweck: Wo im Kernelbaum welche Zustaendigkeit sitzt. Alle relativen Pfade in
-dieser Datei beginnen unter `Repositories/Kernel/`.
+Alle folgenden Pfade beginnen unter Repositories/Kernel/. Der produktive
+Kernel besteht seit 0.83.27 aus Rust und notwendiger x86_64-Assembly.
+Apps, Libraries, Treiber, Protokolle und der separate Recovery-Kernel
+behalten ihre bisherigen Sprachen und oeffentlichen Vertraege.
 
-Versionswahrheit
+Bau und Einstieg
 ----------------
+VERSION.R4S ist die Produktversionswahrheit. Cargo.toml/Cargo.lock binden
+Rust/ und den gepinnten zentralen Contract. Build.sh beziehungsweise Build.bat
+startet dieselbe PowerShell-7-Logik in Build.ps1; Toolchain und Werkzeuge
+kommen ueber den isolierten DevKit-Starter. Details: Agents/Build.txt und
+Docs/Core/KernelRustBuild.txt.
 
-`VERSION.R4S` enthaelt die eigenstaendige Kernelversion. `kernel/version.zig`
-validiert sie beim Kompilieren und bettet sie in `.r4os.kernel.meta` von
-`r4os.elf` ein. Sie ist nicht die fortlaufende R4OS-Releaseversion; Details
-stehen in `Docs/Core/Versionierung.txt`.
+Rust/main.rs bindet arch/x86_64/cpu.S, isr.S und ap_trampoline.S ein und
+ruft als kmain Rust/boot/entry.rs auf. linker.ld behaelt den hoeheren
+Adressraum, getrennte RW/RX/RO/RW-Segmente, die drei geordneten Limine-
+Requestsektionen und .r4os.kernel.meta. Rust/boot/version.rs erzeugt dieses
+44-Byte-Format aus VERSION.R4S. Rust/build_config.rs bindet die von build.rs
+erzeugten Konstanten und den terminalen Panicpfad. Keine Zig-Linkstufe,
+keine produktiven Zig-Fassaden oder alternativen Zustandsbesitzer.
 
-Diese Liste ist kuratiert und nennt die tragenden Dateien je Bereich. Fuer
-den vollstaendigen Bestand gilt der Kernelbaum selbst.
+Das fertige ELF und seine gepruefte Compiler-/Optionsherkunft bleiben unter
+zig-out/bin/r4os.elf und r4os.build.json. Der Verzeichnisname ist ein
+bestehender Artefaktvertrag; Cargo-Zwischenergebnisse liegen unter
+Artifacts/Kernel/Rust/. BuildOptions.json besitzt alle aktiven Optionen.
 
+Bootfolge
+----------
+Rust/boot/entry.rs haelt die folgende Reihenfolge; Fachlogik bleibt beim
+jeweiligen Besitzer:
 
-Einstieg und Bootreihenfolge
-----------------------------
+    COM1/Fatal/Crash, Limine/BootInfo und fruehe Anzeige
+    CPU-Tabellen, PIT, Treiberregistry und PS/2-Eingabe
+    Bootintro; Speicherkarte, PMM, Paging, VM und Heap
+    Storage-Foundation; Modulregistry mit sechs Platform-Providern
+    ACPI/PCIe, USB-Protokollpreload, Servicegrundlage
+    Storagecontroller, Partitionen, Bootmedium und Mounts
+    update/boot und update/upload_boot: Recovery vor Loadercaches
+    Runtime-R4Ls, R4D-Discovery, CONFIG.R4S und Fonts
+    IRQ/APIC/HPET-Handoff; Audio, Netzwerk und USB-HID
+    Task-/SMP-Runtime, Treiberpolicy und optionale begrenzte Proben
+    Netzwerk-/DHCP-/HID-Worker, Services und Shell
 
-`Rust/boot/entry.rs` exportiert seit 0.83.7 `kmain` und haelt die feste
-Reihenfolge. `main.zig` verbindet noch ausstehende Fachbesitzer ueber private
-C-Bootschnitte. Seit 0.83.18 besitzt `Rust/boot/runtime.rs` die Task-/Worker-
-und Service-/Shellkoordination; `kernel/runtime_boot.zig` ist ihre private
-Fassade. Details: Docs/Core/KernelRustBoot.txt und KernelRustServices.txt.
+Boot-/Task-/Speicherfehler bleiben im vorhandenen terminalen Fatalpfad.
+BootReady ist erst nach dem ersten Shellstart erreicht; Spectra CHECK BOOT
+/CONFORMANCE gehoert deshalb nicht in die Boot-AUTOEXEC.
 
-Die Reihenfolge ist Vertrag, nicht Zufall - jede Stufe setzt die vorige
-voraus:
-
-    com_debug_boot               COM1-Debugpfad
-    boot_info, boot_display      Limine-Informationen und fruehe Anzeige
-    cpu_boot                     GDT, IDT und PIC
-    timer_boot                   PIT
-    driver_boot                  Treiberregistry
-    input_boot                   PS/2-Keyboard und -Mouse
-    boot_intro                   fruehe Bootdarstellung
-    memory_boot.initCore         Map, Blocks, PMM, Paging, Page Tables,
-                                 Virtual Ranges und Heap
-    storage_boot.initFoundation  Drive- und Blockgrundlage
-    module_boot                  Modulregistry und sechs eingebaute
-                                 Platform-API-Provider
-    platform_boot                ACPI, PCIe, Device-Mappings und CR3
-    usb_protocol_preload_boot    USB-Protokolle vor dem Hostcontroller
-    service_boot                 Registry, Endpoints und Queues
-    storage_boot.initControllers Controller, Blockdevice-Scan, MBR/GPT und Mounts
-    Rust/update/boot             SYSUPD-Recovery vor allen Loadercaches
-    Rust/update/upload_boot      offene Uploadtransaktionen
-                                 feste *_boot.zig-Aufrufadapter ohne Zustand
-    loader_boot                  Runtime-Libraries, R4D-Discovery, CONFIG.R4S
-                                 und Fonts erst nach beiden Recoveries lesen
-    platform_irq_boot            APIC, IOAPIC, HPET und Timer-Handoff
-    audio_boot                   Audio-Core und Geraeteauswahl
-    network_boot                 Adapter und Netzgrundlage
-    usb_hid_boot                 USB-HID-Eingabe
-    runtime_boot.initTaskRuntime Task-Runtime
-    driver_policy_boot           Treiberpolicy aus CONFIG.R4S
-    Hintergrundaufgaben          Netzwerk, DHCP, HID und Selbsttests
-    runtime_boot.start           Services und Shell
-
-Storage besitzt getrennte Foundation- und Controllerphasen. Die
-Task-Runtime wird vor Treiberpolicy und Hintergrundaufgaben initialisiert.
-
-Verbliebene `*_boot.zig`-Orchestratoren halten nur ihre Reihenfolge;
-bereits migrierte Einstiege sind private Fassaden auf die Rust-Besitzer.
-Die Fachlogik bleibt bei ihrem Bereich.
-
-
-arch/x86_64/
-------------
-
-    Rust/arch/tables.rs  GDT/TSS/IDT/IST und Assembly-Frames
-    gdt.zig, tss.zig     Uebergangsfassaden ohne eigene Tabellen
-    Rust/arch/irq.rs, runtime.rs  IRQ/IPI-Reihenfolge und einziger Runtime-Owner
-    Rust/arch/pic.rs, pit.rs      8259/PIT und Tickzaehler
-    Rust/arch/ioapic.rs, lapic.rs IOAPIC-Routen, xAPIC/x2APIC und LAPIC-Timer
-    Rust/arch/hpet.rs, rtc.rs, msr.rs  HPET/RTC/MSR-Besitzer
-    idt.zig             C-Adapter zum nativen IRQ-/Exceptioneintritt
-    pic/pit/ioapic/lapic/hpet/rtc/msr/interrupts.zig  private C-Fassaden
-    Rust/arch/percpu.rs, smp.rs  Per-CPU/GS/Lifecycle, AP-Trampoline und IPIs
-    Rust/arch/tlb.rs, fpu.rs     TLB-Generationen/ACKs und Task/AP/IRQ-FPU
-    Rust/arch/smp_probe.rs       bestehende begrenzte SMP-/TLB-/Clock-Probe
-    percpu/fpu/tlb_shootdown.zig C-Fassaden ohne zweite Zustandstabelle
-    kernel/smp.zig, smp_probe_bridge.zig  Aufnahme/Darstellung und Ownercuts
-    Rust/arch/terminal_power.rs  S5/Reset/GAS/PCI und begrenzter8042-Fallback
-    power/reset.zig     feste Aufruf-/Logadapter ohne Powerzustand
-    rtc.zig, msr.zig, io.zig, interrupts.zig
-
-
-bootloader/ und display/
-------------------------
-
-    Rust/boot/limine.rs       Request-Marker und volatile Antworten
-    Rust/boot/info.rs         normalisierte residente Bootdaten
-    bootloader/*.zig          unveraenderliche Uebergangsviews fuer Zig
-
-    Rust/display/boot_display.rs  fruehe residente Console/Framebufferausgabe
-    Rust/display/console*.rs  Kernel-Console, begrenzter RAM-Zell-/Pixelscroll
-    Rust/display/framebuffer.rs  volatile Format-/Clipping-/Overlapprimitiven
-    Rust/display/bootscreen.rs, crash_screen.rs, diag_screen.rs
-                              Bootfortschritt, Fatalbild und erhaltene Diagnose
-    Rust/display/boot_driver.rs  genauer Boot-Hold-Guard und Snapshotbesitz
-    display/boot_display/boot_driver/console/console_scroll_buffer/framebuffer.zig
-                              feste C-Fassaden und typisierte Ownerinvoker;
-                              BO-/Displayoperationen direkt nativ
-    Rust/display/manager.rs   residenter DisplayManager, Uebernahme und Restore
-    Rust/display/surface*.rs, presenter.rs  Surface, Frame-/Present-Pfad
-    Rust/display/outputs.rs, output_*.rs  Katalog, Receiver und Atomiczustand
-    Rust/display/cursor_*.rs, mode_*.rs, native_driver.rs
-                              Execution, Moduspuffer, Reset-/Konsolenidentitaet
-    Rust/display/queue*.rs    Ressourcen, IRQ-Eingang und dedizierter Worker
-    Rust/program/r4desk*.rs, remote_frame_state.rs, r4draw.rs
-                              Eingabe/Clipboard, Capture/Leihen und Zeichnen
-    display/*.zig, program/gfx_*.zig, r4desk.zig, r4draw.zig
-                              feste Projektionen, genaue Callbackthunks und
-                              Originalfaelle; kein zweiter Displayzustand
-
-
-kernel/
--------
-
-Der Sammelort fuer Kerndienste und Bootschnitte.
-
-    Rust/boot/log_route.rs  Ausgaberouting; kurze Konfigurationskopie vor Sinks
-    Rust/boot/log_event.rs  begrenzte LOG1-Formatierung ohne neue Ereignisse
-    Rust/boot/performance.rs, instrumentation.rs  Boot-/Detailmessung
-    Rust/loader/performance.rs  Loaderzaehler und begrenzte Spannen
-    Rust/program/r4dev/  direkte native Abfragen/Diagnosen; Contractpraefixe
-    log/boot_perf/loader_perf/instrumentation/log_event.zig  feste Fassaden
-    Rust/boot/foundation.rs  CPU-Boot/Intro/COM1-Hooks/Logumleitung
-    Rust/boot/log.rs, serial.rs  Bootlog und einziger COM1-TX-Ring
-    Rust/boot/fatal.rs, crash.rs  Fatalzustand, Bootphasen und Records
-    Rust/boot/r4b.rs   R4B0-Splashdecoder und frueher MMIO-Bildpfad
-    boot_status/bootlog/fatal/crash.zig  private Uebergangsfassaden
-    crash_screen.zig, diag_screen.zig   bestehender Anzeigenbesitzer
-    Rust/kernel/deadman.rs  kooperativer Deadman; kein IRQ-gesperrter Spin
-    deadman/deadman_bridge.zig  zustandslose Start-/Storage-/Displayfassaden
-    Rust/driver/api_*.rs  DriverApi-Admission, Tabellen/Praefixe, PCI/DMA/MSI,
-                      Backends und terminaler Cleanup; driver_api.zig ist
-                      C-Fassade und Backend-/Darstellungsschnitt
-    Rust/driver/work.rs, work_queue.rs  Work/Completion, Klassen und Ledger
-    Rust/driver/threads.rs, semaphores.rs, heap.rs  residente Treiberruntimes
-    Rust/driver/driver_plan.rs, driver_policy.rs  CONFIG-Plan/-Policy
-    Rust/driver/irq_router.rs  shared INTx/Level/Edge/MSI-IRQ-Routen
-    driver_work/driver_plan/irq_router.zig  private C-Fassaden
-    Rust/platform/timer.rs  Tick-Epoche, absolute Deadlines und Timerbackend
-    Rust/platform/timer_boot.rs, irq_boot.rs  frueher PIT und validierter Handoff
-    timer/platform_irq_boot/timer_boot.zig   private C-Fassaden/Darstellung
-    Rust/loader/boot.rs   Modul-/Loaderboot und sechs Platform-Provider
-    Rust/loader/resources.rs, file.rs, r4m.rs   Ressourcenkataloge,
-                      requestgebundener Dateizugriff und R4M0-Fenster
-    Rust/loader/format.rs, registry_*.rs   Container-/Import-/Exportpruefung,
-                      Registry, Katalog, Resolver, Instanzgenerationen,
-                      Bildanlage, Relocations und Retention
-    modules/module_file/module_r4m/module_resources/module_boot/loader_boot.zig
-                      private C-Fassaden; Originalfixturekoerper bleiben Zig
-    Rust/service/     Service-Registry, Endpoints, Queues und Kanal-IPC
-    services/service_core/service_ipc*.zig  private typisierte C-Fassaden
-    Rust/boot/runtime.rs, Rust/service/boot.rs  native Bootkoordination
-    protocol_api.zig  Protokollzugriff fuer Kernelverbraucher
-    shell_launcher.zig  Start der konfigurierten Shell
-    desktop_events.zig  Fassade auf natives Desktop-Aktivitaets-Event
-    Rust/font/        Fallback, R4F1-Parser/Glyphen, residenter Katalog/Dateiscan
-    font/font_catalog/font_format.zig  feste C-Fassaden und Originalfaelle
-    bootscreen/crash_screen/diag_screen.zig  feste private Anzeigenfassaden
-    bootscreen_r4b*.zig  C-Fassade zum nativen Rust/boot/r4b.rs-Decoder
-    Rust/boot/config.rs  begrenzter CONFIG.R4S-Parser und residente Sicht
-    boot_config.zig   festes C-Layout und Instrumentierungsadapter
-    *_boot.zig        die Bootschnitte aus der Reihenfolge oben
-
-
-Rust/gfx/ - generischer Grafikspeicher
---------------------------------------
-
-    layout/buffer_owner/buffers  BOs, Referenzen, Leihen, Wachstum und Rang100
-    driver_memory_state/driver_memory  genaue Epochen, Deviceknoten, DMA/MMIO
-    allocation_state/allocations  Claims, Providerarbeit und Publikationspins
-    virtual_state/virtual_runtime  VA-Baum, Annahmeschluss, Execution/Retire
-    telemetry/telemetry_api/budget_api/stats_wire  Cache, Budgets und Praefixe
-    allocation_api/virtual_api/owned_buffers  R4DRAW-/R4D-Aufrufe
-    kernel/memory/program gfx_*.zig  feste C-Projektionen und Originalfaelle;
-                              keine zweite BO-/VA-Zustandstabelle
-
-Details und gezielte Abnahme: Docs/Core/KernelRustGpuMemory.txt.
-Display-/Presentqueuebesitzer liegen seit0.83.23 nativ in Rust/display;
-R4DESK/R4DRAW in Rust/program. Details: Docs/Core/KernelRustDisplay.txt.
-Alte zustandslose API-Bruecken werden mit dem Migrationsgeruest in0.83.27
-entfernt.
-
-
-memory/
--------
-
-    Rust/memory/layout.rs, map.rs     Adressfenster/Flags, normalisierte Map
-    Rust/memory/blocks.rs, phys.rs    Blockkatalog, Bitmap, Frames/Extents
-    Rust/memory/owner.rs              ranggebundene CPU-Owner-Locks
-    Rust/memory/paging.rs             aktiver Paging-/CR3-Grundzustand
-    Rust/memory/page_tables.rs, root.rs  eigene PML4, Dry-Run, Geraete,
-                                      Rootwechsel und Limine-Quarantaene
-    Rust/memory/heap.rs               Heap und initialisierter Rust-Allocator
-    Rust/memory/boot.rs               Speicher-Bootkoordination
-    Rust/memory/vm_ranges.rs, vm_index.rs, vm_commit_spans.rs
-                                     einziger Range-/ID-/Adress-/Spankatalog
-    Rust/memory/vm_frames.rs, vm_transactions.rs, vm_query.rs
-                                     eager/residente VM, Rollback, Snapshots
-    Rust/memory/vm_page_state.rs, vm_pager*.rs
-                                     Demandfault, wartender Pager, Page-State
-    Rust/memory/backing_store.rs, reclaim.rs
-                                     genaue Backing-/Slotidentitaet, Reclaim
-    memory/*.zig                     typisierte private C-Fassaden ohne
-                                     zweiten mutablen VM-/Pagerbesitzer
-
-Details: `Docs/Core/Speicherverwaltung.txt`, `Docs/Core/KernelRustMemory.txt`.
-
-
-program/
---------
-
-Die Programm- und ABI-Ebene.
-
-    Rust/program/    R4X-Start, Registry/Generationen/Completions/Threads,
-                      Exit/Kill/Reap, VM-/Stackzulassung und Inventare,
-                      Console/GUI/SharedRaster, AsyncIO und Programm-APIs
-    r4x.zig           typisierte private C-Fassade zu den nativen Besitzern
-    Rust/loader/r4d.rs  Treibermodul-/Laufzeitbesitz, Init/Cleanup/Shutdown
-    Rust/loader/r4p.rs  Preloads, bedarfsgesteuerter Protokollkatalog,
-                      Abhaengigkeiten und Callbackreihenfolge
-    r4d.zig, r4p.zig  private C-Fassaden ohne zweite Ladeimplementierung
-    r4x_start.zig     private C-Fassade fuer nativen R4XStart-Vertrag
-    r4x_api.zig       zyklusfreie Fassade auf das als
-                      r4os_kernel_contract importierte Contractmodul samt
-                      erzeugten Platform-API-Metadaten
-    r4api.zig         zentraler Export der API-Gruppenmodule
-    Rust/program/system/  native R4SYS-Dateien, Streams, Registry/Systempfade
-    Rust/program/registry_format*.rs  kernelprivater R4R1-Codec
-    Rust/program/notifications.rs  genaue Prozess-Notifications
-    r4sys.zig         zustandslose R4SYS-Fassade und Zig-ABI-Invokers
-    Rust/program/network_api.rs, network_projection.rs  alle41 R4NET-Einstiege
-    r4net.zig         zustandslose C-Fassade mit festen ABI-Projektionen
-    r4desk.zig, r4draw.zig, r4audio.zig, r4dev.zig
-                      die uebrigen Gruppentabellen
-
-Die generierte Kernelseite des Plattformvertrags liegt unter
-`Repositories/Contract/Generated/Kernel/Zig/r4x_api_generated.zig` und
-wird vom Kernelbuild als `r4os_kernel_contract` eingebunden.
-
-
-sched/
-------
-
-    Rust/sched/scheduler.rs  rollenbewusste Ready-/Fairness-/IRQ-Auswahl,
-                      Kontextwechsel, Wake-/Deadline-/Idlegrenzen und Zaehler
-    scheduler.zig     private C-Fassade zum einzigen nativen Scheduler
-    scheduler_bridge.zig  zustandslose Serialdarstellung
-    Rust/sched/task/  dynamische Taskregistry, Rollen/Budget/Donation,
-                      Ready-/Deadline-/Reap-/Rollbacklisten, guarded Stacks,
-                      FPU-Ressourcen, Reserve und paginierte Inventare
-    task.zig          C-Fassade mit opaken Taskhandles; native Feld-/Ownerzugriffe
-    task_vm_bridge.zig  zustandslose VM-Aufrufe bis zur VM-Migration17
-    Rust/sched/task_context.rs  genaue Unwind-Bindung/Anker pro CPU
-    task_context.zig  private C-Tokenfassade; kein zweiter Bindungsbesitzer
-    Rust/sched/task_index.rs, wait_node.rs  intrusive AVL-/Waiterverkettung
-    task_index/wait_node.zig  C-Records und unveraenderte Originalfixtures
-    Rust/sched/sync_*.rs  Mutex/UnwindGuard/Event/Completion/Semaphore/WaitQueue,
-                      generationentreue gerichtete Wakes und originale SYNCCHECK
-    sync.zig          feste embedded C-Records und Callback-/Ownerfassade
-    Rust/sched/task_probe/  originale Registry-/Deadline-/Rollen-/OOM-/FPU-Probe
-    task_registry_selftest.zig, task_probe_bridge.zig  Bootoption/Darstellung
-                      und zustandslose Work-/VM-/Owner-/Netzwerkcuts
-
-Details: `Docs/Core/ProgramLifecycle.txt` und
-`Docs/Core/Speicherverwaltung.txt`.
-
-
-fs/ und storage/
+Native Besitzer
 ----------------
+Rust/arch/
+    tables/interrupt_frame: GDT/TSS/IDT/IST und Exception-/Taskframes
+    runtime/irq/percpu/smp: IRQ/IPI, Runtime-Owner und AP-Lifecycle
+    tlb/fpu: genaue Shootdown-Generationen und Task-/IRQ-FPU-Zustaende
+    pic/pit/ioapic/lapic/hpet/rtc/msr: CPU-/Interrupt-/Clockhardware
+    terminal_power: Reset, S5 und begrenzte Hardware-Fallbacks
+    smp_probe: vorhandene SMP-/Heap-/TLB-/Lock-/Serial-/Clock-Nachweise
 
-    Rust/fs/vfs.rs, vfs_types.rs  Volume-/Bootmounttabelle, Pfad-/Node-/
-                      Entry-Dispatch und neutrale private C-Werte
-    Rust/fs/drive.rs, directory_changes.rs  Laufwerke und Verzeichnisrevisionen
-    Rust/fs/request.rs, request_scope.rs  FS-Requests und genaue Volumelanes
-    Rust/fs/page_cache*.rs  Sektorcache, Batch/Policy, Fill und Writeback
-    Rust/fs/fat*.rs, directory_growth.rs  FAT32 und Verzeichniserweiterung
-    Rust/fs/ntfs_format*.rs  Kernel-NTFS-Formatkern
-    Rust/fs/ntfs_volume*.rs, ntfs_adapter*.rs  NTFS-Volumen und Mountbesitzer
-    Rust/fs/copy_transfer.rs, glob.rs  Kopierfortsetzungen und Glob
-    fs/*.zig, Support/ntfs_format.zig, Support/ntfs_volume.zig
-                      private C-Fassaden und unveraenderte Originalfixtures;
-                      externe SDK-/Hosttool-/Recovery-Kopien bleiben Zig
-    Rust/update/      Journal-/Claimbytes, Replay, gepruefte Atomic-/Cleanup-
-                      Uebergaenge, persistente Claims und fruehe Recovery
-                      mit residenten Buffern und wartespannendem Besitzer
-    fs/system_update_atomic.zig, fs/upload_claim_store.zig,
-    Support/system_update_recovery.zig, upload_publish_claim.zig
-                      feste private C-Projektionen und Originalfaelle;
-                      SDK-/Hosttool-/Recovery-Kopien bleiben unveraendert
+Rust/boot/
+    limine/info: volatile Requests und residente normalisierte Bootdaten
+    entry/foundation/runtime: linearer Boot, Worker, Services und Shell
+    config: CONFIG.R4S; log/log_route/log_event/serial: begrenzte Ausgabe
+    fatal/crash: Fehlerphase und Records; performance/instrumentation:
+    Betriebszaehler und ausdruecklich aktivierte Detailmessung
 
-    Rust/storage/    Blockregistry, Requests, Worker, I/O/Diagnose,
-                      GPT/MBR/GUID, Bootquelle, Medieninventar,
-                      Mount-/Claim-/Flush-/Remount-/Cleanuppolitik
-    storage/*.zig    private C-Fassaden und Originalfixtures;
-                      FS-/Drive-Blattaufrufe vermitteln an Rust/fs weiter
-    Rust/storage/ahci.rs  bisheriges kernelkritisches AHCI-Boot-Probing
-    Rust/storage/boot.rs  Controllerreihenfolge und Bootdiagnose
+Rust/memory/
+    phys/blocks: physische Frames und MemoryBlock-Besitz
+    paging/page_tables/vm_ranges: Tabellen, Fenster und TLB-Abschluss
+    heap/heap_policy: Kernelheap und genaue Growth-Wartequittungen
+    vm_*: VM, Reservierung, Commit und residenter Spielraum
+    reclaim/pager/swap*: auslagerbare Seiten und ihre genaue Backingdatei
+    boot/boot_diagnostics/heap_probes: Aufbau und vorhandene Diagnosen
 
-Details: `Docs/FileSystem/DateisystemUndStorage.txt`.
+Rust/sched/
+    scheduler/task*: stabile Taskidentitaeten, Ready-/Wait-/Reap-Lifecycle
+    sync*/wait*: Mutex/Semaphore, WaitQueue und Unwind-/Kill-Schutz
+    task_probe/: bestehende begrenzte Task-/Stack-/FPU-Selbsttests
+    task_probe/fpu.S: ausdrueckliche vorhandene FPU-Pruefroutinen
+Rust/kernel/deadman.rs: kooperativer Deadman ohne IRQ-gesperrten Spin.
 
+Rust/driver/ und Rust/usb/
+    registry, driver_plan/policy: genaue Instanz, Admission und Rueckbau
+    api_*: kanonische DriverApi-Tabellen, Ressourcen und Cleanup
+    work*/threads/semaphores/heap: echte Completion und Lebensdauer
+    irq_router: INTx/Level/Edge/MSI; USB-Core/HID/MSC: Geraeteruntime
 
-driver/
--------
+Rust/storage/ und Rust/fs/
+    block*/ahci*/nvme*/backend*: Requests, Controller und Medien
+    gpt/mbr/guid/partition_table/installation*: Bootidentitaet und Layout
+    normal_boot/boot_source/operations: Mount-/Wartungskoordination
+    vfs*/drive*: Mountbesitz, Requests, Streams, Claims und Pagecache
+    fat*/ntfs*: Dateisysteme; vfs_backends: direkte native Volumenprojektion
+    Installation verwendet begrenzten caller-eigenen JSON-Scratchspeicher.
 
-    com.zig           16550-UART: COM1 Debug, COM2 Link-Basis
-    Rust/driver/registry.rs  Treiber-Registry fuer Built-ins und R4D
-    registry.zig      private C-Fassade mit kopierten Entries
-    Rust/input/       PS/2-Keyboard/Mouse/i8042, Codepoint-/Physicalqueues,
-                      HID-/Set-1, EN/DE, PlatformInput und Inputboot
-    input/            feste C-Fassaden mit Originalfaellen; kein zweiter Zustand
-    storage/          Built-in-Boot-Probing fuer AHCI; NVMe besitzt genau
-                      einen Controllerpfad in NVME.R4D. Produktiver Storage
-                      ueber NVME.R4D, AHCI.R4D und ATAPIO.R4D
-    Rust/usb/xhci*.rs        nativer Controller, Runtimegenerationen,
-                      Ports, DMA/Ringe, IRQ/Worker, Transfers und Recovery
-    Rust/usb/host_controller.rs   Hostregistry und Backenddispatch
-    Rust/usb/core.rs         kopierter USB-Geraetekatalog
-    Rust/usb/hid.rs          HID-Bindungen/Polling ueber bestehende R4Ps
-    Rust/usb/msc*.rs         eigene BOT-Medien und SCSI-Clientpolicy
-    Rust/usb/*              native Timing-/Wait-/Ring-/Kontexthelfer
-    driver/usb/*.zig         feste private C-Projektionen und Adapter;
-                      XHCI.R4D bleibt das duenne Aktivierungsmodul
+Rust/loader/
+    boot/file/r4m/format: Preload, R4M0 und gepruefte Containerfenster
+    registry_control/state/queries/loader und r4d/r4p: Module, Imports,
+    Relocations, instanzgebundene Retention und Ressourcen; performance: Messung
 
-HID und MSC verwenden den genauen nativen Controller-/Runtimebesitzer.
-Zig-Input- und Blockcallbacks behalten typisierte zustandslose Invoker.
+Rust/program/
+    runtime_tables/platform_callbacks: sechs oeffentliche Platform-APIs
+    entry/launch/process/program_api/shell_launcher: Start und Prozessrollen
+    async_io/system/console*/remote_frame*: genaue Ressourcenleihen
+    r4desk*/r4draw/network*/r4audio/r4dev/: fachliche API-Besitzer
+    Rust/arch/callback_abort.S: begrenzte Modulabbruch-/Rueckkehrgrenze
 
+Rust/display/ und Rust/gfx/
+    boot_display/console*/framebuffer/bootscreen: fruehe Ausgabe
+    manager/boot_driver: Anzeigeuebernahme, Boot-Hold und Restore
+    queue*/surface*/presenter/output*/cursor*/mode*/native_driver:
+    Display-, Bild-, Leih-, IRQ-, Reset- und Abschlussbesitz
+    gfx/: gemeinsame Grafikressourcen und native GPU-VA-/BO-Lebensdauer
 
-net/, audio/, platform/, protocol/
-----------------------------------
+Rust/platform/, Rust/input/, Rust/font/, Rust/audio/, Rust/net/,
+Rust/service/ und Rust/update/
+    ACPI/PCI/Clock/Inventar, PS/2-/USB-Eingabe, residente Fonts, Audio,
+    Adapter/Frames/IP/TCP/UDP/DHCP/DNS, Services/IPC und SYSUPD/Upload.
+    Netzwerkbindings verbinden native Handler in der bisherigen Reihenfolge.
 
-    Rust/net/         einziger Netzwerkbesitzer seit0.83.20: Adapter/Pakete,
-                      RX-/TX-Handoff, ARP/IP/ICMP/UDP/TCP, DHCP/DNS und Cache
-    Rust/net/tcp*.rs  TCP-Verbindungen/RTO/Wire/Wait und atomare Ready-Projektion
-    Rust/net/ipc_*.rs NIPC-Handler, acht Wireantworten, genaue Socketidentitaeten
-    Rust/net/config*.rs, diagnostics.rs  Konfiguration und bestehende Diagnosen
-    Rust/net/serial*.rs, boot.rs  SerialLink-COM2 und Netzwerk-Bootkoordination
-    net/*.zig, kernel/network_boot.zig  feste C-Fassaden/typisierte Invoker;
-                      kein zweiter produktiver Netzwerkzustand
-    Docs/Core/KernelRustNetwork.txt  Besitz-/Callback-/Wait-/Abnahmegrenzen
+Grenzen und Pruefung
+---------------------
+Contract/Generated/SDK/Rust liefert alle oeffentlichen ABI-Typen. C-Callbacks
+und Assembly-Aufrufkonventionen bleiben erforderlich; Rust-interne Tabellen
+sind keine zweite ABI-Wahrheit. Fremde Module importieren keinen Kernelcode.
+Jeder mutable Zustand hat einen aktiven Besitzer. Lockrangauswertung, genaue
+Generationen, Unwindschutz, SIMD-Sicherung und explizite Abschlussquittungen
+bleiben verbindlich: Agents/Konventionen.txt und Docs/Core/ProgramLifecycle.txt.
 
-    Rust/audio/core.rs  Streamringe, Backend-/Synthregister und Outputpermit
-    Rust/audio/pcm.rs, mixer.rs, backend_contract.rs
-                       exakte PCM-Phase, Mischung und Idle-/Stopquittungen
-    Rust/audio/boot.rs, Rust/program/r4audio.rs
-                       Boot-/Geraetestatus und19 native R4AUDIO-Einstiege
-    audio/*.zig, kernel/audio_boot.zig, program/r4audio.zig
-                       feste C-Projektionen, Originalfaelle und genaue
-                       Legacy-Callbackthunks; kein zweiter Audiozustand
-    SID, OPL3 und MIDI  unveraenderte externe R4D-/R4P-Besitzer
-
-    Rust/platform/    CPU/Clocksource/Monotonic/Time, ACPI/Firmwareansichten,
-                      PCI/ECAM, kanonischer PCI-/Geraetebestand, Plattformstart
-    platform/*.zig    C-Projektionen fuer die noch aktiven Zig-Verbraucher;
-                      originale Hosttestkoerper bei ihren bestehenden Gates
-    Docs/Core/KernelRustPlatform.txt  Besitz-/Frist-/Firmware-/Inventarvertraege
-    Rust/driver/protocol_registry.rs  Built-in-/R4P-Registry
-    protocol/registry.zig   private C-Fassade mit kopierten Entries
-
-    linker.ld         minimal: OUTPUT_FORMAT und ENTRY
-
-
-Regeln fuer den Kernelbaum
---------------------------
-
-- In den Kernel kommt nur, was dort technisch zwingend hingehoert. Alles
-  andere wird zuerst einer externen Struktur zugeordnet - Anwendung,
-  Service, Library, Treiber oder Protokollmodul.
-- Boot, C:, fruehe Ausgabe, Speicher, Interrupts und Timer sind
-  kernelkritische Built-ins. Nicht bootkritische Geraete- und
-  Protokollfunktionen gehoeren in R4D beziehungsweise R4P.
-- Der Kernel baut ohne SIMD (soft_float); R4X-, R4D-, R4P- und R4L-Module
-  duerfen SIMD nutzen.
-- `kernel/font.zig` ist Kernelcode und bleibt von den Font-Hosttools
-  getrennt; es gibt bewusst keine gemeinsame Glyphquelle.
-
-
-Weiterfuehrend
---------------
-
-    Docs/Core/Architektur.txt          Systemmodell und Besitzgrenzen
-    Docs/Core/Modulsystem.txt          R4M0, Manifest, Loader
-    Docs/Core/ProgramLifecycle.txt     Programmlebenszyklus
-    Docs/Core/Speicherverwaltung.txt   Speicher- und Registryinvarianten
-    Agents/ProjektStruktur.txt         der Baum ausserhalb des Kernels
-
-Kernelinstrumentierung und Bedienung (0.83.2)
---------------------------------------------
-Kernelbesitzer liefern begrenzte Snapshots; die Anzeige und aktiven Checks
-gehoeren Repositories/Diagnostics/Spectra. R4DEV v13 liefert Modus/Sampling,
-Locks und Stackaggregate. SPECTRA METRICS/LOGS liest passiv, CHECK und BENCH
-starten nur ausdruecklich. Quellen, Eigenkosten und Migration stehen in
-Docs/Diagnostics/Spectra.txt und KernelInstrumentation.txt.
-
-Rust-Kernelmigration (0.83.4–27)
------------------------------------------
-Die obige Dateiliste beschreibt den aktuellen gemischten Rust-/Zig-Stand. Die
-Roadmap sichert zuerst Ausgangsstand, vollstaendige Migrationsmatrix, Rust-ABI-
-Bindings und Buildintegration, danach die einzelnen Kernelbesitzer und zuletzt
-die komplette Rust-Abnahme. Private C-ABI-Bruecken erlauben den Uebergang mit
-genau einem aktiven Besitzer je Zustand; 0.83.27 entfernt produktiven Zig-
-Kernelcode und Uebergangspfade. Benoetigte Assembly darf erhalten bleiben.
-Modul-, API-/ABI-, Boot-, Ressourcen- und Dateiformatvertraege bleiben gleich.
-Apps, Services, Libraries, R4D/R4P, Subsysteme, Spectra und der separate Recovery-
-Kernel bleiben Zig. Noetige Contract-/Host-/Dokumentationsaenderungen erfolgen
-beim jeweiligen Besitzer. Performanceoptimierungen werden erst nach der
-Migration separat geplant. Aufgaben und Abnahmen sind in der Roadmap kanonisch.
-
-0.83.4 sichert den bytegleichen Zig-Kernel, alle 350 versionierten Dateien,
-vorhandene Modulbinaerdateien und Spectra-/DevCenter-Belege. Vollstaendige
-Matrix: Docs/Core/KernelRustBaseline0834.json; Rust-Profil, ABI-/Besitzregeln,
-Abnahmen und Rueckweg: Docs/Core/KernelRustMigration.txt.
-
-0.83.5: Rust/lib.rs importiert ausschliesslich die vom Contract erzeugte
-no_std-Crate. Cargo und der bestehende Zig-Standalonebau pinnen denselben
-Contract-Commit. Der produktive Kernelbau bleibt bis 0.83.6 Zig; keine
-zusaetzliche Bindingkopie oder neue API-Version. Darstellungs-/Aufrufnachweis:
-Docs/API/RustContractBindings.txt und Docs/Core/KernelRustBindings0835.json.
-
-0.83.6: Build.ps1 baut Cargo-Nativobjekte und die noch produktiven Zig-Owner.
-BuildOptions.json ist die gemeinsame Optionsquelle; kernel/rust_bridge.zig
-und Rust/build_bridge.rs behalten nur private Buildinfo-/Panicgrenzen.
-r4os.build.json bindet wirkliche Compiler/Profile an den ELF-Hash fuer Spectra.
-Aufrufe und Herkunft: Docs/Core/KernelRustBuild.txt; Abnahme:
-Docs/Core/KernelRustBuild0836.json. Fachliche Owner folgen ihren Rust-Wellen.
-
-0.83.7: kmain, Limine/BootInfo, CPU-Tabellen/IST-Frames, Intro/Logumleitung,
-COM1-/Bootlog-Ringe, R4B und Fatal-/Crashrecords gehoeren Rust. Die vorhandenen
-Ownerfixtures binden echte Rustfunktionen; neue SMP4-Images sind am ELF-Hash
-gebunden. Renderer-/Font-/Framebufferbesitzer sind seit 0.83.21 nativ,
-Clock/Runtime/VM seit 0.83.9-11/17. Grenzen und Beleg: Docs/Core/KernelRustBoot.txt und
-Docs/Core/KernelRustBoot0837.json.
-
-0.83.11: Native Taskobjekte/Ressourcen/Listen/Identitaeten, Sync/Wait-/Unwind-
-Primitive, kooperativer Deadman und komplette bisherige TaskRegistry-Diagnose.
-Keine mutable Zig-Registry oder zweite Wait-/Lockpolitik. Feste private C-
-Records und opake Taskhandles binden noch Zig-basierte Fachbesitzer. Original-
-Hostfaelle, echte SMP4-/IF-/FPU-/OOM-/Abbaunachweise und Standard/DevCenter:
-Docs/Core/KernelRustTasks.txt und Docs/Core/KernelRustTasks08311.json.
-0.83.12: Rust/driver besitzt Registry/Plan/Policy, IRQ/Work/Completion,
-Treiberheap/Threads/Semaphore, DMA/MMIO und die DriverApi einschliesslich
-Praefixen, Grafikeinstiegen und terminalem Cleanup. Private C-Fassaden
-reichen nur an noch nicht migrierte Fachbesitzer weiter. Original439-Host-,
-SMP4-/R4D-/Detail- und Standard-/DevCenter-Belege:
-Docs/Core/KernelRustDrivers.txt und KernelRustDrivers08312.json.
-0.83.13: Alle 16 Storagebesitzer nativ, mit Original439/Storage21,
-oeffentlichen Wartungs-/Fehler-/Cleanupfaellen und frischen SMP4-/
-GPT-/MBR-/Detail-/Standard-/DevCenter-Belegen. Grenzen und gemeinsame
-Abnahme: Docs/Core/KernelRustStorage.txt und KernelRustStorage08313.json.
-0.83.14: Rust/fs besitzt alle 15 VFS-/Drive-/Request-/Cache-/FAT32-/NTFS-
-Implementierungen einschliesslich Kernel-Supportkern und residentem
-Mountadapter. Private Zig-Fassaden haben keinen zweiten Algorithmus.
-Original 458/129/60 Wurzeln, gezielte Normal-/Detail-/Offline-/Update-
-und Standard-/DevCenter-Belege samt expliziten Altfehlergrenzen:
-Docs/Core/KernelRustFilesystem.txt und KernelRustFilesystem08314.json.
-0.83.15: Alle acht Modul-/R4M0-/R4L-/R4D-/R4P-Loaderbesitzer sind nativ;
-119 bestehende Zig-Verbraucher bleiben bytegleich. Originalfixtures,
-Normal-/Detail-/Standard-/DevCenter-Belege und Messgrenzen:
-Docs/Core/KernelRustLoader.txt und KernelRustLoader08315.json.
-0.83.16: Alle sechs Start-/Programm-/Prozessbesitzer liegen in Rust/program;
-119 Zig-Verbraucher unveraendert. Gebuendelte Original-/SMP4-Abnahmen und
-Original-Zig-Grenzen: Docs/Core/KernelRustPrograms.txt und
-KernelRustPrograms08316.json.
-0.83.17: Wartender Pager/Page-State, Backingdatei/Slots und Reclaim sind nativ.
-Taskframe/SIMD, genaue Generationen und quittierter Rueckbau bleiben erhalten.
-Gebuendelte Originalfaelle, alte Eltern-Stackbilanz und Standard-/DevCenter:
-Docs/Core/KernelRustVm.txt und KernelRustVm08317.json.
-0.83.18: Service-/Kanal-IPC, Notifications, Bootkoordination und R4SYS samt
-kernelprivatem R4R1-Codec sind nativ. SERVMAN-Policy und 119 Module bleiben
-unveraendert. Originalfaelle, SMP4/SSH, alter Cachefehler und STANDARD:
-Docs/Core/KernelRustServices.txt und KernelRustServices08318.json.
-0.83.19: Alle 18 USB-/xHCI-/HID-/MSC- und Bootbesitzer sind nativ.
-Exakte Generationen/Quittungen, atomare IRQ-/Workerproduzenten und eigene
-BOT-Medien behalten die vorhandenen externen Module. Originalfaelle,
-gegliederter USB-SMP4-Gast und STANDARD/DevCenter samt Grenzen:
-Docs/Core/KernelRustUsb.txt und KernelRustUsb08319.json.
-0.83.20: Alle 22 Netzwerk-/NIPC-/R4NET- und Bootbesitzer liegen nativ in
-Rust/net und Rust/program/network_api.rs. Originalfaelle, echte SMP4-/SSH-/
-SFTP-Verlustproben, SerialLink und STANDARD/DevCenter samt Messgrenzen:
-Docs/Core/KernelRustNetwork.txt und KernelRustNetwork08320.json.
-0.83.21: Alle 24 Eingabe-/Font-/Softwareanzeigenbesitzer liegen in Rust/input,
-Rust/font und Rust/display. Native Queues, Katalogleihen, Boot-Hold und
-sichtbare Fehlerausgabe behalten ihre exakten Besitz-/Abbaugrenzen.
-Gezielte Original-/SMP4-/Fehlerbild- und Standardbelege samt Grenzen:
-Docs/Core/KernelRustInput.txt und KernelRustInput08321.json.
-0.83.22: Alle 19 BO-/VA-/Budget-/Telemetry-/Treiberressourcenbesitzer
-liegen nativ in Rust/gfx. Exakte Teilseiten, Generationen, Annahmeschluss
-und quittierte Freigaben behalten 119 unveraenderte Vergleichsmodule.
-Gebuendelte Originalfaelle, gezielte SMP4-Fixtures, STANDARD/DevCenter
-und erhaltene Fixture-/Hardware-/Messgrenzen:
-Docs/Core/KernelRustGpuMemory.txt und KernelRustGpuMemory08322.json.
-0.83.23: Alle40 neuen produktiven Display-/Output-/Cursor-/Mode-/Queue-
-und R4DESK-/R4DRAW-Implementierungen sind nativ; Alpha8 schon seit0.83.16.
-Zwei zugeordnete Dateien bleiben Originaltesthelfer. Audio-Routenmetadaten
-sind als Voraussetzung aus0.83.24 vorgezogen;119 Module bytegleich.
-Gebuendelte Originalfaelle, zwei kurze SMP4-Gaeste und STANDARD/DevCenter
-samt Hardware-/Quittungs-/Messgrenzen: Docs/Core/KernelRustDisplay.txt
-und KernelRustDisplay08323.json. Poweroff ist kein DriverShutdown-Beleg.
-0.83.24: Sechs verbleibende Audiobesitzer nativ in Rust/audio und
-Rust/program/r4audio.rs; Routenmetadaten seit0.83.23.119 Module bytegleich.
-Zehn Originalfaelle einmal, ein gebuendelter SMP4-Audiogast und STANDARD/
-DevCenter samt Quittungs-/Hardware-/Messgrenzen: Docs/Core/KernelRustAudio.txt
-und KernelRustAudio08324.json. Normales Poweroff belegt keinen DriverShutdown.
-0.83.25: Zehn Update-/Claim-/Bootconfig-/Powerbesitzer nativ; R4SYS und
-Boot binden denselben Besitzer. Residente Journale, genaue Dateireferenzen,
-Recovery-vor-Loader und wartespannende Arbeitsbuffer-Leihen bleiben gebunden.
-119 Verbraucher unveraendert. Gezielt gepruefte Originale, aktueller SMP4-Gast,
-Recovery-Paketleser und STANDARD/DevCenter mit alter284-Zwischenstart-
-Beobachtung und Pruefgrenzen: Docs/Core/KernelRustUpdate.txt und
-KernelRustUpdate08325.json.
-0.83.26: Rust/boot/performance,log_route,log_event,instrumentation und
-Rust/loader/performance besitzen Messung und funktionalen Bootabschluss.
-Rust/program/r4dev bindet alle45Slots nativ, ohne neue Sammler/Logs; Bootlog
-und Diagnoseschirm bleiben ihre vorhandenen nativen Besitzer.119Module
-bytegleich. Zusammengefasste Abnahme samt SSH-/Quellen-/Messgrenzen:
-Docs/Core/KernelRustInstrumentation.txt und KernelRustInstrumentation08326.json.
-Uploadclaims liegen auch fuer D:-Ziele auf C:. Ihr bestehender geordneter
-Request muss Ziel und C: vor der Aufnahme samt Mountreferenzen enthalten;
-normaler NTFS-Datentransfer bleibt im einzelnen Zielrequest.
-Naechster Schritt: 0.83.27 produktive Zig-Reste entfernen und Endabnahme.
+Build.sh fmt, check und clippy pruefen den aktuellen nativen Bestand.
+Die alten Zig-Hostselektoren und Tests/RustOwners sind entfernt; originale
+Faelle und Belege bleiben in Git und den Migrationsarchiven erhalten.
+Vorhandene Laufzeitdiagnosen werden gezielt ueber Spectra und SMP4 abgenommen.
+Keine Single-Core-Abnahme. Testumfang: Agents/Test.txt.
+Migrationsmatrix, historische Wellen und offene Vergleichsgrenzen:
+Docs/Core/KernelRustMigration.txt; Endstand: Docs/Core/KernelRustFinal.txt.

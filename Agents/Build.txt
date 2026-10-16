@@ -61,9 +61,9 @@ DevKit/Setup/RustToolchain.json festgelegte Stable-Toolchain ein: rustc/Cargo,
 rustfmt, Clippy, LLVM-Werkzeuge, Rust-Quellen und x86_64-unknown-none.
 Werkzeuge mit demselben Starter aufrufen, z. B. Rust.sh cargo --version;
 er setzt die isolierten Compilerhomes und die genaue Version nur pro Aufruf.
-Seit 0.83.6 startet der Kernel dieselbe PowerShell-Logik auf beiden Hosts:
-erst gepruefte Cargo-Nativobjekte, danach Linking der noch produktiven
-Zig-Besitzer. Kerneloptionen: Repositories/Kernel/BuildOptions.json.
+Seit 0.83.27 startet der Kernel dieselbe PowerShell-Logik auf beiden Hosts:
+Cargo baut Rust und notwendige Assembly und linkt mit rust-lld ohne Zig.
+Kerneloptionen: Repositories/Kernel/BuildOptions.json.
 Rustprofil und ELF-gebundene Compiler-/Benchmarkherkunft:
 Docs/Core/KernelRustBuild.txt. Andere Modulbauten bleiben unveraendert.
 
@@ -234,7 +234,9 @@ Zentrale repositoryeigene Tests:
     Repositories\SDK\Build.bat test
     Repositories\Libraries\Build.bat test
     Repositories\Libraries\Build.bat R4STD test
-    Repositories\Kernel\Build.bat test
+    Repositories\Kernel\Build.bat fmt
+    Repositories\Kernel\Build.bat check
+    Repositories\Kernel\Build.bat clippy
     Repositories\Distribution\Build.bat test
 
 Ein Modul kann `Build.bat test` verwenden, wenn sein Zig-Build einen
@@ -245,7 +247,7 @@ Alle kompilierten R4M0-Artefakte lesen `OPTIMIZE=size|speed` ausschliesslich
 aus ihrem `module.R4MF`. `size` beziehungsweise ein fehlendes Feld waehlt
 ReleaseSmall; `speed` waehlt ReleaseFast. Eine Profilwahl im Aufruf oder eine
 zweite Modulnamensliste ist unzulaessig. Der Kernel bleibt davon getrennt auf
-seinem festen ReleaseSafe-Profil.
+seinem festen geprueften Rust-Releaseprofil.
 
 
 Artefakte und Inventare
@@ -440,7 +442,7 @@ Bei einem Fehler:
   den benoetigten Build erneut fahren. Distribution-Ausgaben werden vom
   Clean bewusst nicht entfernt und durch den zustaendigen Image-, Tool- oder
   Releasebuild gezielt erneuert.
-- Zig-Kernelteile bleiben ReleaseSafe ohne SIMD. Rust verwendet das feste
+- Der Rust-Kernel verwendet das feste
   Releaseprofil mit Overflowchecks/Assertions, panic=abort und ohne
   Red-Zone/SIMD; keine pauschale Optimize-Aenderung durch den Caller.
 
