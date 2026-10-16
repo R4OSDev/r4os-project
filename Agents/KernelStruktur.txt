@@ -121,7 +121,12 @@ kernel/
 
 Der Sammelort fuer Kerndienste und Bootschnitte.
 
-    log.zig           Logging, optionaler Serial-Sink
+    Rust/boot/log_route.rs  Ausgaberouting; kurze Konfigurationskopie vor Sinks
+    Rust/boot/log_event.rs  begrenzte LOG1-Formatierung ohne neue Ereignisse
+    Rust/boot/performance.rs, instrumentation.rs  Boot-/Detailmessung
+    Rust/loader/performance.rs  Loaderzaehler und begrenzte Spannen
+    Rust/program/r4dev/  direkte native Abfragen/Diagnosen; Contractpraefixe
+    log/boot_perf/loader_perf/instrumentation/log_event.zig  feste Fassaden
     Rust/boot/foundation.rs  CPU-Boot/Intro/COM1-Hooks/Logumleitung
     Rust/boot/log.rs, serial.rs  Bootlog und einziger COM1-TX-Ring
     Rust/boot/fatal.rs, crash.rs  Fatalzustand, Bootphasen und Records
@@ -509,4 +514,13 @@ Recovery-vor-Loader und wartespannende Arbeitsbuffer-Leihen bleiben gebunden.
 Recovery-Paketleser und STANDARD/DevCenter mit alter284-Zwischenstart-
 Beobachtung und Pruefgrenzen: Docs/Core/KernelRustUpdate.txt und
 KernelRustUpdate08325.json.
-Naechster Schritt: 0.83.26 Instrumentierung, R4DEV und Spectra-Schnittstellen.
+0.83.26: Rust/boot/performance,log_route,log_event,instrumentation und
+Rust/loader/performance besitzen Messung und funktionalen Bootabschluss.
+Rust/program/r4dev bindet alle45Slots nativ, ohne neue Sammler/Logs; Bootlog
+und Diagnoseschirm bleiben ihre vorhandenen nativen Besitzer.119Module
+bytegleich. Zusammengefasste Abnahme samt SSH-/Quellen-/Messgrenzen:
+Docs/Core/KernelRustInstrumentation.txt und KernelRustInstrumentation08326.json.
+Uploadclaims liegen auch fuer D:-Ziele auf C:. Ihr bestehender geordneter
+Request muss Ziel und C: vor der Aufnahme samt Mountreferenzen enthalten;
+normaler NTFS-Datentransfer bleibt im einzelnen Zielrequest.
+Naechster Schritt: 0.83.27 produktive Zig-Reste entfernen und Endabnahme.
