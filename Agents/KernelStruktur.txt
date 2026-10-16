@@ -99,12 +99,18 @@ bootloader/ und display/
     Rust/display/boot_driver.rs  genauer Boot-Hold-Guard und Snapshotbesitz
     display/boot_display/boot_driver/console/console_scroll_buffer/framebuffer.zig
                               feste C-Fassaden und typisierte Ownerinvoker;
-                              BO-Operationen nativ seit 0.83.22;
-                              Displaybesitzer folgen 0.83.23
-    display/surface.zig       generisches XRGB32-Surface-Modell
-    display/presenter.zig     Present-Vertrag Surface gegen DisplayManager
-    display/display.zig       DisplayManager, Backend, Present-/Blit-Pfad
-    display/surface_pipeline.zig  Frame-/Present-Fassade des DisplayManagers
+                              BO-/Displayoperationen direkt nativ
+    Rust/display/manager.rs   residenter DisplayManager, Uebernahme und Restore
+    Rust/display/surface*.rs, presenter.rs  Surface, Frame-/Present-Pfad
+    Rust/display/outputs.rs, output_*.rs  Katalog, Receiver und Atomiczustand
+    Rust/display/cursor_*.rs, mode_*.rs, native_driver.rs
+                              Execution, Moduspuffer, Reset-/Konsolenidentitaet
+    Rust/display/queue*.rs    Ressourcen, IRQ-Eingang und dedizierter Worker
+    Rust/program/r4desk*.rs, remote_frame_state.rs, r4draw.rs
+                              Eingabe/Clipboard, Capture/Leihen und Zeichnen
+    display/*.zig, program/gfx_*.zig, r4desk.zig, r4draw.zig
+                              feste Projektionen, genaue Callbackthunks und
+                              Originalfaelle; kein zweiter Displayzustand
 
 
 kernel/
@@ -167,8 +173,10 @@ Rust/gfx/ - generischer Grafikspeicher
                               keine zweite BO-/VA-Zustandstabelle
 
 Details und gezielte Abnahme: Docs/Core/KernelRustGpuMemory.txt.
-Display-/Presentqueuebesitzer folgen in 0.83.23. Alte zustandslose
-API-Bruecken werden mit dem Migrationsgeruest in 0.83.27 entfernt.
+Display-/Presentqueuebesitzer liegen seit0.83.23 nativ in Rust/display;
+R4DESK/R4DRAW in Rust/program. Details: Docs/Core/KernelRustDisplay.txt.
+Alte zustandslose API-Bruecken werden mit dem Migrationsgeruest in0.83.27
+entfernt.
 
 
 memory/
@@ -466,4 +474,11 @@ und quittierte Freigaben behalten 119 unveraenderte Vergleichsmodule.
 Gebuendelte Originalfaelle, gezielte SMP4-Fixtures, STANDARD/DevCenter
 und erhaltene Fixture-/Hardware-/Messgrenzen:
 Docs/Core/KernelRustGpuMemory.txt und KernelRustGpuMemory08322.json.
-Naechster Schritt: 0.83.23 Display, Presentqueues und Cursor.
+0.83.23: Alle40 neuen produktiven Display-/Output-/Cursor-/Mode-/Queue-
+und R4DESK-/R4DRAW-Implementierungen sind nativ; Alpha8 schon seit0.83.16.
+Zwei zugeordnete Dateien bleiben Originaltesthelfer. Audio-Routenmetadaten
+sind als Voraussetzung aus0.83.24 vorgezogen;119 Module bytegleich.
+Gebuendelte Originalfaelle, zwei kurze SMP4-Gaeste und STANDARD/DevCenter
+samt Hardware-/Quittungs-/Messgrenzen: Docs/Core/KernelRustDisplay.txt
+und KernelRustDisplay08323.json. Poweroff ist kein DriverShutdown-Beleg.
+Naechster Schritt: 0.83.24 Audio-Core, Mixer und R4AUDIO.
