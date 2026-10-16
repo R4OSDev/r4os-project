@@ -91,14 +91,18 @@ bootloader/ und display/
     Rust/boot/info.rs         normalisierte residente Bootdaten
     bootloader/*.zig          unveraenderliche Uebergangsviews fuer Zig
 
-    display/boot_display.zig  fruehe Ausgabe auf dem Limine-Framebuffer
-    display/console.zig       fruehe Kernel-Console mit begrenztem RAM-Pixelscroll
-    display/console_scroll_buffer.zig  RAM-Zell-/Pixelverschiebung
+    Rust/display/boot_display.rs  fruehe residente Console/Framebufferausgabe
+    Rust/display/console*.rs  Kernel-Console, begrenzter RAM-Zell-/Pixelscroll
+    Rust/display/framebuffer.rs  volatile Format-/Clipping-/Overlapprimitiven
+    Rust/display/bootscreen.rs, crash_screen.rs, diag_screen.rs
+                              Bootfortschritt, Fatalbild und erhaltene Diagnose
+    Rust/display/boot_driver.rs  genauer Boot-Hold-Guard und Snapshotbesitz
+    display/boot_display/boot_driver/console/console_scroll_buffer/framebuffer.zig
+                              feste C-Fassaden und typisierte Ownerinvoker;
+                              BO-/Display-Operationen folgen 0.83.22/23
     display/surface.zig       generisches XRGB32-Surface-Modell
     display/presenter.zig     Present-Vertrag Surface gegen DisplayManager
     display/display.zig       DisplayManager, Backend, Present-/Blit-Pfad
-    display/framebuffer.zig   Framebuffer-Primitiven, ueberlappungssicherer
-                              Rect-Move
     display/surface_pipeline.zig  Frame-/Present-Fassade des DisplayManagers
 
 
@@ -141,8 +145,10 @@ Der Sammelort fuer Kerndienste und Bootschnitte.
     protocol_api.zig  Protokollzugriff fuer Kernelverbraucher
     shell_launcher.zig  Start der konfigurierten Shell
     desktop_events.zig  Fassade auf natives Desktop-Aktivitaets-Event
-    font.zig          Kernel-Fallback-Font, R4F1-Loader, Renderer-Helfer
-    bootscreen*.zig   Bootscreen und R4B-Format
+    Rust/font/        Fallback, R4F1-Parser/Glyphen, residenter Katalog/Dateiscan
+    font/font_catalog/font_format.zig  feste C-Fassaden und Originalfaelle
+    bootscreen/crash_screen/diag_screen.zig  feste private Anzeigenfassaden
+    bootscreen_r4b*.zig  C-Fassade zum nativen Rust/boot/r4b.rs-Decoder
     boot_config.zig   CONFIG.R4S-Konfiguration
     *_boot.zig        die Bootschnitte aus der Reihenfolge oben
 
@@ -266,8 +272,9 @@ driver/
     com.zig           16550-UART: COM1 Debug, COM2 Link-Basis
     Rust/driver/registry.rs  Treiber-Registry fuer Built-ins und R4D
     registry.zig      private C-Fassade mit kopierten Entries
-    input/            PS/2-Keyboard und -Mouse, kanonische Codepointqueue,
-                      Layouts unter key_layouts/
+    Rust/input/       PS/2-Keyboard/Mouse/i8042, Codepoint-/Physicalqueues,
+                      HID-/Set-1, EN/DE, PlatformInput und Inputboot
+    input/            feste C-Fassaden mit Originalfaellen; kein zweiter Zustand
     storage/          Built-in-Boot-Probing fuer AHCI; NVMe besitzt genau
                       einen Controllerpfad in NVME.R4D. Produktiver Storage
                       ueber NVME.R4D, AHCI.R4D und ATAPIO.R4D
@@ -379,8 +386,8 @@ Docs/Core/KernelRustBuild0836.json. Fachliche Owner folgen ihren Rust-Wellen.
 0.83.7: kmain, Limine/BootInfo, CPU-Tabellen/IST-Frames, Intro/Logumleitung,
 COM1-/Bootlog-Ringe, R4B und Fatal-/Crashrecords gehoeren Rust. Die vorhandenen
 Ownerfixtures binden echte Rustfunktionen; neue SMP4-Images sind am ELF-Hash
-gebunden. Renderer-/Font-/Framebufferbesitzer folgen 0.83.21, Clock/Runtime/VM
-ihren eigenen Wellen. Grenzen und Beleg: Docs/Core/KernelRustBoot.txt und
+gebunden. Renderer-/Font-/Framebufferbesitzer sind seit 0.83.21 nativ,
+Clock/Runtime/VM seit 0.83.9-11/17. Grenzen und Beleg: Docs/Core/KernelRustBoot.txt und
 Docs/Core/KernelRustBoot0837.json.
 
 0.83.11: Native Taskobjekte/Ressourcen/Listen/Identitaeten, Sync/Wait-/Unwind-
@@ -426,4 +433,13 @@ Exakte Generationen/Quittungen, atomare IRQ-/Workerproduzenten und eigene
 BOT-Medien behalten die vorhandenen externen Module. Originalfaelle,
 gegliederter USB-SMP4-Gast und STANDARD/DevCenter samt Grenzen:
 Docs/Core/KernelRustUsb.txt und KernelRustUsb08319.json.
-Naechster Schritt: 0.83.20 Netzwerk/R4NET.
+0.83.20: Alle 22 Netzwerk-/NIPC-/R4NET- und Bootbesitzer liegen nativ in
+Rust/net und Rust/program/network_api.rs. Originalfaelle, echte SMP4-/SSH-/
+SFTP-Verlustproben, SerialLink und STANDARD/DevCenter samt Messgrenzen:
+Docs/Core/KernelRustNetwork.txt und KernelRustNetwork08320.json.
+0.83.21: Alle 24 Eingabe-/Font-/Softwareanzeigenbesitzer liegen in Rust/input,
+Rust/font und Rust/display. Native Queues, Katalogleihen, Boot-Hold und
+sichtbare Fehlerausgabe behalten ihre exakten Besitz-/Abbaugrenzen.
+Gezielte Original-/SMP4-/Fehlerbild- und Standardbelege samt Grenzen:
+Docs/Core/KernelRustInput.txt und KernelRustInput08321.json.
+Naechster Schritt: 0.83.22 GPU-Speicher und BO-Lebenszyklus.
