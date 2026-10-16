@@ -99,7 +99,8 @@ bootloader/ und display/
     Rust/display/boot_driver.rs  genauer Boot-Hold-Guard und Snapshotbesitz
     display/boot_display/boot_driver/console/console_scroll_buffer/framebuffer.zig
                               feste C-Fassaden und typisierte Ownerinvoker;
-                              BO-/Display-Operationen folgen 0.83.22/23
+                              BO-Operationen nativ seit 0.83.22;
+                              Displaybesitzer folgen 0.83.23
     display/surface.zig       generisches XRGB32-Surface-Modell
     display/presenter.zig     Present-Vertrag Surface gegen DisplayManager
     display/display.zig       DisplayManager, Backend, Present-/Blit-Pfad
@@ -151,6 +152,23 @@ Der Sammelort fuer Kerndienste und Bootschnitte.
     bootscreen_r4b*.zig  C-Fassade zum nativen Rust/boot/r4b.rs-Decoder
     boot_config.zig   CONFIG.R4S-Konfiguration
     *_boot.zig        die Bootschnitte aus der Reihenfolge oben
+
+
+Rust/gfx/ - generischer Grafikspeicher
+--------------------------------------
+
+    layout/buffer_owner/buffers  BOs, Referenzen, Leihen, Wachstum und Rang100
+    driver_memory_state/driver_memory  genaue Epochen, Deviceknoten, DMA/MMIO
+    allocation_state/allocations  Claims, Providerarbeit und Publikationspins
+    virtual_state/virtual_runtime  VA-Baum, Annahmeschluss, Execution/Retire
+    telemetry/telemetry_api/budget_api/stats_wire  Cache, Budgets und Praefixe
+    allocation_api/virtual_api/owned_buffers  R4DRAW-/R4D-Aufrufe
+    kernel/memory/program gfx_*.zig  feste C-Projektionen und Originalfaelle;
+                              keine zweite BO-/VA-Zustandstabelle
+
+Details und gezielte Abnahme: Docs/Core/KernelRustGpuMemory.txt.
+Display-/Presentqueuebesitzer folgen in 0.83.23. Alte zustandslose
+API-Bruecken werden mit dem Migrationsgeruest in 0.83.27 entfernt.
 
 
 memory/
@@ -442,4 +460,10 @@ Rust/font und Rust/display. Native Queues, Katalogleihen, Boot-Hold und
 sichtbare Fehlerausgabe behalten ihre exakten Besitz-/Abbaugrenzen.
 Gezielte Original-/SMP4-/Fehlerbild- und Standardbelege samt Grenzen:
 Docs/Core/KernelRustInput.txt und KernelRustInput08321.json.
-Naechster Schritt: 0.83.22 GPU-Speicher und BO-Lebenszyklus.
+0.83.22: Alle 19 BO-/VA-/Budget-/Telemetry-/Treiberressourcenbesitzer
+liegen nativ in Rust/gfx. Exakte Teilseiten, Generationen, Annahmeschluss
+und quittierte Freigaben behalten 119 unveraenderte Vergleichsmodule.
+Gebuendelte Originalfaelle, gezielte SMP4-Fixtures, STANDARD/DevCenter
+und erhaltene Fixture-/Hardware-/Messgrenzen:
+Docs/Core/KernelRustGpuMemory.txt und KernelRustGpuMemory08322.json.
+Naechster Schritt: 0.83.23 Display, Presentqueues und Cursor.
