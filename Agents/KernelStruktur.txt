@@ -70,6 +70,8 @@ Rust/memory/
     paging/page_tables/vm_ranges: Tabellen, Fenster und TLB-Abschluss
     heap/heap_policy: Kernelheap und genaue Growth-Wartequittungen
     vm_*: VM, Reservierung, Commit und residenter Spielraum
+    vm_budget: abgeleitete Zulassungssummen; vm_ranges publiziert unter
+    demselben Owner. Ranges bleiben Wahrheit, volle Snapshots nur zur Diagnose.
     reclaim/pager/swap*: auslagerbare Seiten und ihre genaue Backingdatei
     boot/boot_diagnostics/heap_probes: Aufbau und vorhandene Diagnosen
     heap_check/: gemeinsame begrenzte Heapfaelle, eigener Ledger und
