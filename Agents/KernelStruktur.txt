@@ -155,3 +155,9 @@ Backend-/Requesterkoerper, eigenen Ressourcenledger (session) und expliziten
 Live-Controller. Geraetegenaues Pinning und Retirement bleiben beim Registry-/
 I/O-Besitzer; die normale IRQ-Completion teilt ihre unveraenderte Arbeit mit
 einer internen Rueckmeldung, ohne dauernden Diagnosehook.
+
+Rust/storage/nvme_check/ trennt den eigenen read-only Fall, residenten
+Controller/Retirement und exakte Callbackaufnahme. block_observation bindet
+nur fuer ausdrueckliche Diagnose eine residente Subscription an den normalen
+Blockpfad; normale Anfragen tragen keinen Beobachter. Hardware-CQE-/IRQ- und
+DMA-Freigabenachweise gehoeren dem externen NVME-Treiber.

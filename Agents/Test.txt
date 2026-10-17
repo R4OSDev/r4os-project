@@ -264,10 +264,12 @@ Notepad-Selbsttests, Zig-/C-App-Entry sowie R4CC, R4PACK und R4BUILD. Nur die
 Browservariante verlangt zusaetzlich die Klickifax-Marker. Die vollstaendige
 Liste steht nur im Script, damit sie nicht doppelt gepflegt wird.
 
-Der Ein-CPU-Lauf verlangt den expliziten SMP-Probe-Skip. Mehrkernlaeufe
-verlangen die exakte Online-/Fehlerzusammenfassung, produktive R4X-Arbeit auf
-einem AP sowie die interne Kernel-Skalierungsprobe mit mindestens 1,050x.
-Diese Probe ist eine Testprofil-Abnahme und kein regulaerer Benchmark.
+Verbindliche Kernel- und STANDARD-Abnahmen laufen mit vier vCPUs.
+SMP4 verlangt die exakte Online-/Fehlerzusammenfassung, produktive R4X-Arbeit
+auf einem AP sowie die funktionalen CPU-Masken und berechneten Arbeitswerte.
+Heap-, TLB- und weitere Besitzervertraege folgen dem Marker-Skript.
+Leistungsvergleiche erfolgen ausschliesslich ueber Spectra STANDARD; eine
+relative Boot-Skalierungsgrenze gehoert nicht zum funktionalen Vertrag.
 
 Verboten sind insbesondere `PANIC`, `FATAL`, CPU Exceptions, Page/General
 Protection Faults, `dirs=missing`, sichtbare NTFS-Metadateien wie `$MFT`
