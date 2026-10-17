@@ -68,6 +68,8 @@ Rust/boot/
 Rust/memory/
     phys/blocks: physische Frames und MemoryBlock-Besitz
     paging/page_tables/vm_ranges: Tabellen, Fenster und TLB-Abschluss
+    paging/batch: maximal zwei kurzlebige Tabellenwege fuer 64er-Batches;
+    nur unter gehaltenem Page-Table-Owner bis zur genauen TLB-/Rollbackquittung.
     heap/heap_policy: Kernelheap und genaue Growth-Wartequittungen
     vm_*: VM, Reservierung, Commit und residenter Spielraum
     vm_budget: abgeleitete Zulassungssummen; vm_ranges publiziert unter
