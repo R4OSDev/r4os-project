@@ -161,3 +161,7 @@ Controller/Retirement und exakte Callbackaufnahme. block_observation bindet
 nur fuer ausdrueckliche Diagnose eine residente Subscription an den normalen
 Blockpfad; normale Anfragen tragen keinen Beobachter. Hardware-CQE-/IRQ- und
 DMA-Freigabenachweise gehoeren dem externen NVME-Treiber.
+
+Rust/program/r4dev/usb.rs stellt nur die beiden unveraenderten lokalen
+USB-Ownerfaelle aus ring_cycle/event_router als festen Diagnosebericht bereit.
+Kein xHCI-/Live-Mailboxzugriff, globaler Testzustand oder neuer Taskbesitzer.
