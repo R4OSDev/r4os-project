@@ -72,6 +72,8 @@ Rust/memory/
     vm_*: VM, Reservierung, Commit und residenter Spielraum
     reclaim/pager/swap*: auslagerbare Seiten und ihre genaue Backingdatei
     boot/boot_diagnostics/heap_probes: Aufbau und vorhandene Diagnosen
+    heap_check/: gemeinsame begrenzte Heapfaelle, eigener Ledger und
+    Task-Unwind-Zulassung fuer Boot sowie explizites Spectra CHECK MEMORY
 
 Rust/sched/
     scheduler/task*: stabile Taskidentitaeten, Ready-/Wait-/Reap-Lifecycle
