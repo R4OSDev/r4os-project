@@ -245,6 +245,11 @@ Zentrale repositoryeigene Tests:
     Repositories\Kernel\Build.bat clippy
     Repositories\Distribution\Build.bat test
 
+SDK-Paketfingerprints aus einem exakten Git-Archiv oder veroeffentlichten
+Quellarchiv bestimmen. Zig 0.16 kann bei `zig fetch .` den laufenden SDK-
+Baum samt lokalen Caches in dessen eigenes zig-pkg kopieren, bevor Filter
+greifen. Das Archiv vermeidet diese unvollstaendige Selbstkopie.
+
 Ein Modul kann `Build.bat test` verwenden, wenn sein Zig-Build einen
 `test`-Step definiert. Der globale `-test`-Lauf ersetzt diese
 repositoryeigenen Tests nicht; Details stehen in `Agents/Test.txt`.
