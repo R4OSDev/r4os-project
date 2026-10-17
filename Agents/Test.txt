@@ -128,12 +128,14 @@ Teilaufgaben
 
     Tools\Build.bat -testquick
     ./Tools/Build.sh -testquick
-        vorhandenes Testimage mit vier CPUs starten und unmittelbar nach dem
-        kurzen SMP-/Heap-/TLB-/Lock-/Serial-/CLOCKPROBE-Nachweis sowie den
-        fuer die aktuelle Unterversion gezielt aktivierten Zusatzmarkern am
-        QUICKPROBE beenden. Seit 0.81.19 gehoeren zwei kurze normale CALC-GUIs
-        und CLIPSVC/IPC-Worker zur SMP-Besitzerprobe; regulaere Shell, R4GB
-        und R4SNES werden dabei nicht gestartet
+        aus dem vorhandenen aktuellen Testplan ein privates Quick-Image mit
+        vier CPUs ableiten. Nach SMP-/Heap-/TLB-/Lock-/Serial-/CLOCKPROBE
+        fuehrt ein minimales Boot-Terminal SPECTRA CHECK NETWORK LIMIT aus;
+        erst danach beendet QUICKPROBE den Lauf. Kein Terminal-SELFTEST,
+        R4GB oder R4SNES. Seit 0.81.19 gehoeren zwei kurze normale CALC-GUIs
+        und CLIPSVC/IPC-Worker zur SMP-Besitzerprobe. BOOT-ELF muss dem
+        gebauten Kernel entsprechen; Kernelcode vorher bauen und das
+        kanonische Testimage mit -testimageonly erneuern
 
     Tools\Build.bat -verify Test
         vorhandenes Testimage strukturell pruefen
@@ -142,10 +144,11 @@ Teilaufgaben
 gebauten Komponenten. Nicht ausgewaehlte on-demand-Artefakte duerfen fehlen.
 `-testonly` kompiliert und packt nichts neu.
 
-Waehrend 0.75.X ist `-testquick` die Gastabnahme fuer gezielte Kernel- und
-Performancearbeiten. Die vollstaendige SMP4-Produktabnahme bleibt erhalten,
-wird in dieser Roadmap aber nicht gestartet, weil ausschliesslich der kurze
-`-testquick`-Lauf vorgesehen ist.
+Fuer gezielte Kernelarbeiten die fachlich betroffenen Faelle und bei Bedarf
+`-testquick` verwenden. Volle Kataloge nur bei konkretem Bedarf; bestandene
+Faelle ohne relevante Folgeaenderung nicht wiederholen. Quick startet keinen
+Benchmark. Pro Unterversion mit moeglicher Performancewirkung genau einen
+abschliessenden STANDARD SMP4 samt geprueftem DevCenter-Upload ausfuehren.
 
 
 Testprofil und Overlay
@@ -411,7 +414,7 @@ Der handgepflegte vorhandene Testbestand steht in
 jeweiligen Besitzer, zum Beispiel:
 
     Repositories/SDK/Tests/
-    Repositories/Kernel/Tests/
+    Repositories/Kernel/Rust/             fuer Kernel-Laufzeitpruefungen
     Repositories/Distribution/Tests/
     Repositories/Libraries/<Library>/Tests/
     Repositories/<Rolle>/<Projekt>/Tests/
