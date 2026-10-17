@@ -115,6 +115,8 @@ Rust/storage/ und Rust/fs/
     vfs*/drive*: Mountbesitz, Requests, Streams und Claims
     page_cache_read/state/policy/worker: Cacheidentitaet, Pins und begrenzte
     Demand-Fills mit residentem Heapstaging; spekulative I/O bleibt deaktiviert
+    request_access/request_payload: generationengebundene Read-/Write-Zulassung
+    und eng gebundene Backendleihen; ntfs_read_buffers: auftragslokale Datenbuffer.
     fat*/ntfs*: Dateisysteme; vfs_backends: direkte native Volumenprojektion
     Installation verwendet begrenzten caller-eigenen JSON-Scratchspeicher.
 
