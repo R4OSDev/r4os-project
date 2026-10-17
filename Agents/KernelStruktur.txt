@@ -90,6 +90,8 @@ Rust/kernel/deadman.rs: kooperativer Deadman ohne IRQ-gesperrten Spin.
 Rust/driver/ und Rust/usb/
     registry, driver_plan/policy: genaue Instanz, Admission und Rueckbau
     api_*: kanonische DriverApi-Tabellen, Ressourcen und Cleanup
+    api_validation/api_net: NetBackend nur als vollstaendiges v2/120;
+    Header vor Folgelesen/Registrierung, optionale Flat-/Pollpfade bleiben.
     work*/threads/semaphores/heap: echte Completion und Lebensdauer
     irq_router: INTx/Level/Edge/MSI; USB-Core/HID/MSC: Geraeteruntime
 
