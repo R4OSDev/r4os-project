@@ -19,8 +19,10 @@ Zwei getrennte Ebenen
 
 Den Umfang auf den geaenderten Besitzer und betroffene vorhandene Faelle
 begrenzen. Vorhandene gruene Belege wiederverwenden; keine pauschalen
-Katalogwiederholungen. Compiler-/ABI-Pruefung und echte Gastfunktion belegen
-verschiedene Grenzen. Der Rust-Kernel besitzt keine alten Zig-Testselektoren;
+Katalogwiederholungen. Vor einem gezielten Diagnoseaufruf dessen Voraussetzungen
+im Testinventar und Besitzer pruefen: private Bootoptionen, Dienstendpunkte,
+Full-only-Fixtures und explizite Aktivierung lazy geladener Protokolle.
+Compiler-/ABI-Pruefung und echte Gastfunktion belegen verschiedene Grenzen. Der Rust-Kernel besitzt keine alten Zig-Testselektoren;
 fmt/check/clippy und gezielte SMP4-Laufzeitdiagnosen sind sein aktueller Weg.
 Historische Originalfaelle bleiben in Git und den Migrationsarchiven erhalten.
 

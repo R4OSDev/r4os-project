@@ -165,3 +165,10 @@ DMA-Freigabenachweise gehoeren dem externen NVME-Treiber.
 Rust/program/r4dev/usb.rs stellt nur die beiden unveraenderten lokalen
 USB-Ownerfaelle aus ring_cycle/event_router als festen Diagnosebericht bereit.
 Kein xHCI-/Live-Mailboxzugriff, globaler Testzustand oder neuer Taskbesitzer.
+
+Kernelbereinigung0.84.17: Fontmessung direkt beim CatalogState unter genauer
+Leseleihe (measure_z_raw); xhci_api behaelt native generationengepruefte
+Guardzugriffe, keine privaten C-Migrationshuellen. Monotonic-CPUsteuerung
+bindet direkt den Clockbesitzer; echter R4SYS-/DriverApi-C-Callback bleibt.
+R4P-Registry wird nur durch Dateimodule/Preload befuellt; oeffentliche
+Statusfelder/Kennungen bleiben stabil, fehlende Rollen melden none.
