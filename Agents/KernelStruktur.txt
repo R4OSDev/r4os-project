@@ -102,6 +102,8 @@ Rust/loader/
 Rust/program/
     runtime_tables/platform_callbacks: sechs oeffentliche Platform-APIs
     entry/launch/process/program_api/shell_launcher: Start und Prozessrollen
+    fault/stack/stack_fault: residente Fault-Fortsetzung, Wachstum und
+    genau zugelassener R4X-Reserveabbruch zum bestehenden Prozess-Reaper
     async_io/system/console*/remote_frame*: genaue Ressourcenleihen
     r4desk*/r4draw/network*/r4audio/r4dev/: fachliche API-Besitzer
     Rust/arch/callback_abort.S: begrenzte Modulabbruch-/Rueckkehrgrenze
