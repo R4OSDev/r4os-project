@@ -71,6 +71,8 @@ Rust/memory/
     paging/batch: maximal zwei kurzlebige Tabellenwege fuer 64er-Batches;
     nur unter gehaltenem Page-Table-Owner bis zur genauen TLB-/Rollbackquittung.
     heap/heap_policy: Kernelheap und genaue Growth-Wartequittungen
+    heap/release: private Retiring-Tickets fuer grosse vollstaendige Fuellungen;
+    VM-Tails behalten die Growth-Serialisierung bis zur genauen Quittung.
     vm_*: VM, Reservierung, Commit und residenter Spielraum
     vm_release/blocks/release_batch: virtuelle 64er-Freigabe, genaue eigene
     TLB-Quittung und residente Ruecknahme unter dem physischen Besitzer;
