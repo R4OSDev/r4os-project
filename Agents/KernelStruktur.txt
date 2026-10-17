@@ -117,6 +117,8 @@ Rust/storage/ und Rust/fs/
     Demand-Fills mit residentem Heapstaging; spekulative I/O bleibt deaktiviert
     request_access/request_payload: generationengebundene Read-/Write-Zulassung
     und eng gebundene Backendleihen; ntfs_read_buffers: auftragslokale Datenbuffer.
+    ntfs_decoded_key/cache: genaue Inhaltsidentitaet, vier immutable Einheiten,
+    Pins und quittierter Heapabbau; kein I/O/Alloc/Free unter dem Cacheowner.
     fat*/ntfs*: Dateisysteme; vfs_backends: direkte native Volumenprojektion
     Installation verwendet begrenzten caller-eigenen JSON-Scratchspeicher.
 
