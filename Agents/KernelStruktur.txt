@@ -77,6 +77,8 @@ Rust/memory/
 
 Rust/sched/
     scheduler/task*: stabile Taskidentitaeten, Ready-/Wait-/Reap-Lifecycle
+    task/diagnostic: eigener begrenzter Taskledger mit genauer CPU-Bindung
+    und direkter letzter Pin-/Ressourcen-/Metadatenquittung
     sync*/wait*: Mutex/Semaphore, WaitQueue und Unwind-/Kill-Schutz
     kernel_check/: ausdruecklicher BSP-Diagnosecontroller, eigene genaue
     Task-/Work-Abschluesse und gemeinsame Zulassung in task_context
@@ -142,3 +144,8 @@ Vorhandene Laufzeitdiagnosen werden gezielt ueber Spectra und SMP4 abgenommen.
 Keine Single-Core-Abnahme. Testumfang: Agents/Test.txt.
 Migrationsmatrix, historische Wellen und offene Vergleichsgrenzen:
 Docs/Core/KernelRustMigration.txt; Endstand: Docs/Core/KernelRustFinal.txt.
+
+Rust/arch/smp_probe/ trennt funktionale Phasen (cases), gebundene Worker,
+eigene Mapping-/Framerueckgaben und den ausdruecklichen Live-Aufruf. Globale
+TLB-Timeoutinjektion bleibt im isolierten Boot; passive SMP-/TLB-Daten gehoeren
+zur R4DEV-Grenze program/r4dev/smp.
