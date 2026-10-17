@@ -72,6 +72,9 @@ Rust/memory/
     nur unter gehaltenem Page-Table-Owner bis zur genauen TLB-/Rollbackquittung.
     heap/heap_policy: Kernelheap und genaue Growth-Wartequittungen
     vm_*: VM, Reservierung, Commit und residenter Spielraum
+    vm_release/blocks/release_batch: virtuelle 64er-Freigabe, genaue eigene
+    TLB-Quittung und residente Ruecknahme unter dem physischen Besitzer;
+    physische Wiedervergabe erst nach Vollquittung und Bitmappruefung.
     vm_budget: abgeleitete Zulassungssummen; vm_ranges publiziert unter
     demselben Owner. Ranges bleiben Wahrheit, volle Snapshots nur zur Diagnose.
     reclaim/pager/swap*: auslagerbare Seiten und ihre genaue Backingdatei
