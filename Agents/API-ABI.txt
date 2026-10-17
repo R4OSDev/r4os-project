@@ -5,6 +5,11 @@ Zweck: Wahrheiten, Generierung und Kompatibilitaetsregeln der zentralen
 Plattform-API sowie der unabhaengigen Runtime-Libraries.
 
 
+Datei-I/O seit 0.84.5: Einzelzaehler sind wegen positiver i32-Ergebnisse auf
+2147483647 Bytes begrenzt; groessere Anfragen vor Aufnahme mit TooLarge
+abweisen. Bestehende u64-Dateigroessen/Offsets bleiben erhalten. Vertrag und
+SDK-Hinweise: Docs/API/FileTransferLimits.txt.
+
 Besitz und Wahrheiten
 ---------------------
 
