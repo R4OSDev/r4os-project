@@ -62,6 +62,8 @@ Rust/boot/
     limine/info: volatile Requests und residente normalisierte Bootdaten
     entry/foundation/runtime: linearer Boot, Worker, Services und Shell
     config: CONFIG.R4S; log/log_route/log_event/serial: begrenzte Ausgabe
+    serial_admission/serial_policy: einmalige COM1-Registryentscheidung,
+    Schreiberabschluss und echte UART-Freigabe nach erfolgreichem BootReady
     fatal/crash: Fehlerphase und Records; performance/instrumentation:
     Betriebszaehler und ausdruecklich aktivierte Detailmessung
 
