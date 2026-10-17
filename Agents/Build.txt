@@ -193,8 +193,14 @@ Produktive Full-Module, die nur eine Testkette benoetigt, koennen als
 ausdrueckliche Test-Includes des Orchestrators aufgenommen werden. Fuer die
 Subsystem-Runtime- und Registry-Abnahmen gilt dies fuer AUDSVC und REGEDIT;
 seit 0.81.19 ist CALC fuer die kurze normale SMP-GUI-Besitzerprobe enthalten;
+DISPLAYD ist seit 0.84.3 fuer seinen bestehenden Testaufruf explizit dabei.
 deren normale `IMAGE_SCOPE=full`-Zuordnung und damit Slim und Full bleiben
 unveraendert.
+Regulaere Headless-Abnahmen erhalten neben dem Installationsimage und dem
+NVMe-IRQ-Medium ein frisches 64-MB-FAT32-Testmedium auf F: mit TEMP/FATTEST.R4S. C:/D: bleiben
+NTFS; die internen BOOT-/RECOVERY-Partitionen sind keine Testfixtures. Quick und
+Spectra STANDARD behalten ihre bisherigen Medien. Der Browserzusatz wartet
+wie der normale Test auf SUBSYS.OK und prueft die Browsermarker explizit.
 Das Benchmarkprofil verwendet stattdessen ausschliesslich das versionierte
 `BenchmarkInjection/` ueber `Injection/` und setzt dort das Terminal als
 AUTOEXEC-faehige Shell. Nicht versionierte und private

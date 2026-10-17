@@ -100,6 +100,13 @@ Testplan auf und verlangt im Gast die Offline-Klickifax-Selbsttestmarker.
 KlickifaxLive bleibt dabei ein aufgenommenes Live-Diagnoseartefakt: QEMU hat
 im Headless-Lauf kein Netzwerk, deshalb wird KFXLIVE dort nicht gestartet.
 
+Die FAT-spezifische PAGECACHE-Probe nutzt F: auf einem frischen separaten
+64-MB-Medium mit TEMP/FATTEST.R4S; verwaltete C:/D: sind NTFS. Die privaten Registry-Selbsttests
+benennen eine regulaere SYSTEM.BAK zuvor in REGBOOT.BAK im selben Ordner
+um und danach zurueck. REN ueberschreibt keine belegten Ziele; bei Fehlern
+bleiben die vorhandenen Kopien erhalten. Der R4BASIC-Bericht weist volle,
+Damage- und Replacement-Publikationen getrennt aus; deren Summe muss stimmen.
+
 
 Teilaufgaben
 ------------
