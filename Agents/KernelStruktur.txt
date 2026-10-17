@@ -149,3 +149,9 @@ Rust/arch/smp_probe/ trennt funktionale Phasen (cases), gebundene Worker,
 eigene Mapping-/Framerueckgaben und den ausdruecklichen Live-Aufruf. Globale
 TLB-Timeoutinjektion bleibt im isolierten Boot; passive SMP-/TLB-Daten gehoeren
 zur R4DEV-Grenze program/r4dev/smp.
+
+Rust/storage/block_probes/ trennt vorhandene synthetische Faelle (cases),
+Backend-/Requesterkoerper, eigenen Ressourcenledger (session) und expliziten
+Live-Controller. Geraetegenaues Pinning und Retirement bleiben beim Registry-/
+I/O-Besitzer; die normale IRQ-Completion teilt ihre unveraenderte Arbeit mit
+einer internen Rueckmeldung, ohne dauernden Diagnosehook.
