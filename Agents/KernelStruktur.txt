@@ -112,7 +112,9 @@ Rust/storage/ und Rust/fs/
     block*/ahci*/nvme*/backend*: Requests, Controller und Medien
     gpt/mbr/guid/partition_table/installation*: Bootidentitaet und Layout
     normal_boot/boot_source/operations: Mount-/Wartungskoordination
-    vfs*/drive*: Mountbesitz, Requests, Streams, Claims und Pagecache
+    vfs*/drive*: Mountbesitz, Requests, Streams und Claims
+    page_cache_read/state/policy/worker: Cacheidentitaet, Pins und begrenzte
+    Demand-Fills mit residentem Heapstaging; spekulative I/O bleibt deaktiviert
     fat*/ntfs*: Dateisysteme; vfs_backends: direkte native Volumenprojektion
     Installation verwendet begrenzten caller-eigenen JSON-Scratchspeicher.
 
