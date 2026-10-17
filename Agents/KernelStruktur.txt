@@ -73,12 +73,15 @@ Rust/memory/
     reclaim/pager/swap*: auslagerbare Seiten und ihre genaue Backingdatei
     boot/boot_diagnostics/heap_probes: Aufbau und vorhandene Diagnosen
     heap_check/: gemeinsame begrenzte Heapfaelle, eigener Ledger und
-    Task-Unwind-Zulassung fuer Boot sowie explizites Spectra CHECK MEMORY
+    gemeinsame Task-Unwind-Zulassung fuer Boot und explizites CHECK MEMORY
 
 Rust/sched/
     scheduler/task*: stabile Taskidentitaeten, Ready-/Wait-/Reap-Lifecycle
     sync*/wait*: Mutex/Semaphore, WaitQueue und Unwind-/Kill-Schutz
-    task_probe/: bestehende begrenzte Task-/Stack-/FPU-Selbsttests
+    kernel_check/: ausdruecklicher BSP-Diagnosecontroller, eigene genaue
+    Task-/Work-Abschluesse und gemeinsame Zulassung in task_context
+    task_probe/: geteilte Task-/Rollen-/FPU-Faelle fuer Boot und Spectra;
+    globale Injektionen und direkte Timerumschaltung bleiben isoliert
     task_probe/fpu.S: ausdrueckliche vorhandene FPU-Pruefroutinen
 Rust/kernel/deadman.rs: kooperativer Deadman ohne IRQ-gesperrten Spin.
 
