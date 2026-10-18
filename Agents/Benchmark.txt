@@ -4,7 +4,9 @@
 Verbindlicher Standard
 ---------------------
 Verbindlicher Performancebenchmark ist SPECTRA BENCH STANDARD mit
-spectra-standard-2 (Spectra ab 0.1.2). Alle QEMU-Laeufe nutzen vier vCPUs (SMP4).
+spectra-standard-3 (Spectra ab 0.1.24). STANDARD nutzt immer alle verfuegbaren
+CPUs mit gleicher Arbeit je CPU und gemeinsamer Startbarriere. QEMU dieses
+Hosts stellt weiterhin vier vCPUs (SMP4), echte Hardware ihre volle Kapazitaet.
 Regulaere SMP4-Headless-Abnahmen enthalten genau eine begrenzte Standardphase
 vor den bisherigen Tests.
 Quick-, Browser-, Fehler-Injektionsproben und reine Builds starten sie nicht.
@@ -18,7 +20,7 @@ technischen/methodischen Grund. Keine Wiederholung allein wegen Uploadfehlern.
 Messung und Ergebnis
 --------------------
 Spectra misst scheduler_sync, memory, ipc, lifecycle und filesystem_io.
-Suite spectra-standard-2: je Bereich aktive Aufwaermung mit mindestens einer
+Suite spectra-standard-3: je Bereich aktive Aufwaermung mit mindestens einer
 Sekunde gemessener Arbeit und drei vollstaendigen festen Batches, danach fuenf
 Messungen. Die Aufwaermbatches bleiben als ein zusammengefasster Rohsample
 mit ihrer echten Operations-/Bytemenge erhalten: insgesamt 30 Rohsamples,
@@ -35,22 +37,24 @@ bleiben mit dem Ergebnis verbunden. Fuer diesen Host gilt hetzner-qemu;
 R4OS_BENCHMARK_HOST_ID oder Tools/BenchmarkHost.R4S setzt die lokale Host-ID.
 Messung und Offlineexport brauchen keinen laufenden DevCenter-Dienst.
 
-Im Spectra-Repository liegt nur Baselines/standard-2.reference.json mit UUID
+Im Spectra-Repository bindet Baselines/standard-3.reference.json die UUID
 und Pruefhashes. Echte Laufexporte einschliesslich der Referenzen bleiben im
 DevCenter und lokal unter Artifacts/Distribution/Diagnostics/SpectraStandard/.
 Der Runner prueft den lokalen Originalexport oder laedt die Referenz aus dem
 DevCenter in den lokalen Cache. API-Basis ueber R4OS_DEVCENTER_API_URL oder
 DEVCENTER_API_URL in Tools/BenchmarkHost.R4S setzen; mit Cache offline nutzbar.
-standard-1.reference.json bezeichnet die unveraenderte historische Suite 1;
-sie wird nicht gegen Suite 2 bewertet. Suite, Scoring, Messmodus und vollstaendige Methodik
+standard-1.reference.json und standard-2.reference.json bleiben historische
+unveraenderte Referenzen; Vergleiche zwischen Suiten sind ungueltig. Suite, Scoring, Messmodus und vollstaendige Methodik
 muessen passen; CPU-/Hostunterschiede bleiben als Kontext sichtbar. Eine
-andere QEMU-/Storage-/Bootmethodik darf keinen gueltigen Vergleich ergeben.
+andere Arbeits-/Messmethodik darf keinen gueltigen Vergleich ergeben. Suite 3
+misst echten Gesamtdurchsatz ueber alle Worker: CPU-Anzahl, RAM, Storage und
+native/VM sind gemessener Kontext; der gleiche Arbeitsvertrag muss passen.
 Fruehere Einzelmessungen sind historische Fachbelege, keine Standardindizes.
 
 DevCenter-Import und Kontrolle
 -----------------------------
 Am Ende jeder Unterversion mit moeglicher Performancewirkung auf dem
-abschliessenden Artefaktstand genau einen vollstaendigen Suite-2-Lauf mit
+abschliessenden Artefaktstand genau einen vollstaendigen Suite-3-Lauf mit
 SMP4 ausfuehren und unveraendert ins DevCenter importieren. Bei unklarer
 Performancewirkung gilt die Laufpflicht ebenfalls, auch fuer Refactorings.
 Reine Analyse-, Planungs- oder Dokumentationsschritte ohne Laufzeitwirkung
