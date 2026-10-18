@@ -163,6 +163,9 @@ Rust/platform/, Rust/input/, Rust/font/, Rust/audio/, Rust/net/,
 Rust/service/ und Rust/update/
     ACPI/PCI/Clock/Inventar, PS/2-/USB-Eingabe, residente Fonts, Audio,
     Adapter/Frames/IP/TCP/UDP/DHCP/DNS, Services/IPC und SYSUPD/Upload.
+    net/tcp: einzelne residente Typ-/Tabellen-/Zustandswurzel und direkte
+    alte Exporte; tcp/connections, transmit_io, receive, contract_checks
+    und foreign_api: unveraenderte ganze Operationen und Fremdaufrufgrenzen.
     net/tcp_wait: genaue Verbindungs-/Listener-Tickets und atomare
     Bereitschaft mit gezielten Runtime-Queues; TCP-Owner bleibt wartbar.
     net/tcp_wait_check: ein begrenzter eigener Waitfall innerhalb der
