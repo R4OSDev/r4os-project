@@ -150,6 +150,9 @@ Rust/program/
     genau zugelassener R4X-Reserveabbruch zum bestehenden Prozess-Reaper
     async_io/system/console*/remote_frame*: genaue Ressourcenleihen
     r4desk*/r4draw/network*/r4audio/r4dev/: fachliche API-Besitzer
+    self_test: gemeinsamer Zustand, vorhandene Helfer und Fallsteuerung;
+    self_test/storage_cases, command_rasters, resource_cases, shared_cases:
+    bisherige Diagnosefaelle mit unveraenderten Orakeln und Cleanup.
     Rust/arch/callback_abort.S: begrenzte Modulabbruch-/Rueckkehrgrenze
 
 Rust/display/ und Rust/gfx/
