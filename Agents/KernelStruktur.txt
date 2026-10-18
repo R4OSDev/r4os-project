@@ -155,6 +155,12 @@ Rust/program/
 Rust/display/ und Rust/gfx/
     boot_display/console*/framebuffer/bootscreen: fruehe Ausgabe
     manager/boot_driver: Anzeigeuebernahme, Boot-Hold und Restore
+    manager: gemeinsame Zustandswurzel mit transitions, presentation,
+    boot_framebuffer und diagnostics fuer komplette alte Operationen.
+    native_driver: eigene Zustandswurzel mit preparation, cpu_access,
+    modes und reset_retirement; genaue Reset-/Restaurationsquittungen bleiben.
+    queue: eigene Zustandswurzel mit backends, jobs, native_completion
+    und worker; Einreichung, Retention und Abschluss behalten ihre Grenzen.
     queue*/surface*/presenter/output*/cursor*/mode*/native_driver:
     Display-, Bild-, Leih-, IRQ-, Reset- und Abschlussbesitz
     gfx/: gemeinsame Grafikressourcen und native GPU-VA-/BO-Lebensdauer
