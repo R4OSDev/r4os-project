@@ -163,6 +163,9 @@ Rust/platform/, Rust/input/, Rust/font/, Rust/audio/, Rust/net/,
 Rust/service/ und Rust/update/
     ACPI/PCI/Clock/Inventar, PS/2-/USB-Eingabe, residente Fonts, Audio,
     Adapter/Frames/IP/TCP/UDP/DHCP/DNS, Services/IPC und SYSUPD/Upload.
+    audio/core: einzelne residente Zustands-/Lock-/Init-/Messwurzel;
+    core/streams, outputs, synths, progress: unveraenderte Stream-/Mixer-,
+    Ausgabe-/Stopp-, Synth- und Fortschrittsoperationen, keine neue Runtime.
     net/tcp: einzelne residente Typ-/Tabellen-/Zustandswurzel und direkte
     alte Exporte; tcp/connections, transmit_io, receive, contract_checks
     und foreign_api: unveraenderte ganze Operationen und Fremdaufrufgrenzen.
