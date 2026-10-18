@@ -137,7 +137,11 @@ Rust/loader/
     Relocations, instanzgebundene Retention und Ressourcen; performance: Messung
 
 Rust/program/
-    runtime_tables/platform_callbacks: sechs oeffentliche Platform-APIs
+    runtime_tables: sechs oeffentliche Platform-APIs
+    platform_callbacks: direkte Fassade fuer R4SYS/R4DESK/R4DRAW;
+    platform_callbacks_system/services/process/files_storage/async_io und
+    platform_callbacks_desktop/drawing: exakte zustandslose Callbackgruppen
+    auf gleicher program-Ebene, ohne neue Aufrufschicht oder zweite Besitzer.
     entry/launch/process/program_api/shell_launcher: Start und Prozessrollen
     fault/stack/stack_fault: residente Fault-Fortsetzung, Wachstum und
     genau zugelassener R4X-Reserveabbruch zum bestehenden Prozess-Reaper
