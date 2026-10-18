@@ -103,6 +103,9 @@ Rust/kernel/deadman.rs: kooperativer Deadman ohne IRQ-gesperrten Spin.
 Rust/driver/ und Rust/usb/
     registry, driver_plan/policy: genaue Instanz, Admission und Rueckbau
     api_*: kanonische DriverApi-Tabellen, Ressourcen und Cleanup
+    api_gfx: gemeinsamer Identitaets-/Header-/Querywurzelbesitzer;
+    api_gfx/display, outputs, queue, memory: unveraenderte komplette
+    Callback-/Backendoperationen, direkte Reexports und keine neue Runtime.
     api_callbacks: alte untypisierte Audio-/Synthslots nur als Fehlerstub;
     api_audio/api_entry binden die strukturierten Backends/Engines. Mixer bleibt.
     api_validation/api_net: NetBackend nur als vollstaendiges v2/120;
