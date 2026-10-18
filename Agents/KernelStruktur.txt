@@ -166,6 +166,9 @@ Rust/service/ und Rust/update/
     net/tcp: einzelne residente Typ-/Tabellen-/Zustandswurzel und direkte
     alte Exporte; tcp/connections, transmit_io, receive, contract_checks
     und foreign_api: unveraenderte ganze Operationen und Fremdaufrufgrenzen.
+    net/ipc_services: Aufnahme/Dispatch, gemeinsamer Status-/Wire-/Textcodec
+    und auftragsgenauer Scratch; ipc_services/dhcp, dns, udp,
+    tcp_operations/tcp_text: originale Dienstoperationen und Antworten.
     net/tcp_wait: genaue Verbindungs-/Listener-Tickets und atomare
     Bereitschaft mit gezielten Runtime-Queues; TCP-Owner bleibt wartbar.
     net/tcp_wait_check: ein begrenzter eigener Waitfall innerhalb der
