@@ -110,6 +110,13 @@ Rust/driver/ und Rust/usb/
     work*/threads/semaphores/heap: echte Completion und Lebensdauer
     irq_router: INTx/Level/Edge/MSI; USB-Core/HID/MSC: Geraeteruntime
 
+Rust/serial/ und Rust/program/serial_api.rs
+    catalog/operations/io/lifetime: dynamische genaue Portnamen, Prozesshandles,
+    Callbackleihen, WaitQueue/Abbruch und quittierter Close/Reaper/Driverabbau.
+    Keine normalen UART-Register oder Ringpuffer im Kernel: externer Besitzer
+    Repositories/Drivers/Serial (SERIAL.R4D), Kernel nur fruehes COM1-Debugging
+    und dessen bestaetigte Reservierung. Contract/SDK besitzen COM-Vertraege.
+
 Rust/storage/ und Rust/fs/
     block*/ahci*/nvme*/backend*: Requests, Controller und Medien
     gpt/mbr/guid/partition_table/installation*: Bootidentitaet und Layout
