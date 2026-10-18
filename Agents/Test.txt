@@ -266,7 +266,9 @@ Notepad-Selbsttests, Zig-/C-App-Entry sowie R4CC, R4PACK und R4BUILD. Nur die
 Browservariante verlangt zusaetzlich die Klickifax-Marker. Die vollstaendige
 Liste steht nur im Script, damit sie nicht doppelt gepflegt wird.
 
-Verbindliche Kernel- und STANDARD-Abnahmen laufen mit vier vCPUs.
+Verbindliche QEMU-Kernel- und STANDARD-Abnahmen laufen mit vier vCPUs.
+STANDARD auf echter Hardware nutzt seit Suite 3 alle verfuegbaren
+schedulierbaren CPUs; die Vier-CPU-Vorgabe gilt fuer diesen QEMU-Host.
 SMP4 verlangt die exakte Online-/Fehlerzusammenfassung, produktive R4X-Arbeit
 auf einem AP sowie die funktionalen CPU-Masken und berechneten Arbeitswerte.
 Heap-, TLB- und weitere Besitzervertraege folgen dem Marker-Skript.
