@@ -262,6 +262,16 @@ Wichtige Manifestregeln
 - OPTIMIZE=size|speed gilt einheitlich fuer R4X, R4L, R4D und R4P. Ohne Feld
   bleibt ReleaseSmall der Default; ReleaseFast ist nur fuer einen belegten
   modulnahen Hotpath vorgesehen und aendert weder ABI noch Imagescope.
+- META=r4d.parallel_callbacks=owned-v1 ist seit0.85.16 eine ausdrueckliche
+  R4D-Besitzererklaerung fuer die vom Kernel parallel aufgerufenen
+  registrierten Storage-/Netzwerkcallbacks. Erst den gesamten erreichbaren
+  Treiber-/IRQ-/DMA-/Cancel-/Shutdownpfad beim Originalbesitzer pruefen.
+  Der Loader bindet die Erklaerung bei Init an die genaue Treiberinstanz;
+  Registrierungen uebernehmen sie. Ohne Angabe bleibt BSP, ein unbekannter
+  Wert ist ungueltig. Aktuell sind nur NVME und VIRTNET freigegeben;
+  kein allgemeiner Reentranzvertrag fuer alle Callbackarten oder R4P.
+  Vorhandener primaerer Blockfallback, RX-/Channel-/Modulowner und echte
+  Freigabequittungen bleiben. Docs/Core/KernelWorkers08516.txt/.json.
 - Ein normales R4X mit ENTRY_MODE=app implementiert
   pub fn r4_app_main(app: *r4os.App) i32.
 - Quell- und Ressourcenpfade sind kanonische, vorwaertsgerichtete Pfade
