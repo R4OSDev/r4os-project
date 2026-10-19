@@ -71,6 +71,7 @@ $systemFontNames = @(
 $testImageIncludes = @(
     '/R4OS/SOFTWARE/TERMINAL/BEEP.R4X',
     '/R4OS/SOFTWARE/DESKTOP/NOTEPAD.R4X',
+    '/R4OS/SOFTWARE/DESKTOP/LOGCENTER.R4X', # normal GUI log/export owner in CHECK LIFECYCLE /APPS
     '/R4OS/SOFTWARE/DESKTOP/CALC.R4X', # normal GUI owner in the short SMP acceptance
     '/R4OS/SOFTWARE/DESKTOP/FONTS.R4X',
     '/R4OS/SOFTWARE/DESKTOP/APPEARANCE.R4X',
