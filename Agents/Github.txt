@@ -26,6 +26,9 @@ Grundregeln
 - Pushes und die automatische Repository-Erstellung bleiben
   tokenauthentifiziert.
 - Keine direkten Aufrufe von git push oder git pull verwenden.
+- Push mit -Preview prueft bei Sammel- und Einzelzielen ausschliesslich lokal:
+  keine Credentials, Repositoryanlage, Staging, Commits oder Remoteaenderung.
+  Pull mit -Preview wird vor einer Aenderung ausdruecklich abgelehnt.
 - Read-only-Aufrufe wie git status, git diff, git log und git rev-parse sind
   zur Prüfung erlaubt.
 - Jedes R4OS-Repository ist unabhängig. Dateien werden weiterhin nur im

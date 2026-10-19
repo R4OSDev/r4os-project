@@ -385,6 +385,19 @@ function Invoke-Pull([psobject]$Target) {
 
 function Invoke-Push([psobject]$Target) {
     Assert-NotRetired $Target
+    if ($Preview) {
+        Write-Host ('VORSCHAU: Push ' + $Target.Root + ' -> ' + $Target.Remote)
+        if (Test-Path -LiteralPath (Join-Path $Target.Root '.git')) {
+            Assert-MainBranch $Target
+            $status = Invoke-GitCommand $Target.Root @('status', '--short')
+            Assert-GitSuccess $status ($Target.Label + ': Status konnte nicht gelesen werden.')
+            Write-CommandOutput $status.Output
+        }
+        else {
+            Write-Host 'Lokales Repository fehlt; Vorschau legt es nicht an.'
+        }
+        return
+    }
     $credentials = Read-Credentials
     Ensure-LocalRepository $Target
     Assert-MainBranch $Target
@@ -610,6 +623,7 @@ try {
         exit 0
     }
     if ($Delete) { Invoke-Retirement $target; exit 0 }
+    if ($Pull -and $Preview) { throw '-Preview fuer Pull ist nicht implementiert; es wurde nichts aktualisiert.' }
     if ($Pull) { Invoke-Pull $target; exit 0 }
     Invoke-Push $target
     exit 0
