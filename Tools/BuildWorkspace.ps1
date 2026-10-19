@@ -465,8 +465,11 @@ function Prepare-DistributionCommonArtifacts {
     }
 
     $preloadPath = Join-Path $distributionGeneratedRoot 'PRELOAD.R4I'
+    $cpuMicrocodePath = Join-Path $distributionGeneratedRoot 'CPU_MICROCODE.R4U'
+    Invoke-External 'pwsh' @('-NoLogo', '-NoProfile', '-File', (Join-Path $distributionRoot 'Tools/CpuMicrocode.ps1'), '-Output', $cpuMicrocodePath) $workspaceRoot
     Invoke-External $preloadTool @(
         '--output', $preloadPath,
+        '--cpu-microcode', $cpuMicrocodePath,
         '--add', 'r4p', 'HIDREPORT.R4P', 'usb.hid_report', (Get-WorkspaceArtifact 'HIDREPORT' 'R4P'),
         '--add', 'r4p', 'USBHID.R4P', 'usb.hid_boot', (Get-WorkspaceArtifact 'USBHID' 'R4P'),
         '--add', 'r4p', 'USBBOT.R4P', 'usb.msc_bot', (Get-WorkspaceArtifact 'USBBOT' 'R4P'),
