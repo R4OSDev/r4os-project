@@ -69,6 +69,7 @@ $systemFontNames = @(
     'TERMINAL8.R4F'
 )
 $testImageIncludes = @(
+    '/R4OS/DRIVERS/ACPIPLAT.R4D', # actual external firmware worker transport in CPU acceptance
     '/R4OS/SOFTWARE/TERMINAL/BEEP.R4X',
     '/R4OS/SOFTWARE/DESKTOP/NOTEPAD.R4X',
     '/R4OS/SOFTWARE/DESKTOP/LOGCENTER.R4X', # normal GUI log/export owner in CHECK LIFECYCLE /APPS
