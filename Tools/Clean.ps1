@@ -6,6 +6,9 @@ $projectRoot = [IO.Path]::GetFullPath((Join-Path $PSScriptRoot '..')).TrimEnd(
     [IO.Path]::AltDirectorySeparatorChar
 )
 $pathComparison = if ($IsWindows) { [StringComparison]::OrdinalIgnoreCase } else { [StringComparison]::Ordinal }
+$preview = $false
+$previewBytes = [long]0
+$previewTargets = 0
 
 function Test-SamePath([string]$Left, [string]$Right) {
     return [IO.Path]::GetFullPath($Left).TrimEnd(
@@ -39,23 +42,54 @@ function Test-IsLink([IO.FileSystemInfo]$Item) {
     return ($Item.Attributes -band [IO.FileAttributes]::ReparsePoint) -ne 0
 }
 
+function Get-LogicalSize([IO.FileSystemInfo]$Item) {
+    if (Test-IsLink $Item) { return [long]0 }
+    if (-not $Item.PSIsContainer) { return [long]$Item.Length }
+    $size = [long]0
+    $pending = [Collections.Generic.Stack[IO.DirectoryInfo]]::new()
+    $pending.Push($Item)
+    while ($pending.Count -gt 0) {
+        foreach ($child in $pending.Pop().EnumerateFileSystemInfos()) {
+            if (Test-IsLink $child) { continue }
+            if ($child -is [IO.DirectoryInfo]) { $pending.Push($child) }
+            else { $size += $child.Length }
+        }
+    }
+    return $size
+}
+
+function Remove-SafeItem([IO.FileSystemInfo]$Item) {
+    if (Test-IsLink $Item) {
+        Remove-Item -LiteralPath $Item.FullName -Force
+        return
+    }
+    if ($Item -is [IO.DirectoryInfo]) {
+        foreach ($child in $Item.EnumerateFileSystemInfos()) {
+            Remove-SafeItem $child
+        }
+    }
+    if (($Item.Attributes -band [IO.FileAttributes]::ReadOnly) -ne 0) {
+        $Item.Attributes = $Item.Attributes -band (-bnot [IO.FileAttributes]::ReadOnly)
+    }
+    $Item.Delete()
+}
+
 function Remove-SafeEntry([string]$Path) {
     $fullPath = Assert-ContainedPath $Path
     $item = Get-PathItem $fullPath
     if ($null -eq $item) { return }
 
-    if (Test-IsLink $item) {
-        Remove-Item -LiteralPath $fullPath -Force
+    if ($script:preview) {
+        $size = Get-LogicalSize $item
+        $script:previewBytes += $size
+        $script:previewTargets++
+        Write-Host ('VORSCHAU: {0:N2} MB  {1}' -f ($size / 1MB), $fullPath)
+        return
     }
-    elseif ($item.PSIsContainer) {
-        foreach ($child in @(Get-ChildItem -LiteralPath $fullPath -Force)) {
-            Remove-SafeEntry $child.FullName
-        }
-        Remove-Item -LiteralPath $fullPath -Force
-    }
-    else {
-        Remove-Item -LiteralPath $fullPath -Force
-    }
+
+    # Enumerate real entries explicitly; links are unlinked, never followed.
+    # Native file operations avoid several provider lookups per cached file.
+    Remove-SafeItem $item
 
     if ($null -ne (Get-PathItem $fullPath)) {
         throw ('Eintrag konnte nicht entfernt werden: ' + $fullPath)
@@ -77,8 +111,8 @@ function Clear-Artifacts {
     }
 
     if (-not (Test-Path -LiteralPath $target)) {
-        [void](New-Item -ItemType Directory -Path $target)
-        Write-Host 'Artifacts war nicht vorhanden und wurde leer angelegt.'
+        if (-not $script:preview) { [void](New-Item -ItemType Directory -Path $target) }
+        Write-Host 'Artifacts war nicht vorhanden; nichts zu bereinigen.'
         return
     }
 
@@ -94,6 +128,8 @@ function Clear-Artifacts {
         Remove-SafeEntry $entry.FullName
     }
 
+    if ($script:preview) { return }
+
     $remaining = @(Get-ChildItem -LiteralPath $target -Force | Where-Object {
         -not $_.Name.Equals('Distribution', $pathComparison)
     })
@@ -108,7 +144,7 @@ function Assert-NoLinkedParent([string]$Path) {
     while (-not (Test-SamePath $current $projectRoot)) {
         $item = Get-PathItem $current
         if ($null -eq $item -or -not $item.PSIsContainer -or (Test-IsLink $item)) {
-            throw ('Unsichere Parent-Kette fuer Zig-Cache: ' + $Path)
+            throw ('Unsichere Parent-Kette fuer Clean-Ziel: ' + $Path)
         }
         $next = [IO.Path]::GetFullPath((Split-Path -Parent $current))
         if (Test-SamePath $next $current) {
@@ -124,17 +160,19 @@ function Get-ZigCachesUnder([string]$Root) {
     if (Test-IsLink $rootItem) { return @() }
 
     $result = [Collections.Generic.List[string]]::new()
-    $pending = [Collections.Generic.Stack[string]]::new()
-    $pending.Push([IO.Path]::GetFullPath($Root))
+    $pending = [Collections.Generic.Stack[IO.DirectoryInfo]]::new()
+    $pending.Push($rootItem)
     while ($pending.Count -gt 0) {
         $current = $pending.Pop()
-        foreach ($directory in @(Get-ChildItem -LiteralPath $current -Directory -Force)) {
+        foreach ($directory in $current.EnumerateDirectories()) {
             if (Test-IsLink $directory) { continue }
+            # Package sources, outputs and VCS data are not cache owners.
+            if ($directory.Name -in @('.git', '.hg', '.svn', 'zig-pkg', 'zig-out')) { continue }
             if ($directory.Name -ceq '.zig-cache') {
                 $result.Add($directory.FullName)
             }
             else {
-                $pending.Push($directory.FullName)
+                $pending.Push($directory)
             }
         }
     }
@@ -158,11 +196,11 @@ function Remove-ZigCache([string]$Path, [switch]$ExplicitDevKitCache) {
 
     Assert-NoLinkedParent $fullPath
     Remove-SafeEntry $fullPath
-    Write-Host ('Entfernt: ' + $fullPath)
+    if (-not $script:preview) { Write-Host ('Entfernt: ' + $fullPath) }
     return $true
 }
 
-function Clear-ZigCaches {
+function Clear-ZigCaches([switch]$IncludeTemp) {
     Assert-WorkspaceSafety
     $targets = [Collections.Generic.HashSet[string]]::new(
         $(if ($IsWindows) { [StringComparer]::OrdinalIgnoreCase } else { [StringComparer]::Ordinal })
@@ -179,7 +217,14 @@ function Clear-ZigCaches {
         (Join-Path $projectRoot 'DevKit/SDK'),
         (Join-Path $projectRoot 'DevKit/HostTools')
     )) {
+        Write-Host ('Suche Zig-Caches: ' + $scanRoot)
         foreach ($cache in @(Get-ZigCachesUnder $scanRoot)) { [void]$targets.Add($cache) }
+    }
+    if ($IncludeTemp) {
+        Write-Host ('Suche Zig-Caches: ' + (Join-Path $projectRoot 'Temp'))
+        foreach ($cache in @(Get-ZigCachesUnder (Join-Path $projectRoot 'Temp'))) {
+            [void]$targets.Add($cache)
+        }
     }
 
     $artifactsRoot = Join-Path $projectRoot 'Artifacts'
@@ -201,7 +246,149 @@ function Clear-ZigCaches {
             $removed++
         }
     }
-    Write-Host ('Zig-Caches entfernt: ' + $removed)
+    $verb = if ($script:preview) { 'vorgesehen' } else { 'entfernt' }
+    Write-Host ('Zig-Caches ' + $verb + ': ' + $removed)
+}
+
+function Clear-BuildCaches {
+    Clear-ZigCaches -IncludeTemp
+    foreach ($relative in @('Artifacts/Kernel/Rust', 'Artifacts/Kernel/RustOwners', 'Artifacts/Distribution/.Cache')) {
+        $target = Assert-ContainedPath (Join-Path $projectRoot $relative)
+        if ($null -eq (Get-PathItem $target)) { continue }
+        Assert-NoLinkedParent $target
+        Remove-SafeEntry $target
+        if (-not $script:preview) { Write-Host ('Buildcache entfernt: ' + $target) }
+    }
+}
+
+# Only explicitly selected generated payloads are removed from these mixed
+# trees. Reports, logs, source/work archives and manifests are never targets.
+function Clear-PayloadFiles([string]$Root, [string[]]$Extensions) {
+    $rootItem = Get-PathItem (Assert-ContainedPath $Root)
+    if ($null -eq $rootItem) { return }
+    Assert-NoLinkedParent $Root
+    if (-not $rootItem.PSIsContainer -or (Test-IsLink $rootItem)) {
+        throw ('Payloadwurzel ist kein regulaeres Verzeichnis: ' + $Root)
+    }
+    $pending = [Collections.Generic.Stack[IO.DirectoryInfo]]::new()
+    $pending.Push($rootItem)
+    $count = 0
+    while ($pending.Count -gt 0) {
+        foreach ($entry in $pending.Pop().EnumerateFileSystemInfos()) {
+            if (Test-IsLink $entry) { continue }
+            if ($entry -is [IO.DirectoryInfo]) {
+                if ($entry.Name -in @('.git', '.hg', '.svn', '.zig-cache', 'zig-pkg',
+                    'Source', 'Sources', 'Work', 'Reports', 'Legal')) { continue }
+                $pending.Push($entry)
+            }
+            elseif ($entry.Extension.ToLowerInvariant() -in $Extensions) {
+                Remove-SafeEntry $entry.FullName
+                $count++
+            }
+        }
+    }
+    $verb = if ($script:preview) { 'vorgesehen' } else { 'entfernt' }
+    Write-Host ('Payloads ' + $verb + ': ' + $count + ' unter ' + $Root)
+}
+
+function Clear-LocalPackages {
+    Assert-WorkspaceSafety
+    foreach ($relative in @('Temp', 'Artifacts/Distribution/Packages', 'Artifacts/Distribution/GraphicsPackages')) {
+        Clear-PayloadFiles (Join-Path $projectRoot $relative) @('.r4u')
+    }
+}
+
+function Clear-OldReleases {
+    Assert-WorkspaceSafety
+    $versionPath = Join-Path $projectRoot 'Repositories/Distribution/Injection/R4OS/CONFIG/VERSION.R4S'
+    Assert-NoLinkedParent $versionPath
+    $versionItem = Get-PathItem $versionPath
+    if ($null -eq $versionItem -or $versionItem.PSIsContainer -or (Test-IsLink $versionItem)) {
+        throw 'Releaseversionsdatei fehlt oder ist verlinkt; alte Releases bleiben erhalten.'
+    }
+    $releaseMatches = @([regex]::Matches([IO.File]::ReadAllText($versionPath), '(?m)^RELEASE_VERSION=(\d+\.\d+\.\d+)\s*$'))
+    if ($releaseMatches.Count -ne 1) { throw 'Keine eindeutige RELEASE_VERSION; alte Releases bleiben erhalten.' }
+    $currentVersion = [version]$releaseMatches[0].Groups[1].Value
+    $root = Join-Path $projectRoot 'Artifacts/Distribution/Releases'
+    $rootItem = Get-PathItem $root
+    if ($null -eq $rootItem) { return }
+    Assert-NoLinkedParent $root
+    if (-not $rootItem.PSIsContainer -or (Test-IsLink $rootItem)) {
+        throw 'Releasewurzel ist kein regulaeres Verzeichnis.'
+    }
+    Write-Host ('Behalte aktuelle/neuere Releases ab ' + $currentVersion)
+    foreach ($directory in $rootItem.EnumerateDirectories()) {
+        if ((Test-IsLink $directory) -or $directory.Name -notmatch '^\d+\.\d+\.\d+$') { continue }
+        if ([version]$directory.Name -ge $currentVersion) { continue }
+        Clear-PayloadFiles $directory.FullName @('.zip', '.r4u', '.img', '.qcow2', '.iso', '.elf', '.efi', '.pdb', '.exe', '.r4i')
+    }
+}
+
+function Clear-TestArchives {
+    Assert-WorkspaceSafety
+    $diagnostics = Join-Path $projectRoot 'Artifacts/Distribution/Diagnostics'
+    $standard = Join-Path $diagnostics 'SpectraStandard'
+    $diagnosticsItem = Get-PathItem $diagnostics
+    if ($null -ne $diagnosticsItem) {
+        Assert-NoLinkedParent $diagnostics
+        if (-not $diagnosticsItem.PSIsContainer -or (Test-IsLink $diagnosticsItem)) {
+            throw 'Diagnosewurzel ist kein regulaeres Verzeichnis.'
+        }
+        foreach ($entry in $diagnosticsItem.EnumerateFileSystemInfos()) {
+            if (-not (Test-SamePath $entry.FullName $standard)) {
+                Remove-SafeEntry $entry.FullName
+                continue
+            }
+            if ($entry -isnot [IO.DirectoryInfo] -or (Test-IsLink $entry)) {
+                throw 'STANDARD-Archiv ist kein regulaeres Verzeichnis.'
+            }
+            # Immutable full JSON exports contain every comparison input.
+            # Their generated source images, logs and work copies are disposable.
+            foreach ($run in $entry.EnumerateFileSystemInfos()) {
+                if ($run.Name -ceq 'References') {
+                    if ($run -isnot [IO.DirectoryInfo] -or (Test-IsLink $run)) {
+                        throw 'STANDARD-Referenzcache ist kein regulaeres Verzeichnis.'
+                    }
+                    continue
+                }
+                if ($run -isnot [IO.DirectoryInfo] -or (Test-IsLink $run)) {
+                    Remove-SafeEntry $run.FullName
+                    continue
+                }
+                foreach ($part in $run.EnumerateFileSystemInfos()) {
+                    if ($part.Name -ceq 'run.json' -and $part -is [IO.FileInfo] -and -not (Test-IsLink $part)) { continue }
+                    Remove-SafeEntry $part.FullName
+                }
+                if (-not $script:preview -and -not (Test-Path -LiteralPath (Join-Path $run.FullName 'run.json') -PathType Leaf)) {
+                    Remove-SafeEntry $run.FullName
+                }
+            }
+        }
+    }
+    foreach ($relative in @('Artifacts/Distribution/Technical', 'Artifacts/Distribution/Logs',
+        'Artifacts/Distribution/Qualification', 'Artifacts/Distribution/ManualAcceptance',
+        'Artifacts/Distribution/MediaAcceptance', 'Artifacts/Distribution/UsbAcceptance',
+        'Artifacts/Distribution/Hardware', 'Repositories/Recovery/Artifacts/BootProbe')) {
+        $target = Join-Path $projectRoot $relative
+        if ($null -eq (Get-PathItem $target)) { continue }
+        Assert-NoLinkedParent $target
+        Remove-SafeEntry $target
+    }
+    foreach ($profile in @('Slim', 'Full', 'Test', 'Benchmark')) {
+        $target = Join-Path $projectRoot ('Artifacts/Distribution/Profiles/' + $profile + '/Runs')
+        if ($null -eq (Get-PathItem $target)) { continue }
+        Assert-NoLinkedParent $target
+        Remove-SafeEntry $target
+    }
+    $temp = Join-Path $projectRoot 'Temp'
+    $tempItem = Get-PathItem $temp
+    if ($null -ne $tempItem) {
+        if (-not $tempItem.PSIsContainer -or (Test-IsLink $tempItem)) { throw 'Temp ist kein regulaeres Verzeichnis.' }
+        foreach ($entry in $tempItem.EnumerateFileSystemInfos()) { Remove-SafeEntry $entry.FullName }
+    }
+    if (-not $script:preview) {
+        Write-Host 'Alte Testausgaben und Temp geleert; STANDARD-JSON/Referenzen, Testquellen und Profilimages bleiben.'
+    }
 }
 
 function Show-Usage {
@@ -210,11 +397,30 @@ function Show-Usage {
     Write-Host '  Clean.bat|Clean.sh -all'
     Write-Host '  Clean.bat|Clean.sh -artifacts'
     Write-Host '  Clean.bat|Clean.sh -zig'
+    Write-Host '  Clean.bat|Clean.sh -caches'
+    Write-Host '  Clean.bat|Clean.sh -packages'
+    Write-Host '  Clean.bat|Clean.sh -releases'
+    Write-Host '  Clean.bat|Clean.sh -obsolete'
+    Write-Host '  Clean.bat|Clean.sh -tests'
+    Write-Host '  Clean.bat|Clean.sh <Modus> -preview'
     Write-Host '  Clean.bat|Clean.sh -help'
+    Write-Host ''
+    Write-Host '-all (Standard): Artifacts ausser Distribution und bisherige lokale Zig-Caches.'
+    Write-Host '-caches: zusaetzlich Temp-Zig-Caches, Rust-Builds und Distribution/.Cache.'
+    Write-Host '-packages: lokale R4U-Pakete in Temp und Distribution-Paketordnern.'
+    Write-Host '-releases: Payloads aelterer Releases; Notizen/Manifeste bleiben.'
+    Write-Host '-obsolete: -packages und -releases zusammen.'
+    Write-Host '-tests: alte Testumgebungen/-ergebnisse und ganz Temp; STANDARD-JSON/Referenzen bleiben.'
+    Write-Host '-preview (auch -whatif): Ziele/Groessen anzeigen; nichts schreiben.'
+    Write-Host 'Projektquellen, ExFiles und Fachberichte unter Docs bleiben erhalten.'
+    Write-Host 'Aktuelle Profilimages, PrivateInjection, zig-out und installierte Toolchains bleiben.'
 }
 
 try {
-    $arguments = @($args)
+    $arguments = @($args | Where-Object {
+        if ($_ -in @('-preview', '--dry-run', '-whatif')) { $script:preview = $true; return $false }
+        return $true
+    })
     if ($arguments.Count -gt 1) { throw 'Zu viele Argumente.' }
     $mode = if ($arguments.Count -eq 0) { '-all' } else { $arguments[0].ToLowerInvariant() }
     switch ($mode) {
@@ -222,15 +428,24 @@ try {
         '-artifacts' { Clear-Artifacts }
         '-zig' { Clear-ZigCaches }
         '-zig-cache' { Clear-ZigCaches }
+        '-caches' { Clear-BuildCaches }
+        '-packages' { Clear-LocalPackages }
+        '-releases' { Clear-OldReleases }
+        '-obsolete' { Clear-LocalPackages; Clear-OldReleases }
+        '-tests' { Clear-TestArchives }
         '-help' { Show-Usage }
         '--help' { Show-Usage }
         '/?' { Show-Usage }
         default { throw ('Unbekannter Clean-Modus: ' + $mode) }
     }
+    if ($script:preview) {
+        Write-Host ('Vorschau: {0} Ziele, {1:N2} GB logische Dateigroesse.' -f $script:previewTargets, ($script:previewBytes / 1GB))
+        Write-Host 'Sparse-Dateien/Hardlinks koennen weniger belegen; dies ist keine Zusage freien Plattenplatzes.'
+    }
     exit 0
 }
 catch {
-    Write-Error ('Clean fehlgeschlagen: ' + $_.Exception.Message)
+    [Console]::Error.WriteLine('Clean fehlgeschlagen: ' + $_.Exception.Message)
     Show-Usage
     exit 1
 }

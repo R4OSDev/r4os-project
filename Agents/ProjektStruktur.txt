@@ -195,11 +195,18 @@ Installation dieser Fremdwerkzeuge.
 Artifacts/
 ----------
 
-`Artifacts/` ist vollstaendig lokal. `Tools/Clean.bat` leert alle direkten
-und darunterliegenden Artefaktbereiche mit Ausnahme des vollstaendig
-erhaltenen Baums `Artifacts/Distribution/`. Dadurch bleiben insbesondere
-Profile, Logs, Releases und das private Injection-Overlay ueber alle
-Clean-Modi hinweg bestehen. Wichtige Orte sind:
+`Artifacts/` ist vollstaendig lokal. `Tools/Clean.bat` beziehungsweise
+`./Tools/Clean.sh` leert im bisherigen Standardmodus alle Artefaktbereiche
+ausser Artifacts/Distribution. Die ausdruecklichen Modi -caches, -packages
+und -releases bereinigen dort nur die benannten Build-Caches, lokalen
+R4U-Pakete beziehungsweise binaeren Payloads aelterer Releases. Der neue
+Modus -tests entfernt alte Testumgebungen/-ergebnisse und leert ganz Temp.
+Nur kompakte STANDARD-Exporte/Referenzen bleiben fuer kuenftige Vergleiche.
+Versionierte Fixtures/Testquellen, aktuelle Profilimages, persistente
+Interactive-Gaeste, Hosttools, Plaene und das private Injection-Overlay
+bleiben erhalten; Fachdocs und Release-Notizen/Manifeste ebenfalls.
+-preview zeigt Ziele und logische Groessen ohne Schreibzugriffe.
+Genaue Modusgrenzen: Agents/Build.txt. Wichtige Orte sind:
 
     Modules/<Projekt>/                 Artefakte einzelner Modul-Repositories
     Distribution/Inputs/               WorkspaceModules.map und Imageplaene

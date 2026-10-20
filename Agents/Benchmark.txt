@@ -37,6 +37,15 @@ bleiben mit dem Ergebnis verbunden. Fuer diesen Host gilt hetzner-qemu;
 R4OS_BENCHMARK_HOST_ID oder Tools/BenchmarkHost.R4S setzt die lokale Host-ID.
 Messung und Offlineexport brauchen keinen laufenden DevCenter-Dienst.
 
+Aufbewahrung seit Userentscheid 20.10.2026: Das vollstaendige run.json
+enthaelt alle Vergleichsdaten und bleibt als kompakter Export erhalten.
+Der STANDARD-Runner erzeugt seine privaten Bilder/Quellkopien unter Temp
+und entfernt sie nach dem Lauf, auch im Fehlerpfad. context.json,
+serial.log und qemu.err sind nur waehrend Export bzw. aktueller Fehlersuche
+noetig; nach Erfolg werden sie entfernt. Tools/Clean.sh -tests bzw. der
+Windows-Starter entfernt alte Testumgebungen und Logs, behaelt jedoch
+STANDARD-JSON und Referenzen. Versionierte Fixtures bleiben beim Besitzer.
+
 Im Spectra-Repository bindet Baselines/standard-3.reference.json die UUID
 und Pruefhashes. Echte Laufexporte einschliesslich der Referenzen bleiben im
 DevCenter und lokal unter Artifacts/Distribution/Diagnostics/SpectraStandard/.

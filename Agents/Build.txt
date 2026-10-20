@@ -421,6 +421,9 @@ Lasten, Rohdaten und Vergleichsgrenzen: Docs/Diagnostics/SpectraStandardBenchmar
 Aufraeumen und Fehlersuche
 --------------------------
 
+Die Beispiele verwenden den Windows-Starter. Unter Linux denselben Modus
+mit `./Tools/Clean.sh` starten; beide verwenden Tools/Clean.ps1.
+
     Tools\Clean.bat
         leert Artifacts ausser Distribution und entfernt alle anderen
         R4OS-lokalen Zig-Caches
@@ -431,10 +434,55 @@ Aufraeumen und Fehlersuche
     Tools\Clean.bat -zig
         entfernt nur lokale Zig-Caches ausserhalb von Artifacts/Distribution
 
-`Artifacts/Distribution` bleibt mit allen Profilimages, Logs, Releases,
-Hosttools, erzeugten Plaenen und `PrivateInjection` bei jedem Clean-Modus
-vollstaendig erhalten. Ebenso bleiben `zig-out`, installierte Toolchains und
-der systemglobale Zig-Cache bewusst erhalten.
+    ./Tools/Clean.sh -caches -preview
+        zeigt die vorgesehenen Cacheziele und logischen Dateigroessen
+        ohne Schreibzugriffe; -preview/-whatif gilt fuer jeden Clean-Modus
+
+    ./Tools/Clean.sh -caches
+        entfernt lokale Zig-Caches auch unter Temp, Rust-Buildausgaben
+        Artifacts/Kernel/Rust und RustOwners sowie Distribution/.Cache
+
+    ./Tools/Clean.sh -packages
+        entfernt lokale R4U-Pakete unter Temp sowie unter
+        Artifacts/Distribution/Packages und GraphicsPackages
+
+    ./Tools/Clean.sh -releases
+        entfernt erzeugte binaere Payloads aelterer Releases unter
+        Artifacts/Distribution/Releases; aktuelle/neuere/unbekannte
+        Releaseordner und alle Notizen/Manifeste bleiben erhalten
+
+    ./Tools/Clean.sh -obsolete
+        kombiniert -packages und -releases
+
+    ./Tools/Clean.sh -tests -preview
+        zeigt die alten Testausgaben und temporaeren Umgebungen
+
+    ./Tools/Clean.sh -tests
+        leert ganz Temp sowie alte Diagnostics-/Technical-/Abnahmeausgaben,
+        Logs, frische Profiles/*/Runs und Recovery/Artifacts/BootProbe;
+        STANDARD-run.json und der Referenzcache bleiben erhalten
+
+Die bisherigen Modi -all/-artifacts/-zig behalten ihren vollstaendigen
+Ausschluss von Artifacts/Distribution. Nur die neuen ausdruecklichen Modi
+bereinigen dort die oben genannten Cache-, Paket-, Release- und Testziele.
+Der Modus -tests setzt den Userentscheid vom 20.10.2026 um: Testergebnisse
+und komplette alte Testumgebungen werden nicht dauerhaft aufbewahrt.
+Die kompakten STANDARD-Exporte und Referenzen bleiben fuer kuenftige
+Vergleiche, die geplante Regressionsanalyse und Offline-Referenzaufloesung.
+Versionierte Testquellen/Fixtures, ExFiles, Fachdocs, aktuelle Profilimages,
+persistente Interactive-Gaeste, Hosttools, Plaene und PrivateInjection bleiben.
+Bei der Payloadsuche werden insbesondere Source/Sources, Work, Reports
+und Legal nicht betreten; Quellpatches und Logs sind keine Payloadziele.
+Ebenso bleiben zig-out, Paketquellen, installierte Toolchains und der
+systemglobale Zig-Cache erhalten. Nur -tests leert ganz Temp; laufende
+Arbeiten vor diesem Modus abschliessen. STANDARD- und Headless-Runner
+entfernen ihre privaten Gast-/Quellkopien im finally-Pfad. Nach Erfolg
+bleibt vom STANDARD-Lauf nur run.json; kleine Fehlerlogs bleiben bis zur
+aktuellen Diagnose bzw. naechsten ausdruecklichen Bereinigung verfuegbar.
+Die Vorschaugroesse ist die logische Dateigroesse; Sparse-Images und
+Hardlinks koennen tatsaechlich deutlich weniger Platz belegen. Die
+tatsaechliche Entlastung am freien Dateisystemplatz pruefen. Clean nur
+ohne parallele Builds oder laufende Gaeste auf den betroffenen Zielen nutzen.
 
 Bei einem Fehler:
 
