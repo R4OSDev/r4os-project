@@ -129,19 +129,31 @@ Vor Aenderungen am Programm- und Taskinventar zusaetzlich
 aktuellen Kernelcode lesen. Die Operations- und Payloadvertraege stehen unter
 `Docs/API/` und in den erzeugten Contractdokumenten.
 
-Konsoleneingabe seit 0.85.38
----------------------------
-Contract0.64.39 / SDK0.64.53 / Kernel0.1.363 erweitern R4DESK auf Version16,
-552Byte. Der alte536-Byte-Praefix und saemtliche alten Slots bleiben exakt.
+Konsolentransport und Textausgabe
+--------------------------------
+Contract0.64.40 / SDK0.64.54 / Kernel0.1.364 stellen R4DESK17/568 bereit.
+Der552-Byte-Praefix und alle bisherigen Slots/Typen bleiben exakt.
 consoleReadEvents/consolePushEvents transportieren bis zu64 feste16-Byte-
-ConsoleInputEvent-Records pro Aufruf: version=1, kind, value, flags=0.
+ConsoleInputEvent-Records pro Aufruf: version1, kind, value, flags0.
 kind1 ist ein Unicode-Skalar, kind2 eine logische Taste, kind3 ein einzelnes
 UTF8-Streambyte. Bytes80/81/82 sind niemals implizite Navigation. Push bindet
 ProgramProcessHandle samt Generation; Ergebnisse zaehlen ganze Ereignisse.
-Nicht angenommene Suffixe bleiben beim Aufrufer, ungueltige Batches veraendern
-die Queue nicht. Alte Bytefunktionen bleiben erhalten und nehmen einen nicht
-als Byte rueckgebbaren Skalar nicht vorab aus der Queue. Dekodierung und
-Editierpolitik gehoeren Terminal/R4STD; Kernel besitzt Transport und Lebenszeit.
+Nicht angenommene Suffixe bleiben beim Aufrufer; ungueltige Batches veraendern
+die Queue nicht. Alte Bytefunktionen entnehmen keine unrepraesentierbaren
+Skalare. Inputdekodierung/Editing gehoeren Terminal/R4STD.
+
+consoleTextInfo/consoleSetEncoding binden die genaue Prozessgeneration.
+ConsoleTextInfo32 bleibt getrennt von ConsoleState64. Output ist ausdruecklich
+UTF8/CP437/1252; Font-Codepage ist kein Decoder. R4STD besitzt den residenten
+Textkern; Kernel nur notwendige Instanz-/Ring-/Glyph-/Sinklebenszeit.
+Gespeicherte Konsolentexte/Snapshots sind kanonisches UTF8 ganzer Skalare.
+Inkomplette Praefixe bleiben je Stream; Kodierungswechsel bei Pending wird
+abgewiesen. Fehler/abgeschnittener Abschluss werden als U+FFFD samt Zaehler
+sichtbar. Ein Skalar ist eine Zelle; Grapheme/volle Fontabdeckung separat.
+Completion-Offsets/Laengen bleiben Bytes des kanonischen Konsolentexts.
+Registry-/Outputbesitzer vor Caller-Kopien freigeben und den genauen Task
+bis zum Abschluss behalten. Dokument-/Dateibytes nicht dabei transkodieren.
+
 Die API-Tabelle wird nur angehaengt; der Generator aktualisiert Schema,
 Baseline und alle Sprachen gemeinsam mit Build.sh write -- --baseline
 (Windows: Build.bat write -- --baseline). Nie einen alten installierten
