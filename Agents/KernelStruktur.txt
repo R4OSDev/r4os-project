@@ -54,6 +54,10 @@ Rust/arch/
     tables/interrupt_frame: GDT/TSS/IDT/IST und Exception-/Taskframes
     runtime/irq/percpu/smp: IRQ/IPI, Runtime-Owner und AP-Lifecycle
     tlb/fpu: genaue Shootdown-Generationen und Task-/IRQ-FPU-Zustaende
+    xstate_contract/xstate_layout: gemeinsame unveraenderliche FP-Geometrie;
+    xsaveopt/fpu_fault*: qualifizierte Tasksaves und residente Ausnahmedaten
+    cpu_lifecycle/cpu_idle: genaue AP-Ruecknahme und zugelassener Idle-Eintritt
+    microcode*/machine_check*: fruehe Pflege und residente CPU-Fehlerdaten
     pic/pit/ioapic/lapic/hpet/rtc/msr: CPU-/Interrupt-/Clockhardware
     terminal_power: Reset, S5 und begrenzte Hardware-Fallbacks
     smp_probe: vorhandene SMP-/Heap-/TLB-/Lock-/Serial-/Clock-Nachweise
@@ -172,6 +176,10 @@ Rust/platform/, Rust/input/, Rust/font/, Rust/audio/, Rust/net/,
 Rust/service/ und Rust/update/
     ACPI/PCI/Clock/Inventar, PS/2-/USB-Eingabe, residente Fonts, Audio,
     Adapter/Frames/IP/TCP/UDP/DHCP/DNS, Services/IPC und SYSUPD/Upload.
+    platform/cpu_topology*/numa*: versiegelte Hardware-/Speicherdomaenen;
+    cpu_capabilities*: getrennte Faehigkeitskopien je lokaler Start-Epoche
+    cpu_power*/cpu_pmu*/cpu_acceleration*: notwendige lokale Mechanismen;
+    Modell-/Profil-/Firmwarepolicy bleibt CPUPOWER/PowerService/ACPIPLAT.
     audio/core: einzelne residente Zustands-/Lock-/Init-/Messwurzel;
     core/streams, outputs, synths, progress: unveraenderte Stream-/Mixer-,
     Ausgabe-/Stopp-, Synth- und Fortschrittsoperationen, keine neue Runtime.
