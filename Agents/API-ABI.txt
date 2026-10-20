@@ -96,7 +96,12 @@ betroffenen Library ein.
 
 R4STD exportiert getrennte Tabellen fuer:
 
-    TEXT_V1  SETTINGS_V1  DATE_V1  TIME_V1  CONFIG_V1
+    TEXT_V1  SETTINGS_V1  DATE_V1  TIME_V1  CONFIG_V1  CODEC_V1
+
+CODEC_V1 ergaenzt ab R4STD0.2.5 strikte CP437-/Windows1252-Konvertierung,
+getrennte PC-Grafik-/C0-Modi und skalare UTF8-/Streamhelfer. Die fuenf alten
+Interfaces und Bytes-/SystemText-/DocumentText-Semantik bleiben erhalten;
+der lokale Library-Contract besitzt die Kennungen, keine neue Kerngruppe.
 
 Verbraucher importieren nur ihren Bedarf aus
 `Repositories/Libraries/R4STD/Bindings/`. Es gibt keine zentrale R4STD-Gruppe,
