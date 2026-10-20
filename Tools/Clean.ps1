@@ -328,6 +328,7 @@ function Clear-TestArchives {
     Assert-WorkspaceSafety
     $diagnostics = Join-Path $projectRoot 'Artifacts/Distribution/Diagnostics'
     $standard = Join-Path $diagnostics 'SpectraStandard'
+    $subsystems = Join-Path $diagnostics 'SubsystemBenchmarks'
     $diagnosticsItem = Get-PathItem $diagnostics
     if ($null -ne $diagnosticsItem) {
         Assert-NoLinkedParent $diagnostics
@@ -335,12 +336,12 @@ function Clear-TestArchives {
             throw 'Diagnosewurzel ist kein regulaeres Verzeichnis.'
         }
         foreach ($entry in $diagnosticsItem.EnumerateFileSystemInfos()) {
-            if (-not (Test-SamePath $entry.FullName $standard)) {
+            if (-not ((Test-SamePath $entry.FullName $standard) -or (Test-SamePath $entry.FullName $subsystems))) {
                 Remove-SafeEntry $entry.FullName
                 continue
             }
             if ($entry -isnot [IO.DirectoryInfo] -or (Test-IsLink $entry)) {
-                throw 'STANDARD-Archiv ist kein regulaeres Verzeichnis.'
+                throw 'Benchmark-Archiv ist kein regulaeres Verzeichnis.'
             }
             # Immutable full JSON exports contain every comparison input.
             # Their generated source images, logs and work copies are disposable.
