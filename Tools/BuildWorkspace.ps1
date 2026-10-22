@@ -386,9 +386,10 @@ function Write-Utf8NoBomLines([string]$Path, [string[]]$Lines) {
 }
 
 function Ensure-ModuleCatalog {
-    if (Test-Path -LiteralPath $moduleCatalogExe -PathType Leaf) { return }
     Write-Section 'SDK Hosttools fuer Imageplan'
-    Invoke-External (Join-Path $sdkRoot $repositoryBuildName) @() $sdkRoot
+    # Zig's dependency cache checks the current parser and Contract sources.
+    # An existing executable may still implement an earlier SDK grammar.
+    Invoke-External (Join-Path $sdkRoot $repositoryBuildName) @('-Dcatalog-only=true', '-j1') $sdkRoot
     Assert-File $moduleCatalogExe 'ModuleCatalog'
 }
 

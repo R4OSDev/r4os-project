@@ -39,6 +39,11 @@ Fehlt `pwsh` unter Debian, installiert `Tools/Setup.sh` es zuvor mit root- oder
 sudo-Rechten aus der offiziellen Microsoft-Paketquelle.
 
 Danach die benoetigten Quell-Repositories mit `Tools/Github.bat` beziehen.
+Vor Workspace-Map oder Imageplan wird nur der aktuelle SDK-ModuleCatalog
+ueber dessen catalog-only-Bauweg geprueft/gebaut. Der Zig-Cache vermeidet
+unveraenderte Uebersetzungen; eine vorhandene alte EXE wird nicht als aktueller
+Parserbeleg verwendet. Dafuer ist kein voller SDK-/Modulbau erforderlich.
+
 Der Workspace-Build aktualisiert Git-Repositories niemals automatisch. Er
 zeigt zu Beginn die verwendeten lokalen Commitstaende von Contract, SDK,
 Libraries, Kernel und Distribution an.
