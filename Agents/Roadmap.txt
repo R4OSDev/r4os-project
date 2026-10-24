@@ -23,9 +23,10 @@ mehr verwendet. Der Endpunkt
 
 liefert die aktuelle Releasefamilie mit Leitbild, allgemeinen Notizen,
 Unterversionen, Aufgaben und Abnahmen. Unterversions-IDs sind innerhalb der
-aktuellen Releasefamilie lokal und beginnen bei 1. Aufgaben-IDs sind innerhalb
-ihrer Unterversion lokal. Abnahme-IDs werden so verwendet, wie sie die API
-liefert.
+aktuellen Releasefamilie lokal und beginnen bei 1. Nach Umordnungen koennen
+sie vom Versionssuffix und der Sortierung abweichen; immer die gelieferten
+IDs verwenden. Aufgaben-IDs sind innerhalb ihrer Unterversion lokal.
+Abnahme-IDs werden ebenfalls so verwendet, wie sie die API liefert.
 
 Neue Unterversionen werden mit
 
