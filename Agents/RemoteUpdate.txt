@@ -135,10 +135,10 @@ Vor dem Upload Groesse und SHA-256 des fertigen Pakets festhalten.
 Veroeffentlichung
 -----------------
 
-Upload, serverseitige Validierung, Freigabereihenfolge, Katalog,
-ControlCenter und Betrieb stehen ausschliesslich in
-`Server/Agents/Server.txt`. Diese Serverinformationen werden hier nicht
-doppelt gepflegt.
+Der bisherige Bereitstellungsdienst wird ersetzt. Bis der Nachfolger
+eingerichtet und dokumentiert ist, besteht kein serverseitiger
+Veroeffentlichungsweg. Administrative Updates ueber die unten beschriebene
+Inbox und SYSUPD bleiben verfuegbar.
 
 
 Clientsuche und Download
@@ -306,7 +306,6 @@ Weiterfuehrend
 --------------
 
     Agents/Build.txt
-    Server/Agents/Server.txt
     Docs/Deployment/R4UComponentContract.txt
     Docs/Deployment/SystemUpdate.txt
     Docs/SupportedHardware.txt
