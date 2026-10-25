@@ -1,6 +1,21 @@
 ﻿R4OS Benchmark - Agent-Referenz
 ================================
 
+Aktuelle Userregel vom 25.10.2026
+--------------------------------
+Benchmarks sind wieder erlaubt. DevCenter ist derzeit nicht erreichbar.
+Pro Unterversion mit moeglicher Laufzeitwirkung genau ein finaler STANDARD
+(Suite 3, KVM4/alle vier CPUs). Den vollstaendigen unveraenderten Original-
+export je Lauf unter ExFiles/Reports/Benchmarks/<run_id>/run.json speichern,
+samt benoetigtem Arbeits-/CPU-/Artefakt-/Vergleichskontext und SHA256.
+Rohsamples, feste Referenz und alle sechs Scorebereiche vollstaendig lokal
+pruefen. Abschluss: "lokal validiert; DevCenter ausstehend". Nur Import und
+Remote-Readback sind aktuell keine Abschlussbedingung. Spaeter denselben
+Originalexport importieren; kein neuer Lauf allein fuer Upload oder Scores.
+Diese aktuelle Ausnahme ersetzt entgegenstehende DevCenter-Pflichten in
+den folgenden allgemeinen/historischen Regeln; Fach-/Hardwareabnahmen und
+die Versions-, Sammelpush- und Aufbewahrungsregeln bleiben bestehen.
+
 Verbindlicher Standard
 ---------------------
 Verbindlicher Performancebenchmark ist SPECTRA BENCH STANDARD mit
