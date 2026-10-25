@@ -1,4 +1,4 @@
-﻿R4OS Shell und Befehlsausfuehrung - Agent-Referenz
+R4OS Shell und Befehlsausfuehrung - Agent-Referenz
 ==================================================
 
 Zweck: Verlaessliche Host-Aufrufe unter Windows und Linux sowie eine kompakte
@@ -209,3 +209,20 @@ SPECTRA BENCH STANDARD [/AREA:scheduler_sync|memory|ipc|lifecycle|filesystem_io]
     [/BASELINE | /REFERENCE:path /COMPAREKEY:method] [/JSON] [/EXPORT:path]
 CHECK LIFECYCLE /STANDARDCANCEL prueft den begrenzten Benchmark-Abbruch.
 Standardlauf/Referenzdaten: Docs/Diagnostics/SpectraStandardBenchmark.txt.
+
+
+DESKRUN (ab0.87.13)
+------------------
+    DESKRUN "C:\R4OS\SOFTWARE\DESKTOP\EXPLORER.R4X" "D:\Roms"
+    DESKRUN /OPEN "D:\Roms\SNES\Super Mario World (Europe).sfc"
+    DESKRUN /JSON /WAIT:10000 /WAITFRAME "C:\TEMP\APP.R4X" "Argumente"
+    DESKRUN /JSON /STATUS:<Broker-ID:Generation:Helfer-ID:Generation>
+
+Startet im vorhandenen Desktop, auch aus SSH; das Fenster bleibt nach
+Helferexit/Logout bestehen. Optionen vor dem Ziel; /OPEN nutzt die gleichen
+R4STD-Zuordnungen und den installierten Subsystemkatalog wie Explorer.
+Normaler Erfolg bestaetigt die Fensteranbindung, /WAITFRAME zusaetzlich
+uebernommenen Inhalt (kein physischer Bildnachweis). Default5000ms,
+/WAIT:1..300000 fuer das gesamte Submit-/Wartebudget. Bei Timeout die
+Kennung mit /STATUS lesen; nicht automatisch erneut starten. /? zeigt
+ERRORLEVELs/Grenzen. Detailvertrag: Docs/Desktop/DeskRun.txt.
