@@ -419,7 +419,7 @@ Nur die Standardphase auf aktuellen Testartefakten und aktuellem Imageplan:
 
 Der vollstaendige Schema-1-Export liegt unter
 Artifacts/Distribution/Diagnostics/SpectraStandard/<run_id>/run.json.
-Verbindlicher Mess-, Referenz- und DevCenter-Importablauf: Agents/Benchmark.txt.
+Verbindlicher Mess-, Referenz- und lokaler Pruefablauf: Agents/Benchmark.txt.
 Lasten, Rohdaten und Vergleichsgrenzen: Docs/Diagnostics/SpectraStandardBenchmark.txt.
 
 

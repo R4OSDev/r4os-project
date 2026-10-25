@@ -17,9 +17,6 @@ Grundregeln
   Kernel, Recovery, Distribution und Module ausschließlich `Tools\Github.bat` unter
   Windows oder `./Tools/Github.sh` unter Linux verwenden. Beide starten die
   gemeinsame PowerShell-7-Logik in `Tools/Github.ps1`.
-- Das private DevCenter ist eine Ausnahme. Es wird ausschliesslich mit seinen
-  eigenen Startern unter `DevCenter/` verwaltet und besitzt kein Ziel im
-  globalen GitHub-Starter.
 - Pulls aus allen vom globalen Script verwalteten öffentlichen Repositories
   laufen anonym. Github.ps1 lädt dafür keine Credentials und deaktiviert
   interaktive Anmeldung sowie lokale Git-Credential-Helper.
@@ -68,8 +65,7 @@ Branch: main
 Project, DevKit, Docs, Organisationsprofil, Contract, SDK, Libraries, Kernel,
 Recovery, Distribution sowie Apps, Services, Diagnostics, Drivers, Protocols und
 Subsystems werden
-bei einem fehlenden Remote-Repository oeffentlich angelegt. DevCenter ist eine
-private Ausnahme; das globale Script legt es nicht an und verwaltet es nicht.
+bei einem fehlenden Remote-Repository oeffentlich angelegt.
 Bereits vorhandene Repositories werden durch Push oder Pull nicht in ihrer
 Sichtbarkeit veraendert.
 
@@ -130,7 +126,6 @@ einzelnes Repository gewählt werden. Pull fragt weiterhin immer nach genau
 einem Repository. Bei Apps, Services, Diagnostics, Drivers, Protocols und
 Subsystems wird
 fuer den Einzelweg zusaetzlich der lokale Komponentenname abgefragt.
-DevCenter ist nicht Teil dieses Menues.
 
 Ein interaktiver Push fragt nicht nach einer Commit-Beschreibung. Ohne direkt
 übergebenen Text verwendet das Script die hinterlegte Standardbeschreibung des
@@ -247,17 +242,6 @@ Docs
     GitHub: R4OSDev/r4os-docs
     Inhalt: projektübergreifende Dokumentation und Inventare.
 
-DevCenter
-    Kein Ziel im globalen GitHub-Starter
-    Lokal: DevCenter/
-    GitHub: R4OSDev/r4os-devcenter
-    Sichtbarkeit: privat
-    Inhalt: eigenstaendige Host-WebApp, LAN-API und private Betriebsreferenz.
-    Push und Pull: DevCenter/Push.bat bzw. ./DevCenter/Push.sh sowie
-    DevCenter/Pull.bat bzw. ./DevCenter/Pull.sh verwenden.
-    Gemeinsame Logik: DevCenter/Github.ps1; authentifizierte Pulls und
-    ausschliesslich private Repository-Erstellung beim ersten Push.
-
 Contract
     Ziel: -contract
     Lokal: Repositories/Contract/
@@ -352,8 +336,8 @@ feste Workspace-Struktur:
    Protocols und Subsystems, innerhalb jeder Rolle alphabetisch.
 3. Recovery, Distribution, Docs, DevKit, Organisationsprofil und zuletzt Project.
 
-DevCenter ist vollstaendig ausgeschlossen. Unterrepositories und
-installierte Fremdquellen in DevKit, insbesondere QEMU, Limine und Zig, werden nicht
+Unterrepositories und installierte Fremdquellen in DevKit, insbesondere
+QEMU, Limine und Zig, werden nicht
 rekursiv gesucht und können deshalb kein Sammel-Pushziel werden. Ein neues
 gültiges Komponentenverzeichnis mit `module.R4MF` in einer der sechs Rollen
 wird ohne zusätzlichen Indexeintrag erkannt.
@@ -410,10 +394,7 @@ neuen Änderungen vorhanden sind, wird kein leerer Commit erzeugt; ein noch
 nicht veröffentlichter vorhandener main-Stand wird trotzdem gepusht.
 
 Alle vom globalen Script unterstützten Ziele werden öffentlich angelegt.
-Das DevCenter besitzt eigene
-Starter und legt ein fehlendes Repository ausschliesslich privat an; vorhandene
-oeffentliche Repositories werden abgelehnt. Eine spaetere Aenderung der
-Sichtbarkeit ist ein eigener administrativer Vorgang.
+Eine spaetere Aenderung der Sichtbarkeit ist ein eigener administrativer Vorgang.
 
 
 Was ein Pull ausführt
@@ -497,13 +478,11 @@ Checkout im frei gewaehlten Workspace-Root existiert:
 3. DevKit mit dem passenden GitHub-Starter und `-pull -devkit` anonym beziehen.
 4. Docs, Contract, SDK, Libraries, Kernel, Recovery, Distribution und bei Bedarf das
    Organisationsprofil mit ihren jeweiligen Pull-Zielen beziehen.
-5. DevCenter bei Bedarf separat aus seinem privaten Repository klonen und mit
-   seinen eigenen Pull-Startern aktualisieren.
-6. Benötigte Apps, Services, Diagnostics, Drivers, Protocols und Subsystems einzeln mit
+5. Benötigte Apps, Services, Diagnostics, Drivers, Protocols und Subsystems einzeln mit
    Rollenflag und Komponentenname beziehen.
-7. Die DevKit-Abhängigkeiten anschließend über dessen Setup installieren; die
+6. Die DevKit-Abhängigkeiten anschließend über dessen Setup installieren; die
    dortigen öffentlichen Quellkopien werden ebenfalls anonym bezogen.
-8. Nur wenn in R4OSDev gepusht werden soll, Benutzername und Token in die
+7. Nur wenn in R4OSDev gepusht werden soll, Benutzername und Token in die
    lokale Credentials-Datei eintragen.
 
 Der DevKit-Checkout ist nicht mit den dort installierten Quellkopien zu
@@ -579,8 +558,7 @@ Grenzen des Scripts
 - Neue zentrale Repositoryarten benötigen eine ausdrückliche Zuordnung in
   Tools/Github.ps1 und in der festen Sammelreihenfolge. Apps, Services,
   Diagnostics, Drivers, Protocols und Subsystems werden bereits generisch über
-  Rollenverzeichnis und Komponentenname erkannt. DevCenter bleibt bewusst
-  ausserhalb dieses globalen Scripts.
+  Rollenverzeichnis und Komponentenname erkannt.
 
 
 Abgeloeste App-/Diagnoserepositories entfernen

@@ -150,7 +150,8 @@ Fuer gezielte Kernelarbeiten die fachlich betroffenen Faelle und bei Bedarf
 `-testquick` verwenden. Volle Kataloge nur bei konkretem Bedarf; bestandene
 Faelle ohne relevante Folgeaenderung nicht wiederholen. Quick startet keinen
 Benchmark. Pro Unterversion mit moeglicher Performancewirkung genau einen
-abschliessenden STANDARD SMP4 samt geprueftem DevCenter-Upload ausfuehren.
+abschliessenden STANDARD SMP4 samt vollstaendiger lokaler Export-, Referenz-
+und Scorepruefung ausfuehren. Ablauf und Aufbewahrung: Agents/Benchmark.txt.
 
 
 Testprofil und Overlay

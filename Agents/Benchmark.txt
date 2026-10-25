@@ -35,7 +35,7 @@ Daneben liegen context.json, serial.log und qemu.err. Host/CPU/QEMU/Storage,
 Versionen, Commits, Artefakthashes, Messmodus, Arbeitsmengen und Clockangaben
 bleiben mit dem Ergebnis verbunden. Fuer diesen Host gilt hetzner-qemu;
 R4OS_BENCHMARK_HOST_ID oder Tools/BenchmarkHost.R4S setzt die lokale Host-ID.
-Messung und Offlineexport brauchen keinen laufenden DevCenter-Dienst.
+Messung, Referenzpruefung und Export erfolgen lokal.
 
 Aufbewahrung seit Userentscheid 20.10.2026: Das vollstaendige run.json
 enthaelt alle Vergleichsdaten und bleibt als kompakter Export erhalten.
@@ -48,11 +48,11 @@ Windows-Starter entfernt alte Testumgebungen und Logs, behaelt jedoch
 STANDARD-JSON und Referenzen. Versionierte Fixtures bleiben beim Besitzer.
 
 Im Spectra-Repository bindet Baselines/standard-3.reference.json die UUID
-und Pruefhashes. Echte Laufexporte einschliesslich der Referenzen bleiben im
-DevCenter und lokal unter Artifacts/Distribution/Diagnostics/SpectraStandard/.
-Der Runner prueft den lokalen Originalexport oder laedt die Referenz aus dem
-DevCenter in den lokalen Cache. API-Basis ueber R4OS_DEVCENTER_API_URL oder
-DEVCENTER_API_URL in Tools/BenchmarkHost.R4S setzen; mit Cache offline nutzbar.
+und Pruefhashes. Echte Laufexporte einschliesslich der Referenzen bleiben
+lokal unter Artifacts/Distribution/Diagnostics/SpectraStandard/. Der Runner
+prueft den lokalen Originalexport beziehungsweise die verifizierte Referenz
+im Unterverzeichnis References/<run_id>/. Fehlt sie, vor dem Gaststart den
+unveraenderten Originalexport wieder bereitstellen; kein Netzwerkabruf.
 standard-1.reference.json und standard-2.reference.json bleiben historische
 unveraenderte Referenzen; Vergleiche zwischen Suiten sind ungueltig. Suite, Scoring, Messmodus und vollstaendige Methodik
 muessen passen; CPU-/Hostunterschiede bleiben als Kontext sichtbar. Eine
@@ -61,37 +61,33 @@ misst echten Gesamtdurchsatz ueber alle Worker: CPU-Anzahl, RAM, Storage und
 native/VM sind gemessener Kontext; der gleiche Arbeitsvertrag muss passen.
 Fruehere Einzelmessungen sind historische Fachbelege, keine Standardindizes.
 
-DevCenter-Import und Kontrolle
------------------------------
+Lokale Kontrolle und Abschluss
+------------------------------
 Am Ende jeder Unterversion mit moeglicher Performancewirkung auf dem
 abschliessenden Artefaktstand genau einen vollstaendigen Suite-3-Lauf mit
-SMP4 ausfuehren und unveraendert ins DevCenter importieren. Bei unklarer
+SMP4 ausfuehren und seinen unveraenderten Export lokal pruefen. Bei unklarer
 Performancewirkung gilt die Laufpflicht ebenfalls, auch fuer Refactorings.
 Reine Analyse-, Planungs- oder Dokumentationsschritte ohne Laufzeitwirkung
 brauchen keinen Pflichtlauf; die Einordnung vor Abschluss kurz begruenden.
 Tests auf fachlich sinnvolle betroffene Faelle begrenzen, vorhandene Faelle
 gezielt buendeln und nur bei konkretem Bedarf ergaenzen oder wiederholen.
-Seit der erneuten Userfreigabe duerfen alle echten Testlaeufe ins DevCenter.
 Vollstaendige Laufexporte und Rohsamples gehoeren nicht in Git-Repositories;
 dort bleiben Methodik, synthetische Fixtures, Referenzdeskriptoren und kurze
 fachliche Abnahmeberichte.
 
-1. Die Host-ID muss im DevCenter registriert sein. Eine noch fehlende
-   referenzierte Baseline zuerst als vollstaendigen echten Lauf importieren.
-2. Die unveraenderten Originalbytes von run.json mit Bearer-Authentisierung
-   per PUT /api/v1/benchmark-runs/<run_id> senden; Pfad- und JSON-UUID gleich.
-   Alle Metriken, Rohsamples, Scores, Umgebungs- und Artefaktdaten mitsenden.
-   Token niemals ausgeben oder versionieren. Keine synthetischen Messungen.
-3. 201 bedeutet neuer Lauf, 200 identische Wiederholung ohne Duplikat.
-   Bei 401/409/422 oder Transportfehlern Originalexport und Fehler erhalten;
-   weder Messwerte noch UUID fuer einen Retry aendern oder einen Lauf ersetzen.
-4. Per GET derselben URL die gespeicherten Daten kontrollieren. Fuer einen
-   erfolgreichen Standardvergleich muessen alle fuenf Metriken, 30 Rohsamples
-   und sechs Scores vorhanden und score_validation sowie alle sechs Bereiche
-   valid sein. Ein HTTP-Erfolg garantiert keine gueltigen Scores.
+1. Host-ID und echte Arbeits-/CPU-/Artefakt-/Vergleichskontexte kontrollieren.
+2. Alle fuenf Metriken, 30 Rohsamples mit vier abgeschlossenen Workern und
+   sechs Scores gegen den festen Referenz- und Methodenvertrag pruefen.
+   Native Hardware behaelt ihre wirkliche schedulierbare Kapazitaet.
+3. Originalbytes von run.json samt SHA256 und benoetigtem Kontext unter
+   ExFiles/Reports/Benchmarks/<run_id>/ erhalten. Keine Werte oder UUIDs fuer
+   bessere Scores aendern und keinen Lauf allein fuer die Ablage wiederholen.
+4. Fachliche Abnahme und lokale Benchmarkvalidierung dokumentieren.
+   Unvollstaendige oder inkompatible Laeufe behalten Rohdaten und Fehler,
+   erhalten aber keinen gueltigen Gesamtindex.
 
-Lokale API-Adresse, sichere Tokenbereitstellung und fertige Windows-/Linux-
-Aufrufe: Agents/DevCenter.txt. DevCenter bleibt ein getrenntes privates
-Hosttool ausserhalb der R4OS-Builds, Modulinventare und Sammelpushes.
+Serverbetrieb, Import und Remote-Readback sind kein Bestandteil dieses
+aktuellen Ablaufs. Historische Nachweise bleiben als damalige Belege erhalten.
+
 Workloads, Terminal-/SSH-Aufrufe, Offlineexport und Vergleichsvertrag:
 Docs/Diagnostics/SpectraStandardBenchmark.txt.

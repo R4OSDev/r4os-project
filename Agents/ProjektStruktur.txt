@@ -17,7 +17,6 @@ Workspace-Ueberblick
     Agents/         kompakte Arbeitsreferenzen fuer Agents
     Artifacts/      lokale Build-, Image- und Testausgaben
     DevKit/         installierte Toolchains und Arbeitskopien
-    DevCenter/      private Host-WebApp mit eigener LAN-API
     Docs/           eigenes Repository fuer projektweite Dokumentation
     Repositories/   kanonische Quell-Repositories
     Tools/          Setup, Workspace-Build, Clean und GitHub-Verwaltung
@@ -256,28 +255,11 @@ Gesamtuebersicht `AllModules.json`. Seine Schema-4-Subsystemeintraege sind
 zugleich die einzige persistente Quelle des installierten Laufzeitkatalogs.
 
 
-DevCenter/
-----------
-
-`DevCenter/` ist das private Repository `R4OSDev/r4os-devcenter`. WebApp,
-API, Hoststarter und private Betriebsreferenz liegen in diesem einen
-Repository. Es wird vom Project-Root ignoriert und ist kein Ziel
-des globalen GitHub-Starters, der R4OS-Builds oder der Modulinventare.
-
-Linux verwendet `./DevCenter/Tools/Start.sh`, `./DevCenter/Push.sh` und
-`./DevCenter/Pull.sh`; Windows die entsprechenden .bat-Starter. Gemeinsame
-Orchestrierung liegt in `Tools/Start.ps1`, `Tools/Service.ps1` und `Github.ps1`.
-Start/Stop/Restart unter `DevCenter/Tools/` steuern WebApp und API gemeinsam;
-`Service.sh -Action Install` richtet den Linux-Autostart ein. Web lauscht standardmaessig
-im LAN auf Port 5000, API auf Port 5001. Weitere private Anleitung:
-`DevCenter/Agents/DevCenter.txt`.
-
-
 Was lokal bleibt
 ----------------
 
 Das Root-Repository ignoriert unter anderem `Artifacts/`, `DevKit/`,
-`Docs/`, `Repositories/`, `DevCenter/`, `ExFiles/`, `Reports/`, `Temp/`, die
+`Docs/`, `Repositories/`, `ExFiles/`, `Reports/`, `Temp/`, die
 Credentials sowie `QuickNotes.txt`. Diese Orte besitzen
 entweder eigene Repositories oder ausschliesslich lokalen Inhalt.
 
