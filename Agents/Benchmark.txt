@@ -1,20 +1,22 @@
-﻿R4OS Benchmark - Agent-Referenz
+R4OS Benchmark - Agent-Referenz
 ================================
 
-Aktuelle Userregel vom 25.10.2026
+Aktuelle Userregel vom 26.10.2026
 --------------------------------
-Benchmarks sind wieder erlaubt. DevCenter ist derzeit nicht erreichbar.
-Pro Unterversion mit moeglicher Laufzeitwirkung genau ein finaler STANDARD
-(Suite 3, KVM4/alle vier CPUs). Den vollstaendigen unveraenderten Original-
-export je Lauf unter ExFiles/Reports/Benchmarks/<run_id>/run.json speichern,
-samt benoetigtem Arbeits-/CPU-/Artefakt-/Vergleichskontext und SHA256.
-Rohsamples, feste Referenz und alle sechs Scorebereiche vollstaendig lokal
-pruefen. Abschluss: "lokal validiert; DevCenter ausstehend". Nur Import und
-Remote-Readback sind aktuell keine Abschlussbedingung. Spaeter denselben
-Originalexport importieren; kein neuer Lauf allein fuer Upload oder Scores.
-Diese aktuelle Ausnahme ersetzt entgegenstehende DevCenter-Pflichten in
-den folgenden allgemeinen/historischen Regeln; Fach-/Hardwareabnahmen und
-die Versions-, Sammelpush- und Aufbewahrungsregeln bleiben bestehen.
+Benchmarks und Uploads sind wieder verfuegbar. Fuer die verbleibende Roadmap
+wird die Benchmark-API des neuen R4OS Servers verwendet; aktuelle AGENTS.md
+und Docs/Benchmark-API.md im separaten R4OS-Server-Projekt sind massgeblich.
+Ein finaler STANDARD je Unterversion/Suite3/alle4KVM-CPUs bleibt unveraendert.
+Vollstaendige Originale/Referenz/Work/CPU/Artefakte/Kontext/SHA256 weiterhin
+unter ExFiles/Reports/Benchmarks/<run_id>/ erhalten. Keine Umetikettierung
+historischer Messungen oder neuer Lauf allein fuer Upload/bessere Scores.
+
+Die ausdrueckliche lokale Abschlussausnahme bleibt bestehen, bis der User sie
+aufhebt. Import/Remote-Readback sind vorerst keine Abschlussbedingung. Falls
+lokal abgeschlossen: "lokal validiert; R4OS Server ausstehend" und konkreten
+Rest fuer Import, Readback oder Referenzauswertung angeben. Bei erfolgreichem
+Import und vollstaendiger Pruefung beide Nachweise getrennt dokumentieren.
+Fachliche/Hardwareabnahmen, Versionen, Sammelpush und Aufbewahrung bleiben.
 
 Verbindlicher Standard
 ---------------------
@@ -97,12 +99,36 @@ fachliche Abnahmeberichte.
 3. Originalbytes von run.json samt SHA256 und benoetigtem Kontext unter
    ExFiles/Reports/Benchmarks/<run_id>/ erhalten. Keine Werte oder UUIDs fuer
    bessere Scores aendern und keinen Lauf allein fuer die Ablage wiederholen.
-4. Fachliche Abnahme und lokale Benchmarkvalidierung dokumentieren.
+4. Fachliche Abnahme, lokale Benchmarkvalidierung und Import/Readbackstatus dokumentieren.
    Unvollstaendige oder inkompatible Laeufe behalten Rohdaten und Fehler,
    erhalten aber keinen gueltigen Gesamtindex.
 
-Serverbetrieb, Import und Remote-Readback sind kein Bestandteil dieses
-aktuellen Ablaufs. Historische Nachweise bleiben als damalige Belege erhalten.
+R4OS Server Import und Readback
+-----------------------------
+LAN-Registrierung172.27.254.3:4021: komplettes TCP-Magic/OK-Protokoll laut
+lokaler Konfiguration; anschliessend dieselbe Quell-IP fuer HTTPS4024 nutzen.
+CA und Server-IP validieren, keine Zertifikatspruefung abschalten. Getrennter
+Benchmark-Bearer fuer Host-/Lauf-PUT, application/json mit Content-Length.
+Secrets nur aus der lokalen Konfiguration laden, nie in Quellcode/Logs.
+Der vorhandene Client Tools/Benchmark.sh bzw. Tools/Benchmark.py im separaten
+Serverprojekt verwendet --config /etc/r4os-server/benchmark.json; dort sind
+Zugang und CA als lokale Dateizeiger hinterlegt, nicht in diesem Dokument.
+
+Vorhandenen Host mit stabiler zum Export passender host_id erhalten; bei
+Aenderung Metadaten bewahren. PUT /api/v1/benchmark-runs/<run_id> sendet die
+Originalbytes. GET derselben Route vollstaendig gegen den normalisierten
+Originalpayload vergleichen: alle30Samples,5Metriken,6Scores,Work/CPU/Artefakte/
+Kontexte. Serverfelder host_snapshot/imported_at_utc/sample_total/
+score_validation nur im Vergleichsinventar abtrennen, nie Originale umschreiben.
+UTC-Zeitstempel/uint64/Dezimalwerte verlustfrei behandeln. Suite3 verlangt
+Primaermetrikversion2 und echte vollstaendige4Worker-Nachweise jeSample.
+HTTP201/200 allein genuegt nicht: score_validation und alle6Bereiche muessen
+passen. Fehlende echte Originalreferenz nachimportieren, keinen neuen Lauf
+oder kuenstlichen Referenzdatensatz erzeugen. Unklare PUT-Ergebnisse mit
+denselben Originalbytes/run_id wiederholen. SNES hat eine eigene Route
+/api/v1/subsystem-benchmark-runs/<run_id> mit validation ohne Kunstscore.
+Importantwort, kompletter GET und Pruefbericht zusaetzlich lokal erhalten.
+Historische DevCenter-Nachweise bleiben als damalige Belege erhalten.
 
 Workloads, Terminal-/SSH-Aufrufe, Offlineexport und Vergleichsvertrag:
 Docs/Diagnostics/SpectraStandardBenchmark.txt.
