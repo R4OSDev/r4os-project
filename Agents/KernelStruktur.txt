@@ -94,6 +94,13 @@ Rust/sched/
     scheduler/task*: stabile Taskidentitaeten, Ready-/Wait-/Reap-Lifecycle
     task/balance: begrenzter Ready-Transfer unter dem Runtime-Owner; feste
     Affinitaet, genaue Current-/RSP-Grenze und Task-/FPU-/Unwindbesitz bleiben.
+    refill_cache: getrennte Ready-/Registry-/Membershiprevisionen und
+    vollstaendige statische Donor-Ausschluesse; partielle Praefixe,
+    Clock-/Stack-/FPU-Uebergaenge bleiben retrybar, maximal8Kandidaten.
+    secondary_idle: CPU-/Start-/Clock-gebundene lokale AP-Timerloans nur
+    auf dem bestaetigten permanenten Idle-Stack; vor produktivem Dispatch
+    und Lifecycle restaurieren. Physisch blockierte Task-Stacks behalten
+    ihren aktiven Timer. Ausdrueckliche IDLE256-Diagnose ohne Sampler.
     task/diagnostic: eigener begrenzter Taskledger mit genauer CPU-Bindung
     und direkter letzter Pin-/Ressourcen-/Metadatenquittung
     sync*/wait*: Mutex/Semaphore, WaitQueue und Unwind-/Kill-Schutz
