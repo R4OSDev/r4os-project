@@ -135,17 +135,41 @@ Vor dem Upload Groesse und SHA-256 des fertigen Pakets festhalten.
 Veroeffentlichung
 -----------------
 
-Der bisherige Bereitstellungsdienst wird ersetzt. Bis der Nachfolger
-eingerichtet und dokumentiert ist, besteht kein serverseitiger
-Veroeffentlichungsweg. Administrative Updates ueber die unten beschriebene
-Inbox und SYSUPD bleiben verfuegbar.
+Der eigenstaendige R4OS Server bietet den neuen Veroeffentlichungsweg.
+Aktueller LAN-Zugang: Registrierung TCP172.27.254.3:4021, Update-API und
+Downloads HTTPS172.27.254.3:4023; die WebApp liegt auf Port4020.
+Adressen/Ports bleiben clientseitig konfigurierbar. Registrierung erwartet
+das vollstaendige OK; HTTPS prueft Server-IP und die lokale CA. Secret,
+Publisher- und Adminnachweis sind getrennte Zugangsdaten aus geschuetzten
+Dateien, keine Quellcode- oder Protokollinhalte.
+
+R4U-Pakete und das originale Release-Buildmanifest unveraendert hochladen,
+Pruefstatus abfragen und erst gueltige Pakete freigeben; das Manifest zuletzt.
+Paket-PUT: /api/updates/uploads/package, Manifest-PUT:
+/api/updates/uploads/manifest, Status-GET: /api/updates/uploads/ID,
+Freigabe-POST: /api/updates/uploads/ID/publish. Upload verlangt Publisher
+oder Admin; Freigabe Admin. Content-Length und application/octet-stream
+beziehungsweise application/json sind Pflicht. Freigegebene Dateinamen und
+abgeschlossene Releases bleiben unveraenderlich. Die Betreiberwerkzeuge im
+separaten Serverprojekt heissen Tools/Publisher.sh bzw. Publisher.py;
+Ports, Rollen, CA und Aufrufbeispiele stehen in der aktuellen lokalen
+AGENTS.md sowie dessen Docs/Server-Vertraege.md und Server-Betrieb.md.
+
+Die bestehenden R4OS-Clients sind noch nicht an diesen neuen Serververtrag
+angebunden. Dafuer fehlt das neue clientseitige Update-Center. Ein erfolgter
+Serverupload bedeutet deshalb keine Client-Such-/Downloadabnahme.
+Administrative Updates ueber Inbox und SYSUPD bleiben verfuegbar.
 
 
 Clientsuche und Download
 ------------------------
 
-UPDSVC bezieht den freigegebenen Katalog und die Pakete ueber den in der
-Serverreferenz beschriebenen Updatekanal.
+Der folgende vorhandene UPDSVC-Ablauf beschreibt den bisherigen Client.
+Er ist noch kein Nachweis fuer die Anbindung an den neuen R4OS Server.
+Dessen neuer Vertrag liest /catalog oder /catalog.json (Schema2) und die
+Katalog-Downloadadressen /packages/DATEINAME ueber geprueftes HTTPS4023.
+Registrierung, Rollen, Range-/Content-Range-Verhalten und HTTP401/403/429
+muessen bei der ausstehenden Clientumstellung ausdruecklich behandelt werden.
 
 Ablauf:
 
@@ -230,8 +254,17 @@ STAGE und COMMIT
 
     SYSUPD STAGE C:\R4OS\UPDATE\INBOX\<PAKET>.R4U
 
-Ein live-fähiges R4X-Paket kann unmittelbar installiert werden. Alle anderen
-Pakete werden im dualen Batchjournal an Pfad, Laenge und Digests gebunden.
+Ein live-faehiges R4X-Paket kann mit SYSUPD APPLY unmittelbar installiert
+werden. Es darf alternativ ausdruecklich mit STAGE in einen Neustartbatch
+aufgenommen werden; dessen COMMIT aktiviert den gesamten gebundenen Stand
+und startet neu. Das ist etwa fuer einen bereits laufenden Desktop noetig,
+damit installierte Datei und neuer Prozessstand gemeinsam geprueft werden.
+VERIFY reboot=no/activation=live beschreibt die Paketklasse und ersetzt
+keinen Nachweis, dass ein laufender Prozess die neue Datei bereits verwendet.
+R4UPack leitet die Klasse aus den enthaltenen Komponenten ab und weist ein
+widersprechendes --activation restart bei reinen Softwarepayloads ab.
+
+Neustartpakete werden im dualen Batchjournal an Pfad, Laenge und Digests gebunden.
 Weitere Pakete desselben Zielrelease koennen demselben Batch hinzugefuegt
 werden.
 
