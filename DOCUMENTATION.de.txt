@@ -1,6 +1,9 @@
 ﻿# R4OS Project
 
-Privater Workspace fuer die Entwicklung und Aufteilung von R4OS.
+Oeffentlicher Koordinations-Workspace fuer die eigenstaendigen R4OS-Repositories.
+Der produktive Kernel besteht aus Rust und notwendiger x86_64-Assembly;
+Apps, Dienste, Libraries, Treiber, Protokolle und der separate Recovery-Kernel
+behalten ihre jeweiligen Besitzer und Builds.
 
     DevKit\        Installierte SDK- und Hostwerkzeuge
     Repositories\  Eigenstaendige R4OS-Quell-Repositories
@@ -9,6 +12,8 @@ Privater Workspace fuer die Entwicklung und Aufteilung von R4OS.
       Diagnostics\  Diagnoseprogramme
       Drivers\      Treiber
       Protocols\    Protokolle
+      Subsystems\   Gastlaufzeiten
+      Recovery\     Eigenstaendige Reparaturumgebung
     Artifacts\     Lokale Build- und Testergebnisse
     Tools\         Workspace-Setup und GitHub-Verwaltung
 
@@ -37,8 +42,8 @@ Linux mit `./Tools/Build.sh`. Beide rufen dieselbe PowerShell-Orchestrierung
 auf. Repository-Buildstarter und Hosttools werden passend zum Host als
 `Build.bat`/`Build.sh` und mit beziehungsweise ohne `.exe` gewaehlt.
 Image-Erzeugung, Verifikation und QEMU bleiben Eigentum des
-Distribution-Repositories; Linux kann diese Aktionen erst ausfuehren, sobald
-Distribution dort die entsprechende Hostfunktion bereitstellt.
+Distribution-Repositories und stehen mit den passenden Hostwerkzeugen
+unter Windows und Linux ueber die gemeinsame PowerShell-Logik bereit.
 
 `Tools\Clean.bat` und `./Tools/Clean.sh` verwenden ebenfalls dieselbe
 PowerShell-Logik. `Artifacts/Distribution` und `zig-out` bleiben erhalten.

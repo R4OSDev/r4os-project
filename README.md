@@ -51,9 +51,9 @@ optional for read-only setup and pulls. Fill it in only when pushing changes or
 creating repositories in the R4OSDev organization.
 
 Use `Tools/Build.bat` on Windows or `./Tools/Build.sh` on Linux as the
-multi-repository build entry point. Linux image, verification, and QEMU actions
-still require matching Linux support from the Distribution repository; the
-Project launcher does not emulate unavailable owner functionality.
+multi-repository build entry point. Image generation, verification, and QEMU
+checks are provided by the Distribution repository on Windows and Linux,
+using the selected host tools and the shared PowerShell orchestration.
 
 Use `Tools/Clean.bat` or `./Tools/Clean.sh` to empty every `Artifacts` subtree
 except the preserved `Artifacts/Distribution` tree and to remove R4OS-local
@@ -80,8 +80,9 @@ The independent Recovery repository lives at `Repositories/Recovery` and is
 managed with the `-Recovery` GitHub target. Use
 `Tools\Github.bat -Pull -Recovery` on Windows or
 `./Tools/Github.sh -Pull -Recovery` on Linux to check it out. Its public remote
-is [R4OSDev/r4os-recovery](https://github.com/R4OSDev/r4os-recovery). The initial
-repository prepares the Recovery work planned for roadmap 0.76.X.
+is [R4OSDev/r4os-recovery](https://github.com/R4OSDev/r4os-recovery). It boots a separate RAM-resident repair environment and supports installation,
+offline repair, updates and rollback. Its kernel/runtime pair and release
+version remain independent of the normal R4OS release.
 
 ## License
 
