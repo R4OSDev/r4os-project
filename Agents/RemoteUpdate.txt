@@ -255,10 +255,15 @@ STAGE und COMMIT
     SYSUPD STAGE C:\R4OS\UPDATE\INBOX\<PAKET>.R4U
 
 Ein live-faehiges R4X-Paket kann mit SYSUPD APPLY unmittelbar installiert
-werden. Es darf alternativ ausdruecklich mit STAGE in einen Neustartbatch
-aufgenommen werden; dessen COMMIT aktiviert den gesamten gebundenen Stand
-und startet neu. Das ist etwa fuer einen bereits laufenden Desktop noetig,
-damit installierte Datei und neuer Prozessstand gemeinsam geprueft werden.
+werden. Auch STAGE kann direkt APPLY ausfuehren: wenn kein offener Batch
+besteht, alle Anforderungen erfuellt und die betroffenen Programme nicht
+aktiv sind. Die echte Antwort auswerten; nur nach state=Staged COMMIT
+senden. Bei laufenden Programmen, offenen Batchanforderungen oder anderen
+Paketklassen bleibt STAGE im Neustartbatch. Dessen COMMIT aktiviert den
+gebundenen Stand und startet neu. Eine reine Live-Installation publiziert
+die sichtbare Release-Kennung nicht automatisch; die kanonische Engine
+bestaetigt sie gesondert nach vollstaendig geprueftem Live-Ziel, oder der
+regulaere Neustartbatch schliesst sie mit RESUME-BATCH ab.
 VERIFY reboot=no/activation=live beschreibt die Paketklasse und ersetzt
 keinen Nachweis, dass ein laufender Prozess die neue Datei bereits verwendet.
 R4UPack leitet die Klasse aus den enthaltenen Komponenten ab und weist ein
