@@ -54,6 +54,30 @@ bleiben mit dem Ergebnis verbunden. Fuer diesen Host gilt hetzner-qemu;
 R4OS_BENCHMARK_HOST_ID oder Tools/BenchmarkHost.R4S setzt die lokale Host-ID.
 Messung, Referenzpruefung und Export erfolgen lokal.
 
+R4OS-Clientpfad ab 0.89.X
+------------------------
+SPECTRA BENCH STANDARD erstellt nach dem vollstaendigen Lauf selbst
+C:\R4OS\DATA\BENCHMARKS\<run-id>\RECORDS.NDJSON und RUN.JSON. Der Gast
+uebernimmt seine 30 Rohsamples, fuenf Metriken, sechs Scores sowie die
+tatsaechlichen Versions-, Hardware- und Artefaktwerte; er behaelt Rohbelege
+bei Exportfehlern. /AREA und abweichendes /SETTLE bleiben lokale Teilproben
+ohne vollstaendigen Schema-1-Export.
+
+SPECTRA BENCH STANDARD /UPLOAD fordert den Netztransfer nach Messung und
+lokaler Ablage ausdruecklich an. Ohne /UPLOAD findet kein Claim oder PUT
+statt. Nach einem Transportfehler wiederholt
+SPECTRA BENCH UPLOAD /RUN:C:\R4OS\DATA\BENCHMARKS\<run-id>\RUN.JSON /UPLOAD
+den Transfer derselben Datei ohne neue Messung. Der externe manuelle
+Tools/Benchmark.sh- beziehungsweise Tools/Benchmark.py-Pfad bleibt erhalten.
+
+Spectra liest die validierte SMBIOS-System-UUID ueber den optionalen
+R4DEV-Firmwareaufruf, kanonisiert sie als kleine 8-4-4-4-12-ASCII-UUID
+und leitet Host-ID und unabhaengigen Identitaetshash gemaess R4OS-Server-
+Vertrag v1 ab. Die rohe UUID verlaesst den Client nicht. Fehlende,
+triviale oder widerspruechliche Firmwareangaben verhindern den automatischen
+Host-Upload; historische IDs werden nicht uebernommen. Zwei physische
+Rechner mit derselben Firmware-UUID lassen sich damit nicht unterscheiden.
+
 Aufbewahrung seit Userentscheid 20.10.2026: Das vollstaendige run.json
 enthaelt alle Vergleichsdaten und bleibt als kompakter Export erhalten.
 Der STANDARD-Runner erzeugt private Eingaben unter Temp und die vom
@@ -105,8 +129,12 @@ fachliche Abnahmeberichte.
 
 R4OS Server Import und Readback
 -----------------------------
-LAN-Registrierung172.27.254.3:4021: komplettes TCP-Magic/OK-Protokoll laut
-lokaler Konfiguration; anschliessend dieselbe Quell-IP fuer HTTPS4024 nutzen.
+Aktuelles oeffentliches Standardziel ist 138.201.253.143:4024, in der
+Registry unter SYSTEM\Network\R4OSServer\Benchmarks separat konfigurierbar.
+Vorher TLS-Registrierung auf Port 4021 mit vollstaendiger OK-Antwort;
+anschliessend dieselbe Quell-IP fuer HTTPS auf dem konfigurierten
+Benchmark-Port nutzen. Historische LAN-Ziele gelten nur bei expliziter
+abweichender lokaler Konfiguration.
 CA und Server-IP validieren, keine Zertifikatspruefung abschalten. Getrennter
 Benchmark-Bearer fuer Host-/Lauf-PUT, application/json mit Content-Length.
 Secrets nur aus der lokalen Konfiguration laden, nie in Quellcode/Logs.
@@ -114,8 +142,13 @@ Der vorhandene Client Tools/Benchmark.sh bzw. Tools/Benchmark.py im separaten
 Serverprojekt verwendet --config /etc/r4os-server/benchmark.json; dort sind
 Zugang und CA als lokale Dateizeiger hinterlegt, nicht in diesem Dokument.
 
-Vorhandenen Host mit stabiler zum Export passender host_id erhalten; bei
-Aenderung Metadaten bewahren. PUT /api/v1/benchmark-runs/<run_id> sendet die
+Der Client sendet vor jedem PUT, auch bei bereits gelesenem Host, einen
+POST /api/v1/hosts/<hw1-host-id>/claim mit Methode
+smbios-system-uuid-sha256-v1 und geprueftem Identitaetshash. HTTP201 legt
+Bindung und Host gemeinsam an; HTTP200 bestaetigt dieselbe Bindung ohne
+Metadatenveraenderung. Rueckgabe von Host-ID, Hostdokument, Methode und Hash
+pruefen. HTTP409 beendet den Ablauf ohne PUT und ohne historischen Fallback.
+PUT /api/v1/benchmark-runs/<run_id> sendet die
 Originalbytes. GET derselben Route vollstaendig gegen den normalisierten
 Originalpayload vergleichen: alle30Samples,5Metriken,6Scores,Work/CPU/Artefakte/
 Kontexte. Serverfelder host_snapshot/imported_at_utc/sample_total/
