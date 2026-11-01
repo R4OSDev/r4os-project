@@ -152,12 +152,22 @@ PUT /api/v1/benchmark-runs/<run_id> sendet die
 Originalbytes. GET derselben Route vollstaendig gegen den normalisierten
 Originalpayload vergleichen: alle30Samples,5Metriken,6Scores,Work/CPU/Artefakte/
 Kontexte. Serverfelder host_snapshot/imported_at_utc/sample_total/
-score_validation nur im Vergleichsinventar abtrennen, nie Originale umschreiben.
+score_validation/server_scoring nur im Vergleichsinventar abtrennen, nie
+Originale umschreiben.
 UTC-Zeitstempel/uint64/Dezimalwerte verlustfrei behandeln. Suite3 verlangt
 Primaermetrikversion2 und echte vollstaendige4Worker-Nachweise jeSample.
-HTTP201/200 allein genuegt nicht: score_validation und alle6Bereiche muessen
-passen. Fehlende echte Originalreferenz nachimportieren, keinen neuen Lauf
-oder kuenstlichen Referenzdatensatz erzeugen. Unklare PUT-Ergebnisse mit
+HTTP201/200 allein genuegt nicht. Fuer Suite3/geomean1 gilt seit R4OS Server
+0.5.22 die unabhaengige server_scoring-Policy first-valid-standard-v1: Im PUT
+und GET applicable:true, status:valid, passende angefragte/effective Baseline,
+gleiche opake Gruppe, Vergleichbarkeit und sechs gueltige positive Server-
+Scores pruefen. Die alte score_validation prueft nur die urspruenglich vom
+Client gemeldeten Scores und bleibt bei geloeschter alter Referenz ehrlich
+pending/unknown_baseline; dies verhindert bei gueltiger neuer Serverwertung
+keinen fachlichen Upload-Erfolg. Gemeldete Scores nie als gegen die neue
+Referenz validiert ausgeben. Bei anderen Messvertraegen gilt die bisherige
+score_validation. Fuer eine Validierung der alten gemeldeten Scores muss
+deren echte Originalreferenz verfuegbar sein; keine Neumessung oder
+kuenstliche Referenz erzeugen. Unklare PUT-Ergebnisse mit
 denselben Originalbytes/run_id wiederholen. SNES hat eine eigene Route
 /api/v1/subsystem-benchmark-runs/<run_id> mit validation ohne Kunstscore.
 Importantwort, kompletter GET und Pruefbericht zusaetzlich lokal erhalten.
