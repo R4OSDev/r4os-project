@@ -181,6 +181,15 @@
       "reason": "Full kernel diagnostic migration; no remaining independent purpose",
       "replacement_group": "memory snapshot",
       "evidence": "Docs/Diagnostics/Spectra0832.json; ExFiles/Reports/Spectra/20261013-consolidation"
+    },
+    {
+      "name": "r4os-devkit",
+      "source_commit": "5fe7dea6e9f6bce1416daa1e355fc1f33c6ffc51",
+      "local_only": true,
+      "preserve_local": true,
+      "verified": true,
+      "reason": "User decision 2026-11-03: delete only the DevKit GitHub repository, retain the complete local directory and all independent nested repositories; never synchronize or recreate the parent remote.",
+      "evidence": "Agents/Github.txt; Docs/SDK/README.txt; ExFiles/RetiredRepositories/r4os-devkit-*/receipt.json"
     }
   ]
 }

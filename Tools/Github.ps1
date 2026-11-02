@@ -97,7 +97,7 @@ function New-CentralTarget([string]$Key) {
         }
         'devkit' {
             $label = 'DevKit'; $root = Join-Path $projectRoot 'DevKit'; $name = 'r4os-devkit'
-            $description = 'Cross-platform bootstrap and setup scripts for the R4OS development kit.'; $allowInit = $true; $defaultCommit = 'DevKit-Stand sichern'
+            $description = 'Local-only R4OS development files; remote repository retired.'; $allowInit = $false; $defaultCommit = ''
         }
         'docs' {
             $label = 'Docs'; $root = Join-Path $projectRoot 'Docs'; $name = 'r4os-docs'
@@ -245,7 +245,7 @@ function Get-WorkspaceTargets {
             $targets.Add((New-ComponentTarget $role.Kind $directory.Name))
         }
     }
-    foreach ($key in @('recovery', 'distribution', 'docs', 'devkit', 'organization', 'project')) {
+    foreach ($key in @('recovery', 'distribution', 'docs', 'organization', 'project')) {
         $targets.Add((New-CentralTarget $key))
     }
     return @($targets)
@@ -454,6 +454,9 @@ function Invoke-ChangedPush {
 }
 
 function Assert-NotRetired([psobject]$Target) {
+    if ($Target.Key -ceq 'devkit') {
+        throw 'DevKit bleibt ausschliesslich lokal; Push, Pull und eine Neuanlage von r4os-devkit sind gesperrt. Eigenstaendige Komponenten behalten ihre separaten Repositoryziele.'
+    }
     $path = Join-Path $PSScriptRoot 'RetiredRepositories.json'
     if (-not (Test-Path -LiteralPath $path -PathType Leaf)) { return }
     $catalog = Get-Content -Raw -LiteralPath $path | ConvertFrom-Json
@@ -462,7 +465,77 @@ function Assert-NotRetired([psobject]$Target) {
     }
 }
 
+function Invoke-DevKitRemoteRetirement([psobject]$Target) {
+    # This exception retires only the parent remote. The local .git and every
+    # installed/nested repository remain intact; no recursive removal occurs.
+    if ($Target.Key -cne 'devkit' -or $Target.Name -cne 'r4os-devkit' -or
+        $Target.Root -cne [IO.Path]::GetFullPath((Join-Path $projectRoot 'DevKit'))) {
+        throw 'Die lokale DevKit-Ausnahme gilt nur fuer R4OSDev/r4os-devkit.'
+    }
+    $catalog = Get-Content -Raw -LiteralPath (Join-Path $PSScriptRoot 'RetiredRepositories.json') | ConvertFrom-Json
+    $entries = @($catalog.repositories | Where-Object { $_.name -ceq $Target.Name })
+    if ($entries.Count -ne 1) { throw 'Ein eindeutiger DevKit-Stilllegungseintrag fehlt.' }
+    $entry = $entries[0]
+    if ($entry.verified -isnot [bool] -or -not $entry.verified -or
+        $entry.local_only -isnot [bool] -or -not $entry.local_only -or
+        $entry.preserve_local -isnot [bool] -or -not $entry.preserve_local -or
+        [string]$entry.source_commit -cnotmatch '^[0-9a-f]{40}$') {
+        throw 'Die ausschliesslich entfernte DevKit-Stilllegung ist nicht belegt.'
+    }
+    if (-not (Test-Path -LiteralPath (Join-Path $Target.Root '.git') -PathType Container)) { throw 'Lokale DevKit-Historie fehlt.' }
+    if ((Get-Item -LiteralPath $Target.Root).Attributes -band [IO.FileAttributes]::ReparsePoint) { throw 'Kein DevKit-Remoteabbau ueber einen Verzeichnislink.' }
+    Assert-MainBranch $Target
+    $origin = Invoke-GitCommand $Target.Root @('remote', 'get-url', 'origin')
+    Assert-GitSuccess $origin 'DevKit-Origin nicht lesbar.'
+    if (($origin.Output -join '').Trim() -cne $Target.Remote) { throw 'DevKit-Origin stimmt nicht mit dem kanonischen oeffentlichen Ziel ueberein.' }
+    $head = Invoke-GitCommand $Target.Root @('rev-parse', 'HEAD')
+    Assert-GitSuccess $head 'DevKit-Commit nicht lesbar.'
+    if (($head.Output -join '').Trim() -cne $entry.source_commit) { throw 'DevKit-Quellcommit weicht vom Stilllegungseintrag ab.' }
+    if ($Preview) {
+        Write-Host 'VORSCHAU: Nur R4OSDev/r4os-devkit auf GitHub loeschen; lokale Dateien, Git-Historie und Unterrepositories bleiben erhalten. Vorher werden alle oeffentlichen Git-Referenzen gesichert.'
+        return
+    }
+    $credentials = Read-Credentials
+    $headers = @{ Accept='application/vnd.github+json'; Authorization=('Bearer ' + $credentials.Token); 'X-GitHub-Api-Version'='2022-11-28' }
+    $uri = 'https://api.github.com/repos/' + $organizationName + '/' + $Target.Name
+    $remote = Invoke-WebRequest -Uri $uri -Headers $headers -Method Get -MaximumRedirection 0 -SkipHttpErrorCheck
+    if ($remote.StatusCode -ne 200) { throw ('DevKit-Remote nicht bestaetigt: HTTP ' + $remote.StatusCode + '; keine Loeschung, lokalen Bestand erhalten.') }
+    $identity = $remote.Content | ConvertFrom-Json
+    if ($identity.private -or $identity.full_name -cne ($organizationName + '/' + $Target.Name)) { throw 'DevKit-Remote ist nicht das erwartete oeffentliche Repository.' }
+    $remoteHead = Invoke-WebRequest -Uri ($uri + '/commits/main') -Headers $headers -Method Get -MaximumRedirection 0 -SkipHttpErrorCheck
+    if ($remoteHead.StatusCode -ne 200 -or ($remoteHead.Content | ConvertFrom-Json).sha -cne $entry.source_commit) { throw 'GitHub-main stimmt nicht mit der erhaltenen lokalen DevKit-Historie ueberein.' }
+    $remoteRefs = Invoke-GitCommand $Target.Root @('-c', 'credential.helper=', 'ls-remote', '--heads', '--tags', $Target.Remote)
+    Assert-GitSuccess $remoteRefs 'Oeffentliche DevKit-Referenzen nicht lesbar.'
+    $localRefs = Invoke-GitCommand $Target.Root @('show-ref')
+    Assert-GitSuccess $localRefs 'Lokale DevKit-Referenzen nicht lesbar.'
+    $savedTips = @($localRefs.Output | ForEach-Object { ($_ -split '\s+')[0] })
+    foreach ($line in $remoteRefs.Output) {
+        if ($line -match '\^\{\}$') { continue }
+        if (($line -split '\s+')[0] -cnotin $savedTips) { throw 'Ein oeffentlicher DevKit-Branch-/Tagstand fehlt in der lokalen Sicherung.' }
+    }
+    $archive = Join-Path $projectRoot ('ExFiles/RetiredRepositories/' + $Target.Name + '-' + [DateTime]::UtcNow.ToString('yyyyMMddTHHmmssZ'))
+    [IO.Directory]::CreateDirectory($archive) | Out-Null
+    $bundle = Join-Path $archive 'history.bundle'
+    Assert-GitSuccess (Invoke-GitCommand $Target.Root @('bundle', 'create', $bundle, '--all')) 'DevKit-Git-Historie konnte nicht gesichert werden.'
+    Assert-GitSuccess (Invoke-GitCommand $Target.Root @('bundle', 'verify', $bundle)) 'DevKit-Git-Sicherung ist ungueltig.'
+    [IO.File]::WriteAllText((Join-Path $archive 'retirement.json'), ($entry | ConvertTo-Json -Depth 8), [Text.UTF8Encoding]::new($false))
+    [IO.File]::WriteAllText((Join-Path $archive 'github-repository.json'), $remote.Content, [Text.UTF8Encoding]::new($false))
+    $unchangedHead = Invoke-WebRequest -Uri ($uri + '/commits/main') -Headers $headers -Method Get -MaximumRedirection 0 -SkipHttpErrorCheck
+    if ($unchangedHead.StatusCode -ne 200 -or ($unchangedHead.Content | ConvertFrom-Json).sha -cne $entry.source_commit) { throw 'DevKit-main wurde waehrend der Sicherung geaendert; Remote nicht loeschen.' }
+    $deleted = Invoke-WebRequest -Uri $uri -Headers $headers -Method Delete -MaximumRedirection 0 -SkipHttpErrorCheck
+    if ($deleted.StatusCode -ne 204) { throw ('GitHub-Loeschung des DevKit abgelehnt: HTTP ' + $deleted.StatusCode + '; lokaler Bestand bleibt erhalten.') }
+    $absent = Invoke-WebRequest -Uri $uri -Headers $headers -Method Get -MaximumRedirection 0 -SkipHttpErrorCheck
+    if ($absent.StatusCode -ne 404) { throw ('DevKit-Remote-Loeschung nicht bestaetigt: HTTP ' + $absent.StatusCode + '; Sicherung pruefen, nicht blind wiederholen.') }
+    # Only this repository's default push URL is disabled. Nested .git configs
+    # and remotes are independent and are never changed by this command.
+    Assert-GitSuccess (Invoke-GitCommand $Target.Root @('config', '--local', 'remote.origin.pushurl', 'disabled://local-only/r4os-devkit')) 'Lokale DevKit-Pushsperre konnte nicht gesetzt werden.'
+    $receipt = @{ repository=$identity.full_name; repository_id=$identity.id; source_commit=$entry.source_commit; remote_deleted_utc=[DateTime]::UtcNow.ToString('o'); local_preserved=$true; bundle_sha256=(Get-FileHash -LiteralPath $bundle).Hash.ToLowerInvariant() }
+    [IO.File]::WriteAllText((Join-Path $archive 'receipt.json'), ($receipt | ConvertTo-Json), [Text.UTF8Encoding]::new($false))
+    Write-Host ('GitHub-Repository entfernt: ' + $identity.full_name + '; DevKit und Unterrepositories bleiben lokal erhalten. Sicherung: ' + $archive)
+}
+
 function Invoke-Retirement([psobject]$Target) {
+    if ($Target.Key -ceq 'devkit') { Invoke-DevKitRemoteRetirement $Target; return }
     if ($Target.Flag -notin @('-app', '-diagnostic')) { throw '-Delete ist auf ein einzelnes App-/Diagnoserepository begrenzt.' }
     $catalogPath = Join-Path $PSScriptRoot 'RetiredRepositories.json'
     $catalog = Get-Content -Raw -LiteralPath $catalogPath | ConvertFrom-Json
@@ -534,11 +607,12 @@ function Invoke-Retirement([psobject]$Target) {
 function Show-Usage {
     Write-Host 'Verwendung:'
     Write-Host '  Github.bat|Github.sh -Push -Changed ["Commit-Beschreibung"]'
-    Write-Host '  Github.bat|Github.sh -Pull -Project|-DevKit|-Docs|-Contract|-SDK|-Libraries|-Kernel|-Recovery|-Distribution|-Organization'
-    Write-Host '  Github.bat|Github.sh -Push -Project|-DevKit|-Docs|-Contract|-SDK|-Libraries|-Kernel|-Recovery|-Distribution|-Organization ["Commit-Beschreibung"]'
+    Write-Host '  Github.bat|Github.sh -Pull -Project|-Docs|-Contract|-SDK|-Libraries|-Kernel|-Recovery|-Distribution|-Organization'
+    Write-Host '  Github.bat|Github.sh -Push -Project|-Docs|-Contract|-SDK|-Libraries|-Kernel|-Recovery|-Distribution|-Organization ["Commit-Beschreibung"]'
     Write-Host '  Github.bat|Github.sh -Pull -App|-Service|-Diagnostic|-Driver|-Protocol|-Subsystem NAME'
     Write-Host '  Github.bat|Github.sh -Push -App|-Service|-Diagnostic|-Driver|-Protocol|-Subsystem NAME ["Commit-Beschreibung"]'
     Write-Host '  Github.bat|Github.sh -Delete -App|-Diagnostic NAME [-Preview] (nur gepruefte Ablosungen im Katalog)'
+    Write-Host '  Github.bat|Github.sh -Delete -DevKit [-Preview] (nur Remote; gesamter lokaler Bestand bleibt)'
 }
 
 function Set-InteractiveSelection {
@@ -559,7 +633,7 @@ function Set-InteractiveSelection {
         if ($modeChoice -ne '2') { throw 'Ungueltige Auswahl.' }
     }
 
-    Write-Host 'Repository: Project, DevKit, Docs, Contract, SDK, Libraries, Kernel, Recovery, Distribution, Organization, App, Service, Diagnostic, Driver, Protocol oder Subsystem'
+    Write-Host 'Repository: Project, Docs, Contract, SDK, Libraries, Kernel, Recovery, Distribution, Organization, App, Service, Diagnostic, Driver, Protocol oder Subsystem. DevKit ist nur lokal.'
     $targetChoice = (Read-Host 'Ziel').Trim().ToLowerInvariant()
     switch ($targetChoice) {
         'project' { $script:Project = $true }

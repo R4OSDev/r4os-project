@@ -329,8 +329,8 @@ try {
 
     Write-Host
     Write-Host '=== Sammel-Push: Vorpruefung ==='
-    Write-Host 'Reihenfolge: Contract, SDK, Libraries, Kernel, Apps, Services, Diagnostics, Drivers, Protocols, Subsystems, Distribution, Docs, DevKit, Organisation, Project.'
-    Write-Host 'Ausgeschlossen: alle verschachtelten DevKit- und Third-Party-Repositories.'
+    Write-Host 'Reihenfolge: Contract, SDK, Libraries, Kernel, Apps, Services, Diagnostics, Drivers, Protocols, Subsystems, Distribution, Docs, Organisation, Project.'
+    Write-Host 'DevKit bleibt lokal. Keine rekursive Aufnahme von Unterrepositories oder Third-Party-Quellen; eigenstaendige Komponenten werden ueber ihre separaten Ziele verwaltet.'
     Write-Host
     foreach ($state in $states) {
         Write-RepositoryState -State $state

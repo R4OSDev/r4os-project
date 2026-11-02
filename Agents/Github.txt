@@ -13,7 +13,7 @@ nur den Einstieg für Push und Pull.
 Grundregeln
 -----------
 
-- Für Project, DevKit, Docs, Organisationsprofil, Contract, SDK, Libraries,
+- Für Project, Docs, Organisationsprofil, Contract, SDK, Libraries,
   Kernel, Recovery, Distribution und Module ausschließlich `Tools\Github.bat` unter
   Windows oder `./Tools/Github.sh` unter Linux verwenden. Beide starten die
   gemeinsame PowerShell-7-Logik in `Tools/Github.ps1`.
@@ -32,8 +32,8 @@ Grundregeln
   Repository ihres fachlichen Besitzers bearbeitet; beim normalen Abschluss
   ermittelt der Sammel-Push die betroffenen Repositories selbst.
 - Ein Project-Push synchronisiert keine Repositories unter Repositories,
-  DevKit oder Docs. Diese Verzeichnisse sind eigenständige Repositories und
-  im Project-Repository ausgeschlossen.
+  DevKit oder Docs. Diese Verzeichnisse sind im Project-Repository
+  ausgeschlossen; DevKit bleibt ausschliesslich lokal.
 - Alle verwalteten Repositories verwenden origin und den Branch main.
 - Github.ps1 erstellt keine Pull Requests und führt keine Branch-Merges oder
   Rebases aus. Es arbeitet direkt mit main.
@@ -62,7 +62,7 @@ Remote-Protokoll: HTTPS
 Remote-Name: origin
 Branch: main
 
-Project, DevKit, Docs, Organisationsprofil, Contract, SDK, Libraries, Kernel,
+Project, Docs, Organisationsprofil, Contract, SDK, Libraries, Kernel,
 Recovery, Distribution sowie Apps, Services, Diagnostics, Drivers, Protocols und
 Subsystems werden
 bei einem fehlenden Remote-Repository oeffentlich angelegt.
@@ -228,13 +228,16 @@ Project
     Inhalt: Workspace-Steuerung wie AGENTS.md, Agents, Tools und Root-Dateien.
     DevKit, Docs, Artifacts und Repositories werden nicht mit eingeschlossen.
 
-DevKit
-    Ziel: -devkit
-    Lokal: DevKit/
-    GitHub: R4OSDev/r4os-devkit
-    Inhalt: Setup und DevKit-Struktur. Installierte Toolchains, QEMU, Limine,
-    SDK-Kopien und Hosttool-Binaries sind durch die DevKit-.gitignore
-    ausgeschlossen.
+DevKit (nur lokal)
+    Lokal: DevKit/ einschliesslich vorhandener Git-Historie und Installationen.
+    Das fruehere GitHub-Repository R4OSDev/r4os-devkit ist entfernt.
+    Kein Sammelpushziel, kein Push, kein Pull und keine automatische Neuanlage.
+    -Query -DevKit darf nur die historische Zuordnung lesen.
+    Eigenstaendige SDK-/Contract-/Library-/Distribution-Repositories darin
+    behalten Dateien, Git-Historie und eigene Remotes. Sie werden nicht als
+    Inhalt eines DevKit-Mantelrepositories veroeffentlicht. Der Sammelpush
+    verwaltet weiterhin die kanonischen Komponenten unter Repositories/;
+    installierte Kopien und Drittquellen werden nicht rekursiv gepusht.
 
 Docs
     Ziel: -docs
@@ -334,7 +337,7 @@ feste Workspace-Struktur:
 1. Contract, SDK, Libraries und Kernel.
 2. Direkte Projektverzeichnisse unter Apps, Services, Diagnostics, Drivers,
    Protocols und Subsystems, innerhalb jeder Rolle alphabetisch.
-3. Recovery, Distribution, Docs, DevKit, Organisationsprofil und zuletzt Project.
+3. Recovery, Distribution, Docs, Organisationsprofil und zuletzt Project.
 
 Unterrepositories und installierte Fremdquellen in DevKit, insbesondere
 QEMU, Limine und Zig, werden nicht
@@ -475,13 +478,17 @@ Checkout im frei gewaehlten Workspace-Root existiert:
 1. Das öffentliche Repository R4OSDev/r4os-project ohne Credentials nach
    `<Workspace-Root>` klonen und in dieses Verzeichnis wechseln.
 2. Unter Windows `Tools\Setup.bat`, unter Linux `./Tools/Setup.sh` ausfuehren.
-3. DevKit mit dem passenden GitHub-Starter und `-pull -devkit` anonym beziehen.
+3. DevKit bleibt ein lokaler Installationsbereich. Kein `-pull -devkit`: das
+   uebergeordnete GitHub-Repository wird nicht mehr bereitgestellt.
 4. Docs, Contract, SDK, Libraries, Kernel, Recovery, Distribution und bei Bedarf das
    Organisationsprofil mit ihren jeweiligen Pull-Zielen beziehen.
 5. Benötigte Apps, Services, Diagnostics, Drivers, Protocols und Subsystems einzeln mit
    Rollenflag und Komponentenname beziehen.
-6. Die DevKit-Abhängigkeiten anschließend über dessen Setup installieren; die
-   dortigen öffentlichen Quellkopien werden ebenfalls anonym bezogen.
+6. Die aktuelle Buildkette benoetigt vorerst weiterhin die lokalen
+   Toolinstallationen und Setupdateien. Einen neuen Workspace aus dem
+   erhaltenen lokalen Bestand vorbereiten. Die Uebernahme der Profilauswahl
+   durch SDK/Server/Studio ist eine getrennte Migration; der GitHub-Starter
+   beschafft kein DevKit-Mantelrepository mehr.
 7. Nur wenn in R4OSDev gepusht werden soll, Benutzername und Token in die
    lokale Credentials-Datei eintragen.
 
@@ -583,3 +590,27 @@ wird anhand seines Archivs/Belegs geprueft, niemals blind wiederholt.
 Push/Pull verweigern Katalogeintraege, damit entfernte Projekte nicht erneut
 entstehen. Artefakte, aktive Aufrufer, Imageplaene und Inventare werden beim
 fachlichen Migrationsschritt bereinigt; das Loeschwerkzeug aendert sie nicht.
+
+
+DevKit-Remote entfernen, lokalen Bestand erhalten
+------------------------------------------------
+Userentscheidung vom 03.11.2026: Nur R4OSDev/r4os-devkit auf GitHub entfernen.
+
+    <Github-Starter> -Delete -DevKit -Preview
+    <Github-Starter> -Delete -DevKit
+
+Diese eng begrenzte Ausnahme hat keinen lokalen Loeschschritt. Sie prueft den
+lokalen Ursprung und den im Stilllegungskatalog gebundenen Commit, bestaetigt
+das exakte oeffentliche GitHub-Ziel und dessen main, sichert alle oeffentlichen
+Branch-/Tagspitzen in einem verifizierten lokalen Bundle und prueft main vor
+der Remote-Loeschung erneut. HTTP204 plus anschliessendes HTTP404 bestaetigen
+die Loeschung. Ein unklarer oder abgelehnter Ausgang wird nicht automatisch
+wiederholt. Alle lokalen DevKit-Dateien, .git, Toolinstallationen und
+Unterrepositories bleiben erhalten. Sicherung/Beleg liegen unter
+ExFiles/RetiredRepositories/r4os-devkit-<UTC>/.
+
+Nach bestaetigter Loeschung ist ausserdem nur die Push-URL des lokalen
+DevKit-Ursprungs gesperrt. Die Git-Konfiguration eingebetteter Repositories
+bleibt unveraendert. Push/Pull ueber den Project-Starter sind fuer DevKit
+unabhaengig vom Vorhandensein des Stilllegungskatalogs gesperrt; damit kann der
+alte Remote nicht beim naechsten Sammelpush wieder entstehen.
