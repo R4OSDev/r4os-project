@@ -174,21 +174,28 @@ separaten Serverprojekt heissen Tools/Publisher.sh bzw. Publisher.py;
 Ports, Rollen, CA und Aufrufbeispiele stehen in der aktuellen lokalen
 AGENTS.md sowie dessen Docs/Server-Vertraege.md und Server-Betrieb.md.
 
-Die bestehenden R4OS-Clients sind noch nicht an diesen neuen Serververtrag
-angebunden. Dafuer fehlt das neue clientseitige Update-Center. Ein erfolgter
-Serverupload bedeutet deshalb keine Client-Such-/Downloadabnahme.
-Administrative Updates ueber Inbox und SYSUPD bleiben verfuegbar.
+Das vorhandene clientseitige Update-Center heisst im Startmenue
+"R4OS Update" (UPDATE.R4X); Anwendung und UPDSVC sind in Slim und Full
+enthalten. UPDSVC verwendet bereits das Registry-Ziel, R4SRV und den
+Schema-2-Katalog des neuen Servers. Die vorhandene Download-/Installations-
+logik ist damit noch nicht vollstaendig gegen den neuen Server abgenommen:
+Der bisherige oeffentliche Gastnachweis pruefte nur die Suche bei einem
+Katalog ohne passende freigegebene Releases. Ein erfolgreicher Serverupload
+belegt keinen Clientdownload und keine Installation. Administrative Updates
+ueber Inbox und SYSUPD bleiben verfuegbar.
 
 
 Clientsuche und Download
 ------------------------
 
-Der folgende vorhandene UPDSVC-Ablauf beschreibt den bisherigen Client.
-Er ist noch kein Nachweis fuer die Anbindung an den neuen R4OS Server.
-Dessen neuer Vertrag liest /catalog oder /catalog.json (Schema2) und die
-Katalog-Downloadadressen /packages/DATEINAME ueber geprueftes HTTPS4023.
-Registrierung, Rollen, Range-/Content-Range-Verhalten und HTTP401/403/429
-muessen bei der ausstehenden Clientumstellung ausdruecklich behandelt werden.
+Der folgende Ablauf ist im vorhandenen UPDSVC implementiert. Die Suche
+verwendet bereits /catalog.json (Schema2) ueber geprueftes HTTPS am
+Registry-Updateport (Standard4023). Registrierung, TLS und die getrennte
+401-/403-/429-Behandlung sind vorhanden. Der Download verwendet die
+Katalogadresse und Range-Fortsetzung. Diese vorhandenen Pfade muessen mit
+einem passenden freigegebenen Paket vom aktuellen R4OS Server bis zur
+Installation geprueft werden; der bisherige reine Suchnachweis reicht
+dafuer nicht aus.
 
 Ablauf:
 
