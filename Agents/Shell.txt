@@ -1,4 +1,4 @@
-R4OS Shell und Befehlsausfuehrung - Agent-Referenz
+﻿R4OS Shell und Befehlsausfuehrung - Agent-Referenz
 ==================================================
 
 Zweck: Verlaessliche Host-Aufrufe unter Windows und Linux sowie eine kompakte
@@ -89,6 +89,8 @@ R4OS-Terminal: Orientierung und Systemstatus
     SPECTRA METRICS ALL     Alle Kernelmessgruppen (gezielt Gruppe bevorzugen)
     SPECTRA LOGS BOOT       Begrenzter Kernel-Bootlog
     SPECTRA HELP            Gruppen, JSON, Export und begrenztes Watch
+    SPECTRA ohne Argumente  CLI-Hilfe, auch bei laufendem Desktop
+    Desktop-Spectra         Verknuepfung/Startmenue: GUI-Policy plus /GUI
     DATE                    Datum anzeigen
     TIME                    Uhrzeit anzeigen
     VOL                     Informationen zum aktuellen Laufwerk anzeigen
