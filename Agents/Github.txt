@@ -484,11 +484,17 @@ Checkout im frei gewaehlten Workspace-Root existiert:
    Organisationsprofil mit ihren jeweiligen Pull-Zielen beziehen.
 5. Benötigte Apps, Services, Diagnostics, Drivers, Protocols und Subsystems einzeln mit
    Rollenflag und Komponentenname beziehen.
-6. Die aktuelle Buildkette benoetigt vorerst weiterhin die lokalen
-   Toolinstallationen und Setupdateien. Einen neuen Workspace aus dem
-   erhaltenen lokalen Bestand vorbereiten. Die Uebernahme der Profilauswahl
-   durch SDK/Server/Studio ist eine getrennte Migration; der GitHub-Starter
-   beschafft kein DevKit-Mantelrepository mehr.
+6. Nach dem SDK-Checkout die vom SDK bestimmten Werkzeuge installieren:
+   `pwsh -NoProfile -File Repositories/SDK/Tools/Setup.ps1 -InstallRoot DevKit`.
+   Das Root-Setup aus Schritt 2 legt nur Workspaceverzeichnisse und die
+   Credentialvorlage an. Es installiert keine Compiler. Die drei SDK-Dateien
+   Profiles/Build.json, Tools.json und Components.json bestimmen Profile,
+   Werkzeuge, Contract und Systemlibraries; deren Quellen muessen zum
+   ausgewaehlten SDK-Satz passen. Benoetigte Hostpakete stehen in Tools.json.
+   Ein passender Werkzeugbestand kann ausdruecklich mit -ReuseRoot wieder-
+   verwendet werden. Alte DevKit-Setupdateien oder ein DevKit-Mantelrepository
+   sind nicht erforderlich. Studio-/Server-Anpassungen stehen getrennt in
+   Docs/SDK/SDK-Profilumstellung-Studio-Server.txt.
 7. Nur wenn in R4OSDev gepusht werden soll, Benutzername und Token in die
    lokale Credentials-Datei eintragen.
 
