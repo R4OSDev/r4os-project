@@ -102,6 +102,10 @@ Testplan auf und verlangt im Gast die Offline-Klickifax-Selbsttestmarker.
 KlickifaxLive bleibt dabei ein aufgenommenes Live-Diagnoseartefakt: QEMU hat
 im Headless-Lauf kein Netzwerk, deshalb wird KFXLIVE dort nicht gestartet.
 
+Der Standard-Testplan nimmt APPDEF und CLOCK ausdruecklich auf: Spectras
+bestehende Desktop-Vorpruefung der Subsystemabnahme benoetigt beide normalen
+Full-Anwendungen. Ihre IMAGE_SCOPE=full-Zuordnung bleibt erhalten.
+
 Die FAT-spezifische PAGECACHE-Probe nutzt F: auf einem frischen separaten
 64-MB-Medium mit TEMP/FATTEST.R4S; verwaltete C:/D: sind NTFS. Die privaten Registry-Selbsttests
 benennen eine regulaere SYSTEM.BAK zuvor in REGBOOT.BAK im selben Ordner

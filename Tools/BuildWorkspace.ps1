@@ -76,6 +76,8 @@ $testImageIncludes = @(
     '/R4OS/DRIVERS/ACPIPLAT.R4D', # actual external firmware worker transport in CPU acceptance
     '/R4OS/SOFTWARE/TERMINAL/BEEP.R4X',
     '/R4OS/SOFTWARE/DESKTOP/NOTEPAD.R4X',
+    '/R4OS/SOFTWARE/DESKTOP/APPDEF.R4X', # existing Spectra Desktop/subsystem prerequisite
+    '/R4OS/SOFTWARE/DESKTOP/CLOCK.R4X', # existing Spectra Desktop/subsystem prerequisite
     '/R4OS/SOFTWARE/DESKTOP/LOGCENTER.R4X', # normal GUI log/export owner in CHECK LIFECYCLE /APPS
     '/R4OS/SOFTWARE/DESKTOP/CALC.R4X', # normal GUI owner in the short SMP acceptance
     '/R4OS/SOFTWARE/DESKTOP/FONTS.R4X',
