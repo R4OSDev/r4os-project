@@ -174,15 +174,15 @@ separaten Serverprojekt heissen Tools/Publisher.sh bzw. Publisher.py;
 Ports, Rollen, CA und Aufrufbeispiele stehen in der aktuellen lokalen
 AGENTS.md sowie dessen Docs/Server-Vertraege.md und Server-Betrieb.md.
 
-Das vorhandene clientseitige Update-Center heisst im Startmenue
-"R4OS Update" (UPDATE.R4X); Anwendung und UPDSVC sind in Slim und Full
-enthalten. UPDSVC verwendet bereits das Registry-Ziel, R4SRV und den
-Schema-2-Katalog des neuen Servers. Die vorhandene Download-/Installations-
-logik ist damit noch nicht vollstaendig gegen den neuen Server abgenommen:
-Der bisherige oeffentliche Gastnachweis pruefte nur die Suche bei einem
-Katalog ohne passende freigegebene Releases. Ein erfolgreicher Serverupload
-belegt keinen Clientdownload und keine Installation. Administrative Updates
-ueber Inbox und SYSUPD bleiben verfuegbar.
+Seit 0.89.38 ist die eigenstaendige Oberflaeche "R4OS Update"
+(UPDATE.R4X) stillgelegt. Neue Slim-/Full-/Testimages und beide Desktop-
+Menuepfade enthalten sie nicht. UPDSVC, R4SRV, SYSUPD, Registryziele und
+Updatejournale bleiben bestehen. Fuer die Entfernung auf vorhandenen
+Installationen siehe Docs/Deployment/SystemUpdate.txt, Abschnitt
+"Standalone GUI retirement". Onlineupdates erhalten erst im kuenftigen
+App Center wieder eine Oberflaeche; derzeit SSH/SFTP-Inbox und SYSUPD nutzen.
+Die erhaltenen Backendpfade sind dadurch nicht neu gegen den Server
+abgenommen.
 
 
 Clientsuche und Download
@@ -207,8 +207,8 @@ Ablauf:
 4. Erst ein vollstaendiges Paket wird atomar unter seinem sichtbaren
    .R4U-Namen bereitgestellt.
 
-UPDATE.R4X steuert Suche, Paketansicht und Update All ueber UPDSVC. Update
-All bindet seine Queue an einen Suchsnapshot, laedt und verifiziert alle
+Die stillgelegte UPDATE.R4X steuerte Suche, Paketansicht und Update All.
+Die erhaltene UPDSVC-Operation Update All bindet ihre Queue an einen Suchsnapshot, laedt und verifiziert alle
 Pakete und bereitet erforderliche Neustartpakete als gemeinsamen Batch vor.
 
 
