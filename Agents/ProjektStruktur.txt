@@ -46,7 +46,8 @@ Zentrale Repositories:
       Tools/        ApiContractGen
 
     SDK/            hostneutrales SDK und Modul-Baugrundlage
-      BuildProfiles/  R4X/R4D/R4P/R4L- und C-Bauprofile
+      Profiles/       Build.json, Tools.json, Components.json: alleinige Politik
+      BuildProfiles/  erzeugte technische C-Projektionen
       Hosts/          Hostanpassungen fuer Windows, Linux und R4OS
       r4os/           Zig-Fassaden und Linkerunterstuetzung
       Shared/         gemeinsame Zig-/C-Bindings und Startup-Quellen
@@ -163,12 +164,13 @@ DevKit/
     HostTools/bin/      installierte R4OS-Hosttools
     HostTools/Source/   installierte Quellkopien fuer Hosttools
 
-Diese Inhalte werden unter Windows von `DevKit/Setup/Setup_Windows.bat` und
-unter Linux von `DevKit/Setup/Setup_Linux.sh` beschafft. Beide starten die
-gemeinsame `Setup.ps1`. Die installierten Contract-, SDK-, Libraries- und
-Distribution-Kopien sind Verbraucher und keine fachlichen Quellwahrheiten.
-Sie werden nicht fuer Produktentwicklung editiert; Aenderungen gehoeren nach
-`Repositories/`.
+DevKit bleibt eine lokale Installations-/Cacheablage. Das uebergeordnete
+Online-Repository ist stillgelegt und wird weder synchronisiert noch neu
+angelegt. Seine Starter delegieren an den SDK. Unabhaengige verschachtelte
+Besitzer-Repositories behalten ihre Git-Ziele. SDK/Tools/Setup.ps1 waehlt
+Werkzeuge aus Tools.json; Components.json bindet Contract/Systemlibraries.
+Installierte Kopien sind Verbraucher; Entwicklung bleibt beim Besitzer.
+
 
 
 Distribution/
@@ -185,7 +187,8 @@ Das Distribution-Repository besitzt:
     Tools/               ImageCreator, ImagePlan, NtfsVerify, R4UPack usw.
     Tests/               Plan-, Tool- und Headless-Auswertung
 
-QEMU, Limine, Zig und die gepinnte Rust-Toolchain liegen nur im DevKit. Distribution enthaelt die
+QEMU, Limine, Zig und Rust werden vom SDK gepinnt. DevKit ist der lokale
+Standardablageort; andere explizite InstallRoots sind zulaessig. Distribution enthaelt die
 R4OS-spezifischen Profile, Overlays und Aufrufe, aber keine zweite
 Installation dieser Fremdwerkzeuge.
 

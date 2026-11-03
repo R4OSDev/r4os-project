@@ -20,19 +20,19 @@ Windows:
 
     Tools\Setup.bat
     Tools\Github.bat -pull -docs
-    Tools\Github.bat -pull -devkit
-    DevKit\Setup\Setup_Windows.bat
+    Tools\Github.bat -pull -sdk -contract -libraries
+    Repositories\SDK\Tools\Setup.bat -InstallRoot DevKit
 
 Unter Linux werden dieselben Project-Aktionen ueber `Tools/Setup.sh`,
 `Tools/Github.sh` und `Tools/Build.sh` gestartet:
 
     ./Tools/Setup.sh
     ./Tools/Github.sh -pull -docs
-    ./Tools/Github.sh -pull -devkit
-    ./DevKit/Setup/Setup_Linux.sh
+    ./Tools/Github.sh -pull -sdk -contract -libraries
+    ./Repositories/SDK/Tools/Setup.sh -InstallRoot DevKit
 
-Das Linux-DevKit installiert Zig, Rust, Limine und QEMU, bezieht seine
-Verbraucherkopien und baut die Hosttools nativ. Image-, Verify- und
+Das SDK installiert seine Werkzeuge aus Profiles/Tools.json im gewaehlten
+InstallRoot. Contract und Systemlibraries muessen Components.json entsprechen. Image-, Verify- und
 QEMU-Aktionen setzen zusaetzlich die Linux-Unterstuetzung des
 Distribution-Besitzers voraus.
 Fehlt `pwsh` unter Debian, installiert `Tools/Setup.sh` es zuvor mit root- oder
@@ -60,12 +60,11 @@ Erwartete zentrale Pfade:
     Repositories/Kernel/
     Repositories/Distribution/
 
-Rust-Vorbereitung: ./DevKit/Setup/Rust.sh setup beziehungsweise
-DevKit\Setup\Rust.bat setup richtet ausschliesslich die in
-DevKit/Setup/RustToolchain.json festgelegte Stable-Toolchain ein: rustc/Cargo,
-rustfmt, Clippy, LLVM-Werkzeuge, Rust-Quellen und x86_64-unknown-none.
-Werkzeuge mit demselben Starter aufrufen, z. B. Rust.sh cargo --version;
-er setzt die isolierten Compilerhomes und die genaue Version nur pro Aufruf.
+Rust-Vorbereitung: Repositories/SDK/Tools/Rust.sh --root DevKit setup liest
+Profiles/Tools.json des SDK; --profile kernel richtet Kernelkomponenten ein.
+Rust.sh cargo --version setzt isolierte Compilerhomes nur pro Aufruf.
+Historische DevKit-JSON-Dateien sind keine aktiven Pins. DevKit ist ein
+frei waehlbarer lokaler Ablageort.
 Seit 0.83.27 startet der Kernel dieselbe PowerShell-Logik auf beiden Hosts:
 Cargo baut Rust und notwendige Assembly und linkt mit rust-lld ohne Zig.
 Kerneloptionen: Repositories/Kernel/BuildOptions.json.
@@ -538,3 +537,15 @@ Phase auf aktuellen Testartefakten; Quick-, Browser-, Fehler-Injektionsproben
 und reine Builds starten sie nicht. Referenzvergleich/Verlustfrei-Export beim
 Spectra-Besitzer, ohne Datenbankdienst. Workloads, Grenzen und Datensatz:
 Docs/Diagnostics/SpectraStandardBenchmark.txt.
+
+Verbindlicher SDK-Profilsatz (0.89.25-0.89.33)
+-------------------------------------------
+Settings.R4S/Rootargumente waehlen Orte; SDK/Profiles/Build.json, Tools.json
+und Components.json waehlen Politik und Systemkomponenten. Profile.ps1
+Validate/Describe/Resolve ist compilerfrei. Veraenderte Quellen benoetigen
+einen ausdruecklichen Develop-Beleg. Normale Builds weisen Mischstaende und
+versteckte Flags/Forks/Cargo-Overrides ab. Modulbesitzer delegieren an
+SDK/Tools/BuildModule.ps1, externe Projekte an Build-Project.ps1. Kernel,
+native Grafik und Recovery nutzen eigene SDK-Profile. Imageinhalte und
+normative ABI bleiben beim bisherigen Besitzer. Docs/SDK/Profiles.txt
+beschreibt Installation, Paketpruefung und Studio-/Serveranschluss.

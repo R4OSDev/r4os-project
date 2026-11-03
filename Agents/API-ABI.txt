@@ -158,3 +158,12 @@ Die API-Tabelle wird nur angehaengt; der Generator aktualisiert Schema,
 Baseline und alle Sprachen gemeinsam mit Build.sh write -- --baseline
 (Windows: Build.bat write -- --baseline). Nie einen alten installierten
 Generator fuer einen neuen Schemaabschluss wiederverwenden.
+
+SDK-Auswahl und Paketanschluss (0.89.33)
+--------------------------------------
+Normative API/ABI-/Hardwarevertraege bleiben bei Contract/Librarybesitzern.
+Das SDK waehlt deren aktiven Stand und die Compiler-/Werkzeugpolitik allein
+in Profiles/Build.json, Tools.json und Components.json. Caller-Roots sind
+Orte; Zusatzlibraries ersetzen keine Systembindung. Package.ps1 und der
+Schema3-Faehigkeitskatalog liefern den abgeleiteten Studio-/Serveranschluss.
+Anleitung: Docs/SDK/Profiles.txt; finale Uebergabe in 0.89.37.
