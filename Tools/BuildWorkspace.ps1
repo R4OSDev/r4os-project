@@ -45,6 +45,10 @@ $executableSuffix = if ($IsWindows) { '.exe' } else { '' }
 $pathComparison = if ($IsWindows) { [StringComparison]::OrdinalIgnoreCase } else { [StringComparison]::Ordinal }
 $docsInventoryTool = Join-Path $workspaceRoot 'Docs/Inventory/DocsInventory.ps1'
 $zigExe = Join-Path $devKitRoot ('Toolchains/Zig/zig' + $executableSuffix)
+. (Join-Path $sdkRoot 'Tools/BuildContext.ps1')
+$sdkBuildContext=Get-R4SdkBuildContext $sdkRoot $contractRoot $librariesRoot $devKitRoot
+$zigExe=$sdkBuildContext.zig
+
 $moduleCatalogExe = Join-Path $sdkRoot ('zig-out/bin/module-catalog' + $executableSuffix)
 $distributionInputRoot = Join-Path $artifactsRoot 'Distribution/Inputs'
 $workspaceMapPath = Join-Path $distributionInputRoot 'WorkspaceModules.map'
@@ -276,7 +280,7 @@ function Build-Central {
     Write-Section 'Contract'
     Assert-File $zigExe 'Zig'
     Assert-File (Join-Path $contractRoot 'build.zig') 'Contract-Build'
-    Invoke-External $zigExe @('build') $contractRoot
+    Invoke-External (Join-Path $contractRoot $repositoryBuildName) @() $contractRoot
 
     Write-Section 'SDK'
     Invoke-External (Join-Path $sdkRoot $repositoryBuildName) @() $sdkRoot
