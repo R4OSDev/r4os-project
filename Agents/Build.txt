@@ -169,7 +169,7 @@ Profilzuordnung:
     Slim    slim
     Full    slim + full
     Test    slim + test sowie die expliziten Test-Includes des Orchestrators
-    Benchmark slim + full sowie explizit benannte Diagnosemodule aus test
+    Benchmark slim + full; eigener Benchmark-Overlay
     none    in keinem normalen Image; nur ausdruecklich in einem Testplan
 
 Das Testprofil verwendet zusaetzlich
@@ -208,9 +208,10 @@ wie der normale Test auf SUBSYS.OK und prueft die Browsermarker explizit.
 Das Benchmarkprofil verwendet stattdessen ausschliesslich das versionierte
 `BenchmarkInjection/` ueber `Injection/` und setzt dort das Terminal als
 AUTOEXEC-faehige Shell. Nicht versionierte und private
-Overlays werden dort absichtlich nicht eingemischt. Seine aktuelle explizite
-Diagnosefreigabe ist `SPECTRA`; dafuer wurde kein vierter `IMAGE_SCOPE`
-eingefuehrt.
+Overlays werden dort absichtlich nicht eingemischt. `SPECTRA` ist mit
+`IMAGE_SCOPE=slim` bereits in allen Profilen enthalten; die explizite
+Benchmark-Includeliste ist aktuell leer. Benchmark ist ein Buildprofil,
+kein eigener `IMAGE_SCOPE`.
 
 
 Einzelne Repositories bauen

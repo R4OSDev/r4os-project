@@ -181,7 +181,8 @@ Das Distribution-Repository besitzt:
     Assets/SystemFonts/  Fontgeneratoren und Fontquellen
     Injection/           versioniertes Overlay fuer normale Images
     TestInjection/       zusaetzliches Overlay fuer das Testprofil
-    Profiles/            Slim.R4S, Full.R4S und Test.R4S
+    BenchmarkInjection/  eigenes Overlay fuer das Benchmarkprofil
+    Profiles/            Slim.R4S, Full.R4S, Test.R4S und Benchmark.R4S
     QEMU/                R4OS-spezifische QEMU-Konfiguration
     Release.bat          Releasepakete vorbereiten und auf GitHub publizieren
     Tools/               ImageCreator, ImagePlan, NtfsVerify, R4UPack usw.
