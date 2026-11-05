@@ -5,7 +5,7 @@ Der produktive Kernel besteht aus Rust und notwendiger x86_64-Assembly;
 Apps, Dienste, Libraries, Treiber, Protokolle und der separate Recovery-Kernel
 behalten ihre jeweiligen Besitzer und Builds.
 
-    DevKit\        Installierte SDK- und Hostwerkzeuge
+    DevKit\        Lokale Werkzeuginstallationen ohne eigenes Online-Repo
     Repositories\  Eigenstaendige R4OS-Quell-Repositories
       Apps\         Anwendungen
       Services\     Dienste
@@ -30,12 +30,17 @@ Repository-Verwaltung benoetigt.
 
 GitHub-Zugriffe erfolgen unter Windows ueber `Tools\Github.bat` und unter Linux
 ueber `./Tools/Github.sh`. Oeffentliche Pulls laufen auf beiden Hosts anonym.
-Das DevKit wird mit `-Pull -DevKit` bezogen; seine hostspezifische Einrichtung
-bleibt Eigentum des DevKit-Repositories. Danach wird es unter Windows mit
-`DevKit\Setup\Setup_Windows.bat` oder unter Linux mit
-`./DevKit/Setup/Setup_Linux.sh` eingerichtet. Beide Starter verwenden dieselbe
-PowerShell-Logik; unter Linux werden die festgelegten nativen Toolchains und
-Hosttools installiert beziehungsweise gebaut.
+Docs werden mit `-Pull -Docs`, SDK und Komponenten mit
+`-Pull -SDK -Contract -Libraries` bezogen. Die Werkzeuge installiert unter
+Windows `Repositories\SDK\Tools\Setup.bat -InstallRoot DevKit`, unter Linux
+`./Repositories/SDK/Tools/Setup.sh -InstallRoot DevKit`.
+Allein das SDK definiert Build-/Werkzeugprofile sowie Contract und
+Systemlibraries in `Profiles/Build.json`, `Profiles/Tools.json` und
+`Profiles/Components.json`. Die Komponenten muessen dieser Auswahl
+entsprechen; Apps duerfen Zusatzlibraries selbst pinnen. DevKit bleibt eine
+lokale Installationsablage. Sein stillgelegtes Elternrepository wird weder
+gepullt noch gepusht oder neu angelegt. Details: `Agents/Build.txt` und
+`Docs/SDK/Profiles.txt`.
 
 Der gemeinsame Build startet unter Windows mit `Tools\Build.bat` und unter
 Linux mit `./Tools/Build.sh`. Beide rufen dieselbe PowerShell-Orchestrierung

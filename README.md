@@ -6,7 +6,7 @@ required x86_64 assembly. Applications, services, libraries, drivers, protocols
 and the separate Recovery kernel retain their existing Zig builds.
 
     Agents/        Compact agent-facing project references
-    DevKit/        Installed SDK and host tools
+    DevKit/        Local tool installations; no parent remote repository
     Docs/          Cross-project documentation and inventories
     Repositories/  Independent R4OS source repositories
     Artifacts/     Local build and test outputs
@@ -36,13 +36,20 @@ The Batch and shell files are thin host launchers. Shared setup, GitHub, clean,
 and workspace-build behavior is implemented once in PowerShell 7 using paths
 derived from each script location.
 
-Public source checkouts do not require a GitHub account or API token. Pull Docs
-and the DevKit on Windows with `Tools\Github.bat -Pull -Docs` and
-`Tools\Github.bat -Pull -DevKit`, or on Linux with
-`./Tools/Github.sh -Pull -Docs` and `./Tools/Github.sh -Pull -DevKit`.
-Initialize the checked-out DevKit with `DevKit\Setup\Setup_Windows.bat` or
-`./DevKit/Setup/Setup_Linux.sh`. Both launch its shared PowerShell setup; the
-Linux launcher installs the pinned native toolchain and host tools.
+Public source checkouts do not require a GitHub account or API token. On
+Windows, pull `Docs` with `Tools\Github.bat -Pull -Docs`, then the SDK and
+components with `Tools\Github.bat -Pull -SDK -Contract -Libraries`. On Linux,
+use `./Tools/Github.sh -Pull -Docs` and
+`./Tools/Github.sh -Pull -SDK -Contract -Libraries`.
+Install the SDK-selected tools with
+`Repositories\SDK\Tools\Setup.bat -InstallRoot DevKit` on Windows or
+`./Repositories/SDK/Tools/Setup.sh -InstallRoot DevKit` on Linux.
+The SDK alone defines build and tool profiles, Contract and system libraries
+in `Profiles/Build.json`, `Profiles/Tools.json` and `Profiles/Components.json`.
+Component checkouts must match that selection; applications may pin additional
+libraries. DevKit remains a local installation location. Its retired parent
+repository must not be pulled, pushed or recreated. See `Agents/Build.txt`
+and `Docs/SDK/Profiles.txt` for the matched setup and build workflow.
 The setup also creates the ignored local file `QuickNotes.txt` when missing,
 without overwriting existing content.
 

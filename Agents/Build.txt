@@ -126,8 +126,8 @@ Ablauf eines Gesamtbuilds
 1. Den Dateibestand in `Docs/Inventory/Docs.json` inkrementell abgleichen und
    anschließend mit dem schreibfreien Dokumentinventar-Gate prüfen. Dieser
    Schritt läuft vor jeder globalen Buildaktion, nicht nur vor `-all`.
-2. Contract mit dem Zig aus dem DevKit bauen. Der normale Install-Step prueft
-   die generierten Contractartefakte.
+2. Contract ueber dessen Besitzerstarter und die SDK-Auswahl bauen. Der
+   normale Install-Step prueft die generierten Contractartefakte.
 3. SDK ueber dessen `Build.bat` mit dem lokal gemappten Contract bauen.
 4. R4STD, R4IMG und R4FONT ueber `Repositories/Libraries/Build.bat` bauen.
 5. Kernel ueber `Repositories/Kernel/Build.bat` bauen. Die sechs Platform
@@ -239,8 +239,7 @@ gepinnten Stand verwenden oder an einem privaten Remote scheitern.
 
 Zentrale repositoryeigene Tests:
 
-    cd Repositories\Contract
-    ..\..\DevKit\Toolchains\Zig\zig.exe build test
+    Repositories\Contract\Build.bat test
 
     Repositories\SDK\Build.bat test
     Repositories\Libraries\Build.bat test

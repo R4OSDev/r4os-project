@@ -32,8 +32,7 @@ Repositoryeigene Tests
 
 Die wichtigsten Aufrufe unter Windows:
 
-    cd Repositories\Contract
-    ..\..\DevKit\Toolchains\Zig\zig.exe build test
+    Repositories\Contract\Build.bat test
 
     Repositories\SDK\Build.bat test
     Repositories\Libraries\Build.bat test

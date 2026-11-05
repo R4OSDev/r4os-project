@@ -143,7 +143,7 @@ das vollstaendige OK; HTTPS prueft Server-IP und die lokale CA. Secret,
 Publisher- und Adminnachweis sind getrennte Zugangsdaten aus geschuetzten
 Dateien, keine Quellcode- oder Protokollinhalte.
 
-Fuer 0.89.X ist zusaetzlich der oeffentliche Anschluss vorgesehen:
+Der oeffentliche Clientanschluss ist implementiert:
 Registrierung 138.201.253.143:4021 nur mit TLS, Updates HTTPS auf 4023 und
 Benchmarks HTTPS auf 4024. Das explizite Profil PUBLIC oder LAN steht in
 C:\R4OS\CONFIG\R4OSSERVER.R4S. Die Ziele fuer AppCenter, Updates und
@@ -153,12 +153,16 @@ Registrierungsport 4021 verwendet die IP des jeweiligen Ziels. Die neue CA
 liegt im Zertifikatskatalog; R4TLS prueft bei IP-Adressen den passenden SAN,
 die Kette und die UTC-Gueltigkeit. Zugangsdaten gehoeren ausschliesslich in
 lokale, nicht verteilte Konfiguration unter C:\R4OS\SECRETS.
-Der AppCenter-Dienst auf 4022 ist noch nicht verfuegbar.
+Der Software-/AppCenter-Dienst auf HTTPS4022 liefert den Portex-Katalog
+und unveraenderte App-, Library- und Kernelassets. Registrierung und
+vertrauenswuerdige CA muessen lokal eingerichtet sein. Der reale PUBLIC-
+Appweg ist in Docs/Deployment/Portex.txt dokumentiert; Library-/Kernel-
+Abnahmen verwenden die dort ausdruecklich genannten Fixtures.
 Das bisherige UPDATE.R4S mit altem Endpoint und MAGIC_KEY wird nicht in
 Registry oder Secretdatei uebernommen. UPDSVC verwendet das Registry-Ziel und
 den gemeinsamen Dienst R4SRV; die Update-Suche ist aktiviert, benoetigt aber
-ein lokal bereitgestelltes Registrierungssecret. Ein Gastlauf las den
-oeffentlichen Schema-2-Katalog und meldete beim aktuellen lokalen Stand
+ein lokal bereitgestelltes Registrierungssecret. Ein damaliger Gastlauf las den
+oeffentlichen Schema-2-Katalog und meldete beim geprueften lokalen Stand
 `up-to-date`; Download und Apply sind noch offen. Vorhandene einzelne
 Registry-Zielwerte bleiben bei der Migration erhalten.
 
