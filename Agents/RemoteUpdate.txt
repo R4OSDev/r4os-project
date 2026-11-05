@@ -179,10 +179,16 @@ Seit 0.89.38 ist die eigenstaendige Oberflaeche "R4OS Update"
 Menuepfade enthalten sie nicht. UPDSVC, R4SRV, SYSUPD, Registryziele und
 Updatejournale bleiben bestehen. Fuer die Entfernung auf vorhandenen
 Installationen siehe Docs/Deployment/SystemUpdate.txt, Abschnitt
-"Standalone GUI retirement". Onlineupdates erhalten erst im kuenftigen
-App Center wieder eine Oberflaeche; derzeit SSH/SFTP-Inbox und SYSUPD nutzen.
-Die erhaltenen Backendpfade sind dadurch nicht neu gegen den Server
-abgenommen.
+"Standalone GUI retirement". Seit0.89.55 ist Portex das neue Software Center
+fuer Original-R4X-, Library- und Kernelartefakte aus dem Softwarekatalog auf
+Port4022. Portex verwendet den gemeinsamen Installations-/Updatebesitzer,
+eigene ausdrueckliche Einzel-/Sammelupdates und App-Deinstallation.
+Der Schema2-R4U-Updatekatalog auf4023 und getrennte Systemdatenpakete sind
+damit keine zusaetzlich integrierten GUI-Funktionen. Fuer administrative
+R4U-Pakete bleiben SSH/SFTP-Inbox und SYSUPD erhalten. Bedienung, Registry,
+TLS-Konfiguration und tatsaechlicher Pruefumfang stehen in
+Docs/Deployment/Portex.txt. Die frueheren Backendpfade sind allein durch
+die neue Portex-Oberflaeche nicht neu gegen den Server abgenommen.
 
 
 Clientsuche und Download
