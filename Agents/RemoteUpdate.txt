@@ -155,13 +155,18 @@ die Kette und die UTC-Gueltigkeit. Zugangsdaten gehoeren ausschliesslich in
 lokale, nicht verteilte Konfiguration unter C:\R4OS\SECRETS.
 Der Software-/AppCenter-Dienst auf HTTPS4022 liefert den Portex-Katalog
 und unveraenderte App-, Library- und Kernelassets. Registrierung und
-vertrauenswuerdige CA muessen lokal eingerichtet sein. Der reale PUBLIC-
+vertrauenswuerdige CA muessen vorhanden sein. Ab0.90.3 initialisiert R4SRV den offiziellen
+PUBLIC-Lesezugang automatisch ueber geprueftes HTTPS; bestehende lokale
+Registrierungsdaten, LAN und angepasste Ziele bleiben erhalten. Der reale PUBLIC-
 Appweg ist in Docs/Deployment/Portex.txt dokumentiert; Library-/Kernel-
 Abnahmen verwenden die dort ausdruecklich genannten Fixtures.
 Das bisherige UPDATE.R4S mit altem Endpoint und MAGIC_KEY wird nicht in
 Registry oder Secretdatei uebernommen. UPDSVC verwendet das Registry-Ziel und
-den gemeinsamen Dienst R4SRV; die Update-Suche ist aktiviert, benoetigt aber
-ein lokal bereitgestelltes Registrierungssecret. Ein damaliger Gastlauf las den
+den gemeinsamen Dienst R4SRV; die Update-Suche ist aktiviert. Der offizielle
+PUBLIC-Erstzugang benoetigt ab0.90.3 keine manuell kopierte Secretdatei.
+R4SRV speichert den installationsbezogenen Lese-/Registrierungsnachweis
+atomar und getrennt unter C:\R4OS\SECRETS\PUBLIC.R4S. Details:
+Docs/Deployment/PortexFirstStart090.txt. Ein damaliger Gastlauf las den
 oeffentlichen Schema-2-Katalog und meldete beim geprueften lokalen Stand
 `up-to-date`; Download und Apply sind noch offen. Vorhandene einzelne
 Registry-Zielwerte bleiben bei der Migration erhalten.
