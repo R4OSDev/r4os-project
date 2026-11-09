@@ -159,6 +159,10 @@ Rust/program/
     entry/launch/process/program_api/shell_launcher: Start und Prozessrollen
     fault/stack/stack_fault: residente Fault-Fortsetzung, Wachstum und
     genau zugelassener R4X-Reserveabbruch zum bestehenden Prozess-Reaper
+    byte_pipes: residente begrenzte Bytekanaele, genaue Prozessreferenzen,
+    native Taskqueues und quittierter Reaperabbau; keine SDK-Transferpolicy.
+    deadline_policy: gemeinsame reine absolute Clock-/Budgetwerte fuer
+    WaitSet und Byte-Pipes, kein zweiter Clock- oder Schedulingbesitzer.
     async_io/system/console*/remote_frame*: genaue Ressourcenleihen
     r4desk*/r4draw/network*/r4audio/r4dev/: fachliche API-Besitzer
     self_test: gemeinsamer Zustand, vorhandene Helfer und Fallsteuerung;
