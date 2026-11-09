@@ -124,6 +124,12 @@ erst nach gesondertem Auftrag. Normative Auswahl bleibt beim SDK.
 - Bestehende Slots, Namen, Layouts und Fehlercodes bleiben binaer stabil.
   Neue Zahlen werden nicht in Agent-Dateien wiederholt, sondern aus Contract
   und generierten Dateien gelesen.
+- Neue SDK-FFI-Grenzen fuer C/Rust transportieren Parameterrecords ueber
+  geliehene Zeiger und kopieren sie vor der Besitzertransition. Reine
+  Layoutasserts belegen keine identische Argumentuebergabe: gezielte echte
+  Sprachproben muessen auch Register-/Stackdruck abdecken. Der konkrete
+  Kompositionsfall steht in Docs/API/TextComposition.txt. Bestehende normative
+  Wertparameter behalten ihren Vertrag.
 - SDK-Fassaden fuer Storage, GUI, Ressourcen, Services/Netz, Audio und
   Geraete bleiben der einzige normale Verbraucherpfad; ihre dauerhaften
   Conformance-Tests werden nicht entfernt. Keine zweite Netzimplementierung,
