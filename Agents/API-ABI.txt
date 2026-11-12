@@ -77,7 +77,8 @@ Updatepfad. Ihre Implementierungsversion folgt dem Kernelartefakt; Namen,
 Gruppen-IDs, Query-Revision und Tabellenlayouts folgen dem zentralen
 Contract.
 
-Ein normales R4X exportiert `R4XStart:1` und importiert `R4SYS:Query:1`.
+Ein migriertes normales R4X exportiert `R4XStart2:2` und importiert
+`R4SYS:Query2:2`; sein SDK-Profil waehlt den echten Start2-Kontext.
 Jede weitere Gruppe steht ausschliesslich als geordnete `IMPORT=`-Zeile in
 `module.R4MF`. Die vollstaendigen Container- und Manifestregeln stehen in
 `Agents/R4M0-Container.txt`.
@@ -111,13 +112,15 @@ keine `App.standard`-Fassade und keine R4STD-Implementierung im Kern-SDK.
 Kompatibilitaet und Fassaden
 ----------------------------
 
-Der beschlossene Zielvertrag der getrennten Plattformgeneration 2 steht in
-Docs/API/Generation2.txt. Der neue Symbolraum Query2 /
-R4XStart2 verhindert eine inkompatible Aufloesung durch die bisherige
-Mindestversionssuche. Das ist keine Aussage ueber bereits implementierte
-Provider. Bestehende Modulprofile und Verbraucher bleiben waehrend des
-Anbieterumbaus unveraendert; Abschaltung und Verbrauchercutover folgen
-erst nach gesondertem Auftrag. Normative Auswahl bleibt beim SDK.
+Der implementierte Plattformvertrag der Generation 2 steht in
+Docs/API/Generation2.txt; die Anbieterabnahme steht in
+Docs/API/ProviderHandoff.txt. Query2/R4XStart2 verhindern eine inkompatible
+Aufloesung durch die Mindestversionssuche. Die laufende Verbrauchermigration
+und ihre verbleibenden Grenzen stehen in Docs/API/ConsumerMigration.txt
+und in der Roadmap-API. Noch nicht migrierte Verbraucher verwenden waehrend
+dieses kontrollierten Uebergangs weiterhin R4XStart:1/Query:1. Der gemeinsame
+Altanbieter wird erst nach dem vollstaendigen Restverbrauchernachweis und
+dem geplanten Cutover entfernt. Normative Profilauswahl bleibt beim SDK.
 
 - `extensible`-Typen wachsen ausschliesslich am Ende nach ihrem Versions- und
   Groessenvertrag. `fixed_layout`-Typen werden nie in-place erweitert.
