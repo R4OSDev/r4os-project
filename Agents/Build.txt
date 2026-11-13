@@ -374,7 +374,11 @@ Ein neues Quellimage erhaelt einen neuen interaktiven Zustand. Der Releasebau
 formatiert DATA in seiner privaten Arbeitskopie neu. USB-Starter und das
 Original-ZIP liegen im Paket; das Quellimage selbst enthaelt keinen ZIP-Cache.
 `RecoveryPin.json` verlangt einen ausdruecklich veroeffentlichten Recovery-
-Stand. Technische Pruefungen verwenden `-RecoveryCandidate <ZIP>` beim
+Stand. Ein wegen alter Plattformverbraucher stillgelegter Pin (status=retired)
+blockiert neue normale Images und Releases bereits vor Cache-/Downloadzugriff;
+das alte Paket bleibt nur historischer Beleg. Ein neuer produktiver Pin benoetigt
+einen qualifizierten veroeffentlichten Ersatz.
+Technische Pruefungen verwenden `-RecoveryCandidate <ZIP>` beim
 Distribution-Build bzw. `-TechnicalCandidate -RecoveryCandidate <ZIP>` bei
 `Tools/Release.ps1`. Technische Pakete koennen nicht veroeffentlicht werden.
 
