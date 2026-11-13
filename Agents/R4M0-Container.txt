@@ -55,7 +55,7 @@ Imports, Exports und Entry
 
 Ein Import nennt Modul, Symbol und Mindestversion:
 
-    R4SYS:Query:1
+    R4SYS:Query2:2
     ACMECODEC:API_V1:2
 
 Optionale Runtime-R4L-Imports verwenden das vierte Feld Flags=1:
@@ -74,21 +74,27 @@ Ein Export nennt oeffentlichen Namen, Section, Sectionoffset und Revision.
 Namen und Revisionen muessen innerhalb des Moduls case-insensitiv eindeutig
 sein.
 
-Ein normales R4X exportiert R4XStart:1 und importiert R4SYS:Query:1. Weitere
-Anforderungen stehen als geordnete IMPORT=-Zeilen im Manifest.
+Ein normales R4X exportiert R4XStart2:2 und importiert R4SYS:Query2:2.
+Der normale SDK-Default verwendet den echten120-Byte-Start2-Kontext.
+Weitere Anforderungen stehen als geordnete IMPORT=-Zeilen im Manifest.
+Der kontrollierte Altanbieter und dessen spaetere Abschaltung sind in
+Agents/API-ABI.txt und der Roadmap beschrieben; Altartefakte sind keine
+Vorlage fuer neue normale Module.
 
 Importe der sechs Platform APIs werden gegen die bereits registrierten
 Kernel-Provider aufgeloest. Sie erzeugen keine Datei- oder Imageabhaengigkeit.
 
-Eine Runtime-R4L exportiert Query:1 und mindestens eine fachliche,
-versionierte Tabelle. Der Manifestwert
+Eine normale Runtime-R4L exportiert die technische Query2:2 und mindestens
+eine eigenstaendige fachliche, versionierte Tabelle. Deren Namen und
+Revisionen wie API_V1:1 werden durch die Plattformmigration nicht umbenannt.
+Der Manifestwert
 
     EXPORT=<oeffentlicher Name>:<globales ELF-Symbol>:<Revision>
 
 bindet den oeffentlichen R4M0-Namen an das Symbol der Implementierung.
 
-R4D und R4P verwenden die Entry-, Import- und Exportregeln ihrer jeweiligen
-Contract-Dokumente.
+R4D und R4P verwenden ihre getrennten DriverInit2-/ProtocolInit2-Vertraege
+und die Entry-, Import- und Exportregeln ihrer jeweiligen Contract-Dokumente.
 
 
 Ressourcenbereich
@@ -180,14 +186,15 @@ Vollstaendiges R4X-Beispiel:
     NAME=NOTEPAD
     VERSION=0.1.0
     LANGUAGE=Zig
+    SDK_PROFILE=r4os-zig-generation2
     SOURCE=src/main.zig
     ENTRY_MODE=app
     APP_CLASS=gui
     TARGET=/R4OS/SOFTWARE/DESKTOP/NOTEPAD.R4X
     IMAGE_SCOPE=full
-    IMPORT=R4SYS:Query:1
-    IMPORT=R4DESK:Query:1
-    IMPORT=R4DRAW:Query:1
+    IMPORT=R4SYS:Query2:2
+    IMPORT=R4DESK:Query2:2
+    IMPORT=R4DRAW:Query2:2
     META=desktop.launch=hosted
     ICON=Assets/Desktop.ico
     HELP=Assets/Help.txt
@@ -204,6 +211,7 @@ Kanonische Feldreihenfolge:
     NAME
     VERSION
     LANGUAGE
+    SDK_PROFILE
     SOURCE
     ENTRY_MODE
     APP_CLASS
