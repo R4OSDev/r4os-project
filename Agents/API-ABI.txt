@@ -21,25 +21,30 @@ Seit 0.90.88 ist Schema 12 unmittelbar der aktuelle Generation2-Vertrag
 aller 533 Gruppenslots (526 Funktionen, sieben Reserven) sowie Query2/Start2.
 API/Generation2.json (Schema 2) besitzt die fuenf technischen Generation2-Records und ihre
 Callback-/Auswahlvertraege. API/Generation2.baseline.json schuetzt diese
-Layouts. Alte Tabellen sind nur noch befristete Rueckprojektionen aus
-dieser aktuellen Quelle; API/LegacyProjection.json besitzt keine zweite
-aktive Funktionsliste. Ihre Entfernung gehoert den geplanten 0.90.89/90.
+Layouts. Die alten Drahtdefinitionen bleiben als historische Vergleichs- und
+Ablehnungsdaten erhalten; API/LegacyProjection.json besitzt keine zweite
+aktive Funktionsliste. Seit0.90.89 publiziert kein normaler oder Recovery-
+Kernel einen alten technischen Anbieter. SDK0.64.218 verwendet nur die
+aktuellen Generation2-Fassaden; die Qualifizierung und Quellenbereinigung
+werden in0.90.90 abgeschlossen.
 
 Die erzeugten Zig-, C- und Rust-Bindings, Kernelseite, Contractlayouts,
 Conformance-Fixtures, API-Dokumente und das API-Inventar liegen unter
 `Repositories/Contract/Generated/`. Erzeugte Dateien und erzeugte Bereiche in
 `Docs/API/` werden nicht von Hand editiert.
 
-Ausnahme im bestehenden, bis 0.90.90 zu bereinigenden alten Fassadenbestand: In
+Historische Drahtdefinitionen und gemeinsame Records: In
 `Generated/SDK/Zig/abi.zig` verwaltet der Generator nur den markierten
-`R4OS-ABI-GENERATED-EXPORTS`-Block. Die technischen Typen ausserhalb dieses
-Blocks (darunter das alte DriverApi) werden im Contract bewusst append-only gepflegt;
-der Generator erhaelt sie unveraendert. Solche Aenderungen benoetigen den
-passenden Versionsentscheid, dokumentierten Praefixvergleich und SDK-/Kernel-
-Layoutpruefung. Der markierte Block bleibt ausschliesslich generiert.
+`R4OS-ABI-GENERATED-EXPORTS`-Block. Technische Definitionen ausserhalb dieses
+Blocks, darunter das historische DriverApi, bleiben fuer Layoutvergleich und
+Ablehnung alter Artefakte erhalten. Sie sind keine aktuelle SDK-Fassade und
+kein alter Kernelanbieter. Fachliche gemeinsame Records behalten ihren
+Vertrag; beabsichtigte Aenderungen verlangen Versionsentscheid,
+Praefixvergleich und SDK-/Kernel-Layoutpruefung. Der markierte Block bleibt
+nach wie vor ausschliesslich generiert.
 
 Rust-Bindings unter Contract/Generated/SDK/Rust/ reflektieren den gesamten
-kanonischen Zig-Typbestand einschliesslich dieses technischen Fassadenteils.
+kanonischen Zig-Typbestand einschliesslich historischer Drahtdefinitionen.
 Contract write erzeugt zuerst Zig/C und danach Rust; normaler Build/check
 vergleichen alle Ausgaben. Host-/Baretarget-Layouts und native Rust/Zig/C-
 Callbacks gehoeren zum bestehenden Contract-test. Darstellung, Defaults,
@@ -126,10 +131,11 @@ Docs/API/Generation2.txt; die Anbieterabnahme steht in
 Docs/API/ProviderHandoff.txt. Query2/R4XStart2 verhindern eine inkompatible
 Aufloesung durch die Mindestversionssuche. Die laufende Verbrauchermigration
 und ihre verbleibenden Grenzen stehen in Docs/API/ConsumerMigration.txt
-und in der Roadmap-API. Noch nicht migrierte Verbraucher verwenden waehrend
-dieses kontrollierten Uebergangs weiterhin R4XStart:1/Query:1. Der gemeinsame
-Altanbieter wird erst nach dem vollstaendigen Restverbrauchernachweis und
-dem geplanten Cutover entfernt. Normative Profilauswahl bleibt beim SDK.
+und in der Roadmap-API. Seit dem abgeschlossenen Cutover0.90.89 verwenden alle145 kanonischen
+Module und39 Recoveryvarianten die technischen Generation2-Einstiege. Alte
+Artefakte werden vor ihrem Einstieg abgewiesen. Die noch offenen90..92
+bereinigen SDK/Buildpfade und qualifizieren das vollstaendige Zielsystem.
+Normative Profilauswahl bleibt beim SDK.
 
 - `extensible`-Typen wachsen ausschliesslich am Ende nach ihrem Versions- und
   Groessenvertrag. `fixed_layout`-Typen werden nie in-place erweitert.

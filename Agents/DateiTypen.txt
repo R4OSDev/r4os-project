@@ -14,13 +14,13 @@ Module und Projekte
 Vier Endungen verwenden den gemeinsamen R4M0-Container:
 
     .R4X    Programm oder Dienst
-            Exportiert R4XStart:1 und importiert R4SYS:Query:1.
+            Exportiert R4XStart2:2 und importiert R4SYS:Query2:2.
             APP_CLASS ist console, gui oder service.
             Ziele liegen unter C:\R4OS\SOFTWARE\ oder
             C:\R4OS\SERVICES\.
 
     .R4L    unabhaengige Runtime-Library
-            Exportiert Query:1 und eigene versionierte Tabellen. R4STD,
+            Exportiert Query2:2 und eigene versionierte Tabellen. R4STD,
             R4IMG und R4FONT sind aktuelle Beispiele. Die sechs Platform APIs
             R4SYS bis R4DEV sind eingebaute Kernel-Provider und besitzen
             keine R4L-Datei. Ziel echter Runtime-Libraries:
