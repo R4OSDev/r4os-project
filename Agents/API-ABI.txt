@@ -25,8 +25,9 @@ Layouts. Die alten Drahtdefinitionen bleiben als historische Vergleichs- und
 Ablehnungsdaten erhalten; API/LegacyProjection.json besitzt keine zweite
 aktive Funktionsliste. Seit0.90.89 publiziert kein normaler oder Recovery-
 Kernel einen alten technischen Anbieter. SDK0.64.218 verwendet nur die
-aktuellen Generation2-Fassaden; die Qualifizierung und Quellenbereinigung
-werden in0.90.90 abgeschlossen.
+aktuellen Generation2-Fassaden. Qualifizierung und Quellenbereinigung
+sind seit 0.90.90 abgeschlossen. Die Gesamtabnahme steht in
+Docs/Changelogs/V0.90.X.txt und Docs/API/ProviderHandoff.txt.
 
 Die erzeugten Zig-, C- und Rust-Bindings, Kernelseite, Contractlayouts,
 Conformance-Fixtures, API-Dokumente und das API-Inventar liegen unter
@@ -129,13 +130,15 @@ Kompatibilitaet und Fassaden
 Der implementierte Plattformvertrag der Generation 2 steht in
 Docs/API/Generation2.txt; die Anbieterabnahme steht in
 Docs/API/ProviderHandoff.txt. Query2/R4XStart2 verhindern eine inkompatible
-Aufloesung durch die Mindestversionssuche. Die laufende Verbrauchermigration
-und ihre verbleibenden Grenzen stehen in Docs/API/ConsumerMigration.txt
-und in der Roadmap-API. Seit dem abgeschlossenen Cutover0.90.89 verwenden alle145 kanonischen
-Module und39 Recoveryvarianten die technischen Generation2-Einstiege. Alte
-Artefakte werden vor ihrem Einstieg abgewiesen. Die noch offenen90..92
-bereinigen SDK/Buildpfade und qualifizieren das vollstaendige Zielsystem.
-Normative Profilauswahl bleibt beim SDK.
+Aufloesung durch die Mindestversionssuche. Die abgeschlossene Verbraucher-
+migration und ihre verbleibenden Grenzen stehen in
+Docs/API/ConsumerMigration.txt und Docs/Changelogs/V0.90.X.txt. Seit dem
+abgeschlossenen Cutover 0.90.89 verwenden alle 145 kanonischen Module und
+39 Recoveryvarianten die technischen Generation2-Einstiege. Alte Artefakte
+werden vor ihrem Einstieg abgewiesen. SDK-/Buildbereinigung, vollstaendige
+Zielsystemqualifikation und technische Uebergabe sind bis 0.90.92
+abgeschlossen. Neue Planung steht in der Roadmap-API; die normative
+Profilauswahl bleibt beim SDK.
 
 - `extensible`-Typen wachsen ausschliesslich am Ende nach ihrem Versions- und
   Groessenvertrag. `fixed_layout`-Typen werden nie in-place erweitert.
