@@ -47,6 +47,7 @@ function Show-Usage {
     Write-Host '  Build.bat|Build.sh -qemu [Slim|Full|Test|Benchmark] [VirtioNet|RTL8139]'
     Write-Host '  Build.bat|Build.sh -ssh [VirtioNet|RTL8139]'
     Write-Host '  Build.bat|Build.sh -test|-testbrowser|-testsmp|-testquick|-testimage|-testimageonly|-testonly|-benchmarkimage'
+    Write-Host '  Build.bat|Build.sh -testbrowser -reuse-test-artifacts (vorhandenes Testprofil, Browserkette neu bauen)'
     Write-Host '  Build.bat|Build.sh -benchmark SUITE VERSION WARM|COLD WIEDERHOLUNGEN UMGEBUNGS-ID'
     Write-Host '  Build.bat|Build.sh -standardbenchmark (bounded five-area SMP4 phase on current Test artifacts)'
     Write-Host '  Build.bat|Build.sh -all [Slim|Full|Test|Benchmark]'
@@ -162,8 +163,13 @@ try {
             Invoke-WorkspaceBuild -Action test -Profile Test
         }
         '-testbrowser' {
-            if ($commandArguments.Count -ne 1) { throw '-testbrowser akzeptiert keine weiteren Argumente.' }
-            Invoke-WorkspaceBuild -Action test -Profile Test -Additional @{ BrowserTest = $true }
+            if ($commandArguments.Count -gt 2 -or ($commandArguments.Count -eq 2 -and $commandArguments[1] -ine '-reuse-test-artifacts')) {
+                throw '-testbrowser akzeptiert optional -reuse-test-artifacts.'
+            }
+            Invoke-WorkspaceBuild -Action test -Profile Test -Additional @{
+                BrowserTest = $true
+                ReuseTestArtifacts = ($commandArguments.Count -eq 2)
+            }
         }
         '-testsmp' {
             if ($commandArguments.Count -ne 1) { throw '-testsmp akzeptiert keine weiteren Argumente.' }

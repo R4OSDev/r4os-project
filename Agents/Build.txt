@@ -570,3 +570,18 @@ SDK/Tools/BuildModule.ps1, externe Projekte an Build-Project.ps1. Kernel,
 native Grafik und Recovery nutzen eigene SDK-Profile. Imageinhalte und
 normative ABI bleiben beim bisherigen Besitzer. Docs/SDK/Profiles.txt
 beschreibt Installation, Paketpruefung und Studio-/Serveranschluss.
+
+
+Browserkette mit vorhandenem Testprofil (0.91.27)
+------------------------------------------------
+./Tools/Build.sh -testbrowser -reuse-test-artifacts
+Tools\Build.bat -testbrowser -reuse-test-artifacts
+
+Nur bei bereits gebauten aktuellen normalen Testartefakten verwenden.
+Betroffene Besitzer ausserhalb der Browserkette vorher gezielt bauen.
+Der Modus prueft zuerst den normalen Testplan und die Anwesenheit und zugeordneten Namen der Artefakte,
+baut dann die sechs Besitzer aus der kanonischen Browser-Zielliste und
+behaelt Repositorytests, Browserimage, Verify und Headless-Marker bei.
+Fehlende oder mit widerspruechlichem Namen zugeordnete Testartefakte beenden den Vorlauf. SDK-,
+Library-, Kernel- und sonstige Normalartefakte werden wiederverwendet;
+Buildprofile, Compiler und die normale -testbrowser-Vollroute bleiben gleich.

@@ -20,6 +20,8 @@ param(
 
     [switch]$BrowserTest,
 
+    [switch]$ReuseTestArtifacts,
+
     [switch]$SmpTest,
 
     [switch]$QuickTest,
@@ -29,6 +31,9 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
+if ($ReuseTestArtifacts -and ($Action -ne 'test' -or -not $BrowserTest)) {
+    throw '-ReuseTestArtifacts erfordert den Browser-Testlauf.'
+}
 
 $workspaceRoot = [IO.Path]::GetFullPath((Join-Path $PSScriptRoot '..'))
 $repositoriesRoot = Join-Path $workspaceRoot 'Repositories'
@@ -585,6 +590,23 @@ function Build-All([string]$SelectedProfile, [switch]$IncludeBrowserTest) {
     Invoke-Distribution 'image' $SelectedProfile $variant
 }
 
+function Build-BrowserWithTestArtifacts {
+    # Validate the normal profile before starting the large browser builds.
+    # Selection checks file presence and mapped identity names. The caller
+    # builds affected non-browser owners before opting into artifact reuse.
+    New-ImagePlan 'Test'
+    $allModules = @(Get-ModuleRepositories)
+    $modules = @(foreach ($target in $browserTestImageIncludes) {
+        $owners = @($allModules | Where-Object { $_.ManifestTarget -ieq $target })
+        if ($owners.Count -ne 1) { throw ('Browserziel hat keinen eindeutigen Besitzer: ' + $target) }
+        $owners[0]
+    })
+    Write-Section ('Browserkette auf vorhandenem Testprofil (' + $modules.Count + ' Besitzer)')
+    for ($index = 0; $index -lt $modules.Count; $index++) { Build-OneModule $modules[$index] ($index + 1) $modules.Count }
+    New-ImagePlan 'Test' -IncludeBrowserTest
+    Invoke-Distribution 'image' 'Test' @('browser')
+}
+
 Assert-Directory $repositoriesRoot 'Repositories'
 Assert-Directory $devKitRoot 'DevKit'
 Update-DocsInventory
@@ -623,7 +645,8 @@ switch ($Action) {
     'test' {
         Invoke-Distribution 'test' 'Test'
         if ($BrowserTest) { Test-BrowserOwner }
-        Build-All 'Test' -IncludeBrowserTest:$BrowserTest
+        if ($ReuseTestArtifacts) { Build-BrowserWithTestArtifacts }
+        else { Build-All 'Test' -IncludeBrowserTest:$BrowserTest }
         Invoke-Distribution 'verify' 'Test'
         $variant = if ($BrowserTest) { @('browser') } else { @('smp4') }
         Invoke-Distribution 'headless' 'Test' $variant
