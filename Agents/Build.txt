@@ -129,7 +129,10 @@ Ablauf eines Gesamtbuilds
 2. Contract ueber dessen Besitzerstarter und die SDK-Auswahl bauen. Der
    normale Install-Step prueft die generierten Contractartefakte.
 3. SDK ueber dessen `Build.bat` mit dem lokal gemappten Contract bauen.
-4. R4STD, R4IMG und R4FONT ueber `Repositories/Libraries/Build.bat` bauen.
+4. Die Runtime-Libraries des aktiven SDK-Profils ueber
+   `Repositories/Libraries/Build.bat` bauen. Ohne Einheit waehlt dieser
+   Zentralbau alle dort gefuehrten Libraries, auch bei `IMAGE_SCOPE=none`;
+   einzelne Einheiten lassen sich dem Besitzerstarter als Argument geben.
 5. Kernel ueber `Repositories/Kernel/Build.bat` bauen. Die sechs Platform
    APIs sind Teil dieses Kernelartefakts und keine getrennten Modulbuilds.
 6. Alle direkten Repositoryprojekte unter Apps, Services, Diagnostics,
@@ -435,6 +438,16 @@ Aufraeumen und Fehlersuche
 
 Die Beispiele verwenden den Windows-Starter. Unter Linux denselben Modus
 mit `./Tools/Clean.sh` starten; beide verwenden Tools/Clean.ps1.
+
+Erhaltene `zig-out`-Ausgaben der Besitzer werden dadurch nicht entfernt.
+Sie koennen nach Abgleich von Quellen, Manifesten und Artefakthashes weiter
+verwendet werden. Fuer Rust-Module muss auch das passende Werkzeugpaket unter
+dem in `Settings.R4S` gewaehlten `RUST_TOOLS_ROOT` vorliegen. Der normale
+SDK-Build stellt dessen Export nicht automatisch wieder her:
+`Repositories/SDK/Tools/Export-RustTools.ps1` erzeugt ihn aus aktuellen
+Hosttools, Runtimeobjekten und dem passenden SDK-/Contractsatz.
+Der Imagebau benoetigt ausserdem die gepinnten Fremdquellarchive fuer seine
+Rechtsdokumentation; diese koennen ebenfalls im bereinigten Artefaktbaum liegen.
 
     Tools\Clean.bat
         leert Artifacts ausser Distribution und entfernt alle anderen
