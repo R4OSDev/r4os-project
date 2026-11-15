@@ -181,6 +181,10 @@ Ziele, fehlende Artefakte und unaufloesbare Providerabhaengigkeiten sind harte
 Planfehler.
 Der normale Testplan enthaelt weder Klickifax noch KlickifaxLive und nimmt
 auch R4HTTP, R4HTML, R4CSS und R4JS nicht eigens fuer den Browser auf.
+Browser nur bei fachlichen Aenderungen an Klickifax, KlickifaxLive oder
+browserspezifischem Code testen oder zusaetzlich ins Image aufnehmen. Reine
+Abhaengigkeits-/Peerpin-Abgleiche und Aenderungen an allgemeinen Libraries
+loesen fuer sich keinen Browserlauf aus.
 `-testbrowser` erzeugt eine gezielte Variante desselben Testprofils, nimmt
 diese sechs Artefakte ausdruecklich auf und legt zusaetzlich
 `Repositories/Distribution/BrowserTestInjection/` ueber das Testoverlay.

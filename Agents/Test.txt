@@ -89,8 +89,11 @@ Wichtig: Schritt 3 verwendet die normalen Buildsteps der Repositories.
 `test`-Step auf. Tests des konkret geaenderten Besitzers deshalb vorher
 oder danach separat ausfuehren.
 
-Nach Aenderungen an Klickifax, KlickifaxLive oder der gemeinsam verwendeten
-Browserkette wird stattdessen der gezielte Lauf verwendet:
+Browser nur bei fachlichen Aenderungen an Klickifax, KlickifaxLive oder
+browserspezifischem Code testen oder zusaetzlich ins Image aufnehmen. Reine
+Abhaengigkeits-/Peerpin-Abgleiche und Aenderungen an allgemeinen Libraries
+loesen fuer sich keinen Browserlauf aus. Bei solchen Browseraenderungen wird
+stattdessen der gezielte Lauf verwendet:
 
     Tools\Build.bat -testbrowser
     ./Tools/Build.sh -testbrowser
