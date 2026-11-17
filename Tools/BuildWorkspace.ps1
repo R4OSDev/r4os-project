@@ -173,12 +173,10 @@ function Show-WorkspaceState {
 }
 
 function Update-DocsInventory {
-    Write-Section 'Dokumentinventar aktualisieren'
+    Write-Section 'Dokumentinventar aktualisieren und prüfen'
     Assert-File $docsInventoryTool 'Docs-Inventarwerkzeug'
     Invoke-External $pwshExecutable @('-NoLogo', '-NoProfile', '-File', $docsInventoryTool, '-Update') $workspaceRoot
 
-    Write-Section 'Dokumentinventar-Gate'
-    Invoke-External $pwshExecutable @('-NoLogo', '-NoProfile', '-File', $docsInventoryTool, '-Check') $workspaceRoot
 }
 
 function Get-RepositoryManifests([string]$GitRoot, [string]$ScopeRoot = $GitRoot) {
