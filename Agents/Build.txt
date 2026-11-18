@@ -123,9 +123,9 @@ Ablauf eines Gesamtbuilds
 
 `Tools\Build.bat -all <Profil>` arbeitet in dieser Reihenfolge:
 
-1. Den Dateibestand in `Docs/Inventory/Docs.json` inkrementell abgleichen und
-   anschließend mit dem schreibfreien Dokumentinventar-Gate prüfen. Dieser
-   Schritt läuft vor jeder globalen Buildaktion, nicht nur vor `-all`.
+1. Vor jeder globalen Buildaktion ruft der Workspace `DocsInventory.ps1 -Update`
+   einmal auf. Das Skript gleicht das Inventar ab und prüft die gespeicherte
+   `Docs/Inventory/Docs.json` gegen dieselbe Git-Dateiliste.
 2. Contract ueber dessen Besitzerstarter und die SDK-Auswahl bauen. Der
    normale Install-Step prueft die generierten Contractartefakte.
 3. SDK ueber dessen `Build.bat` mit dem lokal gemappten Contract bauen.
@@ -275,11 +275,15 @@ seinem festen geprueften Rust-Releaseprofil.
 Artefakte und Inventare
 -----------------------
 
+Unter Linux ist das Inventarwerkzeug über PowerShell 7 erreichbar, etwa mit
+`pwsh -NoProfile -File Docs/Inventory/DocsInventory.ps1 -Check`.
+Der Windows-Starter reicht die gleichen Schalter an dieses Skript weiter.
+
     Docs/Inventory/DocsInventory.bat -Initial
         einmaliger, ausdrücklich aufzurufender Neuaufbau von Docs.json
 
     Docs/Inventory/DocsInventory.bat -Update
-        inkrementeller Dateiabgleich; bestehende manuelle Felder bleiben
+        inkrementeller Dateiabgleich mit anschließender Prüfung der gespeicherten Datei
 
     Docs/Inventory/DocsInventory.bat -Check
         schreibfreies Gate fuer Struktur, Eindeutigkeit und Dateibestand
